@@ -2,7 +2,7 @@
 #SBATCH --job-name=sim_app_generate
 #SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/data/logs/sim_app_generate_%j.out
 #SBATCH --time=04:00:00
-#SBATCH --mem=32G
+#SBATCH --mem=100G
 #SBATCH --cpus-per-task=4
 ##SBATCH --partition=shared      # uncomment / edit to match your cluster's partition name
 

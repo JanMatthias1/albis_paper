@@ -51,16 +51,17 @@ PLOTS_DIR = DATA_DIR / "plots"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
-H5AD_PATH = DATA_DIR / "simulation_bin_z.h5ad"
-SUMMARY_PATH = DATA_DIR / "simulation_bin_z_summary.json"
+H5AD_PATH = DATA_DIR / "simulation_spot_z.h5ad"
+SUMMARY_PATH = DATA_DIR / "simulation_spot_z_summary.json"
+OUTPUT_MODALITY = "spot"
+SLICE_AXIS = "Z"
 
 
 # ---------------------------------------------------------------------------
 # Generate data
 # ---------------------------------------------------------------------------
-# The previous 200 um sphere could not physically fit 20,000 non-overlapping
-# cells with the requested cell radii. This larger tissue matches the intended
-# 12 mm-diameter simulation and avoids that placement failure.
+# Use a moderate Visium-sized simulation for now. The larger VisiumHD/bin
+# setup is memory-heavy because it creates millions of observations.
 cell_radius_kwargs = dict(
     radius_dist="lognormal",
     r_mean=7.5,
@@ -85,8 +86,7 @@ SIM_PARAMS = dict(
     # tissue: 12 mm diameter
     sphere_R_um=6000.0,
 
-    # capture windows
-    xenium_capture_size_um=(12000.0, 24000.0),
+    # Visium capture window
     visium_capture_size_um=(6500.0, 6500.0),
     visium_capture_center_um=(0.0, 0.0),
 
@@ -103,7 +103,7 @@ SIM_PARAMS = dict(
     core_fuzz_flip_prob=0.25,
 
     # cells
-    n_cells=600_000,
+    n_cells=100_000,
     cell_radius_kwargs=cell_radius_kwargs,
     allow_cell_overlap=False,
 
@@ -118,8 +118,7 @@ SIM_PARAMS = dict(
     n_slices=10,
     batch_sigma=0.22,
 
-    # VisiumHD bins / Visium spots
-    bin_size_um=8.0,
+    # Visium spots
     spot_spacing_um=100.0,
     spot_radius_um=27.5,
 
@@ -128,9 +127,9 @@ SIM_PARAMS = dict(
     max_shift=3000.0,
     base_seed_unaligned=12345,
 
-    # Generate only the output needed by the clustering pipeline.
-    output_modalities=("bin",),
-    slice_axes=("Z",),
+    # Generate only one modality/axis for the clustering pipeline.
+    output_modalities=(OUTPUT_MODALITY,),
+    slice_axes=(SLICE_AXIS,),
 
     seed=2025,
 )
@@ -143,11 +142,16 @@ for k, v in SIM_PARAMS.items():
         print(f"  {k}: {v}")
 
 sim = simulate_3d_molecule_sphere_multires(**SIM_PARAMS)
-adata = sim["bin_adatas"]["Z"]
+if sim["bin_adatas"] or sim["adata_cell_sectioned"]:
+    raise RuntimeError("Expected only Visium spot output, but extra modalities were generated.")
+if sorted(sim["spot_adatas"]) != [SLICE_AXIS]:
+    raise RuntimeError(f"Expected only spot axis {SLICE_AXIS}, got {sorted(sim['spot_adatas'])}.")
+
+adata = sim["spot_adatas"][SLICE_AXIS]
 adata.uns["sim_params"] = _to_serializable(sim["meta"])
 adata.uns["output"] = {
-    "platform": "bin",
-    "slice_axis": "Z",
+    "platform": OUTPUT_MODALITY,
+    "slice_axis": SLICE_AXIS,
 }
 print("\nGenerated AnnData:")
 print(adata)
@@ -189,7 +193,7 @@ savefig(fig, "02_aligned_cell_type_true.png")
 fig = sim_app.plot(adata, view="2d", coordinates="unaligned", color="slice_id", point_size=4)
 savefig(fig, "03_unaligned_slice_id.png")
 
-# 4. QC: total counts / genes detected per bin
+# 4. QC: total counts / genes detected per spot
 X = adata.X
 if hasattr(X, "toarray"):
     total_counts = np.asarray(X.sum(axis=1)).ravel()
@@ -200,27 +204,27 @@ else:
 
 fig, axes = plt.subplots(1, 2, figsize=(10, 4))
 axes[0].hist(total_counts, bins=50, color="steelblue")
-axes[0].set_xlabel("Total counts per bin")
-axes[0].set_ylabel("Number of bins")
+axes[0].set_xlabel("Total counts per spot")
+axes[0].set_ylabel("Number of spots")
 axes[0].set_title("Total counts distribution")
 
 axes[1].hist(genes_detected, bins=50, color="darkorange")
-axes[1].set_xlabel("Genes detected per bin")
-axes[1].set_ylabel("Number of bins")
+axes[1].set_xlabel("Genes detected per spot")
+axes[1].set_ylabel("Number of spots")
 axes[1].set_title("Genes detected distribution")
 
 fig.tight_layout()
 savefig(fig, "04_qc_count_distributions.png")
 
-# 5. Number of bins per slice
+# 5. Number of spots per slice
 slice_counts = adata.obs["slice_id"].value_counts().sort_index()
 fig, ax = plt.subplots(figsize=(6, 4))
 ax.bar(slice_counts.index.astype(str), slice_counts.values, color="slategray")
 ax.set_xlabel("Slice ID")
-ax.set_ylabel("Number of bins")
-ax.set_title("Bins per slice")
+ax.set_ylabel("Number of spots")
+ax.set_title("Spots per slice")
 fig.tight_layout()
-savefig(fig, "05_bins_per_slice.png")
+savefig(fig, "05_spots_per_slice.png")
 
 # 6. Domain composition per slice (stacked bar)
 comp = adata.obs.groupby(["slice_id", "domain_true"]).size().unstack(fill_value=0)
