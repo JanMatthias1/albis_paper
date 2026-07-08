@@ -36,6 +36,7 @@ if str(repo_root) not in sys.path:
 
 sys.modules.pop("sim_app", None)
 import sim_app
+from sim_app.simulation_sphere import _to_serializable, simulate_3d_molecule_sphere_multires
 
 print("Python:", sys.executable)
 print("sim_app module:", getattr(sim_app, "__file__", "<no __file__>"))
@@ -57,24 +58,97 @@ SUMMARY_PATH = DATA_DIR / "simulation_bin_z_summary.json"
 # ---------------------------------------------------------------------------
 # Generate data
 # ---------------------------------------------------------------------------
-GEN_PARAMS = dict(
-    output="bin",
-    slice_axis="Z",
-    n_cells=20000,
-    n_slices=10,
+# The previous 200 um sphere could not physically fit 20,000 non-overlapping
+# cells with the requested cell radii. This larger tissue matches the intended
+# 12 mm-diameter simulation and avoids that placement failure.
+cell_radius_kwargs = dict(
+    radius_dist="lognormal",
+    r_mean=7.5,
+    r_sigma=0.28,
+    r_min=4.0,
+    r_max=14.0,
+)
+
+domain_type_mix = np.array(
+    [
+        [0.18, 0.18, 0.13, 0.12, 0.11, 0.10, 0.09, 0.09],
+        [0.11, 0.12, 0.18, 0.18, 0.13, 0.10, 0.09, 0.09],
+        [0.10, 0.11, 0.12, 0.13, 0.18, 0.18, 0.09, 0.09],
+        [0.10, 0.10, 0.11, 0.12, 0.13, 0.13, 0.16, 0.15],
+        [0.14, 0.13, 0.12, 0.11, 0.12, 0.13, 0.13, 0.12],
+        [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+    ],
+    dtype=float,
+)
+
+SIM_PARAMS = dict(
+    # tissue: 12 mm diameter
+    sphere_R_um=6000.0,
+
+    # capture windows
+    xenium_capture_size_um=(12000.0, 24000.0),
+    visium_capture_size_um=(6500.0, 6500.0),
+    visium_capture_center_um=(0.0, 0.0),
+
+    # domains: noisier boundaries
     n_domains=6,
-    marker_genes_per_type=20,
-    sphere_radius_um=200.0,
-    capture_window_um=(300.0, 300.0),
-    bin_size_um=30.0,
+    core_frac=0.55,
+    core_bump_amp=0.25,
+    wedge_angle_amp_deg=25.0,
+    noise_terms=16,
+    noise_freq_range=(3.0, 6.0),
+    boundary_fuzz_width_deg=6.0,
+    boundary_fuzz_flip_prob=0.15,
+    core_fuzz_width_um=300.0,
+    core_fuzz_flip_prob=0.25,
+
+    # cells
+    n_cells=600_000,
+    cell_radius_kwargs=cell_radius_kwargs,
+    allow_cell_overlap=False,
+
+    # cell types / genes
+    n_cell_types=8,
+    domain_type_mix=domain_type_mix,
+    marker_genes_per_type=80,
+    noise_gene_frac=0.10,
+    shared_marker_frac=0.25,
+
+    # slices + batch effect
+    n_slices=10,
+    batch_sigma=0.22,
+
+    # VisiumHD bins / Visium spots
+    bin_size_um=8.0,
+    spot_spacing_um=100.0,
+    spot_radius_um=27.5,
+
+    # unaligned perturbation
+    max_deg=270.0,
+    max_shift=3000.0,
+    base_seed_unaligned=12345,
+
+    # Generate only the output needed by the clustering pipeline.
+    output_modalities=("bin",),
+    slice_axes=("Z",),
+
     seed=2025,
 )
 
 print("\nGenerating data with parameters:")
-for k, v in GEN_PARAMS.items():
-    print(f"  {k}: {v}")
+for k, v in SIM_PARAMS.items():
+    if k == "domain_type_mix":
+        print(f"  {k}: shape={v.shape}")
+    else:
+        print(f"  {k}: {v}")
 
-adata = sim_app.generate_data(**GEN_PARAMS)
+sim = simulate_3d_molecule_sphere_multires(**SIM_PARAMS)
+adata = sim["bin_adatas"]["Z"]
+adata.uns["sim_params"] = _to_serializable(sim["meta"])
+adata.uns["output"] = {
+    "platform": "bin",
+    "slice_axis": "Z",
+}
 print("\nGenerated AnnData:")
 print(adata)
 

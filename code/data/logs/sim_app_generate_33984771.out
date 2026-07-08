@@ -1,0 +1,28 @@
+Job started: Wed Jul  8 04:14:05 PM EDT 2026
+Host: compute-176.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+sim_app module: /dcs04/hicks/data/Jan/sim_project/sim_app/sim_app/__init__.py
+sim_app version: 0.1.0
+
+Generating data with parameters:
+  output: bin
+  slice_axis: Z
+  n_cells: 20000
+  n_slices: 10
+  n_domains: 6
+  marker_genes_per_type: 20
+  sphere_radius_um: 200.0
+  capture_window_um: (300.0, 300.0)
+  bin_size_um: 30.0
+  seed: 2025
+Traceback (most recent call last):
+  File "/dcs04/hicks/data/Jan/sim_project/sim_paper/code/data/generate_simulation.py", line 77, in <module>
+    adata = sim_app.generate_data(**GEN_PARAMS)
+  File "/dcs04/hicks/data/Jan/sim_project/sim_app/sim_app/api.py", line 136, in generate_data
+    simulation = simulate_3d_molecule_sphere_multires(
+  File "/dcs04/hicks/data/Jan/sim_project/sim_app/sim_app/simulation_sphere.py", line 1206, in simulate_3d_molecule_sphere_multires
+    centers, radii, tree = sample_nonoverlapping_cells_in_sphere(
+  File "/dcs04/hicks/data/Jan/sim_project/sim_app/sim_app/simulation_sphere.py", line 360, in sample_nonoverlapping_cells_in_sphere
+    raise RuntimeError(
+RuntimeError: Could only place 8410/20000 cells after 50000000 attempts. Try fewer cells, allow_overlap=True, smaller radii, or larger sphere_R.
