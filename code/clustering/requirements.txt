@@ -1,0 +1,4 @@
+scanpy
+harmonypy
+python-igraph
+leidenalg

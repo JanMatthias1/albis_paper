@@ -1,0 +1,4 @@
+Job started: Wed Jul  8 06:11:32 PM EDT 2026
+Host: compute-124.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/clustering.py 
