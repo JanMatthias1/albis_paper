@@ -1,8 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=sim_app_generate
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/data/logs/sim_app_generate_%j.out
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/data/logs/sim_app_generate_%A_%a.out
+#SBATCH --array=0-2
 #SBATCH --time=04:00:00
-#SBATCH --mem=100G
+#SBATCH --mem=250G
 #SBATCH --cpus-per-task=4
 ##SBATCH --partition=shared      # uncomment / edit to match your cluster's partition name
 
@@ -49,6 +50,16 @@ if [[ "${1:-}" == "--check-env" ]]; then
     exit 0
 fi
 
-"${PYTHON_BIN}" generate_simulation.py
+MODALITIES=(spot bin cell)
+
+if [[ "$#" -gt 0 ]]; then
+    MODALITY="$1"
+else
+    MODALITY="${MODALITIES[${SLURM_ARRAY_TASK_ID:-0}]}"
+fi
+
+echo "Modality: ${MODALITY}"
+echo "Command: ${PYTHON_BIN} generate_simulation.py --modality ${MODALITY}"
+"${PYTHON_BIN}" generate_simulation.py --modality "${MODALITY}"
 
 echo "Job finished: $(date)"

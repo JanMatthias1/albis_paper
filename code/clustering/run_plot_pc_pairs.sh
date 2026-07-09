@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=sim_pc_pairs
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs/sim_pc_pairs_%j.out
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs/sim_pc_pairs_%A_%a.out
+#SBATCH --array=0-2
 #SBATCH --time=04:00:00
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=4
@@ -38,8 +39,18 @@ cd /dcs04/hicks/data/Jan/sim_project
 echo "Job started: $(date)"
 echo "Host: $(hostname)"
 echo "Python: ${PYTHON_BIN}"
-echo "Command: ${PYTHON_BIN} sim_paper/code/clustering/plot_pc_pairs.py $*"
 
-"${PYTHON_BIN}" sim_paper/code/clustering/plot_pc_pairs.py "$@"
+MODALITIES=(spot bin cell)
+MODALITY="${MODALITIES[${SLURM_ARRAY_TASK_ID:-0}]}"
+
+if [[ "$#" -gt 0 ]]; then
+    echo "Modality: ${MODALITY}"
+    echo "Command: ${PYTHON_BIN} sim_paper/code/clustering/plot_pc_pairs.py --modality ${MODALITY} $*"
+    "${PYTHON_BIN}" sim_paper/code/clustering/plot_pc_pairs.py --modality "${MODALITY}" "$@"
+else
+    echo "Modality: ${MODALITY}"
+    echo "Command: ${PYTHON_BIN} sim_paper/code/clustering/plot_pc_pairs.py --modality ${MODALITY} --n-pcs 12"
+    "${PYTHON_BIN}" sim_paper/code/clustering/plot_pc_pairs.py --modality "${MODALITY}" --n-pcs 12
+fi
 
 echo "Job finished: $(date)"

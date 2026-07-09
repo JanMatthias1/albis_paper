@@ -1,0 +1,22 @@
+Job started: Thu Jul  9 03:48:21 PM EDT 2026
+Host: compute-168.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/leiden_umap.py --resolution 0.5
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering/simulation_spot_z_pca_harmony.h5ad
+[neighbors] Using first 30 dimensions of X_pca_harmony with n_neighbors=15
+[leiden] resolution=0.5, key=cluster_label
+Traceback (most recent call last):
+  File "/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/scanpy/tools/_leiden.py", line 136, in leiden
+    import leidenalg
+ModuleNotFoundError: No module named 'leidenalg'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/leiden_umap.py", line 185, in <module>
+    main()
+  File "/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/leiden_umap.py", line 155, in main
+    sc.tl.leiden(
+  File "/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/scanpy/tools/_leiden.py", line 142, in leiden
+    raise ImportError(msg) from e
+ImportError: Please install the leiden algorithm: `conda install -c conda-forge leidenalg` or `pip3 install leidenalg`.

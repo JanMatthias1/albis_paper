@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH --job-name=sim_pca_harmony
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs/sim_pca_harmony_%A_%a.out
+#SBATCH --job-name=sim_gene_harmony_umap
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs/sim_gene_harmony_umap_%A_%a.out
 #SBATCH --array=0-2
-#SBATCH --time=02:00:00
-#SBATCH --mem=32G
+#SBATCH --time=04:00:00
+#SBATCH --mem=64G
 #SBATCH --cpus-per-task=4
-#SBATCH --partition=shared      
+#SBATCH --partition=shared
 
 set -euo pipefail
 
@@ -14,8 +14,6 @@ mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
 ENV_PREFIX="/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial"
 PYTHON_BIN="${ENV_PREFIX}/bin/python"
 
-# Activate the conda environment used by sim_app. Batch shells often do not
-# source .bashrc, so conda activate is unavailable until conda.sh is loaded.
 if ! command -v conda >/dev/null 2>&1; then
     module load conda 2>/dev/null || true
 fi
@@ -46,7 +44,7 @@ MODALITIES=(spot bin cell)
 MODALITY="${MODALITIES[${SLURM_ARRAY_TASK_ID:-0}]}"
 
 echo "Modality: ${MODALITY}"
-echo "Command: ${PYTHON_BIN} sim_paper/code/clustering/clustering.py --modality ${MODALITY} $*"
-"${PYTHON_BIN}" sim_paper/code/clustering/clustering.py --modality "${MODALITY}" "$@"
+echo "Command: ${PYTHON_BIN} sim_paper/code/clustering/gene_harmony_umap.py --modality ${MODALITY} $*"
+"${PYTHON_BIN}" sim_paper/code/clustering/gene_harmony_umap.py --modality "${MODALITY}" "$@"
 
 echo "Job finished: $(date)"

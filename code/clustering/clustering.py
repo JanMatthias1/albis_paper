@@ -34,6 +34,7 @@ SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
 DEFAULT_INPUT = SIM_PAPER_DIR / "data" / "simulation_spot_z.h5ad"
 DEFAULT_OUTPUT_DIR = SIM_PAPER_DIR / "data" / "clustering"
 DEFAULT_OUTPUT = DEFAULT_OUTPUT_DIR / "simulation_spot_z_pca_harmony.h5ad"
+VALID_MODALITIES = ("spot", "bin", "cell")
 
 
 def parse_args() -> argparse.Namespace:
@@ -42,6 +43,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--modality", choices=VALID_MODALITIES, default="spot")
     parser.add_argument("--batch-key", default="slice_id")
     parser.add_argument("--n-pcs", type=int, default=30)
     parser.add_argument("--target-sum", type=float, default=1e4)
@@ -169,6 +171,10 @@ def save_pca_plots(adata, plot_dir: Path, color_keys: list[str]) -> None:
 
 def main() -> None:
     args = parse_args()
+    if args.input == DEFAULT_INPUT:
+        args.input = SIM_PAPER_DIR / "data" / f"simulation_{args.modality}_z.h5ad"
+    if args.output == DEFAULT_OUTPUT:
+        args.output = DEFAULT_OUTPUT_DIR / f"simulation_{args.modality}_z_pca_harmony.h5ad"
 
     if not args.input.is_file():
         raise SystemExit(
@@ -177,7 +183,7 @@ def main() -> None:
         )
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    plot_dir = args.output.parent / "plots" / "pca_harmony"
+    plot_dir = args.output.parent / "plots" / f"{args.modality}_pca_harmony"
 
     print(f"[load] {args.input}")
     adata = sc.read_h5ad(args.input)
