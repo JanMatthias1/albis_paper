@@ -23,10 +23,10 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import harmonypy as hm
 import numpy as np
 import pandas as pd
 import scanpy as sc
-import scanpy.external as sce
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -69,6 +69,25 @@ def preprocess_for_pca(adata, n_pcs: int, random_state: int, target_sum: float) 
         random_state=random_state,
     )
     adata.obsm["X_pca_pre_harmony"] = adata.obsm["X_pca"].copy()
+
+
+def run_harmony(adata, batch_key: str, basis: str, adjusted_basis: str) -> None:
+    pca = np.asarray(adata.obsm[basis], dtype=np.float64)
+    harmony_out = hm.run_harmony(pca, adata.obs, batch_key)
+    corrected = np.asarray(harmony_out.Z_corr)
+
+    if corrected.shape == pca.shape:
+        adata.obsm[adjusted_basis] = corrected
+        return
+
+    if corrected.T.shape == pca.shape:
+        adata.obsm[adjusted_basis] = corrected.T
+        return
+
+    raise ValueError(
+        f"Harmony returned shape {corrected.shape}; expected {pca.shape} "
+        f"or its transpose for adata.obsm[{adjusted_basis!r}]."
+    )
 
 
 def color_values(obs: pd.DataFrame, key: str):
@@ -171,12 +190,7 @@ def main() -> None:
     preprocess_for_pca(adata, args.n_pcs, args.random_state, args.target_sum)
 
     print(f"[harmony] Correcting X_pca_pre_harmony by obs['{args.batch_key}']")
-    sce.pp.harmony_integrate(
-        adata,
-        key=args.batch_key,
-        basis="X_pca_pre_harmony",
-        adjusted_basis="X_pca_post_harmony",
-    )
+    run_harmony(adata, args.batch_key, "X_pca_pre_harmony", "X_pca_post_harmony")
     adata.obsm["X_pca"] = adata.obsm["X_pca_pre_harmony"].copy()
     adata.obsm["X_pca_harmony"] = adata.obsm["X_pca_post_harmony"].copy()
 

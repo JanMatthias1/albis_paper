@@ -1,5 +1,5 @@
-Job started: Wed Jul  8 06:11:32 PM EDT 2026
-Host: compute-124.cm.cluster
+Job started: Wed Jul  8 06:34:59 PM EDT 2026
+Host: compute-176.cm.cluster
 Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
 Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/clustering.py 
 /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/legacy_api_wrap/__init__.py:88: UserWarning: Some cells have zero counts
