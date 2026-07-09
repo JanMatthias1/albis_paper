@@ -14,6 +14,7 @@ Or submit the same steps through SLURM:
 
 ```bash
 sbatch sim_paper/code/clustering/run_clustering.sh
+sbatch sim_paper/code/clustering/run_plot_pc_pairs.sh --n-pcs 12
 sbatch sim_paper/code/clustering/run_leiden_umap.sh --resolution 0.5
 ```
 

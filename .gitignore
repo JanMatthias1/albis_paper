@@ -1,0 +1,16 @@
+.DS_Store
+.venv/
+env/.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+tutorial/outputs/
+env/sim-app-tutorial
+env/*.log
+env/slurm-*.out
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+data/
