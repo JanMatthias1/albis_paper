@@ -24,13 +24,16 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 from scipy import sparse
+from sklearn.decomposition import PCA
+
+from pc_pairs import plot_pc_pairs
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
 DEFAULT_INPUT = SIM_PAPER_DIR / "data" / "simulation_spot_z.h5ad"
-DEFAULT_OUTPUT_DIR = SIM_PAPER_DIR / "data" / "clustering"
-DEFAULT_OUTPUT = DEFAULT_OUTPUT_DIR / "simulation_spot_z_gene_harmony_umap.h5ad"
+CLUSTERING_ROOT = SIM_PAPER_DIR / "data" / "clustering"
+DEFAULT_OUTPUT = CLUSTERING_ROOT / "spot" / "gene_harmony_umap" / "simulation_spot_z_gene_harmony_umap.h5ad"
 VALID_MODALITIES = ("spot", "bin", "cell")
 
 
@@ -43,6 +46,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--modality", choices=VALID_MODALITIES, default="spot")
     parser.add_argument("--batch-key", default="slice_id")
     parser.add_argument("--target-sum", type=float, default=1e4)
+    parser.add_argument(
+        "--n-pcs",
+        type=int,
+        default=30,
+        help="Number of PCs for the diagnostic (non-Harmony) PCA used only for PC-pair plots.",
+    )
     parser.add_argument("--n-neighbors", type=int, default=15)
     parser.add_argument("--random-state", type=int, default=0)
     parser.add_argument("--point-size", type=float, default=4.0)
@@ -85,6 +94,12 @@ def run_harmony_matrix(features: np.ndarray, obs: pd.DataFrame, batch_key: str) 
         f"Harmony returned shape {corrected.shape}; expected {features.shape} "
         "or its transpose."
     )
+
+
+def diagnostic_pca(features: np.ndarray, n_pcs: int, random_state: int) -> np.ndarray:
+    """PCA for inspection only; Harmony here runs on the full gene matrix, not this basis."""
+    n_comp = min(n_pcs, features.shape[0] - 1, features.shape[1])
+    return PCA(n_components=n_comp, random_state=random_state).fit_transform(features)
 
 
 def compute_umap(adata, rep_key: str, umap_key: str, n_neighbors: int, random_state: int) -> None:
@@ -189,7 +204,12 @@ def main() -> None:
     if args.input == DEFAULT_INPUT:
         args.input = SIM_PAPER_DIR / "data" / f"simulation_{args.modality}_z.h5ad"
     if args.output == DEFAULT_OUTPUT:
-        args.output = DEFAULT_OUTPUT_DIR / f"simulation_{args.modality}_z_gene_harmony_umap.h5ad"
+        args.output = (
+            CLUSTERING_ROOT
+            / args.modality
+            / "gene_harmony_umap"
+            / f"simulation_{args.modality}_z_gene_harmony_umap.h5ad"
+        )
 
     if not args.input.is_file():
         raise SystemExit(
@@ -198,7 +218,7 @@ def main() -> None:
         )
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    plot_dir = args.output.parent / "plots" / f"{args.modality}_gene_harmony_umap"
+    plot_dir = args.output.parent / "plots"
 
     print(f"[load] {args.input}")
     adata = sc.read_h5ad(args.input)
@@ -213,6 +233,12 @@ def main() -> None:
 
     print(f"[harmony] Correcting X_gene_pre_harmony by obs['{args.batch_key}']")
     adata.obsm["X_gene_harmony"] = run_harmony_matrix(features, adata.obs, args.batch_key)
+
+    print(f"[pca] Computing diagnostic (non-Harmony) PCA with {args.n_pcs} components")
+    adata.obsm["X_pca_diag_pre_harmony"] = diagnostic_pca(features, args.n_pcs, args.random_state)
+    adata.obsm["X_pca_diag_post_harmony"] = diagnostic_pca(
+        adata.obsm["X_gene_harmony"], args.n_pcs, args.random_state
+    )
 
     print("[umap] Computing UMAP before Harmony from all-gene features")
     compute_umap(
@@ -235,6 +261,15 @@ def main() -> None:
     print(f"[plot] Saving before/after UMAP plots under {plot_dir}")
     save_umap_plots(adata, plot_dir, args.plot_colors, args.point_size, args.alpha)
 
+    print(f"[pc_pairs] Plotting diagnostic PC pairs by {args.batch_key} under {plot_dir / 'pc_pairs'}")
+    plot_pc_pairs(
+        adata,
+        pre_key="X_pca_diag_pre_harmony",
+        post_key="X_pca_diag_post_harmony",
+        output_dir=plot_dir / "pc_pairs",
+        color_key=args.batch_key,
+    )
+
     adata.uns["gene_harmony_umap"] = {
         "batch_key": args.batch_key,
         "target_sum": float(args.target_sum),
@@ -244,6 +279,11 @@ def main() -> None:
         "post_harmony_obsm": "X_gene_harmony",
         "pre_harmony_umap_obsm": "X_umap_gene_pre_harmony",
         "post_harmony_umap_obsm": "X_umap_gene_harmony",
+        "diagnostic_pca_note": "X_pca_diag_* is PCA fit independently pre/post Harmony for "
+        "inspection only; Harmony itself runs on the full gene matrix, not this basis.",
+        "diagnostic_pca_pre_obsm": "X_pca_diag_pre_harmony",
+        "diagnostic_pca_post_obsm": "X_pca_diag_post_harmony",
+        "diagnostic_pca_n_pcs": int(args.n_pcs),
         "input": str(args.input),
     }
     adata.write_h5ad(args.output)

@@ -2,3 +2,5 @@ scanpy
 harmonypy
 python-igraph
 leidenalg
+louvain
+scikit-learn

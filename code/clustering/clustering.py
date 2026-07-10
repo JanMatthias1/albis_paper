@@ -28,12 +28,14 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 
+from pc_pairs import plot_pc_pairs
+
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
 DEFAULT_INPUT = SIM_PAPER_DIR / "data" / "simulation_spot_z.h5ad"
-DEFAULT_OUTPUT_DIR = SIM_PAPER_DIR / "data" / "clustering"
-DEFAULT_OUTPUT = DEFAULT_OUTPUT_DIR / "simulation_spot_z_pca_harmony.h5ad"
+CLUSTERING_ROOT = SIM_PAPER_DIR / "data" / "clustering"
+DEFAULT_OUTPUT = CLUSTERING_ROOT / "spot" / "pca_harmony" / "simulation_spot_z_pca_harmony.h5ad"
 VALID_MODALITIES = ("spot", "bin", "cell")
 
 
@@ -174,7 +176,12 @@ def main() -> None:
     if args.input == DEFAULT_INPUT:
         args.input = SIM_PAPER_DIR / "data" / f"simulation_{args.modality}_z.h5ad"
     if args.output == DEFAULT_OUTPUT:
-        args.output = DEFAULT_OUTPUT_DIR / f"simulation_{args.modality}_z_pca_harmony.h5ad"
+        args.output = (
+            CLUSTERING_ROOT
+            / args.modality
+            / "pca_harmony"
+            / f"simulation_{args.modality}_z_pca_harmony.h5ad"
+        )
 
     if not args.input.is_file():
         raise SystemExit(
@@ -183,7 +190,7 @@ def main() -> None:
         )
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    plot_dir = args.output.parent / "plots" / f"{args.modality}_pca_harmony"
+    plot_dir = args.output.parent / "plots"
 
     print(f"[load] {args.input}")
     adata = sc.read_h5ad(args.input)
@@ -202,6 +209,15 @@ def main() -> None:
 
     print(f"[plot] Saving PCA before/after plots under {plot_dir}")
     save_pca_plots(adata, plot_dir, args.plot_colors)
+
+    print(f"[pc_pairs] Plotting PC pairs by {args.batch_key} under {plot_dir / 'pc_pairs'}")
+    plot_pc_pairs(
+        adata,
+        pre_key="X_pca_pre_harmony",
+        post_key="X_pca_post_harmony",
+        output_dir=plot_dir / "pc_pairs",
+        color_key=args.batch_key,
+    )
 
     adata.uns["clustering_pca_harmony"] = {
         "batch_key": args.batch_key,

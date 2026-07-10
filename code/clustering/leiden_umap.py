@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 """
-Run Leiden clustering and UMAP from Harmony-corrected PCA features.
+Run Leiden or Louvain clustering and UMAP from Harmony-corrected PCA features.
 
-This is separate from clustering.py so Leiden resolution can be iterated
-without recomputing normalization, PCA, or Harmony.
+This is separate from clustering.py so clustering algorithm/resolution can be
+iterated without recomputing normalization, PCA, or Harmony.
 
 Example:
     python sim_paper/code/clustering/leiden_umap.py --resolution 0.5
-    python sim_paper/code/clustering/leiden_umap.py --resolution 1.0
+    python sim_paper/code/clustering/leiden_umap.py --algorithm louvain --resolution 1.0
 """
 
 from __future__ import annotations
@@ -26,9 +26,11 @@ import scanpy as sc
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
-DEFAULT_INPUT = SIM_PAPER_DIR / "data" / "clustering" / "simulation_spot_z_pca_harmony.h5ad"
-DEFAULT_OUTPUT_DIR = SIM_PAPER_DIR / "data" / "clustering"
+CLUSTERING_ROOT = SIM_PAPER_DIR / "data" / "clustering"
+DEFAULT_INPUT = CLUSTERING_ROOT / "spot" / "pca_harmony" / "simulation_spot_z_pca_harmony.h5ad"
+DEFAULT_OUTPUT_DIR = CLUSTERING_ROOT
 VALID_MODALITIES = ("spot", "bin", "cell")
+VALID_ALGORITHMS = ("leiden", "louvain")
 
 
 def parse_args() -> argparse.Namespace:
@@ -38,6 +40,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--modality", choices=VALID_MODALITIES, default="spot")
+    parser.add_argument("--algorithm", choices=VALID_ALGORITHMS, default="leiden")
     parser.add_argument("--resolution", type=float, default=0.5)
     parser.add_argument("--n-pcs", type=int, default=30)
     parser.add_argument("--n-neighbors", type=int, default=15)
@@ -115,7 +118,9 @@ def plot_umap(adata, color_key: str, output_path: Path) -> None:
 def main() -> None:
     args = parse_args()
     if args.input == DEFAULT_INPUT:
-        args.input = args.output_dir / f"simulation_{args.modality}_z_pca_harmony.h5ad"
+        args.input = (
+            CLUSTERING_ROOT / args.modality / "pca_harmony" / f"simulation_{args.modality}_z_pca_harmony.h5ad"
+        )
 
     if not args.input.is_file():
         raise SystemExit(
@@ -123,10 +128,12 @@ def main() -> None:
             "Run sim_paper/code/clustering/clustering.py first."
         )
 
-    args.output_dir.mkdir(parents=True, exist_ok=True)
     tag = resolution_tag(args.resolution)
-    output = args.output_dir / f"simulation_{args.modality}_z_leiden_res{tag}.h5ad"
-    plot_dir = args.output_dir / "plots" / f"{args.modality}_leiden_res{tag}"
+    if args.output_dir == DEFAULT_OUTPUT_DIR:
+        args.output_dir = CLUSTERING_ROOT / args.modality / f"{args.algorithm}_res{tag}"
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    output = args.output_dir / f"simulation_{args.modality}_z_{args.algorithm}_res{tag}.h5ad"
+    plot_dir = args.output_dir / "plots"
     plot_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"[load] {args.input}")
@@ -155,8 +162,9 @@ def main() -> None:
         random_state=args.random_state,
     )
 
-    print(f"[leiden] resolution={args.resolution}, key={args.cluster_key}")
-    sc.tl.leiden(
+    print(f"[{args.algorithm}] resolution={args.resolution}, key={args.cluster_key}")
+    cluster_fn = sc.tl.leiden if args.algorithm == "leiden" else sc.tl.louvain
+    cluster_fn(
         adata,
         resolution=args.resolution,
         key_added=args.cluster_key,
@@ -174,7 +182,8 @@ def main() -> None:
     for color_key in valid_colors:
         plot_umap(adata, color_key, plot_dir / f"umap_by_{color_key}.png")
 
-    adata.uns["leiden_umap"] = {
+    adata.uns[f"{args.algorithm}_umap"] = {
+        "algorithm": args.algorithm,
         "resolution": float(args.resolution),
         "cluster_key": args.cluster_key,
         "rep_key": args.rep_key,

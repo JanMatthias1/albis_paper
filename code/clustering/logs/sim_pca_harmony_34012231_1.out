@@ -1,0 +1,7 @@
+Job started: Thu Jul  9 04:24:47 PM EDT 2026
+Host: compute-155.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Modality: bin
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/clustering.py --modality bin 
+Input file not found: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/simulation_bin_z.h5ad
+Generate it first with sim_paper/code/data/generate_simulation.py.
