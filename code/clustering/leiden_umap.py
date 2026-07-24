@@ -1,13 +1,21 @@
 #!/usr/bin/env python
 """
-Run Leiden or Louvain clustering and UMAP from Harmony-corrected PCA features.
+Run Leiden or Louvain clustering and UMAP from a Harmony-corrected representation.
 
-This is separate from clustering.py so clustering algorithm/resolution can be
-iterated without recomputing normalization, PCA, or Harmony.
+This is separate from clustering.py/gene_harmony_umap.py so clustering
+algorithm/resolution can be iterated without recomputing normalization, PCA,
+or Harmony. Two independent Harmony pipelines exist upstream, and either can
+be clustered on via --pipeline:
+  - pca_harmony:  Harmony corrects the PCA embedding (clustering.py output).
+                  Uses the first --n-pcs dimensions (variance-ordered).
+  - gene_harmony: Harmony corrects the full gene matrix directly
+                  (gene_harmony_umap.py output). Uses all dimensions as-is,
+                  since raw genes have no natural "first N" ordering.
 
 Example:
     python sim_paper/code/clustering/leiden_umap.py --resolution 0.5
     python sim_paper/code/clustering/leiden_umap.py --algorithm louvain --resolution 1.0
+    python sim_paper/code/clustering/leiden_umap.py --pipeline gene_harmony --resolution 0.5
 """
 
 from __future__ import annotations
@@ -31,6 +39,9 @@ DEFAULT_INPUT = CLUSTERING_ROOT / "spot" / "pca_harmony" / "simulation_spot_z_pc
 DEFAULT_OUTPUT_DIR = CLUSTERING_ROOT
 VALID_MODALITIES = ("spot", "bin", "cell")
 VALID_ALGORITHMS = ("leiden", "louvain")
+VALID_PIPELINES = ("pca_harmony", "gene_harmony")
+PIPELINE_TAGS = {"pca_harmony": "pca", "gene_harmony": "gene"}
+PIPELINE_REP_KEYS = {"pca_harmony": "X_pca_harmony", "gene_harmony": "X_gene_harmony"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -41,11 +52,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--modality", choices=VALID_MODALITIES, default="spot")
     parser.add_argument("--algorithm", choices=VALID_ALGORITHMS, default="leiden")
+    parser.add_argument("--pipeline", choices=VALID_PIPELINES, default="pca_harmony")
     parser.add_argument("--resolution", type=float, default=0.5)
     parser.add_argument("--n-pcs", type=int, default=30)
     parser.add_argument("--n-neighbors", type=int, default=15)
     parser.add_argument("--random-state", type=int, default=0)
-    parser.add_argument("--rep-key", default="X_pca_harmony")
+    parser.add_argument(
+        "--rep-key",
+        default=None,
+        help="obsm key to cluster on. Defaults to X_pca_harmony or X_gene_harmony based on --pipeline.",
+    )
     parser.add_argument("--cluster-key", default="cluster_label")
     parser.add_argument(
         "--plot-colors",
@@ -117,22 +133,26 @@ def plot_umap(adata, color_key: str, output_path: Path) -> None:
 
 def main() -> None:
     args = parse_args()
+    pipeline_dirname = "pca_harmony" if args.pipeline == "pca_harmony" else "gene_harmony_umap"
     if args.input == DEFAULT_INPUT:
         args.input = (
-            CLUSTERING_ROOT / args.modality / "pca_harmony" / f"simulation_{args.modality}_z_pca_harmony.h5ad"
+            CLUSTERING_ROOT / args.modality / pipeline_dirname / f"simulation_{args.modality}_z_{pipeline_dirname}.h5ad"
         )
+    if args.rep_key is None:
+        args.rep_key = PIPELINE_REP_KEYS[args.pipeline]
 
     if not args.input.is_file():
         raise SystemExit(
             f"Input file not found: {args.input}\n"
-            "Run sim_paper/code/clustering/clustering.py first."
+            f"Run sim_paper/code/clustering/{'clustering.py' if args.pipeline == 'pca_harmony' else 'gene_harmony_umap.py'} first."
         )
 
     tag = resolution_tag(args.resolution)
+    pipeline_tag = PIPELINE_TAGS[args.pipeline]
     if args.output_dir == DEFAULT_OUTPUT_DIR:
-        args.output_dir = CLUSTERING_ROOT / args.modality / f"{args.algorithm}_res{tag}"
+        args.output_dir = CLUSTERING_ROOT / args.modality / f"{args.algorithm}_{pipeline_tag}_res{tag}"
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    output = args.output_dir / f"simulation_{args.modality}_z_{args.algorithm}_res{tag}.h5ad"
+    output = args.output_dir / f"simulation_{args.modality}_z_{args.algorithm}_{pipeline_tag}_res{tag}.h5ad"
     plot_dir = args.output_dir / "plots"
     plot_dir.mkdir(parents=True, exist_ok=True)
 
@@ -147,14 +167,23 @@ def main() -> None:
         )
 
     rep = np.asarray(adata.obsm[args.rep_key])
-    n_pcs = min(args.n_pcs, rep.shape[1])
-    active_rep_key = f"{args.rep_key}_{n_pcs}"
-    adata.obsm[active_rep_key] = rep[:, :n_pcs].copy()
-
-    print(
-        f"[neighbors] Using first {n_pcs} dimensions of {args.rep_key} "
-        f"with n_neighbors={args.n_neighbors}"
-    )
+    if args.pipeline == "pca_harmony":
+        # PCA components are variance-ordered, so truncating to the top n_pcs is meaningful.
+        n_pcs = min(args.n_pcs, rep.shape[1])
+        active_rep_key = f"{args.rep_key}_{n_pcs}"
+        adata.obsm[active_rep_key] = rep[:, :n_pcs].copy()
+        print(
+            f"[neighbors] Using first {n_pcs} dimensions of {args.rep_key} "
+            f"with n_neighbors={args.n_neighbors}"
+        )
+    else:
+        # Raw gene-space Harmony has no natural "first N" ordering; use all dimensions.
+        n_pcs = rep.shape[1]
+        active_rep_key = args.rep_key
+        print(
+            f"[neighbors] Using all {n_pcs} dimensions of {args.rep_key} "
+            f"with n_neighbors={args.n_neighbors}"
+        )
     sc.pp.neighbors(
         adata,
         n_neighbors=args.n_neighbors,
@@ -171,7 +200,7 @@ def main() -> None:
         random_state=args.random_state,
     )
 
-    print("[umap] Computing UMAP from the Harmony PCA neighbor graph")
+    print(f"[umap] Computing UMAP from the {args.pipeline} neighbor graph")
     sc.tl.umap(adata, random_state=args.random_state)
 
     valid_colors = [key for key in args.plot_colors if key in adata.obs]
@@ -184,6 +213,7 @@ def main() -> None:
 
     adata.uns[f"{args.algorithm}_umap"] = {
         "algorithm": args.algorithm,
+        "pipeline": args.pipeline,
         "resolution": float(args.resolution),
         "cluster_key": args.cluster_key,
         "rep_key": args.rep_key,

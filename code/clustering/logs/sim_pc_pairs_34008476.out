@@ -1,9 +1,0 @@
-Job started: Thu Jul  9 11:29:51 AM EDT 2026
-Host: compute-058.cm.cluster
-Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
-Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/plot_pc_pairs.py 
-[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering/simulation_spot_z_pca_harmony.h5ad
-[plot] Plotting 30 PCs (435 pairs) using 20000 sampled observations
-[save] 435 pre-Harmony plots -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering/plots/pc_pairs/by_slice_id/pre_harmony
-[save] 435 post-Harmony plots -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering/plots/pc_pairs/by_slice_id/post_harmony
-Job finished: Thu Jul  9 11:41:22 AM EDT 2026

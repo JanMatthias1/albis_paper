@@ -1,7 +1,0 @@
-Job started: Thu Jul  9 10:06:32 PM EDT 2026
-Host: compute-148.cm.cluster
-Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
-Modality: cell
-Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/leiden_umap.py --modality cell --resolution 0.5
-Input file not found: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering/simulation_cell_z_pca_harmony.h5ad
-Run sim_paper/code/clustering/clustering.py first.

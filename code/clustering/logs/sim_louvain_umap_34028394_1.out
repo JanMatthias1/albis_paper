@@ -1,0 +1,1326 @@
+Job started: Fri Jul 10 12:57:29 PM EDT 2026
+Host: compute-155.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Modality: bin
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/leiden_umap.py --modality bin --algorithm louvain --resolution 0.5
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/leiden_umap.py:113: UserWarning: Tight layout not applied. The bottom and top margins cannot be made large enough to accommodate all Axes decorations.
+  marker="o",
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering/bin/pca_harmony/simulation_bin_z_pca_harmony.h5ad
+[neighbors] Using first 30 dimensions of X_pca_harmony with n_neighbors=15
+[louvain] resolution=0.5, key=cluster_label
+[umap] Computing UMAP from the Harmony PCA neighbor graph
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering/bin/louvain_res0p5/simulation_bin_z_louvain_res0p5.h5ad
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/leiden_umap.py --modality bin --algorithm louvain --resolution 0.1
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+slurmstepd: error: *** JOB 34028443 ON compute-155 CANCELLED AT 2026-07-10T20:57:45 DUE TO TIME LIMIT ***

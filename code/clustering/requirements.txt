@@ -3,4 +3,5 @@ harmonypy
 python-igraph
 leidenalg
 louvain
+setuptools<81  # >=81 dropped pkg_resources, which the louvain package needs
 scikit-learn

@@ -1,0 +1,12 @@
+Job started: Fri Jul 10 01:01:56 PM EDT 2026
+Host: compute-153.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Modality: bin
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/leiden_umap.py --modality bin --resolution 0.5
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/leiden_umap.py:167: FutureWarning: In the future, the default backend for leiden will be igraph instead of leidenalg.
+
+ To achieve the future defaults please pass: flavor="igraph" and n_iterations=2.  directed must also be False to work with igraph's implementation.
+  cluster_fn(
+slurmstepd: error: *** JOB 34028417 ON compute-153 CANCELLED AT 2026-07-10T21:02:15 DUE TO TIME LIMIT ***

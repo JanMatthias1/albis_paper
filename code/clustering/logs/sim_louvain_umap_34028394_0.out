@@ -1,0 +1,95 @@
+Job started: Fri Jul 10 12:50:23 PM EDT 2026
+Host: compute-154.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Modality: spot
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/leiden_umap.py --modality spot --algorithm louvain --resolution 0.5
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/sklearn/manifold/_spectral_embedding.py:328: UserWarning: Graph is not fully connected, spectral embedding may not work as expected.
+  warnings.warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/leiden_umap.py:113: UserWarning: Tight layout not applied. The bottom and top margins cannot be made large enough to accommodate all Axes decorations.
+  fig.tight_layout()
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering/spot/pca_harmony/simulation_spot_z_pca_harmony.h5ad
+[neighbors] Using first 30 dimensions of X_pca_harmony with n_neighbors=15
+[louvain] resolution=0.5, key=cluster_label
+[umap] Computing UMAP from the Harmony PCA neighbor graph
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering/spot/louvain_res0p5/simulation_spot_z_louvain_res0p5.h5ad
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/leiden_umap.py --modality spot --algorithm louvain --resolution 0.1
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/sklearn/manifold/_spectral_embedding.py:328: UserWarning: Graph is not fully connected, spectral embedding may not work as expected.
+  warnings.warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/leiden_umap.py:113: UserWarning: Tight layout not applied. The bottom and top margins cannot be made large enough to accommodate all Axes decorations.
+  fig.tight_layout()
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering/spot/pca_harmony/simulation_spot_z_pca_harmony.h5ad
+[neighbors] Using first 30 dimensions of X_pca_harmony with n_neighbors=15
+[louvain] resolution=0.1, key=cluster_label
+[umap] Computing UMAP from the Harmony PCA neighbor graph
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering/spot/louvain_res0p1/simulation_spot_z_louvain_res0p1.h5ad
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/leiden_umap.py --modality spot --algorithm louvain --resolution 0.2
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/sklearn/manifold/_spectral_embedding.py:328: UserWarning: Graph is not fully connected, spectral embedding may not work as expected.
+  warnings.warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/umap/spectral.py:548: UserWarning: Spectral initialisation failed! The eigenvector solver
+failed. This is likely due to too small an eigengap. Consider
+adding some noise or jitter to your data.
+
+Falling back to random initialisation!
+  warn(
+/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/leiden_umap.py:113: UserWarning: Tight layout not applied. The bottom and top margins cannot be made large enough to accommodate all Axes decorations.
+  fig.tight_layout()
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering/spot/pca_harmony/simulation_spot_z_pca_harmony.h5ad
+[neighbors] Using first 30 dimensions of X_pca_harmony with n_neighbors=15
+[louvain] resolution=0.2, key=cluster_label
+[umap] Computing UMAP from the Harmony PCA neighbor graph
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering/spot/louvain_res0p2/simulation_spot_z_louvain_res0p2.h5ad
+Job finished: Fri Jul 10 12:58:14 PM EDT 2026

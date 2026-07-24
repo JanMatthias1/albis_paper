@@ -92,12 +92,14 @@ def generate_modality(output_modality, slice_axis):
         core_frac=0.55,
         core_bump_amp=0.25,
         wedge_angle_amp_deg=25.0,
+
         noise_terms=16,
         noise_freq_range=(3.0, 6.0),
         boundary_fuzz_width_deg=6.0,
         boundary_fuzz_flip_prob=0.15,
         core_fuzz_width_um=300.0,
         core_fuzz_flip_prob=0.25,
+        
         n_cells=600_000,
         cell_radius_kwargs=dict(
             radius_dist="lognormal",

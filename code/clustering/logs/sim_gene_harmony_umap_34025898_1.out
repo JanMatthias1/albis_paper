@@ -1,5 +1,5 @@
-Job started: Thu Jul  9 10:06:33 PM EDT 2026
-Host: compute-145.cm.cluster
+Job started: Fri Jul 10 10:01:05 AM EDT 2026
+Host: compute-149.cm.cluster
 Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
 Modality: bin
 Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/gene_harmony_umap.py --modality bin 
@@ -7,5 +7,5 @@ Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/pyth
   return fn(*args_all, **kw)
 /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/functools.py:889: UserWarning: zero-centering a sparse array/matrix densifies it.
   return dispatch(args[0].__class__)(*args, **kw)
-/var/spool/slurm/d/job34016956/slurm_script: line 48: 2147961 Killed                  "${PYTHON_BIN}" sim_paper/code/clustering/gene_harmony_umap.py --modality "${MODALITY}" "$@"
-slurmstepd: error: Detected 1 oom-kill event(s) in StepId=34016956.batch. Some of your processes may have been killed by the cgroup out-of-memory handler.
+/var/spool/slurm/d/job34025900/slurm_script: line 27: 963053 Killed                  "${PYTHON_BIN}" sim_paper/code/clustering/gene_harmony_umap.py --modality "${MODALITY}" "$@"
+slurmstepd: error: Detected 1 oom-kill event(s) in StepId=34025900.batch. Some of your processes may have been killed by the cgroup out-of-memory handler.

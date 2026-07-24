@@ -1,5 +1,0 @@
-Job started: Thu Jul  9 03:45:22 PM EDT 2026
-Host: compute-168.cm.cluster
-Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
-Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/leiden_umap.py 
-slurmstepd: error: *** JOB 34011643 ON compute-168 CANCELLED AT 2026-07-09T15:45:39 ***
