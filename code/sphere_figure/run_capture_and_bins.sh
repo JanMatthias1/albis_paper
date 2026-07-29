@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=sphere_intact
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/logs/sphere_intact_%j.out
+#SBATCH --job-name=sphere_bins
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/logs/sphere_bins_%j.out
 #SBATCH --time=04:00:00
 #SBATCH --mem=250G
 #SBATCH --cpus-per-task=4
@@ -40,6 +40,6 @@ echo "Job started: $(date)"
 echo "Host: $(hostname)"
 echo "Python: ${PYTHON_BIN}"
 
-"${PYTHON_BIN}" "$SCRIPT_DIR/01_plot_intact_sphere.py" "$@"
+"${PYTHON_BIN}" "$SCRIPT_DIR/02_plot_capture_and_bins.py" "$@"
 
 echo "Job finished: $(date)"
