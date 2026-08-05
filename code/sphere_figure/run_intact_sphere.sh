@@ -8,8 +8,10 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="/dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure"
 mkdir -p "$SCRIPT_DIR/logs"
+mkdir -p "$SCRIPT_DIR/.mplconfig"
+export MPLCONFIGDIR="$SCRIPT_DIR/.mplconfig"
 
 ENV_PREFIX="/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial"
 PYTHON_BIN="${ENV_PREFIX}/bin/python"

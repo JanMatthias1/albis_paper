@@ -1,0 +1,16 @@
+Job started: Wed Jul 29 12:18:15 PM EDT 2026
+Host: compute-169.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Generating base sphere with full molecule stream for binning...
+Saved: /dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/outputs/figure_1b_capture_window.png
+Saved: /dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/outputs/figure_1b_capture_window.pdf
+Traceback (most recent call last):
+  File "/dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/02_plot_capture_and_bins.py", line 244, in <module>
+    main()
+  File "/dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/02_plot_capture_and_bins.py", line 240, in main
+    plot_binned_sections(base, args.outdir, args.dpi, args.max_bins)
+  File "/dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/02_plot_capture_and_bins.py", line 181, in plot_binned_sections
+    sim = sim_app.section_3d_molecule_sphere(
+  File "/dcs04/hicks/data/Jan/sim_project/sim_app/sim_app/simulation_sphere.py", line 1885, in section_3d_molecule_sphere
+    captures=dict(
+TypeError: dict() got multiple values for keyword argument 'capture_window_um'

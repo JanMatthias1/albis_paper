@@ -6,6 +6,10 @@ planned capture window shown in grey and captured cells colored by domain.
 
 Figure 1C: the same base sphere after sectioning into Z slices and aggregating
 transcripts into Visium HD-like bins.
+
+Figure 1D: the sectioned bins again, but using each slice's unaligned
+(randomly rotated and translated) coordinates, showing the naive stack
+before any registration/coordinate-shift correction is applied.
 """
 
 import argparse
@@ -173,12 +177,12 @@ def plot_capture_window(base, outdir, dpi, max_cells):
     ax.plot([x0, x1, x1, x0, x0], [y0, y0, y1, y1, y0], [z] * 5, color="#222222", lw=0.8)
 
     style_3d_axis(ax)
-    ax.set_title("Planned Visium HD capture", fontsize=8, fontweight="bold", pad=0)
+    ax.set_title("Planned Visium HD capture", fontsize=8, color="black", y=0.76)
     save_figure(fig, outdir, "figure_1b_capture_window", dpi)
 
 
-def plot_binned_sections(base, outdir, dpi, max_bins):
-    sim = sim_app.section_3d_molecule_sphere(
+def run_sectioning(base):
+    return sim_app.section_3d_molecule_sphere(
         base,
         n_slices=10,
         batch_sigma=0.22,
@@ -188,9 +192,10 @@ def plot_binned_sections(base, outdir, dpi, max_bins):
         output_modalities=("bin",),
         slice_axes=("Z",),
     )
-    adata = sim["bin_adatas"]["Z"]
 
-    coords = np.asarray(adata.obsm["spatial_3d"])
+
+def _plot_stacked_bins(adata, outdir, dpi, max_bins, spatial_key, title, stem):
+    coords = np.asarray(adata.obsm[spatial_key])
     domains = adata.obs["domain_true"].astype(str).to_numpy()
     slice_ids = adata.obs["slice_id"].astype(int).to_numpy()
 
@@ -226,8 +231,32 @@ def plot_binned_sections(base, outdir, dpi, max_bins):
     style_3d_axis(ax, radius=6000, zlim=(-0.5 * z_offset, 9.5 * z_offset))
     ax.set_box_aspect((1, 1, 1.25))
     ax.view_init(elev=22, azim=-60)
-    ax.set_title("Sectioned Visium HD bins", fontsize=8, fontweight="bold", pad=0)
-    save_figure(fig, outdir, "figure_1c_sectioned_bins", dpi)
+    ax.set_title(title, fontsize=8, color="black", y=0.80)
+    save_figure(fig, outdir, stem, dpi)
+
+
+def plot_binned_sections(adata, outdir, dpi, max_bins):
+    _plot_stacked_bins(
+        adata,
+        outdir,
+        dpi,
+        max_bins,
+        spatial_key="spatial_3d",
+        title="Sectioned Visium HD bins",
+        stem="figure_1c_sectioned_bins",
+    )
+
+
+def plot_unaligned_sections(adata, outdir, dpi, max_bins):
+    _plot_stacked_bins(
+        adata,
+        outdir,
+        dpi,
+        max_bins,
+        spatial_key="spatial_3d_unaligned",
+        title="Reconstructed bins, coordinate-shifted",
+        stem="figure_1d_unaligned_bins",
+    )
 
 
 def main():
@@ -237,7 +266,12 @@ def main():
     print("Generating base sphere with full molecule stream for binning...")
     base = sim_app.simulate_3d_molecule_sphere_base(**manuscript_simulation_kwargs())
     plot_capture_window(base, args.outdir, args.dpi, args.max_cells)
-    plot_binned_sections(base, args.outdir, args.dpi, args.max_bins)
+
+    print("Sectioning sphere into Visium HD-like bins...")
+    sim = run_sectioning(base)
+    adata = sim["bin_adatas"]["Z"]
+    plot_binned_sections(adata, args.outdir, args.dpi, args.max_bins)
+    plot_unaligned_sections(adata, args.outdir, args.dpi, args.max_bins)
 
 
 if __name__ == "__main__":
