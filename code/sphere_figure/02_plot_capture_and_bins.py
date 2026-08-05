@@ -177,7 +177,7 @@ def plot_capture_window(base, outdir, dpi, max_cells):
     ax.plot([x0, x1, x1, x0, x0], [y0, y0, y1, y1, y0], [z] * 5, color="#222222", lw=0.8)
 
     style_3d_axis(ax)
-    ax.set_title("Planned Visium HD capture", fontsize=8, color="black", y=0.76)
+    ax.set_title("Planned Visium HD capture", fontsize=8, fontweight="bold", y=0.93)
     save_figure(fig, outdir, "figure_1b_capture_window", dpi)
 
 
@@ -231,7 +231,7 @@ def _plot_stacked_bins(adata, outdir, dpi, max_bins, spatial_key, title, stem):
     style_3d_axis(ax, radius=6000, zlim=(-0.5 * z_offset, 9.5 * z_offset))
     ax.set_box_aspect((1, 1, 1.25))
     ax.view_init(elev=22, azim=-60)
-    ax.set_title(title, fontsize=8, color="black", y=0.80)
+    ax.set_title(title, fontsize=8, fontweight="bold", y=0.94)
     save_figure(fig, outdir, stem, dpi)
 
 
