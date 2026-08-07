@@ -17,12 +17,17 @@ Or submit all three modalities through SLURM (a `0-2` array over `spot`,
 sbatch sim_paper/code/count_distribution/run_count_distribution.sh
 ```
 
-`count_distribution.py` produces three PNGs per modality under
+`count_distribution.py` produces four PNGs per modality under
 `sim_paper/data/count_distribution/<modality>/`:
 
 - `mean_variance.png` -- per-gene mean vs variance (log-log), with the
   Poisson line (`var = mean`) and a single method-of-moments NB line
   (`var = mean + mean^2/theta`) overlaid.
+- `mean_dropout.png` -- per-gene mean vs observed zero fraction, with the
+  Poisson- and NB-predicted zero-probability curves overlaid (same
+  `theta` as `mean_variance.png`). Tests whether the NB fit from the first
+  two moments also explains the zero rate, or whether the data needs
+  zero-inflation on top of NB.
 - `total_counts.png` -- per-cell library-size (total counts) histogram.
 - `raw_norm_log.png` -- histogram of nonzero matrix entries at three
   pipeline stages: raw counts, target-sum normalized, and
@@ -30,12 +35,12 @@ sbatch sim_paper/code/count_distribution/run_count_distribution.sh
   `clustering.py`, on a random sample of up to `--sample-size` nonzero
   entries.
 
-`mean_variance.png` and `total_counts.png` are computed from
-`adata.layers["counts_pre_batch"]` when present (the NB draw before the
-synthetic batch-effect multiplier), falling back to `adata.X` otherwise --
-this checks the underlying generative count model, not the batch-perturbed
-data. `raw_norm_log.png` always uses `adata.X`, since that's what the
-clustering pipeline actually consumes.
+`mean_variance.png`, `mean_dropout.png`, and `total_counts.png` are
+computed from `adata.layers["counts_pre_batch"]` when present (the NB draw
+before the synthetic batch-effect multiplier), falling back to `adata.X`
+otherwise -- this checks the underlying generative count model, not the
+batch-perturbed data. `raw_norm_log.png` always uses `adata.X`, since
+that's what the clustering pipeline actually consumes.
 
 ## Comparing against real datasets
 

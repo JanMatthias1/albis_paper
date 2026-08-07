@@ -2,10 +2,15 @@
 """
 Plot count-distribution diagnostics for a sim_app (or real) dataset.
 
-Produces three PNGs:
+Produces four PNGs:
   - mean_variance.png: per-gene mean vs variance (log-log), with the Poisson
     line (var = mean) and a single method-of-moments NB line
     (var = mean + mean^2/theta) overlaid, computed from the raw counts.
+  - mean_dropout.png: per-gene mean vs observed zero fraction, with the
+    Poisson- and NB-predicted zero-probability curves overlaid (same theta
+    as mean_variance.png), computed from the raw counts. Tests whether the
+    NB fit from the first two moments also explains the zero rate, or
+    whether the data needs zero-inflation on top of NB.
   - total_counts.png: per-cell library-size (total counts) histogram,
     computed from the raw counts.
   - raw_norm_log.png: histogram of nonzero matrix entries at three pipeline
@@ -110,6 +115,31 @@ def plot_mean_variance(mean: np.ndarray, var: np.ndarray, theta: float, modality
     plt.close(fig)
 
 
+def gene_zero_fraction(X, n_obs: int) -> np.ndarray:
+    nnz = X.getnnz(axis=0) if sparse.issparse(X) else np.count_nonzero(X, axis=0)
+    return 1.0 - np.asarray(nnz).ravel() / n_obs
+
+
+def plot_mean_dropout(mean: np.ndarray, zero_frac: np.ndarray, theta: float, modality: str, output_path: Path) -> None:
+    keep = mean > 0
+    fig, ax = plt.subplots(figsize=(6, 5))
+    ax.scatter(mean[keep], zero_frac[keep], s=8, alpha=0.5, linewidths=0, label="genes")
+
+    x = np.logspace(np.log10(mean[keep].min()), np.log10(mean[keep].max()), 200)
+    ax.plot(x, np.exp(-x), "k--", label="Poisson-predicted")
+    if np.isfinite(theta):
+        ax.plot(x, (theta / (theta + x)) ** theta, "r-", label=rf"NB-predicted ($\hat\theta$={theta:.1f})")
+
+    ax.set_xscale("log")
+    ax.set_xlabel("Mean count per gene")
+    ax.set_ylabel("Fraction of zero cells")
+    ax.set_title(f"{modality}: gene mean-dropout")
+    ax.legend(frameon=False)
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=180)
+    plt.close(fig)
+
+
 def plot_total_counts(total_counts: np.ndarray, modality: str, output_path: Path) -> None:
     positive = total_counts[total_counts > 0]
     bins = np.logspace(np.log10(positive.min()), np.log10(positive.max()), 60)
@@ -187,6 +217,10 @@ def main() -> None:
     theta = fit_common_dispersion(mean, var)
     print(f"[mean_variance] theta_hat (median, method of moments) = {theta:.2f}")
     plot_mean_variance(mean, var, theta, args.modality, args.output_dir / "mean_variance.png")
+
+    print("[mean_dropout] Computing per-gene zero fraction")
+    zero_frac = gene_zero_fraction(raw_counts, adata.n_obs)
+    plot_mean_dropout(mean, zero_frac, theta, args.modality, args.output_dir / "mean_dropout.png")
 
     print("[total_counts] Computing per-cell total counts")
     total_counts = np.asarray(raw_counts.sum(axis=1)).ravel()
