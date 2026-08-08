@@ -57,3 +57,31 @@ python sim_paper/code/count_distribution/count_distribution.py \
     --input /path/to/real_dataset.h5ad \
     --modality xenium_breast
 ```
+
+## Overlaying sim vs. real on the same plots
+
+Pass `--compare-input` (plus `--compare-label`) to overlay a second dataset on
+the same four diagnostics instead of producing separate PNGs per dataset --
+useful for checking whether the simulated count distribution actually looks
+like real Xenium data:
+
+```bash
+python sim_paper/code/count_distribution/count_distribution.py \
+    --modality cell \
+    --compare-input sim_paper/data/real_data_qc/non_diseased_lung/non_diseased_lung_qc.h5ad \
+    --compare-label non_diseased_lung
+```
+
+This produces, under `sim_paper/data/count_distribution/<modality>_vs_<compare-label>/`:
+
+- `mean_variance_compare.png`, `mean_dropout_compare.png` -- both datasets'
+  per-gene scatter clouds and NB fits overlaid on one plot (one shared
+  Poisson reference line).
+- `total_counts_compare.png` -- density-normalized (not raw-count)
+  histograms of total counts per cell, so datasets with very different
+  numbers of cells are still comparable by shape.
+- `raw_norm_log_compare.png` -- same density-normalized overlay, for each of
+  the raw/normalized/log1p stages.
+
+Colors are fixed by dataset role (`--modality` = blue, `--compare-label` =
+orange) across all four plots, not by draw order.

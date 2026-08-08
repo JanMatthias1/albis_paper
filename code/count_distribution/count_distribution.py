@@ -22,11 +22,19 @@ before the synthetic batch-effect multiplier is applied), otherwise adata.X.
 The raw/norm/log panel always uses adata.X, since that is what the
 clustering pipeline actually consumes.
 
+Pass --compare-input (plus --compare-label) to overlay a second dataset --
+e.g. real Xenium data -- on the same four diagnostics instead of plotting
+--input alone. Both datasets are density-normalized so they're comparable
+regardless of how many cells/genes each one has.
+
 Expected environment:
     conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial
 
 Example:
     python sim_paper/code/count_distribution/count_distribution.py --modality cell
+    python sim_paper/code/count_distribution/count_distribution.py --modality cell \\
+        --compare-input sim_paper/data/real_data_qc/non_diseased_lung/non_diseased_lung_qc.h5ad \\
+        --compare-label non_diseased_lung
 """
 
 from __future__ import annotations
@@ -45,6 +53,11 @@ from scipy import sparse
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
+
+# Fixed categorical assignment (dataviz palette slots 1/2) -- color follows the
+# dataset role (primary vs compare), never plot order.
+PRIMARY_COLOR = "#2a78d6"  # blue
+COMPARE_COLOR = "#eb6834"  # orange
 
 
 def parse_args() -> argparse.Namespace:
@@ -67,12 +80,29 @@ def parse_args() -> argparse.Namespace:
         help="Max nonzero matrix entries sampled for the raw/norm/log1p histograms.",
     )
     parser.add_argument("--random-state", type=int, default=0)
+    parser.add_argument(
+        "--compare-input",
+        type=Path,
+        default=None,
+        help="Second dataset (e.g. real Xenium data) to overlay against --input instead of "
+        "plotting --input alone.",
+    )
+    parser.add_argument(
+        "--compare-label",
+        default="real",
+        help="Label used for --compare-input in plot legends/titles and default output path.",
+    )
     args = parser.parse_args()
 
     if args.input is None:
         args.input = SIM_PAPER_DIR / "data" / f"simulation_{args.modality}_z.h5ad"
     if args.output_dir is None:
-        args.output_dir = SIM_PAPER_DIR / "data" / "count_distribution" / args.modality
+        if args.compare_input is None:
+            args.output_dir = SIM_PAPER_DIR / "data" / "count_distribution" / args.modality
+        else:
+            args.output_dir = (
+                SIM_PAPER_DIR / "data" / "count_distribution" / f"{args.modality}_vs_{args.compare_label}"
+            )
     return args
 
 
@@ -197,6 +227,152 @@ def plot_raw_norm_log(
     plt.close(fig)
 
 
+def plot_mean_variance_compare(datasets: list[dict], output_path: Path) -> None:
+    """datasets: [{"label", "color", "mean", "var", "theta"}, ...] (primary first)."""
+    fig, ax = plt.subplots(figsize=(6.5, 5.5))
+
+    all_mean = np.concatenate([d["mean"][(d["mean"] > 0) & (d["var"] > 0)] for d in datasets])
+    x = np.logspace(np.log10(all_mean.min()), np.log10(all_mean.max()), 200)
+    ax.plot(x, x, "--", color="#898781", label="Poisson (var = mean)", zorder=1)
+
+    for d in datasets:
+        keep = (d["mean"] > 0) & (d["var"] > 0)
+        ax.scatter(d["mean"][keep], d["var"][keep], s=8, alpha=0.4, linewidths=0, color=d["color"], label=d["label"])
+        if np.isfinite(d["theta"]):
+            ax.plot(x, x + x**2 / d["theta"], "-", color=d["color"], linewidth=1.5,
+                     label=rf"{d['label']} NB fit ($\hat\theta$={d['theta']:.1f})")
+
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel("Mean count per gene")
+    ax.set_ylabel("Variance per gene")
+    ax.set_title("Gene mean-variance: simulated vs real")
+    ax.legend(frameon=False, fontsize=8)
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=180)
+    plt.close(fig)
+
+
+def plot_mean_dropout_compare(datasets: list[dict], output_path: Path) -> None:
+    """datasets: [{"label", "color", "mean", "zero_frac", "theta"}, ...] (primary first)."""
+    fig, ax = plt.subplots(figsize=(6.5, 5.5))
+
+    all_mean = np.concatenate([d["mean"][d["mean"] > 0] for d in datasets])
+    x = np.logspace(np.log10(all_mean.min()), np.log10(all_mean.max()), 200)
+    ax.plot(x, np.exp(-x), "--", color="#898781", label="Poisson-predicted", zorder=1)
+
+    for d in datasets:
+        keep = d["mean"] > 0
+        ax.scatter(d["mean"][keep], d["zero_frac"][keep], s=8, alpha=0.4, linewidths=0, color=d["color"], label=d["label"])
+        if np.isfinite(d["theta"]):
+            ax.plot(x, (d["theta"] / (d["theta"] + x)) ** d["theta"], "-", color=d["color"], linewidth=1.5,
+                     label=rf"{d['label']} NB-predicted ($\hat\theta$={d['theta']:.1f})")
+
+    ax.set_xscale("log")
+    ax.set_xlabel("Mean count per gene")
+    ax.set_ylabel("Fraction of zero cells")
+    ax.set_title("Gene mean-dropout: simulated vs real")
+    ax.legend(frameon=False, fontsize=8)
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=180)
+    plt.close(fig)
+
+
+def plot_total_counts_compare(datasets: list[dict], output_path: Path) -> None:
+    """datasets: [{"label", "color", "total_counts"}, ...] (primary first). Density-normalized
+    so datasets with very different cell counts are still comparable by shape."""
+    positive = [d["total_counts"][d["total_counts"] > 0] for d in datasets]
+    all_positive = np.concatenate(positive)
+    bins = np.logspace(np.log10(all_positive.min()), np.log10(all_positive.max()), 60)
+
+    fig, ax = plt.subplots(figsize=(6.5, 5.5))
+    for d, pos in zip(datasets, positive):
+        ax.hist(pos, bins=bins, density=True, color=d["color"], alpha=0.5, label=d["label"])
+    ax.set_xscale("log")
+    ax.set_xlabel("Total counts per cell")
+    ax.set_ylabel("Density (fraction of cells)")
+    ax.set_title("Total counts per cell: simulated vs real")
+    ax.legend(frameon=False)
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=180)
+    plt.close(fig)
+
+
+def plot_raw_norm_log_compare(
+    datasets: list[dict], target_sum: float, sample_size: int, rng: np.random.Generator, output_path: Path
+) -> None:
+    """datasets: [{"label", "color", "X"}, ...] (primary first)."""
+    staged = []
+    for d in datasets:
+        tmp = ad.AnnData(X=d["X"].copy())
+        raw_vals = sample_values(tmp.X.data.copy(), sample_size, rng)
+        sc.pp.normalize_total(tmp, target_sum=target_sum)
+        norm_vals = sample_values(tmp.X.data.copy(), sample_size, rng)
+        sc.pp.log1p(tmp)
+        log_vals = sample_values(tmp.X.data.copy(), sample_size, rng)
+        staged.append({"label": d["label"], "color": d["color"], "raw": raw_vals, "norm": norm_vals, "log": log_vals})
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4.5))
+    stage_specs = [
+        (axes[0], "raw", "Raw counts", True),
+        (axes[1], "norm", f"Normalized (target_sum={target_sum:g})", True),
+        (axes[2], "log", "log1p(normalized)", False),
+    ]
+    for ax, key, title, log_x in stage_specs:
+        vals_by_dataset = [s[key][s[key] > 0] for s in staged]
+        all_vals = np.concatenate(vals_by_dataset)
+        if log_x:
+            bins = np.logspace(np.log10(all_vals.min()), np.log10(all_vals.max()), 60)
+            ax.set_xscale("log")
+        else:
+            bins = np.linspace(all_vals.min(), all_vals.max(), 60)
+        for s, vals in zip(staged, vals_by_dataset):
+            ax.hist(vals, bins=bins, density=True, color=s["color"], alpha=0.5, label=s["label"])
+        ax.set_title(title)
+        ax.set_xlabel("Value (nonzero matrix entries)")
+    axes[0].set_ylabel("Density")
+    axes[0].legend(frameon=False, fontsize=8)
+    fig.suptitle("Raw -> normalized -> log1p: simulated vs real")
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=180)
+    plt.close(fig)
+
+
+def run_compare(args: argparse.Namespace, rng: np.random.Generator) -> None:
+    print(f"[load] primary: {args.input}")
+    primary = sc.read_h5ad(args.input)
+    print(f"[load] primary shape: {primary.n_obs} observations x {primary.n_vars} genes")
+
+    print(f"[load] compare: {args.compare_input}")
+    compare = sc.read_h5ad(args.compare_input)
+    print(f"[load] compare shape: {compare.n_obs} observations x {compare.n_vars} genes")
+
+    specs = [
+        {"label": args.modality, "color": PRIMARY_COLOR, "adata": primary},
+        {"label": args.compare_label, "color": COMPARE_COLOR, "adata": compare},
+    ]
+    for spec in specs:
+        adata = spec["adata"]
+        raw_counts = adata.layers["counts_pre_batch"] if "counts_pre_batch" in adata.layers else adata.X
+        mean, var = gene_mean_var(raw_counts)
+        spec["mean"] = mean
+        spec["var"] = var
+        spec["theta"] = fit_common_dispersion(mean, var)
+        spec["zero_frac"] = gene_zero_fraction(raw_counts, adata.n_obs)
+        spec["total_counts"] = np.asarray(raw_counts.sum(axis=1)).ravel()
+        print(f"[nb] {spec['label']}: theta_hat = {spec['theta']:.2f}, "
+              f"{'counts_pre_batch' if 'counts_pre_batch' in adata.layers else 'X'} used for mean-variance/total-counts")
+
+    plot_mean_variance_compare(specs, args.output_dir / "mean_variance_compare.png")
+    plot_mean_dropout_compare(specs, args.output_dir / "mean_dropout_compare.png")
+    plot_total_counts_compare(specs, args.output_dir / "total_counts_compare.png")
+    plot_raw_norm_log_compare(
+        [{"label": s["label"], "color": s["color"], "X": s["adata"].X} for s in specs],
+        args.target_sum, args.sample_size, rng, args.output_dir / "raw_norm_log_compare.png",
+    )
+    print(f"[save] Comparison plots written to {args.output_dir}")
+
+
 def main() -> None:
     args = parse_args()
     if not args.input.is_file():
@@ -204,6 +380,12 @@ def main() -> None:
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     rng = np.random.default_rng(args.random_state)
+
+    if args.compare_input is not None:
+        if not args.compare_input.is_file():
+            raise SystemExit(f"Compare input file not found: {args.compare_input}")
+        run_compare(args, rng)
+        return
 
     print(f"[load] {args.input}")
     adata = sc.read_h5ad(args.input)
