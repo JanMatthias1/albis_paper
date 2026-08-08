@@ -1,0 +1,44 @@
+Job started: Fri Aug  7 09:52:36 PM EDT 2026
+Host: compute-176.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Modality: cell
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/gene_harmony_umap.py --modality cell --input /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect/simulation_cell_z.h5ad --output /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_high_batch/cell/gene_harmony_umap/simulation_cell_z_gene_harmony_umap.h5ad
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/functools.py:889: UserWarning: zero-centering a sparse array/matrix densifies it.
+  return dispatch(args[0].__class__)(*args, **kw)
+2026-08-07 21:52:47,141 - harmonypy - INFO - Running Harmony
+2026-08-07 21:52:47,141 - harmonypy - INFO -   Parameters:
+2026-08-07 21:52:47,141 - harmonypy - INFO -     max_iter_harmony: 10
+2026-08-07 21:52:47,141 - harmonypy - INFO -     max_iter_kmeans: 4
+2026-08-07 21:52:47,141 - harmonypy - INFO -     epsilon_cluster: 0.001
+2026-08-07 21:52:47,141 - harmonypy - INFO -     epsilon_harmony: 0.01
+2026-08-07 21:52:47,141 - harmonypy - INFO -     nclust: 100
+2026-08-07 21:52:47,141 - harmonypy - INFO -     block_size: 0.05
+2026-08-07 21:52:47,141 - harmonypy - INFO -     lamb: dynamic (alpha=0.2)
+2026-08-07 21:52:47,141 - harmonypy - INFO -     theta: [2. 2. 2. 2. 2. 2. 2. 2. 2. 2.]
+2026-08-07 21:52:47,141 - harmonypy - INFO -     sigma: [0.1 0.1 0.1 0.1 0.1]...
+2026-08-07 21:52:47,142 - harmonypy - INFO -     verbose: True
+2026-08-07 21:52:47,142 - harmonypy - INFO -     random_state: 0
+2026-08-07 21:52:47,142 - harmonypy - INFO -   Data: 556 PCs × 600000 cells
+2026-08-07 21:52:47,142 - harmonypy - INFO -   Batch variables: ['slice_id']
+2026-08-07 21:52:52,871 - harmonypy - INFO - Computing initial centroids...
+2026-08-07 21:55:26,729 - harmonypy - INFO - Initialization complete.
+2026-08-07 21:55:26,730 - harmonypy - INFO - Iteration 1 of 10
+2026-08-07 21:56:14,623 - harmonypy - INFO - Converged after 1 iteration
+/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/gene_harmony_umap.py:180: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  fig.tight_layout()
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect/simulation_cell_z.h5ad
+[load] AnnData shape: 600000 observations x 556 genes
+[features] Normalizing, log-transforming, and scaling all genes
+[harmony] Correcting X_gene_pre_harmony by obs['slice_id']
+[pca] Computing diagnostic (non-Harmony) PCA with 30 components
+[umap] Computing UMAP before Harmony from all-gene features
+[umap] Computing UMAP after Harmony from all-gene features
+[plot] Saving before/after UMAP plots under /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_high_batch/cell/gene_harmony_umap/plots
+[pc_pairs] Plotting diagnostic PC pairs by slice_id under /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_high_batch/cell/gene_harmony_umap/plots/pc_pairs
+[pc_pairs] Plotting 30 PCs (15 adjacent pairs) using 20000 sampled observations
+[pc_pairs] Saved -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_high_batch/cell/gene_harmony_umap/plots/pc_pairs/by_slice_id/pc_pairs_pre_harmony_by_slice_id.png
+[pc_pairs] Saved -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_high_batch/cell/gene_harmony_umap/plots/pc_pairs/by_slice_id/pc_pairs_post_harmony_by_slice_id.png
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_high_batch/cell/gene_harmony_umap/simulation_cell_z_gene_harmony_umap.h5ad
+Job finished: Fri Aug  7 10:19:30 PM EDT 2026
