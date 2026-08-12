@@ -1,0 +1,16 @@
+Job started: Sat Aug  8 06:19:32 PM EDT 2026
+Host: compute-116.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Slice: lung_cancer
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/real_data_qc/real_data_qc.py --slice lung_cancer 
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/real_data/Xenium_Preview_Human_Lung_Cancer_With_Add_on_2_FFPE/outs
+[load] AnnData shape: 531165 cells x 392 genes
+[qc] Applying MAD-based QC filters (nmads=4)
+[qc] thresholds (log1p scale): {'count_density': np.float64(-0.19565716496482877), 'total_counts': np.float32(2.887713), 'detected_features': np.float64(2.9924064365844094)}
+[qc] low_qc cells: 22862 / 531165
+[save] Summary written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/real_data_qc/lung_cancer/qc_summary.json
+[save] AnnData with QC flags written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/real_data_qc/lung_cancer/lung_cancer_qc.h5ad
+[save] Plots written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/real_data_qc/lung_cancer
+Job finished: Sat Aug  8 06:21:16 PM EDT 2026

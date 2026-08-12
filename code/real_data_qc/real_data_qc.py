@@ -204,6 +204,16 @@ def plot_qc_metrics(adata, thresholds, sample_name=None, output_path=None):
     axs[1,0].set_title("log(n_genes_by_counts)")
     axs[1,0].axvline(thresholds["detected_features"], color="red", linestyle="--")
 
+    # total counts, raw scale
+    axs[1,1].hist(adata.obs["total_counts"], bins=100, color="black")
+    axs[1,1].set_title("total_counts (raw)")
+    axs[1,1].axvline(np.expm1(thresholds["total_counts"]), color="red", linestyle="--")
+
+    # n genes by counts, raw scale
+    axs[1,2].hist(adata.obs["n_genes_by_counts"], bins=100, color="black")
+    axs[1,2].set_title("n_genes_by_counts (raw)")
+    axs[1,2].axvline(np.expm1(thresholds["detected_features"]), color="red", linestyle="--")
+
     # optional title
     if sample_name:
         fig.suptitle(f"QC metrics for {sample_name}", fontsize=16)
