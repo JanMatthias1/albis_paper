@@ -76,6 +76,11 @@ NOISY_THETA = 2.0
 NOISY_THETA_JITTER = 1.0
 NOISY_NOISE_SCALE = 1.3
 MANUSCRIPT_BATCH_SIGMA = 0.22
+# Manuscript baseline (and simulate_3d_molecule_sphere_multires's own default)
+# is base_gene_lognormal=(0.7, 0.7) -- median per-gene baseline expression
+# exp(0.7) ~= 2.0. Lower the first value (log_mu) to bring down average
+# per-cell total counts / genes detected without touching dispersion/noise.
+NOISY_BASE_GENE_LOGNORMAL = (0.7, 0.7)
 
 
 def parse_args():
@@ -108,6 +113,16 @@ def parse_args():
         help="Multiplier applied to non-marker 'noise gene' expression.",
     )
     parser.add_argument(
+        "--base-gene-lognormal",
+        type=float,
+        nargs=2,
+        metavar=("LOG_MU", "LOG_SIGMA"),
+        default=NOISY_BASE_GENE_LOGNORMAL,
+        help="Lognormal (log_mu, log_sigma) for per-gene baseline expression "
+        "(base_gene = exp(Normal(log_mu, log_sigma))); lower log_mu = lower "
+        "average per-cell total counts / genes detected.",
+    )
+    parser.add_argument(
         "--batch-sigma",
         type=float,
         default=MANUSCRIPT_BATCH_SIGMA,
@@ -123,6 +138,7 @@ THETA = args.theta
 THETA_JITTER = args.theta_jitter
 NOISE_SCALE = args.noise_scale
 BATCH_SIGMA = args.batch_sigma
+BASE_GENE_LOGNORMAL = tuple(args.base_gene_lognormal)
 OUTPUT_STEM = f"simulation_{OUTPUT_MODALITY}_{SLICE_AXIS.lower()}"
 H5AD_PATH = DATA_DIR / f"{OUTPUT_STEM}.h5ad"
 SUMMARY_PATH = DATA_DIR / f"{OUTPUT_STEM}_summary.json"
@@ -133,10 +149,11 @@ PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 # ---------------------------------------------------------------------------
 # Generate data
 # ---------------------------------------------------------------------------
-def generate_modality(output_modality, slice_axis, theta, theta_jitter, noise_scale, batch_sigma):
-    # sim_app.generate_data() doesn't forward theta/theta_jitter/noise_scale, so
-    # call the lower-level simulator directly and pull out the requested
-    # modality/axis ourselves (mirrors what generate_data() does internally).
+def generate_modality(output_modality, slice_axis, theta, theta_jitter, noise_scale, batch_sigma, base_gene_lognormal):
+    # sim_app.generate_data() doesn't forward theta/theta_jitter/noise_scale/
+    # base_gene_lognormal, so call the lower-level simulator directly and pull
+    # out the requested modality/axis ourselves (mirrors what generate_data()
+    # does internally).
     simulation = sim_app.simulate_3d_molecule_sphere_multires(
         sphere_R_um=6000.0,
         capture_window_um=(6500.0, 6500.0),
@@ -177,6 +194,7 @@ def generate_modality(output_modality, slice_axis, theta, theta_jitter, noise_sc
         theta=theta,
         theta_jitter=theta_jitter,
         noise_scale=noise_scale,
+        base_gene_lognormal=base_gene_lognormal,
         batch_sigma=batch_sigma,
         max_deg=270.0,
         max_shift=3000.0,
@@ -192,15 +210,19 @@ def generate_modality(output_modality, slice_axis, theta, theta_jitter, noise_sc
         "theta_jitter": theta_jitter,
         "noise_scale": noise_scale,
         "batch_sigma": batch_sigma,
+        "base_gene_lognormal": base_gene_lognormal,
     }
     return adata
 
 
 print(
     f"\nGenerating {OUTPUT_MODALITY} data for slice axis {SLICE_AXIS} with "
-    f"theta={THETA}, theta_jitter={THETA_JITTER}, noise_scale={NOISE_SCALE}, batch_sigma={BATCH_SIGMA}"
+    f"theta={THETA}, theta_jitter={THETA_JITTER}, noise_scale={NOISE_SCALE}, "
+    f"batch_sigma={BATCH_SIGMA}, base_gene_lognormal={BASE_GENE_LOGNORMAL}"
 )
-adata = generate_modality(OUTPUT_MODALITY, SLICE_AXIS, THETA, THETA_JITTER, NOISE_SCALE, BATCH_SIGMA)
+adata = generate_modality(
+    OUTPUT_MODALITY, SLICE_AXIS, THETA, THETA_JITTER, NOISE_SCALE, BATCH_SIGMA, BASE_GENE_LOGNORMAL
+)
 print("\nGenerated AnnData:")
 print(adata)
 

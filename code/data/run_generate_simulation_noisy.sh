@@ -51,15 +51,10 @@ if [[ "${1:-}" == "--check-env" ]]; then
 fi
 
 MODALITIES=(spot bin cell)
-
-if [[ "$#" -gt 0 ]]; then
-    MODALITY="$1"
-else
-    MODALITY="${MODALITIES[${SLURM_ARRAY_TASK_ID:-0}]}"
-fi
+MODALITY="${MODALITIES[${SLURM_ARRAY_TASK_ID:-0}]}"
 
 echo "Modality: ${MODALITY}"
-echo "Command: ${PYTHON_BIN} generate_simulation_noisy.py --modality ${MODALITY}"
-"${PYTHON_BIN}" generate_simulation_noisy.py --modality "${MODALITY}"
+echo "Command: ${PYTHON_BIN} generate_simulation_noisy.py --modality ${MODALITY} $*"
+"${PYTHON_BIN}" generate_simulation_noisy.py --modality "${MODALITY}" "$@"
 
 echo "Job finished: $(date)"
