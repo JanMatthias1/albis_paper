@@ -1,0 +1,99 @@
+Job started: Thu Aug  6 12:50:19 AM EDT 2026
+Host: compute-174.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Modality: spot
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python generate_simulation_batch_effect.py --modality spot
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+sim_app module: /dcs04/hicks/data/Jan/sim_project/sim_app/sim_app/__init__.py
+sim_app version: 0.1.0
+
+Generating spot data for slice axis Z with batch_sigma=2.0
+
+Generated AnnData:
+AnnData object with n_obs × n_vars = 43560 × 556
+    obs: 'slice_axis', 'slice_id', 'spot_spacing_um', 'spot_radius_um', 'window_center0', 'window_center1', 'window_size0', 'window_size1', 'plane_dim0', 'plane_dim1', 'cell_type_true', 'domain_true'
+    var: 'gene_class', 'is_noise', 'is_shared_marker'
+    uns: 'batch_effect_factors', 'rigid_perturb_inplane', 'sim_params', 'output'
+    obsm: 'spatial', 'cell_type_frac_true', 'domain_frac_true', 'spatial_3d', 'spatial_unaligned', 'spatial_3d_unaligned'
+    layers: 'counts_pre_batch'
+
+Summary:
+{
+  "n_obs": 43560,
+  "n_vars": 556,
+  "total_counts": 1158256180,
+  "nonzero_counts": 14387406,
+  "platform": "spot",
+  "slice_axis": "Z",
+  "n_slices": 10,
+  "slice_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "obs_columns": [
+    "slice_axis",
+    "slice_id",
+    "spot_spacing_um",
+    "spot_radius_um",
+    "window_center0",
+    "window_center1",
+    "window_size0",
+    "window_size1",
+    "plane_dim0",
+    "plane_dim1",
+    "cell_type_true",
+    "domain_true"
+  ],
+  "var_columns": [
+    "gene_class",
+    "is_noise",
+    "is_shared_marker"
+  ],
+  "layers": [
+    "counts_pre_batch"
+  ],
+  "obsm_keys": [
+    "spatial",
+    "cell_type_frac_true",
+    "domain_frac_true",
+    "spatial_3d",
+    "spatial_unaligned",
+    "spatial_3d_unaligned"
+  ],
+  "uns_keys": [
+    "batch_effect_factors",
+    "rigid_perturb_inplane",
+    "sim_params",
+    "output"
+  ],
+  "truth_annotations": [
+    "layers['counts_pre_batch']",
+    "obs['cell_type_true']",
+    "obs['domain_true']",
+    "obsm['cell_type_frac_true']",
+    "obsm['domain_frac_true']"
+  ]
+}
+
+Saved summary -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect/simulation_spot_z_summary.json
+
+Generating diagnostic plots...
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect/plots/simulation_spot_z/01_aligned_domain_true.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect/plots/simulation_spot_z/02_aligned_cell_type_true.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect/plots/simulation_spot_z/03_unaligned_slice_id.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect/plots/simulation_spot_z/04_qc_count_distributions.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect/plots/simulation_spot_z/05_spots_per_slice.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect/plots/simulation_spot_z/06_domain_composition_per_slice.png
+
+All diagnostic plots saved under /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect/plots/simulation_spot_z
+
+Saved dataset -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect/simulation_spot_z.h5ad
+Job finished: Thu Aug  6 12:54:11 AM EDT 2026
