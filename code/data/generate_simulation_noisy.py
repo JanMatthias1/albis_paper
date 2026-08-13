@@ -210,7 +210,7 @@ def generate_modality(output_modality, slice_axis, theta, theta_jitter, noise_sc
         "theta_jitter": theta_jitter,
         "noise_scale": noise_scale,
         "batch_sigma": batch_sigma,
-        "base_gene_lognormal": base_gene_lognormal,
+        "base_gene_lognormal": list(base_gene_lognormal),
     }
     return adata
 

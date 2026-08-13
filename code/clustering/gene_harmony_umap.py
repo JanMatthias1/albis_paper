@@ -2,7 +2,7 @@
 """
 Run Harmony directly on the normalized all-gene feature matrix and compare UMAPs.
 
-This intentionally skips the PCA projection used by clustering.py. The feature
+This intentionally skips the PCA projection used by pca_harmony.py. The feature
 matrix passed to Harmony is the scaled log-normalized expression matrix with one
 dimension per gene.
 

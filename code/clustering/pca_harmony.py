@@ -11,7 +11,7 @@ Expected environment:
     python -m pip install -r sim_paper/code/clustering/requirements.txt
 
 Example:
-    python sim_paper/code/clustering/clustering.py
+    python sim_paper/code/clustering/pca_harmony.py
 """
 
 from __future__ import annotations
@@ -50,6 +50,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--n-pcs", type=int, default=30)
     parser.add_argument("--target-sum", type=float, default=1e4)
     parser.add_argument("--random-state", type=int, default=0)
+    parser.add_argument("--n-neighbors", type=int, default=15)
+    parser.add_argument("--point-size", type=float, default=4.0)
+    parser.add_argument("--alpha", type=float, default=0.85)
     parser.add_argument(
         "--plot-colors",
         nargs="+",
@@ -171,6 +174,94 @@ def save_pca_plots(adata, plot_dir: Path, color_keys: list[str]) -> None:
         )
 
 
+def compute_umap(adata, rep_key: str, umap_key: str, n_neighbors: int, random_state: int) -> None:
+    sc.pp.neighbors(
+        adata,
+        n_neighbors=n_neighbors,
+        use_rep=rep_key,
+        random_state=random_state,
+    )
+    sc.tl.umap(adata, random_state=random_state)
+    adata.obsm[umap_key] = np.asarray(adata.obsm["X_umap"]).copy()
+
+
+def plot_umap_before_after(
+    adata,
+    color_key: str,
+    output_path: Path,
+    point_size: float,
+    alpha: float,
+) -> None:
+    colors, categories = color_values(adata.obs, color_key)
+    pre = np.asarray(adata.obsm["X_umap_pca_pre_harmony"])
+    post = np.asarray(adata.obsm["X_umap_pca_post_harmony"])
+
+    fig, axes = plt.subplots(1, 2, figsize=(11, 5), sharex=False, sharey=False)
+    scatters = []
+    for ax, coords, title in [
+        (axes[0], pre, "Before Harmony"),
+        (axes[1], post, "After Harmony"),
+    ]:
+        scatter = ax.scatter(
+            coords[:, 0],
+            coords[:, 1],
+            c=colors,
+            s=point_size,
+            linewidths=0,
+            cmap="tab20" if categories is not None else "viridis",
+            alpha=alpha,
+        )
+        scatters.append(scatter)
+        ax.set_xlabel("UMAP 1")
+        ax.set_ylabel("UMAP 2")
+        ax.set_title(title)
+
+    if categories is None:
+        fig.colorbar(scatters[-1], ax=axes, fraction=0.046, pad=0.04, label=color_key)
+    else:
+        handles = [
+            plt.Line2D(
+                [0],
+                [0],
+                marker="o",
+                color="w",
+                markerfacecolor=scatters[-1].cmap(scatters[-1].norm(i)),
+                markersize=6,
+                label=label,
+            )
+            for i, label in enumerate(categories)
+        ]
+        axes[-1].legend(
+            handles=handles,
+            title=color_key,
+            bbox_to_anchor=(1.02, 1),
+            loc="upper left",
+            frameon=False,
+        )
+
+    fig.suptitle(f"PCA UMAP before vs after Harmony by {color_key}")
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    plt.close(fig)
+
+
+def save_umap_plots(adata, plot_dir: Path, color_keys: list[str], point_size: float, alpha: float) -> None:
+    plot_dir.mkdir(parents=True, exist_ok=True)
+    valid_colors = [key for key in color_keys if key in adata.obs]
+    missing = sorted(set(color_keys) - set(valid_colors))
+    if missing:
+        print(f"[plot] Skipping missing obs columns: {', '.join(missing)}")
+
+    for color_key in valid_colors:
+        plot_umap_before_after(
+            adata,
+            color_key,
+            plot_dir / f"umap_pca_harmony_before_after_by_{color_key}.png",
+            point_size,
+            alpha,
+        )
+
+
 def main() -> None:
     args = parse_args()
     if args.input == DEFAULT_INPUT:
@@ -210,6 +301,27 @@ def main() -> None:
     print(f"[plot] Saving PCA before/after plots under {plot_dir}")
     save_pca_plots(adata, plot_dir, args.plot_colors)
 
+    print("[umap] Computing UMAP before Harmony from PCA")
+    compute_umap(
+        adata,
+        "X_pca_pre_harmony",
+        "X_umap_pca_pre_harmony",
+        args.n_neighbors,
+        args.random_state,
+    )
+
+    print("[umap] Computing UMAP after Harmony from PCA")
+    compute_umap(
+        adata,
+        "X_pca_post_harmony",
+        "X_umap_pca_post_harmony",
+        args.n_neighbors,
+        args.random_state,
+    )
+
+    print(f"[plot] Saving before/after UMAP plots under {plot_dir}")
+    save_umap_plots(adata, plot_dir, args.plot_colors, args.point_size, args.alpha)
+
     print(f"[pc_pairs] Plotting PC pairs by {args.batch_key} under {plot_dir / 'pc_pairs'}")
     plot_pc_pairs(
         adata,
@@ -225,6 +337,9 @@ def main() -> None:
         "used_all_genes": True,
         "pre_harmony_obsm": "X_pca_pre_harmony",
         "post_harmony_obsm": "X_pca_post_harmony",
+        "n_neighbors": int(args.n_neighbors),
+        "pre_harmony_umap_obsm": "X_umap_pca_pre_harmony",
+        "post_harmony_umap_obsm": "X_umap_pca_post_harmony",
         "input": str(args.input),
     }
     adata.write_h5ad(args.output)

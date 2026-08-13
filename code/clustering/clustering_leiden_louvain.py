@@ -2,20 +2,20 @@
 """
 Run Leiden or Louvain clustering and UMAP from a Harmony-corrected representation.
 
-This is separate from clustering.py/gene_harmony_umap.py so clustering
+This is separate from pca_harmony.py/gene_harmony_umap.py so clustering
 algorithm/resolution can be iterated without recomputing normalization, PCA,
 or Harmony. Two independent Harmony pipelines exist upstream, and either can
 be clustered on via --pipeline:
-  - pca_harmony:  Harmony corrects the PCA embedding (clustering.py output).
+  - pca_harmony:  Harmony corrects the PCA embedding (pca_harmony.py output).
                   Uses the first --n-pcs dimensions (variance-ordered).
   - gene_harmony: Harmony corrects the full gene matrix directly
                   (gene_harmony_umap.py output). Uses all dimensions as-is,
                   since raw genes have no natural "first N" ordering.
 
 Example:
-    python sim_paper/code/clustering/leiden_umap.py --resolution 0.5
-    python sim_paper/code/clustering/leiden_umap.py --algorithm louvain --resolution 1.0
-    python sim_paper/code/clustering/leiden_umap.py --pipeline gene_harmony --resolution 0.5
+    python sim_paper/code/clustering/clustering_leiden_louvain.py --resolution 0.5
+    python sim_paper/code/clustering/clustering_leiden_louvain.py --algorithm louvain --resolution 1.0
+    python sim_paper/code/clustering/clustering_leiden_louvain.py --pipeline gene_harmony --resolution 0.5
 """
 
 from __future__ import annotations
@@ -144,7 +144,7 @@ def main() -> None:
     if not args.input.is_file():
         raise SystemExit(
             f"Input file not found: {args.input}\n"
-            f"Run sim_paper/code/clustering/{'clustering.py' if args.pipeline == 'pca_harmony' else 'gene_harmony_umap.py'} first."
+            f"Run sim_paper/code/clustering/{'pca_harmony.py' if args.pipeline == 'pca_harmony' else 'gene_harmony_umap.py'} first."
         )
 
     tag = resolution_tag(args.resolution)

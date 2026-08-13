@@ -1,0 +1,6 @@
+Job started: Wed Aug 12 07:53:00 PM EDT 2026
+Host: compute-127.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Modality: cell
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/leiden_umap.py --modality cell --algorithm louvain --input /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_moderate_batch/cell/pca_harmony/simulation_cell_z_pca_harmony.h5ad --output-dir /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_moderate_batch/cell/louvain_res0p2 --resolution 0.2
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python: can't open file '/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/leiden_umap.py': [Errno 2] No such file or directory

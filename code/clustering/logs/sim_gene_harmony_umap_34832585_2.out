@@ -29,3 +29,19 @@ Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/pyth
 2026-08-12 09:11:31,791 - harmonypy - INFO - Iteration 3 of 10
 2026-08-12 09:17:03,542 - harmonypy - INFO - Iteration 4 of 10
 2026-08-12 09:22:43,573 - harmonypy - INFO - Converged after 4 iterations
+/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/gene_harmony_umap.py:180: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  fig.tight_layout()
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect_moderate/simulation_cell_z.h5ad
+[load] AnnData shape: 600000 observations x 556 genes
+[features] Normalizing, log-transforming, and scaling all genes
+[harmony] Correcting X_gene_pre_harmony by obs['slice_id']
+[pca] Computing diagnostic (non-Harmony) PCA with 30 components
+[umap] Computing UMAP before Harmony from all-gene features
+[umap] Computing UMAP after Harmony from all-gene features
+[plot] Saving before/after UMAP plots under /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_moderate_batch/cell/gene_harmony_umap/plots
+[pc_pairs] Plotting diagnostic PC pairs by slice_id under /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_moderate_batch/cell/gene_harmony_umap/plots/pc_pairs
+[pc_pairs] Plotting 30 PCs (15 adjacent pairs) using 20000 sampled observations
+[pc_pairs] Saved -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_moderate_batch/cell/gene_harmony_umap/plots/pc_pairs/by_slice_id/pc_pairs_pre_harmony_by_slice_id.png
+[pc_pairs] Saved -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_moderate_batch/cell/gene_harmony_umap/plots/pc_pairs/by_slice_id/pc_pairs_post_harmony_by_slice_id.png
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_moderate_batch/cell/gene_harmony_umap/simulation_cell_z_gene_harmony_umap.h5ad
+Job finished: Wed Aug 12 11:02:42 AM EDT 2026

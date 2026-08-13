@@ -5,10 +5,10 @@ Run these from the project root after activating the sim_app tutorial env:
 ```bash
 conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial
 python -m pip install -r sim_paper/code/clustering/requirements.txt
-python sim_paper/code/clustering/clustering.py --modality spot
+python sim_paper/code/clustering/pca_harmony.py --modality spot
 python sim_paper/code/clustering/gene_harmony_umap.py --modality spot
-python sim_paper/code/clustering/leiden_umap.py --modality spot --resolution 0.5
-python sim_paper/code/clustering/leiden_umap.py --modality spot --algorithm louvain --resolution 0.5
+python sim_paper/code/clustering/clustering_leiden_louvain.py --modality spot --resolution 0.5
+python sim_paper/code/clustering/clustering_leiden_louvain.py --modality spot --algorithm louvain --resolution 0.5
 ```
 
 Or submit the same steps through SLURM. Each wrapper is a `0-2` array over
@@ -17,21 +17,21 @@ Or submit the same steps through SLURM. Each wrapper is a `0-2` array over
 the conda-activation boilerplate.
 
 ```bash
-sbatch sim_paper/code/clustering/run_clustering.sh
+sbatch sim_paper/code/clustering/run_pca_harmony.sh
 sbatch sim_paper/code/clustering/run_gene_harmony_umap.sh
-sbatch sim_paper/code/clustering/run_leiden_umap.sh
+sbatch sim_paper/code/clustering/run_clustering_leiden_louvain.sh
 sbatch sim_paper/code/clustering/run_louvain_umap.sh
 ```
 
-To run `run_clustering.sh` only after two other jobs finish (e.g. to refresh
+To run `run_pca_harmony.sh` only after two other jobs finish (e.g. to refresh
 `pca_harmony` without racing a job that's reading it), use SLURM's own
 dependency scheduling instead of adding wait logic to the script:
 
 ```bash
-sbatch --dependency=afterany:<jobid1>:<jobid2> sim_paper/code/clustering/run_clustering.sh
+sbatch --dependency=afterany:<jobid1>:<jobid2> sim_paper/code/clustering/run_pca_harmony.sh
 ```
 
-`clustering.py` normalizes/log-transforms the generated `spot`, `bin`, or
+`pca_harmony.py` normalizes/log-transforms the generated `spot`, `bin`, or
 `cell` dataset, runs PCA over all genes, runs Harmony on `obs["slice_id"]`,
 writes PCA plots before and after Harmony, and plots PC pairs (adjacent pairs
 such as PC1 vs PC2, PC3 vs PC4, ...) from the same pre/post-Harmony PCA basis.
@@ -48,7 +48,7 @@ Both scripts' PC-pairs plots default to coloring by the Harmony `--batch-key`
 (`slice_id`); the shared plotting code lives in `pc_pairs.py` (not a
 standalone CLI — it's imported by both scripts).
 
-`leiden_umap.py` starts from the modality-specific Harmony-corrected PCA file,
+`clustering_leiden_louvain.py` starts from the modality-specific Harmony-corrected PCA file,
 uses the first 30 Harmony PCA dimensions, runs Leiden or Louvain clustering
 (`--algorithm leiden|louvain`, default `leiden`), computes UMAP, and plots
 UMAP colored by `domain_true`, `cell_type_true`, and `cluster_label`. The
@@ -98,5 +98,5 @@ data/clustering/
     gene_harmony_umap/
 ```
 
-`leiden_umap.py` reads its input from `<modality>/pca_harmony/` by default, so
-run `clustering.py` for a modality before the other steps.
+`clustering_leiden_louvain.py` reads its input from `<modality>/pca_harmony/` by default, so
+run `pca_harmony.py` for a modality before the other steps.

@@ -24,14 +24,14 @@ MODALITY="${MODALITIES[${SLURM_ARRAY_TASK_ID:-0}]}"
 
 if [[ "$#" -gt 0 ]]; then
     echo "Modality: ${MODALITY}"
-    echo "Command: ${PYTHON_BIN} sim_paper/code/clustering/leiden_umap.py --modality ${MODALITY} --algorithm louvain $*"
-    "${PYTHON_BIN}" sim_paper/code/clustering/leiden_umap.py --modality "${MODALITY}" --algorithm louvain "$@"
+    echo "Command: ${PYTHON_BIN} sim_paper/code/clustering/clustering_leiden_louvain.py --modality ${MODALITY} --algorithm louvain $*"
+    "${PYTHON_BIN}" sim_paper/code/clustering/clustering_leiden_louvain.py --modality "${MODALITY}" --algorithm louvain "$@"
 else
     RESOLUTIONS=(0.5 0.1 0.2)
     echo "Modality: ${MODALITY}"
     for resolution in "${RESOLUTIONS[@]}"; do
-        echo "Command: ${PYTHON_BIN} sim_paper/code/clustering/leiden_umap.py --modality ${MODALITY} --algorithm louvain --resolution ${resolution}"
-        "${PYTHON_BIN}" sim_paper/code/clustering/leiden_umap.py --modality "${MODALITY}" --algorithm louvain --resolution "${resolution}"
+        echo "Command: ${PYTHON_BIN} sim_paper/code/clustering/clustering_leiden_louvain.py --modality ${MODALITY} --algorithm louvain --resolution ${resolution}"
+        "${PYTHON_BIN}" sim_paper/code/clustering/clustering_leiden_louvain.py --modality "${MODALITY}" --algorithm louvain --resolution "${resolution}"
     done
 fi
 

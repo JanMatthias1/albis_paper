@@ -23,7 +23,7 @@ MODALITIES=(spot bin cell)
 MODALITY="${MODALITIES[${SLURM_ARRAY_TASK_ID:-0}]}"
 
 echo "Modality: ${MODALITY}"
-echo "Command: ${PYTHON_BIN} sim_paper/code/clustering/clustering.py --modality ${MODALITY} $*"
-"${PYTHON_BIN}" sim_paper/code/clustering/clustering.py --modality "${MODALITY}" "$@"
+echo "Command: ${PYTHON_BIN} sim_paper/code/clustering/pca_harmony.py --modality ${MODALITY} $*"
+"${PYTHON_BIN}" sim_paper/code/clustering/pca_harmony.py --modality "${MODALITY}" "$@"
 
 echo "Job finished: $(date)"
