@@ -1,251 +1,201 @@
 #!/usr/bin/env python
-# coding: utf-8
+"""
+QC diagnostics for a real Visium HD sample using SpotSweeper's local-outlier
+detection, matched to the sim_app bin-level data for comparison.
 
-# In[1]:
+Loads a raw Visium HD `binned_outputs/square_XXXum/` bundle
+(filtered_feature_bc_matrix.h5 + spatial/tissue_positions_list.csv), computes
+total_counts / n_genes_by_counts / pct_counts_mt, and flags spatially-local
+outliers on each metric via spotsweeper.local_outliers -- without
+normalizing, log-transforming, or dropping any bins.
 
+Raw downloads must already be extracted via extract_breast_visium_hd.py.
 
-# Preprocessing script for Visium human breast data
-# enviroment: preprocessing_JM
-# Adapted from Visium_HD_human_colon_8_um.ipynb (multi-sample-alignment-benchmark/code/01_preprocessing/)
+Expected environment:
+    conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial
+    pip install spotsweeper   # one-time; not yet in requirements
 
+Example:
+    python sim_paper/code/real_data_qc/visium_hd_human_breast_8um.py --sample breast_cancer
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
 from pathlib import Path
-import scanpy as sc
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
 import pandas as pd
-from statsmodels import robust
+import scanpy as sc
 import spotsweeper.local_outliers as lo
 import spotsweeper.plot_QC as plot_QC
-import spotsweeper.plot_QCpdf as pdf
-import gzip
-import os
-import shutil
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
 
-# In[2]:
-
-
-# Raw downloads are extracted into per-sample folders by extract_breast_visium_hd.py
-# (sim_paper/code/real_data_qc/extract_breast_visium_hd.py) before this script runs:
-#   conda activate /dcs04/hicks/data/multi-sample-alignment-benchmark/envs/preprocessing_JM
-#   python extract_breast_visium_hd.py
-
-
-# In[3]:
-
-
-def unzip_into_adata(data_path, library_id=None):
-    """
-    Load Visium / Visium HD data into AnnData.
-    Expected folder structure:
-    sample/
-    ├── filtered_feature_bc_matrix.h5
-    └── spatial/
-        ├── scalefactors_json.json
-        ├── tissue_hires_image.png
-        ├── tissue_lowres_image.png
-        ├── tissue_positions_list.csv (or tissue_positions.parquet)
-    """
-    data_path = Path(data_path)
-    spatial_path = data_path / "spatial"
-
-    # --- 1. Unzip any .gz files in the spatial folder ---
-    for gz_file in spatial_path.glob("*.gz"):
-        out_file = gz_file.with_suffix('')
-        print(f"Unzipping {gz_file.name} -> {out_file.name}")
-        with gzip.open(gz_file, 'rb') as f_in, open(out_file, 'wb') as f_out:
-            shutil.copyfileobj(f_in, f_out)
-        gz_file.unlink()
-
-    # --- 2. Convert tissue_positions.parquet to CSV if needed ---
-    parquet_file = spatial_path / "tissue_positions.parquet"
-    csv_file = spatial_path / "tissue_positions_list.csv"
-    if parquet_file.exists() and not csv_file.exists():
-        print(f"Converting {parquet_file.name} → {csv_file.name}")
-        df = pd.read_parquet(parquet_file)
-        expected_cols = [
-            "barcode",
-            "in_tissue",
-            "array_row",
-            "array_col",
-            "pxl_row_in_fullres",
-            "pxl_col_in_fullres"
-        ]
-        # enforce column order
-        df = df[expected_cols]
-        df.to_csv(csv_file, index=False, header=False)
-
-    # --- 3. Load Visium HD data ---
-    print(f"Reading Visium HD data from: {data_path}")
-    adata = sc.read_visium(
-        path=str(data_path),
-        count_file="filtered_feature_bc_matrix.h5",
-        library_id=library_id,
-        load_images=True
-    )
-
-    return adata
-
-def mad_based_cutoffs(x, direction="both", log=False, nmads=3):
-    """
-    From Vani's script
-
-    Returns lower and/or upper cutoffs based on median ± nmads * MAD.
-    direction: "both", "lower", or "higher"
-    """
-    x = np.array(x)
-    if log:
-        x = np.log1p(x)
-
-    med = np.median(x)
-    mad = robust.mad(x, c=1)  # Median Absolute Deviation
-    lower = med - nmads * mad
-    upper = med + nmads * mad
-
-    if log:
-        lower, upper = np.expm1(lower), np.expm1(upper)
-
-    if direction == "lower":
-        return lower
-    elif direction == "higher":
-        return upper
-    else:
-        return lower, upper
-
-# Helper: remove genes starting with ERCC / MT-
-def prefilter_specialgenes(adata, Gene1Pattern="ERCC", Gene2Pattern="MT-"):
-    mask1 = ~adata.var_names.str.startswith(Gene1Pattern)
-    mask2 = ~adata.var_names.str.startswith(Gene2Pattern)
-    keep = mask1 & mask2
-    adata._inplace_subset_var(keep)
-    return adata
-
-
-# In[4]:
-
-
-# Script based on Vani's preprocessing steps, CORRECTED
-
-# Define your sample names and file paths
-# CHANGE THE PATH AND FILE NAMES ACCORDINGLY, THE FOLLOWING STEPS WILL PLOT THE QC METRICS,
-# 8um bins to match sim_app's bin_size_um=8.0 (see sim_paper/code/data/generate_simulation.py)
-
-sample_files = {
-    "Visium_HD_11mm_Human_Breast_Cancer": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/real_data/breast_cancer/Visium_HD_11mm_Human_Breast_Cancer/binned_outputs/square_008um",
+SAMPLE_RAW_DIRS = {
+    "breast_cancer": "breast_cancer/Visium_HD_11mm_Human_Breast_Cancer",
 }
 
-# Initialize a dictionary to store the AnnData objects and QC thresholds
-adata_dict = {}
+POSITION_COLS = ["barcode", "in_tissue", "array_row", "array_col", "pxl_row_in_fullres", "pxl_col_in_fullres"]
 
-for sample_name, data_path in sample_files.items():
+# metric -> (direction, log, renamed outlier column)
+METRICS = {
+    "total_counts": ("lower", True, "total_counts_outliers"),
+    "n_genes_by_counts": ("lower", True, "n_genes_outliers"),
+    "pct_counts_mt": ("higher", False, "mt_outliers"),
+}
 
-    print(f"Loading {sample_name}")
-    # Load the data from the above sample_files
-    adata = unzip_into_adata(data_path, library_id=None)
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="SpotSweeper local-outlier QC for a raw Visium HD sample.")
+    parser.add_argument("--sample", choices=sorted(SAMPLE_RAW_DIRS), required=True)
+    parser.add_argument("--bin-size-um", type=int, default=8, help="Matches sim_app's bin_size_um.")
+    parser.add_argument("--input-dir", type=Path, default=None, help="binned_outputs/square_XXXum dir (overrides --sample/--bin-size-um default).")
+    parser.add_argument("--output-dir", type=Path, default=None)
+    parser.add_argument("--n-neighbors", type=int, default=36)
+    parser.add_argument("--cutoff", type=float, default=3.0, help="Robust z-score cutoff for local_outliers.")
+    parser.add_argument("--workers", type=int, default=4)
+    args = parser.parse_args()
+
+    if args.input_dir is None:
+        args.input_dir = (
+            SIM_PAPER_DIR / "data" / "real_data" / SAMPLE_RAW_DIRS[args.sample]
+            / "binned_outputs" / f"square_{args.bin_size_um:03d}um"
+        )
+    if args.output_dir is None:
+        args.output_dir = SIM_PAPER_DIR / "data" / "real_data_qc" / f"{args.sample}_visium_hd"
+    return args
+
+
+def load_visium_hd_sample(input_dir: Path) -> sc.AnnData:
+    adata = sc.read_10x_h5(input_dir / "filtered_feature_bc_matrix.h5")
     adata.var_names_make_unique()
-    print("Raw shape:", adata.shape)
 
-    # Retain only in_tissue spots
-    if "in_tissue" not in adata.obs:
-        raise ValueError(f"{sample_name}: 'in_tissue' missing in .obs")
-
-    before = adata.n_obs
+    positions = pd.read_csv(
+        input_dir / "spatial" / "tissue_positions_list.csv", header=None, names=POSITION_COLS, index_col="barcode"
+    )
+    adata.obs = positions.loc[adata.obs_names]
     adata = adata[adata.obs["in_tissue"] == 1].copy()
-    after = adata.n_obs
-    print(f"Spots retained after in_tissue filter: {after}/{before}")
+    adata.obsm["spatial"] = adata.obs[["pxl_col_in_fullres", "pxl_row_in_fullres"]].to_numpy()
 
-    # Make annotation categorical
-    #adata.obs["annotation"] = adata.obs["annotation"].astype("category")
-    #print("Annotation value counts:")
-    #print(adata.obs["annotation"].value_counts())
-
-    # 3. Compute QC metrics and mitochondrial metrics
     adata.var["mt"] = adata.var_names.str.startswith("MT-")
-    sc.pp.calculate_qc_metrics(adata, qc_vars=["mt"], inplace=True)
-    # Now have: total_counts, n_genes_by_counts, pct_counts_mt in adata.obs
+    sc.pp.calculate_qc_metrics(adata, qc_vars=["mt"], percent_top=None, inplace=True)
+    return adata
 
-    # 4. Spotsweeper: detect local outliers & retain QC-passing spots
-    adata.obs["region"] = "sample1"
-    lo.local_outliers(adata, metric="total_counts", sample_key="region", direction="lower", log=True)
-    lo.local_outliers(adata, metric="n_genes_by_counts", sample_key="region", direction="lower", log=True)
-    adata.obs.rename(columns={"n_genes_by_counts_outliers": "n_genes_outliers"}, inplace=True)
-    lo.local_outliers(adata, metric="pct_counts_mt", sample_key="region", direction="higher", log=False)
-    adata.obs.rename(columns={"pct_counts_mt_outliers": "mt_outliers"}, inplace=True)
 
-    # Plot Spotsweeper outliers
-    #fig_out = plot_dir / f"{sample_name}_spotsweeper_outliers.png"
-    sc.pl.spatial(
-        adata,
-        img_key="hires",
-        color=["total_counts_outliers", "n_genes_outliers", "mt_outliers"],
-        size=1.5,
-        title=f"{sample_name}: Spotsweeper outliers",
-        show=False,
+def apply_qc_filters(adata, n_neighbors=36, cutoff=3.0, workers=4):
+    adata.obs["region"] = "sample1"  # single-sample dataset; spotsweeper groups outlier detection by this key
+
+    for metric, (direction, log, renamed) in METRICS.items():
+        lo.local_outliers(
+            adata, metric=metric, sample_key="region", direction=direction, log=log,
+            n_neighbors=n_neighbors, cutoff=cutoff, workers=workers,
+        )
+        adata.obs.rename(columns={f"{metric}_outliers": renamed}, inplace=True)
+
+    adata.obs["low_qc"] = (
+        adata.obs["total_counts_outliers"] |
+        adata.obs["n_genes_outliers"] |
+        adata.obs["mt_outliers"]
     )
-    #plt.savefig(fig_out, dpi=300, bbox_inches="tight")
-    plt.show()
+    return adata
+
+
+def plot_qc_metrics_spatial(adata, sample_name, output_dir: Path) -> None:
+    """One SpotSweeper spatial diagnostic per metric (value + local-outlier ring), ring_overlay=False
+    per spotsweeper's own guidance for Visium HD's bin density."""
+    for metric, (_direction, _log, renamed) in METRICS.items():
+        fig = plot_QC.plot_qc_metrics(
+            adata, sample_id="region", sample="sample1", metric=metric, outliers=renamed,
+            coord_key="spatial", ring_overlay=False, legend=True,
+            title=f"{sample_name}: {metric} (SpotSweeper local outliers)",
+        )
+        fig.savefig(output_dir / f"qc_{metric}.png", dpi=180)
+        fig.close()
+
+
+def plot_qc_exclusions(adata, sample_name, output_path: Path) -> None:
+    """Combined exclusion map: which criterion (if any) flagged each bin. First failure wins."""
+    qc_labels = []
+    for i in range(adata.n_obs):
+        obs_i = adata.obs.iloc[i]
+        if obs_i["total_counts_outliers"]:
+            qc_labels.append("low_total_count")
+        elif obs_i["n_genes_outliers"]:
+            qc_labels.append("low_detected_features")
+        elif obs_i["mt_outliers"]:
+            qc_labels.append("high_mt")
+        else:
+            qc_labels.append("kept")
+
+    color_map = {
+        "kept": "lightgrey",
+        "low_total_count": "green",
+        "low_detected_features": "orange",
+        "high_mt": "red",
+    }
+    colors = [color_map[label] for label in qc_labels]
+
+    plt.figure(figsize=(7, 7))
+    plt.scatter(adata.obs["array_col"], adata.obs["array_row"], c=colors, s=1)
+    plt.gca().invert_yaxis()
+    plt.title(f"QC-excluded bins by metric: {sample_name}")
+
+    legend_elements = [mpatches.Patch(color=color, label=label) for label, color in color_map.items()]
+    plt.legend(handles=legend_elements, markerscale=6, loc="upper right")
+    plt.savefig(output_path, dpi=180)
     plt.close()
 
-    # Keep only spots that pass all three outlier filters
-    before = adata.n_obs
-    adata = adata[
-        (~adata.obs["total_counts_outliers"]) &
-        (~adata.obs["n_genes_outliers"]) &
-        (~adata.obs["mt_outliers"]),
-        :
-    ].copy()
-    after = adata.n_obs
-    print(f"Remaining spots after Spotsweeper QC: {after}/{before}")
 
-    # 5. Remove lowly expressed genes + ERCC/MT genes
-    sc.pp.filter_genes(adata, min_cells=3)
-    print("Shape after filter_genes(min_cells=3):", adata.shape)
+def main() -> None:
+    args = parse_args()
+    if not args.input_dir.is_dir():
+        raise SystemExit(f"Input dir not found: {args.input_dir}")
 
-    prefilter_specialgenes(adata, Gene1Pattern="ERCC", Gene2Pattern="MT-")
-    print("Shape after removing ERCC/MT genes:", adata.shape)
-    """
-    # 6. Normalize, log1p, HVG
-    sc.pp.normalize_total(adata)
-    sc.pp.log1p(adata)
-    sc.pp.highly_variable_genes(adata, flavor="seurat", n_top_genes=2000)
-    print("Number of HVGs:", adata.var["highly_variable"].sum())
-    hvg = adata.var["highly_variable"]
-    print("Any ERCC in HVGs?", any(adata.var_names[hvg].str.startswith("ERCC")))
-    print("Any MT- in HVGs?", any(adata.var_names[hvg].str.startswith("MT-")))
-    """
-    # 8. Manual annotation plotting on remaining spots
-    #fig_annot = plot_dir / f"{sample_name}_annotation.png"
-    sc.pl.spatial(
-        adata,
-        img_key="hires",
-        #color="annotation",
-        title=f"{sample_name} annotation (post-QC)",
-        show=False,
-    )
-    plt.show()
-    plt.close()
-    #plt.savefig(fig_annot, dpi=300, bbox_inches="tight")
-    #plt.close()
-    print(f"Saved annotation plot")
+    args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Store in dictionary
-    adata_dict[sample_name] = {
-        "adata": adata}
+    print(f"[load] {args.input_dir}")
+    adata = load_visium_hd_sample(args.input_dir)
+    print(f"[load] AnnData shape: {adata.n_obs} bins x {adata.n_vars} genes")
+
+    print(f"[qc] Running SpotSweeper local_outliers (n_neighbors={args.n_neighbors}, cutoff={args.cutoff})")
+    adata = apply_qc_filters(adata, n_neighbors=args.n_neighbors, cutoff=args.cutoff, workers=args.workers)
+    print(f"[qc] low_qc bins: {int(adata.obs['low_qc'].sum())} / {adata.n_obs}")
+
+    print("[plot] Per-metric spatial diagnostics")
+    plot_qc_metrics_spatial(adata, args.sample, args.output_dir)
+    plot_qc_exclusions(adata, args.sample, args.output_dir / "qc_exclusions.png")
+
+    summary = {
+        "sample": args.sample,
+        "input_dir": str(args.input_dir),
+        "bin_size_um": args.bin_size_um,
+        "method": "spotsweeper.local_outliers",
+        "n_neighbors": args.n_neighbors,
+        "cutoff": args.cutoff,
+        "n_bins": int(adata.n_obs),
+        "n_genes": int(adata.n_vars),
+        "n_low_qc": int(adata.obs["low_qc"].sum()),
+        "n_low_total_count": int(adata.obs["total_counts_outliers"].sum()),
+        "n_low_detected_features": int(adata.obs["n_genes_outliers"].sum()),
+        "n_high_mt": int(adata.obs["mt_outliers"].sum()),
+    }
+    with open(args.output_dir / "qc_summary.json", "w") as f:
+        json.dump(summary, f, indent=2)
+    print(f"[save] Summary written to {args.output_dir / 'qc_summary.json'}")
+
+    out_h5ad = args.output_dir / f"{args.sample}_visium_hd_qc.h5ad"
+    adata.write_h5ad(out_h5ad)
+    print(f"[save] AnnData with QC flags written to {out_h5ad}")
+
+    print(f"[save] Plots written to {args.output_dir}")
 
 
-# In[5]:
-
-
-# CHANGE OUTPUT DIRECTORY ACCORDINGLY
-output_dir= "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/real_data_qc/breast_cancer"
-os.makedirs(output_dir, exist_ok=True)
-
-for sample_name, data in adata_dict.items():
-    adata = data["adata"]
-
-    # save file (uncomment to actually write)
-    output_path = os.path.join(output_dir, f"{sample_name}_qc_filtered_8_um.h5ad")
-    adata.write(output_path)
-    print(f"  → Would save to: {output_path}")
+if __name__ == "__main__":
+    main()
