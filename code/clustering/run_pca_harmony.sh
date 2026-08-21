@@ -3,7 +3,7 @@
 #SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs/sim_pca_harmony_%A_%a.out
 #SBATCH --array=0-2
 #SBATCH --time=08:00:00
-#SBATCH --mem=256G
+#SBATCH --mem=320G
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared      
 

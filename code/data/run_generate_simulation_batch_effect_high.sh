@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=sim_app_generate_batch_effect
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/data/logs/sim_app_generate_batch_effect_%A_%a.out
+#SBATCH --job-name=sim_app_generate_batch_effect_high
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/data/logs/sim_app_generate_batch_effect_high_%A_%a.out
 #SBATCH --array=0-2
 #SBATCH --time=04:00:00
 #SBATCH --mem=250G
@@ -59,7 +59,7 @@ else
 fi
 
 echo "Modality: ${MODALITY}"
-echo "Command: ${PYTHON_BIN} generate_simulation_batch_effect.py --modality ${MODALITY}"
-"${PYTHON_BIN}" generate_simulation_batch_effect.py --modality "${MODALITY}"
+echo "Command: ${PYTHON_BIN} generate_simulation_batch_effect_high.py --modality ${MODALITY}"
+"${PYTHON_BIN}" generate_simulation_batch_effect_high.py --modality "${MODALITY}"
 
 echo "Job finished: $(date)"

@@ -1,0 +1,99 @@
+Job started: Thu Aug 13 08:53:50 PM EDT 2026
+Host: compute-154.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Modality: bin
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python generate_simulation_batch_effect_moderate.py --modality bin
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+sim_app module: /dcs04/hicks/data/Jan/sim_project/sim_app/sim_app/__init__.py
+sim_app version: 0.1.0
+
+Generating bin data for slice axis Z with batch_sigma=0.8
+
+Generated AnnData:
+AnnData object with n_obs × n_vars = 6609690 × 556
+    obs: 'slice_axis', 'slice_id', 'bin_size_um', 'window_center0', 'window_center1', 'window_size0', 'window_size1', 'plane_dim0', 'plane_dim1', 'cell_type_true', 'domain_true'
+    var: 'gene_class', 'is_noise', 'is_shared_marker'
+    uns: 'batch_effect_factors', 'rigid_perturb_inplane', 'sim_params', 'output'
+    obsm: 'spatial', 'cell_type_frac_true', 'domain_frac_true', 'spatial_3d', 'spatial_unaligned', 'spatial_3d_unaligned'
+    layers: 'counts_pre_batch'
+
+Summary:
+{
+  "n_obs": 6609690,
+  "n_vars": 556,
+  "total_counts": 884918539,
+  "nonzero_counts": 204665461,
+  "platform": "bin",
+  "slice_axis": "Z",
+  "n_slices": 10,
+  "slice_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "obs_columns": [
+    "slice_axis",
+    "slice_id",
+    "bin_size_um",
+    "window_center0",
+    "window_center1",
+    "window_size0",
+    "window_size1",
+    "plane_dim0",
+    "plane_dim1",
+    "cell_type_true",
+    "domain_true"
+  ],
+  "var_columns": [
+    "gene_class",
+    "is_noise",
+    "is_shared_marker"
+  ],
+  "layers": [
+    "counts_pre_batch"
+  ],
+  "obsm_keys": [
+    "spatial",
+    "cell_type_frac_true",
+    "domain_frac_true",
+    "spatial_3d",
+    "spatial_unaligned",
+    "spatial_3d_unaligned"
+  ],
+  "uns_keys": [
+    "batch_effect_factors",
+    "rigid_perturb_inplane",
+    "sim_params",
+    "output"
+  ],
+  "truth_annotations": [
+    "layers['counts_pre_batch']",
+    "obs['cell_type_true']",
+    "obs['domain_true']",
+    "obsm['cell_type_frac_true']",
+    "obsm['domain_frac_true']"
+  ]
+}
+
+Saved summary -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect_moderate/simulation_bin_z_summary.json
+
+Generating diagnostic plots...
+Plotting a deterministic subset of 100,000 / 6,609,690 observations.
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect_moderate/plots/simulation_bin_z/01_aligned_domain_true.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect_moderate/plots/simulation_bin_z/02_aligned_cell_type_true.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect_moderate/plots/simulation_bin_z/03_unaligned_slice_id.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect_moderate/plots/simulation_bin_z/04_qc_count_distributions.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect_moderate/plots/simulation_bin_z/05_bins_per_slice.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect_moderate/plots/simulation_bin_z/06_domain_composition_per_slice.png
+
+All diagnostic plots saved under /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect_moderate/plots/simulation_bin_z
+
+Saved dataset -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect_moderate/simulation_bin_z.h5ad
+Job finished: Thu Aug 13 09:01:17 PM EDT 2026

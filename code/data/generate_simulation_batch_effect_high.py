@@ -1,14 +1,14 @@
 """
 Generate a sim_app synthetic spatial-transcriptomics dataset with an extreme
 per-slice batch effect, along with diagnostic plots, under
-sim_paper/data/batch_effect.
+sim_paper/data/batch_effect_high.
 
 Identical to generate_simulation.py except batch_sigma is raised far above
 the manuscript default to stress-test batch-correction methods.
 
 Run from anywhere inside the sim_project tree, e.g.:
     cd /dcs04/hicks/data/Jan/sim_project/sim_paper
-    python generate_simulation_batch_effect.py
+    python generate_simulation_batch_effect_high.py
 """
 
 import json
@@ -50,7 +50,7 @@ print("sim_app version:", getattr(sim_app, "__version__", "<no __version__>"))
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-DATA_DIR = Path("/dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect")
+DATA_DIR = Path("/dcs04/hicks/data/Jan/sim_project/sim_paper/data/batch_effect_high")
 PLOTS_DIR = DATA_DIR / "plots"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 PLOTS_DIR.mkdir(parents=True, exist_ok=True)

@@ -35,6 +35,11 @@ sbatch --dependency=afterany:<jobid1>:<jobid2> sim_paper/code/clustering/run_pca
 `cell` dataset, runs PCA over all genes, runs Harmony on `obs["slice_id"]`,
 writes PCA plots before and after Harmony, and plots PC pairs (adjacent pairs
 such as PC1 vs PC2, PC3 vs PC4, ...) from the same pre/post-Harmony PCA basis.
+The before/after UMAP diagnostic plots run on a subsample (`--umap-max-obs`,
+default 50,000; `--no-umap-sample` to disable) since neighbors+UMAP computed
+twice at full scale is the slow step for million-cell datasets (e.g. the
+`bin` modality's ~6.6M cells) and isn't used downstream — `clustering_leiden_louvain.py`
+reads `X_pca_harmony` from the full, non-subsampled output.
 
 `gene_harmony_umap.py` skips PCA for the actual Harmony correction — it runs
 Harmony directly on the scaled log-normalized all-gene matrix — but it also

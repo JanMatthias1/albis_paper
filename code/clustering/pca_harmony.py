@@ -28,7 +28,7 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 
-from pc_pairs import plot_pc_pairs
+from pc_pairs import plot_pc_pairs, sampled_indices
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -53,6 +53,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--n-neighbors", type=int, default=15)
     parser.add_argument("--point-size", type=float, default=4.0)
     parser.add_argument("--alpha", type=float, default=0.85)
+    parser.add_argument(
+        "--umap-max-obs",
+        type=int,
+        default=50000,
+        help="Subsample to at most this many observations before computing the before/after-Harmony "
+        "UMAPs (neighbors+UMAP twice at full scale is the slow step for million-cell datasets; "
+        "downstream clustering reads X_pca_harmony from the full, non-subsampled data, not this UMAP, "
+        "so subsampling only affects the diagnostic plots). Use --no-umap-sample to disable.",
+    )
+    parser.add_argument(
+        "--no-umap-sample",
+        action="store_true",
+        help="Compute the before/after UMAPs on all observations instead of subsampling (slow for large datasets).",
+    )
     parser.add_argument(
         "--plot-colors",
         nargs="+",
@@ -301,9 +315,17 @@ def main() -> None:
     print(f"[plot] Saving PCA before/after plots under {plot_dir}")
     save_pca_plots(adata, plot_dir, args.plot_colors)
 
+    obs_idx = sampled_indices(adata.n_obs, args.umap_max_obs, args.no_umap_sample, args.random_state)
+    if len(obs_idx) < adata.n_obs:
+        print(
+            f"[umap] Subsampling {len(obs_idx):,} / {adata.n_obs:,} observations for the before/after-Harmony "
+            "UMAP diagnostic plots (full neighbors+UMAP twice is the slow step; not used downstream)"
+        )
+    umap_adata = adata[obs_idx].copy() if len(obs_idx) < adata.n_obs else adata
+
     print("[umap] Computing UMAP before Harmony from PCA")
     compute_umap(
-        adata,
+        umap_adata,
         "X_pca_pre_harmony",
         "X_umap_pca_pre_harmony",
         args.n_neighbors,
@@ -312,7 +334,7 @@ def main() -> None:
 
     print("[umap] Computing UMAP after Harmony from PCA")
     compute_umap(
-        adata,
+        umap_adata,
         "X_pca_post_harmony",
         "X_umap_pca_post_harmony",
         args.n_neighbors,
@@ -320,7 +342,7 @@ def main() -> None:
     )
 
     print(f"[plot] Saving before/after UMAP plots under {plot_dir}")
-    save_umap_plots(adata, plot_dir, args.plot_colors, args.point_size, args.alpha)
+    save_umap_plots(umap_adata, plot_dir, args.plot_colors, args.point_size, args.alpha)
 
     print(f"[pc_pairs] Plotting PC pairs by {args.batch_key} under {plot_dir / 'pc_pairs'}")
     plot_pc_pairs(
@@ -338,8 +360,10 @@ def main() -> None:
         "pre_harmony_obsm": "X_pca_pre_harmony",
         "post_harmony_obsm": "X_pca_post_harmony",
         "n_neighbors": int(args.n_neighbors),
-        "pre_harmony_umap_obsm": "X_umap_pca_pre_harmony",
-        "post_harmony_umap_obsm": "X_umap_pca_post_harmony",
+        "umap_obsm_note": "before/after UMAP is diagnostic-plot-only, computed on a subsample "
+        "(see umap_n_obs) and not stored in this file; downstream clustering uses pre_harmony_obsm/"
+        "post_harmony_obsm from the full data.",
+        "umap_n_obs": int(umap_adata.n_obs),
         "input": str(args.input),
     }
     adata.write_h5ad(args.output)

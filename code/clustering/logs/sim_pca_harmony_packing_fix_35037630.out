@@ -1,0 +1,92 @@
+=== modality: bin ===
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] sim_paper/data/noisy/packing_pf0p015/simulation_bin_z.h5ad
+[load] AnnData shape: 1505440 observations x 556 genes
+[pca] Running PCA with 30 components over all genes
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/legacy_api_wrap/__init__.py:88: UserWarning: Some cells have zero counts
+  return fn(*args_all, **kw)
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/functools.py:889: UserWarning: zero-centering a sparse array/matrix densifies it.
+  return dispatch(args[0].__class__)(*args, **kw)
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/scanpy/preprocessing/_pca/__init__.py:226: FutureWarning: Argument `use_highly_variable` is deprecated, consider using the mask argument. Use_highly_variable=True can be called through mask_var="highly_variable". Use_highly_variable=False can be called through mask_var=None
+  mask_var_param, mask_var = _handle_mask_var(
+[harmony] Correcting X_pca_pre_harmony by obs['slice_id']
+2026-08-20 15:26:18,362 - harmonypy - INFO - Running Harmony
+2026-08-20 15:26:18,362 - harmonypy - INFO -   Parameters:
+2026-08-20 15:26:18,362 - harmonypy - INFO -     max_iter_harmony: 10
+2026-08-20 15:26:18,362 - harmonypy - INFO -     max_iter_kmeans: 4
+2026-08-20 15:26:18,362 - harmonypy - INFO -     epsilon_cluster: 0.001
+2026-08-20 15:26:18,362 - harmonypy - INFO -     epsilon_harmony: 0.01
+2026-08-20 15:26:18,362 - harmonypy - INFO -     nclust: 100
+2026-08-20 15:26:18,362 - harmonypy - INFO -     block_size: 0.05
+2026-08-20 15:26:18,362 - harmonypy - INFO -     lamb: dynamic (alpha=0.2)
+2026-08-20 15:26:18,363 - harmonypy - INFO -     theta: [2. 2. 2. 2. 2. 2. 2. 2. 2. 2.]
+2026-08-20 15:26:18,363 - harmonypy - INFO -     sigma: [0.1 0.1 0.1 0.1 0.1]...
+2026-08-20 15:26:18,363 - harmonypy - INFO -     verbose: True
+2026-08-20 15:26:18,363 - harmonypy - INFO -     random_state: 0
+2026-08-20 15:26:18,363 - harmonypy - INFO -   Data: 30 PCs × 1505440 cells
+2026-08-20 15:26:18,363 - harmonypy - INFO -   Batch variables: ['slice_id']
+2026-08-20 15:26:19,926 - harmonypy - INFO - Computing initial centroids...
+2026-08-20 15:26:58,393 - harmonypy - INFO - Initialization complete.
+2026-08-20 15:26:58,393 - harmonypy - INFO - Iteration 1 of 10
+2026-08-20 15:27:41,474 - harmonypy - INFO - Converged after 1 iteration
+[plot] Saving PCA before/after plots under sim_paper/data/clustering_packing_fix/bin/pca_harmony/plots
+[umap] Subsampling 50,000 / 1,505,440 observations for the before/after-Harmony UMAP diagnostic plots (full neighbors+UMAP twice is the slow step; not used downstream)
+[umap] Computing UMAP before Harmony from PCA
+[umap] Computing UMAP after Harmony from PCA
+[plot] Saving before/after UMAP plots under sim_paper/data/clustering_packing_fix/bin/pca_harmony/plots
+/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/pca_harmony.py:257: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  fig.tight_layout()
+[pc_pairs] Plotting PC pairs by slice_id under sim_paper/data/clustering_packing_fix/bin/pca_harmony/plots/pc_pairs
+[pc_pairs] Plotting 30 PCs (15 adjacent pairs) using 20000 sampled observations
+[pc_pairs] Saved -> sim_paper/data/clustering_packing_fix/bin/pca_harmony/plots/pc_pairs/by_slice_id/pc_pairs_pre_harmony_by_slice_id.png
+[pc_pairs] Saved -> sim_paper/data/clustering_packing_fix/bin/pca_harmony/plots/pc_pairs/by_slice_id/pc_pairs_post_harmony_by_slice_id.png
+[save] sim_paper/data/clustering_packing_fix/bin/pca_harmony/simulation_bin_z_pca_harmony.h5ad
+=== modality: spot ===
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] sim_paper/data/noisy/packing_pf0p015/simulation_spot_z.h5ad
+[load] AnnData shape: 10240 observations x 556 genes
+[pca] Running PCA with 30 components over all genes
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/legacy_api_wrap/__init__.py:88: UserWarning: Some cells have zero counts
+  return fn(*args_all, **kw)
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/functools.py:889: UserWarning: zero-centering a sparse array/matrix densifies it.
+  return dispatch(args[0].__class__)(*args, **kw)
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/scanpy/preprocessing/_pca/__init__.py:226: FutureWarning: Argument `use_highly_variable` is deprecated, consider using the mask argument. Use_highly_variable=True can be called through mask_var="highly_variable". Use_highly_variable=False can be called through mask_var=None
+  mask_var_param, mask_var = _handle_mask_var(
+[harmony] Correcting X_pca_pre_harmony by obs['slice_id']
+2026-08-20 15:31:58,675 - harmonypy - INFO - Running Harmony
+2026-08-20 15:31:58,675 - harmonypy - INFO -   Parameters:
+2026-08-20 15:31:58,675 - harmonypy - INFO -     max_iter_harmony: 10
+2026-08-20 15:31:58,675 - harmonypy - INFO -     max_iter_kmeans: 4
+2026-08-20 15:31:58,675 - harmonypy - INFO -     epsilon_cluster: 0.001
+2026-08-20 15:31:58,675 - harmonypy - INFO -     epsilon_harmony: 0.01
+2026-08-20 15:31:58,675 - harmonypy - INFO -     nclust: 100
+2026-08-20 15:31:58,675 - harmonypy - INFO -     block_size: 0.05
+2026-08-20 15:31:58,675 - harmonypy - INFO -     lamb: dynamic (alpha=0.2)
+2026-08-20 15:31:58,675 - harmonypy - INFO -     theta: [2. 2. 2. 2. 2. 2. 2. 2. 2. 2.]
+2026-08-20 15:31:58,675 - harmonypy - INFO -     sigma: [0.1 0.1 0.1 0.1 0.1]...
+2026-08-20 15:31:58,675 - harmonypy - INFO -     verbose: True
+2026-08-20 15:31:58,675 - harmonypy - INFO -     random_state: 0
+2026-08-20 15:31:58,675 - harmonypy - INFO -   Data: 30 PCs × 10240 cells
+2026-08-20 15:31:58,675 - harmonypy - INFO -   Batch variables: ['slice_id']
+2026-08-20 15:31:58,683 - harmonypy - INFO - Computing initial centroids...
+2026-08-20 15:31:58,918 - harmonypy - INFO - Initialization complete.
+2026-08-20 15:31:58,918 - harmonypy - INFO - Iteration 1 of 10
+2026-08-20 15:31:59,099 - harmonypy - INFO - Iteration 2 of 10
+2026-08-20 15:31:59,291 - harmonypy - INFO - Iteration 3 of 10
+2026-08-20 15:31:59,485 - harmonypy - INFO - Iteration 4 of 10
+2026-08-20 15:31:59,674 - harmonypy - INFO - Iteration 5 of 10
+2026-08-20 15:31:59,862 - harmonypy - INFO - Iteration 6 of 10
+2026-08-20 15:32:00,051 - harmonypy - INFO - Converged after 6 iterations
+[plot] Saving PCA before/after plots under sim_paper/data/clustering_packing_fix/spot/pca_harmony/plots
+[umap] Computing UMAP before Harmony from PCA
+[umap] Computing UMAP after Harmony from PCA
+[plot] Saving before/after UMAP plots under sim_paper/data/clustering_packing_fix/spot/pca_harmony/plots
+/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/pca_harmony.py:257: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  fig.tight_layout()
+[pc_pairs] Plotting PC pairs by slice_id under sim_paper/data/clustering_packing_fix/spot/pca_harmony/plots/pc_pairs
+[pc_pairs] Plotting 30 PCs (15 adjacent pairs) using all observations
+[pc_pairs] Saved -> sim_paper/data/clustering_packing_fix/spot/pca_harmony/plots/pc_pairs/by_slice_id/pc_pairs_pre_harmony_by_slice_id.png
+[pc_pairs] Saved -> sim_paper/data/clustering_packing_fix/spot/pca_harmony/plots/pc_pairs/by_slice_id/pc_pairs_post_harmony_by_slice_id.png
+[save] sim_paper/data/clustering_packing_fix/spot/pca_harmony/simulation_spot_z_pca_harmony.h5ad

@@ -16,7 +16,8 @@ Expected environment:
     pip install spotsweeper   # one-time; not yet in requirements
 
 Example:
-    python sim_paper/code/real_data_qc/visium_hd_human_breast_8um.py --sample breast_cancer
+    python sim_paper/code/real_data_qc/visium_hd_qc.py --sample breast_cancer
+    python sim_paper/code/real_data_qc/visium_hd_qc.py --sample human_pancreas
 """
 
 from __future__ import annotations
@@ -40,6 +41,7 @@ SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
 
 SAMPLE_RAW_DIRS = {
     "breast_cancer": "breast_cancer/Visium_HD_11mm_Human_Breast_Cancer",
+    "human_pancreas": "human_pancreas_HD/Visium_HD_11mm_Human_Pancreas",
 }
 
 POSITION_COLS = ["barcode", "in_tissue", "array_row", "array_col", "pxl_row_in_fullres", "pxl_col_in_fullres"]
@@ -73,13 +75,21 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
+def load_tissue_positions(spatial_dir: Path) -> pd.DataFrame:
+    """Handles both the older, headerless tissue_positions_list.csv and the newer
+    tissue_positions.parquet (10x has shipped either depending on download vintage)."""
+    csv_path = spatial_dir / "tissue_positions_list.csv"
+    if csv_path.exists():
+        return pd.read_csv(csv_path, header=None, names=POSITION_COLS, index_col="barcode")
+    parquet_path = spatial_dir / "tissue_positions.parquet"
+    return pd.read_parquet(parquet_path).set_index("barcode")
+
+
 def load_visium_hd_sample(input_dir: Path) -> sc.AnnData:
     adata = sc.read_10x_h5(input_dir / "filtered_feature_bc_matrix.h5")
     adata.var_names_make_unique()
 
-    positions = pd.read_csv(
-        input_dir / "spatial" / "tissue_positions_list.csv", header=None, names=POSITION_COLS, index_col="barcode"
-    )
+    positions = load_tissue_positions(input_dir / "spatial")
     adata.obs = positions.loc[adata.obs_names]
     adata = adata[adata.obs["in_tissue"] == 1].copy()
     adata.obsm["spatial"] = adata.obs[["pxl_col_in_fullres", "pxl_row_in_fullres"]].to_numpy()

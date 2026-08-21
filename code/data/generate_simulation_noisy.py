@@ -61,10 +61,7 @@ print("sim_app version:", getattr(sim_app, "__version__", "<no __version__>"))
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-DATA_DIR = Path("/dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy")
-PLOTS_DIR = DATA_DIR / "plots"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-PLOTS_DIR.mkdir(parents=True, exist_ok=True)
+BASE_DATA_DIR = Path("/dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy")
 
 SLICE_AXIS = "Z"
 VALID_MODALITIES = ("spot", "bin", "cell")
@@ -81,6 +78,27 @@ MANUSCRIPT_BATCH_SIGMA = 0.22
 # exp(0.7) ~= 2.0. Lower the first value (log_mu) to bring down average
 # per-cell total counts / genes detected without touching dispersion/noise.
 NOISY_BASE_GENE_LOGNORMAL = (0.7, 0.7)
+
+# Manuscript-baseline geometry (sphere_R_um=6000, n_cells=600_000) packs cells
+# at only ~0.16% of sphere volume -- real tissue is essentially fully packed.
+# A fixed 8um bin grid over that mostly lands in empty interstitial space:
+# 66.3% of bins came back with zero genes detected vs. 0.0% in real
+# breast_cancer_visium_hd (see DATA_VERSIONS.md, "Known issue" section,
+# 2026-08-20). Raising theta does not fix this -- tested up to theta=200 with
+# almost no effect -- because it's geometric (empty grid cells), not
+# per-molecule count noise. Local validation swept target 3D packing fraction
+# via --sphere-r-um (holding --n-cells fixed): packing fully solves emptiness
+# by ~10% but overshoots real counts/bin by 5-9x, because it shrinks cell
+# spacing enough that neighboring cells' molecule clouds start overlapping
+# into the same bin. There's no packing fraction that hits both targets
+# exactly; ~0.8-1.5% packing was the best compromise found (empty bins cut
+# from 66% to ~7-18%, counts/bin within ~1.1-1.6x of real). See
+# packing_fraction_to_sphere_R() below for the conversion.
+NOISY_N_CELLS = 600_000
+NOISY_SPHERE_R_UM = 6000.0
+WINDOW_TO_R = 6500.0 / 6000.0
+CORE_FUZZ_TO_R = 300.0 / 6000.0
+MAX_SHIFT_TO_R = 3000.0 / 6000.0
 
 
 def parse_args():
@@ -128,6 +146,47 @@ def parse_args():
         default=MANUSCRIPT_BATCH_SIGMA,
         help="Standard deviation of the per-slice, per-gene log-fold-change batch effect.",
     )
+    parser.add_argument(
+        "--sphere-r-um",
+        type=float,
+        default=NOISY_SPHERE_R_UM,
+        help="Sphere radius; with --n-cells fixed, smaller = higher 3D cell-packing "
+        "fraction (see count_distribution bin/spot zero-inflation investigation, "
+        "2026-08-20 -- default 6000um gives ~0.16%% packing, which leaves the "
+        "majority of 8um bins empty).",
+    )
+    parser.add_argument(
+        "--n-cells",
+        type=int,
+        default=NOISY_N_CELLS,
+    )
+    parser.add_argument(
+        "--capture-window-um",
+        type=float,
+        default=None,
+        help="Square capture window side length. Defaults to "
+        f"sphere_r_um * {WINDOW_TO_R:.4f} (same ratio as the manuscript baseline: "
+        "6500/6000).",
+    )
+    parser.add_argument(
+        "--core-fuzz-width-um",
+        type=float,
+        default=None,
+        help=f"Defaults to sphere_r_um * {CORE_FUZZ_TO_R:.4f} (manuscript ratio: 300/6000).",
+    )
+    parser.add_argument(
+        "--max-shift",
+        type=float,
+        default=None,
+        help=f"Defaults to sphere_r_um * {MAX_SHIFT_TO_R:.4f} (manuscript ratio: 3000/6000).",
+    )
+    parser.add_argument(
+        "--out-tag",
+        default="",
+        help="If set, write output under data/noisy/<out-tag>/ instead of data/noisy/ directly "
+        "(e.g. a parameter-sweep label like 'log_mu_-2.5'), so this run doesn't overwrite the "
+        "existing simulation_<modality>_<axis>.h5ad.",
+    )
     return parser.parse_args()
 
 
@@ -139,24 +198,35 @@ THETA_JITTER = args.theta_jitter
 NOISE_SCALE = args.noise_scale
 BATCH_SIGMA = args.batch_sigma
 BASE_GENE_LOGNORMAL = tuple(args.base_gene_lognormal)
+N_CELLS = args.n_cells
+SPHERE_R_UM = args.sphere_r_um
+CAPTURE_WINDOW_UM = args.capture_window_um if args.capture_window_um is not None else SPHERE_R_UM * WINDOW_TO_R
+CORE_FUZZ_WIDTH_UM = args.core_fuzz_width_um if args.core_fuzz_width_um is not None else SPHERE_R_UM * CORE_FUZZ_TO_R
+MAX_SHIFT = args.max_shift if args.max_shift is not None else SPHERE_R_UM * MAX_SHIFT_TO_R
+OUT_TAG = args.out_tag
+DATA_DIR = (BASE_DATA_DIR / OUT_TAG) if OUT_TAG else BASE_DATA_DIR
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_STEM = f"simulation_{OUTPUT_MODALITY}_{SLICE_AXIS.lower()}"
 H5AD_PATH = DATA_DIR / f"{OUTPUT_STEM}.h5ad"
 SUMMARY_PATH = DATA_DIR / f"{OUTPUT_STEM}_summary.json"
-PLOTS_DIR = PLOTS_DIR / OUTPUT_STEM
+PLOTS_DIR = DATA_DIR / "plots" / OUTPUT_STEM
 PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ---------------------------------------------------------------------------
 # Generate data
 # ---------------------------------------------------------------------------
-def generate_modality(output_modality, slice_axis, theta, theta_jitter, noise_scale, batch_sigma, base_gene_lognormal):
+def generate_modality(
+    output_modality, slice_axis, theta, theta_jitter, noise_scale, batch_sigma, base_gene_lognormal,
+    n_cells, sphere_r_um, capture_window_um, core_fuzz_width_um, max_shift,
+):
     # sim_app.generate_data() doesn't forward theta/theta_jitter/noise_scale/
     # base_gene_lognormal, so call the lower-level simulator directly and pull
     # out the requested modality/axis ourselves (mirrors what generate_data()
     # does internally).
     simulation = sim_app.simulate_3d_molecule_sphere_multires(
-        sphere_R_um=6000.0,
-        capture_window_um=(6500.0, 6500.0),
+        sphere_R_um=sphere_r_um,
+        capture_window_um=(capture_window_um, capture_window_um),
         n_domains=6,
         core_frac=0.55,
         core_bump_amp=0.25,
@@ -166,10 +236,10 @@ def generate_modality(output_modality, slice_axis, theta, theta_jitter, noise_sc
         noise_freq_range=(3.0, 6.0),
         boundary_fuzz_width_deg=6.0,
         boundary_fuzz_flip_prob=0.15,
-        core_fuzz_width_um=300.0,
+        core_fuzz_width_um=core_fuzz_width_um,
         core_fuzz_flip_prob=0.25,
 
-        n_cells=600_000,
+        n_cells=n_cells,
         cell_radius_kwargs=dict(
             radius_dist="lognormal",
             r_mean=7.5,
@@ -197,7 +267,7 @@ def generate_modality(output_modality, slice_axis, theta, theta_jitter, noise_sc
         base_gene_lognormal=base_gene_lognormal,
         batch_sigma=batch_sigma,
         max_deg=270.0,
-        max_shift=3000.0,
+        max_shift=max_shift,
         output_modalities=(output_modality,),
         slice_axes=(slice_axis,),
     )
@@ -208,6 +278,11 @@ def generate_modality(output_modality, slice_axis, theta, theta_jitter, noise_sc
     adata.uns["sim_params"] = {
         "theta": theta,
         "theta_jitter": theta_jitter,
+        "n_cells": n_cells,
+        "sphere_r_um": sphere_r_um,
+        "capture_window_um": capture_window_um,
+        "core_fuzz_width_um": core_fuzz_width_um,
+        "max_shift": max_shift,
         "noise_scale": noise_scale,
         "batch_sigma": batch_sigma,
         "base_gene_lognormal": list(base_gene_lognormal),
@@ -218,10 +293,13 @@ def generate_modality(output_modality, slice_axis, theta, theta_jitter, noise_sc
 print(
     f"\nGenerating {OUTPUT_MODALITY} data for slice axis {SLICE_AXIS} with "
     f"theta={THETA}, theta_jitter={THETA_JITTER}, noise_scale={NOISE_SCALE}, "
-    f"batch_sigma={BATCH_SIGMA}, base_gene_lognormal={BASE_GENE_LOGNORMAL}"
+    f"batch_sigma={BATCH_SIGMA}, base_gene_lognormal={BASE_GENE_LOGNORMAL}, "
+    f"n_cells={N_CELLS}, sphere_r_um={SPHERE_R_UM}, capture_window_um={CAPTURE_WINDOW_UM}, "
+    f"core_fuzz_width_um={CORE_FUZZ_WIDTH_UM}, max_shift={MAX_SHIFT}"
 )
 adata = generate_modality(
-    OUTPUT_MODALITY, SLICE_AXIS, THETA, THETA_JITTER, NOISE_SCALE, BATCH_SIGMA, BASE_GENE_LOGNORMAL
+    OUTPUT_MODALITY, SLICE_AXIS, THETA, THETA_JITTER, NOISE_SCALE, BATCH_SIGMA, BASE_GENE_LOGNORMAL,
+    N_CELLS, SPHERE_R_UM, CAPTURE_WINDOW_UM, CORE_FUZZ_WIDTH_UM, MAX_SHIFT,
 )
 print("\nGenerated AnnData:")
 print(adata)

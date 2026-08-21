@@ -4,6 +4,7 @@
 
 ENV_PREFIX="/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial"
 PYTHON_BIN="${ENV_PREFIX}/bin/python"
+export PYTHONUNBUFFERED=1
 
 if ! command -v conda >/dev/null 2>&1; then
     module load conda 2>/dev/null || true
