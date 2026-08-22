@@ -50,6 +50,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument(
+        "--packing-tag", default=None,
+        help="If set, use data/clustering_<packing-tag>/ as the root instead of data/clustering/ "
+        "(matches ari_vs_ground_truth.py's --packing-tag). Ignored if --input/--output-dir given.",
+    )
     parser.add_argument("--modality", choices=VALID_MODALITIES, default="spot")
     parser.add_argument("--algorithm", choices=VALID_ALGORITHMS, default="leiden")
     parser.add_argument("--pipeline", choices=VALID_PIPELINES, default="pca_harmony")
@@ -133,10 +138,13 @@ def plot_umap(adata, color_key: str, output_path: Path) -> None:
 
 def main() -> None:
     args = parse_args()
+    clustering_root = (
+        SIM_PAPER_DIR / "data" / f"clustering_{args.packing_tag}" if args.packing_tag else CLUSTERING_ROOT
+    )
     pipeline_dirname = "pca_harmony" if args.pipeline == "pca_harmony" else "gene_harmony_umap"
     if args.input == DEFAULT_INPUT:
         args.input = (
-            CLUSTERING_ROOT / args.modality / pipeline_dirname / f"simulation_{args.modality}_z_{pipeline_dirname}.h5ad"
+            clustering_root / args.modality / pipeline_dirname / f"simulation_{args.modality}_z_{pipeline_dirname}.h5ad"
         )
     if args.rep_key is None:
         args.rep_key = PIPELINE_REP_KEYS[args.pipeline]
@@ -150,7 +158,7 @@ def main() -> None:
     tag = resolution_tag(args.resolution)
     pipeline_tag = PIPELINE_TAGS[args.pipeline]
     if args.output_dir == DEFAULT_OUTPUT_DIR:
-        args.output_dir = CLUSTERING_ROOT / args.modality / f"{args.algorithm}_{pipeline_tag}_res{tag}"
+        args.output_dir = clustering_root / args.modality / f"{args.algorithm}_{pipeline_tag}_res{tag}"
     args.output_dir.mkdir(parents=True, exist_ok=True)
     output = args.output_dir / f"simulation_{args.modality}_z_{args.algorithm}_{pipeline_tag}_res{tag}.h5ad"
     plot_dir = args.output_dir / "plots"

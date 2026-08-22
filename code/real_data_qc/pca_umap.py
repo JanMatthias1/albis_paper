@@ -144,7 +144,7 @@ def resolve_plot_colors(adata, requested: list[str] | None) -> list[str]:
 def main() -> None:
     args = parse_args()
     if not args.input.is_file():
-        raise SystemExit(f"Input file not found: {args.input}\nRun real_data_qc.py / visium_hd_qc.py first.")
+        raise SystemExit(f"Input file not found: {args.input}\nRun xenium_qc.py / visium_hd_qc.py first.")
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
 

@@ -23,7 +23,7 @@ SLICES=(non_diseased_lung lung_cancer)
 SLICE="${SLICES[${SLURM_ARRAY_TASK_ID:-0}]}"
 
 echo "Slice: ${SLICE}"
-echo "Command: ${PYTHON_BIN} sim_paper/code/real_data_qc/real_data_qc.py --slice ${SLICE} $*"
-"${PYTHON_BIN}" sim_paper/code/real_data_qc/real_data_qc.py --slice "${SLICE}" "$@"
+echo "Command: ${PYTHON_BIN} sim_paper/code/real_data_qc/xenium_qc.py --slice ${SLICE} $*"
+"${PYTHON_BIN}" sim_paper/code/real_data_qc/xenium_qc.py --slice "${SLICE}" "$@"
 
 echo "Job finished: $(date)"

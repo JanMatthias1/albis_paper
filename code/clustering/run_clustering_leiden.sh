@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=sim_clustering_leiden_louvain
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs/sim_clustering_leiden_louvain_%A_%a.out
+#SBATCH --job-name=sim_clustering_leiden
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs/sim_clustering_leiden_%A_%a.out
 #SBATCH --array=0-2
 #SBATCH --time=08:00:00
 #SBATCH --mem=256G

@@ -19,7 +19,7 @@ the conda-activation boilerplate.
 ```bash
 sbatch sim_paper/code/clustering/run_pca_harmony.sh
 sbatch sim_paper/code/clustering/run_gene_harmony_umap.sh
-sbatch sim_paper/code/clustering/run_clustering_leiden_louvain.sh
+sbatch sim_paper/code/clustering/run_clustering_leiden.sh
 sbatch sim_paper/code/clustering/run_louvain_umap.sh
 ```
 

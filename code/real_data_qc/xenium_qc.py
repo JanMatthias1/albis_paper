@@ -6,15 +6,15 @@ data for comparison.
 Loads a raw Xenium `outs/` bundle (cell_feature_matrix.h5 + cells.csv.gz),
 restricts the count matrix to Gene Expression features, computes MAD-based
 QC thresholds on total_counts / n_genes_by_counts / count_density, and flags
-low-quality cells and control-probe/codeword contamination -- without
-normalizing, log-transforming, or dropping any cells.
+low-quality cells and control-probe/codeword contamination. Flagged cells are
+dropped before saving; no normalization or log-transform is applied.
 
 Expected environment:
     conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial
 
 Example:
-    python sim_paper/code/real_data_qc/real_data_qc.py --slice non_diseased_lung
-    python sim_paper/code/real_data_qc/real_data_qc.py --slice lung_cancer
+    python sim_paper/code/real_data_qc/xenium_qc.py --slice non_diseased_lung
+    python sim_paper/code/real_data_qc/xenium_qc.py --slice lung_cancer
 """
 
 from __future__ import annotations
@@ -242,11 +242,12 @@ def main() -> None:
     plot_qc_metrics(adata, thresholds, sample_name=args.slice, output_path=args.output_dir / "qc_metrics.png")
     plot_qc_exclusions(adata, sample_name=args.slice, output_path=args.output_dir / "qc_exclusions.png")
 
+    n_cells_before = adata.n_obs
     summary = {
         "slice": args.slice,
         "input_dir": str(args.input_dir),
         "nmads": args.nmads,
-        "n_cells": int(adata.n_obs),
+        "n_cells_before_qc": int(n_cells_before),
         "n_genes": int(adata.n_vars),
         "thresholds_log1p": {k: float(v) for k, v in thresholds.items()},
         "n_low_qc": int(adata.obs["low_qc"].sum()),
@@ -255,12 +256,17 @@ def main() -> None:
         "n_low_detected_features": int(adata.obs["low_detected_features"].sum()),
         "n_qc_controls": int(adata.obs["qc_controls"].sum()),
     }
+
+    adata = adata[~adata.obs["low_qc"]].copy()
+    print(f"[qc] Dropped {n_cells_before - adata.n_obs} low_qc cells; {adata.n_obs} remain")
+    summary["n_cells_after_qc"] = int(adata.n_obs)
+
     with open(args.output_dir / "qc_summary.json", "w") as f:
         json.dump(summary, f, indent=2)
     print(f"[save] Summary written to {args.output_dir / 'qc_summary.json'}")
 
     adata.write_h5ad(args.output_dir / f"{args.slice}_qc.h5ad")
-    print(f"[save] AnnData with QC flags written to {args.output_dir / f'{args.slice}_qc.h5ad'}")
+    print(f"[save] QC-filtered AnnData written to {args.output_dir / f'{args.slice}_qc.h5ad'}")
 
     print(f"[save] Plots written to {args.output_dir}")
 
