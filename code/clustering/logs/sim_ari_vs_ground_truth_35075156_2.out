@@ -1,0 +1,21 @@
+Job started: Sat Aug 22 10:13:08 AM EDT 2026
+Host: compute-177.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Modality: cell
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/ari_vs_ground_truth.py --modality cell --packing-tag packing_pf0p04
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_packing_pf0p04/cell/pca_harmony/simulation_cell_z_pca_harmony.h5ad
+[load] AnnData shape: 600000 x 556
+[neighbors] n_pcs=30 n_neighbors=15
+[ari] domain_true: target_k=6
+/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/ari_vs_ground_truth.py:74: FutureWarning: In the future, the default backend for leiden will be igraph instead of leidenalg.
+
+ To achieve the future defaults please pass: flavor="igraph" and n_iterations=2.  directed must also be False to work with igraph's implementation.
+  sc.tl.leiden(adata, resolution=mid, key_added=cluster_key, random_state=random_state)
+[ari] domain_true: resolution=0.3837 achieved_k=8 (target 6)  ARI=0.0063
+[ari] cell_type_true: target_k=8
+[ari] cell_type_true: resolution=0.3837 achieved_k=8 (target 8)  ARI=1.0000
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_packing_pf0p04/cell/ari_recovery/ari_summary_cell.json
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_packing_pf0p04/cell/ari_recovery/simulation_cell_z_ari_recovery.h5ad
+Job finished: Sat Aug 22 11:00:58 AM EDT 2026

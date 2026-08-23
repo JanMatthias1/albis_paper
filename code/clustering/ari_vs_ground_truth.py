@@ -71,7 +71,10 @@ def find_resolution_for_k(adata, target_k, res_lo, res_hi, max_iter, random_stat
     tried = []
     for _ in range(max_iter):
         mid = (lo + hi) / 2
-        sc.tl.leiden(adata, resolution=mid, key_added=cluster_key, random_state=random_state)
+        sc.tl.leiden(
+            adata, resolution=mid, key_added=cluster_key, random_state=random_state,
+            flavor="igraph", n_iterations=2, directed=False,
+        )
         k = adata.obs[cluster_key].nunique()
         tried.append({"resolution": mid, "n_clusters": int(k)})
         diff = abs(k - target_k)
@@ -86,7 +89,10 @@ def find_resolution_for_k(adata, target_k, res_lo, res_hi, max_iter, random_stat
 
     # Re-run at best_res so adata.obs[cluster_key] reflects the winning trial, not
     # whichever resolution the loop happened to try last.
-    sc.tl.leiden(adata, resolution=best_res, key_added=cluster_key, random_state=random_state)
+    sc.tl.leiden(
+        adata, resolution=best_res, key_added=cluster_key, random_state=random_state,
+        flavor="igraph", n_iterations=2, directed=False,
+    )
     return best_res, best_k, tried
 
 

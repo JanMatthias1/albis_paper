@@ -2,7 +2,7 @@
 """
 Plot count-distribution diagnostics for a sim_app (or real) dataset.
 
-Produces four PNGs:
+Produces six PNGs:
   - mean_variance.png: per-gene mean vs variance (log-log), with the Poisson
     line (var = mean) and a single method-of-moments NB line
     (var = mean + mean^2/theta) overlaid, computed from the raw counts.
@@ -15,7 +15,19 @@ Produces four PNGs:
     computed from the raw counts.
   - raw_norm_log.png: histogram of nonzero matrix entries at three pipeline
     stages -- raw counts, target-sum normalized, and log1p(normalized) --
-    matching the normalize_total/log1p steps in clustering.py.
+    matching the normalize_total/log1p steps in clustering.py. Zeros are
+    excluded at every stage, so this says nothing about sparsity -- see
+    sparsity_summary.png for that.
+  - genes_per_cell.png: per-cell number of distinct genes detected
+    (nonzero entries per row), computed from the raw counts. A cell/bin
+    could match total_counts.png well while still concentrating counts
+    into fewer genes than real, which this catches and total_counts
+    doesn't.
+  - sparsity_summary.png: two headline sparsity numbers computed from the
+    raw counts -- percent of all matrix entries that are zero, and percent
+    of cells/bins that are fully empty (zero total counts). mean_dropout.png
+    is conditional on each gene's mean, so it can't tell you the overall
+    sparsity if gene means themselves differ between datasets; this does.
 
 "Raw counts" means adata.layers["counts_pre_batch"] when present (the counts
 before the synthetic batch-effect multiplier is applied), otherwise adata.X.
@@ -185,6 +197,50 @@ def plot_total_counts(total_counts: np.ndarray, modality: str, output_path: Path
     plt.close(fig)
 
 
+def genes_per_cell(X) -> np.ndarray:
+    return np.asarray(X.getnnz(axis=1) if sparse.issparse(X) else np.count_nonzero(X, axis=1)).ravel()
+
+
+def plot_genes_per_cell(n_genes: np.ndarray, modality: str, output_path: Path) -> None:
+    positive = n_genes[n_genes > 0]
+    bins = np.logspace(np.log10(positive.min()), np.log10(positive.max()), 60)
+
+    fig, ax = plt.subplots(figsize=(6, 5))
+    ax.hist(positive, bins=bins, color="steelblue", edgecolor="none")
+    ax.set_xscale("log")
+    ax.set_xlabel("Genes detected per cell")
+    ax.set_ylabel("Number of cells")
+    ax.set_title(f"{modality}: genes detected per cell")
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=180)
+    plt.close(fig)
+
+
+def compute_sparsity_stats(X, n_genes: np.ndarray) -> dict[str, float]:
+    """n_genes: per-cell nonzero-gene counts from genes_per_cell(X), reused rather than
+    recomputed. matrix_zero_frac is the overall fraction of zero entries in X; empty_row_frac
+    is the fraction of cells/bins with zero genes detected."""
+    matrix_zero_frac = 1.0 - n_genes.sum() / (X.shape[0] * X.shape[1])
+    empty_row_frac = float(np.mean(n_genes == 0))
+    return {"matrix_zero_frac": float(matrix_zero_frac), "empty_row_frac": empty_row_frac}
+
+
+def plot_sparsity_summary(stats: dict[str, float], modality: str, output_path: Path) -> None:
+    labels = ["Zero matrix\nentries", "Fully-empty\ncells"]
+    values = [stats["matrix_zero_frac"] * 100, stats["empty_row_frac"] * 100]
+
+    fig, ax = plt.subplots(figsize=(4.5, 5))
+    bars = ax.bar(labels, values, color="steelblue", width=0.5)
+    for bar, v in zip(bars, values):
+        ax.annotate(f"{v:.1f}%", (bar.get_x() + bar.get_width() / 2, v), ha="center", va="bottom", fontsize=9)
+    ax.set_ylabel("Percent (%)")
+    ax.set_ylim(0, 105)
+    ax.set_title(f"{modality}: sparsity summary")
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=180)
+    plt.close(fig)
+
+
 def sample_values(data: np.ndarray, sample_size: int, rng: np.random.Generator) -> np.ndarray:
     if data.size <= sample_size:
         return data
@@ -298,6 +354,51 @@ def plot_total_counts_compare(datasets: list[dict], output_path: Path) -> None:
     plt.close(fig)
 
 
+def plot_genes_per_cell_compare(datasets: list[dict], output_path: Path) -> None:
+    """datasets: [{"label", "color", "n_genes"}, ...] (primary first)."""
+    positive = [d["n_genes"][d["n_genes"] > 0] for d in datasets]
+    all_positive = np.concatenate(positive)
+    bins = np.logspace(np.log10(all_positive.min()), np.log10(all_positive.max()), 60)
+
+    fig, ax = plt.subplots(figsize=(6.5, 5.5))
+    for d, pos in zip(datasets, positive):
+        ax.hist(pos, bins=bins, density=True, color=d["color"], alpha=0.5, label=d["label"])
+    ax.set_xscale("log")
+    ax.set_xlabel("Genes detected per cell")
+    ax.set_ylabel("Density (fraction of cells)")
+    ax.set_title("Genes detected per cell: simulated vs real")
+    ax.legend(frameon=False)
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=180)
+    plt.close(fig)
+
+
+def plot_sparsity_summary_compare(datasets: list[dict], output_path: Path) -> None:
+    """datasets: [{"label", "color", "sparsity"}, ...] (primary first), sparsity is the dict
+    returned by compute_sparsity_stats."""
+    metrics = [("matrix_zero_frac", "Zero matrix\nentries"), ("empty_row_frac", "Fully-empty\ncells")]
+    x = np.arange(len(metrics))
+    width = 0.8 / len(datasets)
+
+    fig, ax = plt.subplots(figsize=(6, 5.5))
+    for i, d in enumerate(datasets):
+        values = [d["sparsity"][key] * 100 for key, _ in metrics]
+        offset = (i - (len(datasets) - 1) / 2) * width
+        bars = ax.bar(x + offset, values, width=width, color=d["color"], label=d["label"])
+        for bar, v in zip(bars, values):
+            ax.annotate(f"{v:.1f}%", (bar.get_x() + bar.get_width() / 2, v), ha="center", va="bottom", fontsize=8)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([label for _, label in metrics])
+    ax.set_ylabel("Percent (%)")
+    ax.set_ylim(0, 105)
+    ax.set_title("Sparsity summary: simulated vs real")
+    ax.legend(frameon=False)
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=180)
+    plt.close(fig)
+
+
 def plot_raw_norm_log_compare(
     datasets: list[dict], target_sum: float, sample_size: int, rng: np.random.Generator, output_path: Path
 ) -> None:
@@ -360,12 +461,18 @@ def run_compare(args: argparse.Namespace, rng: np.random.Generator) -> None:
         spec["theta"] = fit_common_dispersion(mean, var)
         spec["zero_frac"] = gene_zero_fraction(raw_counts, adata.n_obs)
         spec["total_counts"] = np.asarray(raw_counts.sum(axis=1)).ravel()
+        spec["n_genes"] = genes_per_cell(raw_counts)
+        spec["sparsity"] = compute_sparsity_stats(raw_counts, spec["n_genes"])
         print(f"[nb] {spec['label']}: theta_hat = {spec['theta']:.2f}, "
               f"{'counts_pre_batch' if 'counts_pre_batch' in adata.layers else 'X'} used for mean-variance/total-counts")
+        print(f"[sparsity] {spec['label']}: {spec['sparsity']['matrix_zero_frac'] * 100:.2f}% zero entries, "
+              f"{spec['sparsity']['empty_row_frac'] * 100:.2f}% fully-empty cells")
 
     plot_mean_variance_compare(specs, args.output_dir / "mean_variance_compare.png")
     plot_mean_dropout_compare(specs, args.output_dir / "mean_dropout_compare.png")
     plot_total_counts_compare(specs, args.output_dir / "total_counts_compare.png")
+    plot_genes_per_cell_compare(specs, args.output_dir / "genes_per_cell_compare.png")
+    plot_sparsity_summary_compare(specs, args.output_dir / "sparsity_summary_compare.png")
     plot_raw_norm_log_compare(
         [{"label": s["label"], "color": s["color"], "X": s["adata"].X} for s in specs],
         args.target_sum, args.sample_size, rng, args.output_dir / "raw_norm_log_compare.png",
@@ -407,6 +514,16 @@ def main() -> None:
     print("[total_counts] Computing per-cell total counts")
     total_counts = np.asarray(raw_counts.sum(axis=1)).ravel()
     plot_total_counts(total_counts, args.modality, args.output_dir / "total_counts.png")
+
+    print("[genes_per_cell] Computing per-cell genes-detected")
+    n_genes = genes_per_cell(raw_counts)
+    plot_genes_per_cell(n_genes, args.modality, args.output_dir / "genes_per_cell.png")
+
+    print("[sparsity] Computing global sparsity stats")
+    sparsity = compute_sparsity_stats(raw_counts, n_genes)
+    print(f"[sparsity] {sparsity['matrix_zero_frac'] * 100:.2f}% zero entries, "
+          f"{sparsity['empty_row_frac'] * 100:.2f}% fully-empty cells")
+    plot_sparsity_summary(sparsity, args.modality, args.output_dir / "sparsity_summary.png")
 
     print("[raw_norm_log] Sampling nonzero entries through normalize_total -> log1p")
     plot_raw_norm_log(

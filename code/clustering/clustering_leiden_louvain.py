@@ -201,11 +201,16 @@ def main() -> None:
 
     print(f"[{args.algorithm}] resolution={args.resolution}, key={args.cluster_key}")
     cluster_fn = sc.tl.leiden if args.algorithm == "leiden" else sc.tl.louvain
+    extra_kwargs = (
+        {"flavor": "igraph", "n_iterations": 2, "directed": False}
+        if args.algorithm == "leiden" else {}
+    )
     cluster_fn(
         adata,
         resolution=args.resolution,
         key_added=args.cluster_key,
         random_state=args.random_state,
+        **extra_kwargs,
     )
 
     print(f"[umap] Computing UMAP from the {args.pipeline} neighbor graph")
