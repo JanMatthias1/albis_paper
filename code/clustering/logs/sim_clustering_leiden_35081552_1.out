@@ -12,3 +12,5 @@ Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/pyth
 
  To achieve the future defaults please pass: flavor="igraph" and n_iterations=2.  directed must also be False to work with igraph's implementation.
   cluster_fn(
+[umap] Computing UMAP from the pca_harmony neighbor graph
+slurmstepd: error: *** JOB 35107374 ON compute-129 CANCELLED AT 2026-08-23T16:15:06 ***

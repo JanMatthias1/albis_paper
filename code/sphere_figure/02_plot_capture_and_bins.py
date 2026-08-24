@@ -182,6 +182,10 @@ def plot_capture_window(base, outdir, dpi, max_cells):
 
 
 def run_sectioning(base):
+    # max_deg/max_shift intentionally left at section_3d_molecule_sphere's defaults
+    # (180 deg / 200 um) for this schematic -- a toned-down illustrative version of
+    # the misalignment used in the actual analyzed dataset (generate_simulation.py
+    # uses max_deg=270, max_shift=3000).
     return sim_app.section_3d_molecule_sphere(
         base,
         n_slices=10,

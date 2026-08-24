@@ -140,7 +140,7 @@ def main():
         rasterized=True,
     )
     style_3d_axis(ax, radius=6000)
-    ax.set_title("Intact 3D tissue sphere", fontsize=8, fontweight="bold", y=0.93)
+    ax.set_title("Intact 3D Tissue Sphere", fontsize=8, fontweight="bold", y=0.93)
 
     handles = [
         plt.Line2D([0], [0], marker="o", color="none", label=domain, markerfacecolor=color, markersize=4)
@@ -149,7 +149,7 @@ def main():
     ax.legend(
         handles=handles,
         loc="lower center",
-        bbox_to_anchor=(0.5, 0.16),
+        bbox_to_anchor=(0.5, -0.07),
         ncol=6,
         frameon=False,
         fontsize=5,

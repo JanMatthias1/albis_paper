@@ -13,3 +13,7 @@ Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/pyth
  To achieve the future defaults please pass: flavor="igraph" and n_iterations=2.  directed must also be False to work with igraph's implementation.
   cluster_fn(
 [umap] Computing UMAP from the pca_harmony neighbor graph
+/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/clustering_leiden_louvain.py:134: UserWarning: Tight layout not applied. The bottom and top margins cannot be made large enough to accommodate all Axes decorations.
+  fig.tight_layout()
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_packing_pf0p04/bin/leiden_pca_res0p1/simulation_bin_z_leiden_pca_res0p1.h5ad
+Job finished: Sun Aug 23 12:50:51 PM EDT 2026
