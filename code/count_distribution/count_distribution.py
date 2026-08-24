@@ -104,6 +104,16 @@ def parse_args() -> argparse.Namespace:
         default="real",
         help="Label used for --compare-input in plot legends/titles and default output path.",
     )
+    parser.add_argument(
+        "--match-panel-size",
+        action="store_true",
+        help="Subset --compare-input to its top-N highly-variable genes (N = --input's gene count) "
+        "before computing any comparison metric, when the real reference has a much larger gene "
+        "panel than the simulated one. Deliberately NOT a random subsample -- the simulated panel "
+        "is designed to be marker/signal-heavy, so a size-matched HVG subset of real data is the "
+        "closer like-for-like comparison, and it directly shrinks apparent total-counts/sparsity "
+        "gaps that are really just panel-size artifacts rather than simulator fidelity issues.",
+    )
     args = parser.parse_args()
 
     if args.input is None:
@@ -447,6 +457,19 @@ def run_compare(args: argparse.Namespace, rng: np.random.Generator) -> None:
     print(f"[load] compare: {args.compare_input}")
     compare = sc.read_h5ad(args.compare_input)
     print(f"[load] compare shape: {compare.n_obs} observations x {compare.n_vars} genes")
+
+    if args.match_panel_size and compare.n_vars > primary.n_vars:
+        n_target = primary.n_vars
+        print(f"[panel-match] subsetting compare from {compare.n_vars} to top-{n_target} "
+              f"highly-variable genes (matching {args.modality}'s panel size)")
+        compare_counts = compare.layers["counts_pre_batch"] if "counts_pre_batch" in compare.layers else compare.X
+        hvg_source = ad.AnnData(X=compare_counts.copy(), var=compare.var.copy())
+        sc.pp.highly_variable_genes(hvg_source, n_top_genes=n_target, flavor="seurat_v3")
+        compare = compare[:, hvg_source.var["highly_variable"]].copy()
+        print(f"[panel-match] compare shape after HVG subset: {compare.n_obs} observations x {compare.n_vars} genes")
+    elif args.match_panel_size:
+        print(f"[panel-match] skipped -- compare ({compare.n_vars} genes) is not larger than "
+              f"{args.modality} ({primary.n_vars} genes)")
 
     specs = [
         {"label": args.modality, "color": PRIMARY_COLOR, "adata": primary},
