@@ -111,12 +111,20 @@ def run_harmony(adata, batch_key: str, basis: str, adjusted_basis: str) -> None:
     )
 
 
-def color_values(obs: pd.DataFrame, key: str):
+def color_values(obs: pd.DataFrame, key: str, max_categories: int = 20):
+    """Numeric ID-like columns (e.g. slice_id) have few distinct values and should be
+    treated as discrete categories, not a continuous colorbar -- only fall back to
+    continuous coloring when there are too many distinct values to legend sensibly."""
     values = obs[key]
-    if pd.api.types.is_numeric_dtype(values):
+    is_numeric = pd.api.types.is_numeric_dtype(values)
+    if is_numeric and values.nunique() > max_categories:
         return values.to_numpy(), None
 
     categories = pd.Categorical(values.astype(str))
+    if is_numeric:
+        # string-sorts ("1" < "10" < "2") by default; re-sort numerically so the
+        # legend reads in the same order as the underlying values.
+        categories = categories.reorder_categories(sorted(categories.categories, key=float))
     return categories.codes, list(categories.categories)
 
 
@@ -153,11 +161,13 @@ def plot_two_dims(adata, embedding_key: str, color_key: str, output_path: Path) 
             )
             for i, label in enumerate(categories)
         ]
-        ax.legend(
+        ncol = min(len(categories), 10)
+        fig.legend(
             handles=handles,
             title=color_key,
-            bbox_to_anchor=(1.02, 1),
-            loc="upper left",
+            loc="upper center",
+            bbox_to_anchor=(0.5, 0.0),
+            ncol=ncol,
             frameon=False,
         )
 
@@ -245,11 +255,13 @@ def plot_umap_before_after(
             )
             for i, label in enumerate(categories)
         ]
-        axes[-1].legend(
+        ncol = min(len(categories), 10)
+        fig.legend(
             handles=handles,
             title=color_key,
-            bbox_to_anchor=(1.02, 1),
-            loc="upper left",
+            loc="upper center",
+            bbox_to_anchor=(0.5, 0.02),
+            ncol=ncol,
             frameon=False,
         )
 
