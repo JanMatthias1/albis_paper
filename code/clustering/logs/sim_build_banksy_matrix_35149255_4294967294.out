@@ -1,0 +1,99 @@
+Job started: Tue Aug 25 08:06:46 AM EDT 2026
+Host: compute-163.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-banksy/bin/python
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-banksy/bin/python sim_paper/code/clustering/01_build_banksy_matrix.py --modality bin --packing-tag packing_pf0p04_domain_shift --input sim_paper/data/noisy/packing_pf0p04_domain_shift/simulation_bin_z_qc.h5ad
+[load] sim_paper/data/noisy/packing_pf0p04_domain_shift/simulation_bin_z_qc.h5ad
+[load] AnnData shape: 716117 x 556
+[stagger] offsetting each slice's x coordinate so slices don't overlap
+  slice 0: offset x by 0.0
+  slice 1: offset x by 3324.0
+  slice 2: offset x by 6648.0
+  slice 3: offset x by 9972.0
+  slice 4: offset x by 13296.0
+  slice 5: offset x by 16620.0
+  slice 6: offset x by 19944.0
+  slice 7: offset x by 23268.0
+  slice 8: offset x by 26592.0
+  slice 9: offset x by 29916.0
+
+[normalize] normalize_total (no log1p -- BANKSY expects normalized, non-log counts here)
+[hvg] skipped -- using all 556 genes (matches pca_harmony.py's convention)
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-banksy/lib/python3.10/site-packages/scanpy/preprocessing/_normalization.py:197: UserWarning: Some cells have zero counts
+  warn(UserWarning('Some cells have zero counts'))
+
+[banksy] k_geom=15 max_m=1 lambda=0.8 decay=scaled_gaussian
+
+Median distance to closest cell = 8.0
+
+---- Ran median_dist_to_nearest_neighbour in 3.67 s ----
+
+---- Ran generate_spatial_distance_graph in 7.14 s ----
+
+---- Ran row_normalize in 4.50 s ----
+
+---- Ran generate_spatial_weights_fixed_nbrs in 33.39 s ----
+
+---- Ran generate_spatial_distance_graph in 10.27 s ----
+
+---- Ran theta_from_spatial_graph in 9.00 s ----
+
+---- Ran row_normalize in 2.51 s ----
+
+---- Ran generate_spatial_weights_fixed_nbrs in 38.97 s ----
+
+Runtime Aug-25-2026-08-09
+
+556 genes to be analysed:
+Gene List:
+Index(['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10',
+       ...
+       'G547', 'G548', 'G549', 'G550', 'G551', 'G552', 'G553', 'G554', 'G555',
+       'G556'],
+      dtype='object', length=556)
+
+Check if X contains only finite (non-NAN) values
+Decay Type: scaled_gaussian
+Weights Object: {'weights': {0: <716117x716117 sparse matrix of type '<class 'numpy.float64'>'
+	with 10741755 stored elements in Compressed Sparse Row format>, 1: <716117x716117 sparse matrix of type '<class 'numpy.complex128'>'
+	with 21483510 stored elements in Compressed Sparse Row format>}}
+
+Nbr matrix | Mean: 17.98 | Std: 31.17
+Size of Nbr | Shape: (716117, 556)
+Top 3 entries of Nbr Mat:
+
+[[ 9.32286021 44.99263842  3.29344363]
+ [15.583799   31.61920078  0.        ]
+ [ 6.80229904 13.42342916  0.        ]]
+
+AGF matrix | Mean: 7.42 | Std: 16.41
+Size of AGF mat (m = 1) | Shape: (716117, 556)
+Top entries of AGF:
+[[ 0.71776623 13.7490625   0.7724504 ]
+ [ 4.58303634 29.68473619  0.20806853]
+ [ 5.88226647 23.874218    0.36629555]]
+Ran 'Create BANKSY Matrix' in 1.3 mins
+
+Cell by gene matrix has shape (716117, 556)
+
+Scale factors squared: [0.2        0.53333333 0.26666667]
+Scale factors: [0.4472136  0.73029674 0.51639778]
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-banksy/lib/python3.10/site-packages/banksy/main.py:368: FutureWarning: X.dtype being converted to np.float32 from float64. In the next version of anndata (0.9) conversion will not be automatic. Pass dtype explicitly to avoid this warning. Pass `AnnData(X, dtype=X.dtype, ...)` to get the future behavour.
+  return anndata.AnnData(concatenated_matrix, obs=adata.obs, var=var_combined)
+Shape of BANKSY matrix: (716117, 1668)
+Type of banksy_matrix: <class 'anndata._core.anndata.AnnData'>
+
+[banksy] BANKSY matrix shape: 716117 x 1668
+
+[pca] pre-Harmony PCA + UMAP
+Current decay types: ['scaled_gaussian']
+
+Reducing dims of dataset in (Index = scaled_gaussian, lambda = 0.8)
+==================================================
+
+Setting the total number of PC = 30
+Original shape of matrix: (716117, 1668)
+Reduced shape of matrix: (716117, 30)
+------------------------------------------------------------
+min_value = -18.530576705932617, mean = 1.3175573485568748e-06, max = 22.174362182617188
+
+Conducting UMAP and adding embeddings to adata.obsm["reduced_pc_30_umap"]

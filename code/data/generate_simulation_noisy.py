@@ -131,6 +131,24 @@ def parse_args():
         help="Multiplier applied to non-marker 'noise gene' expression.",
     )
     parser.add_argument(
+        "--marker-foldchange",
+        type=float,
+        default=3.5,
+        help="Expression multiplier for a cell type's own unique marker genes. Pooling variance "
+        "across all cell types inflates a marker gene's variance far above the NB fit (between-type "
+        "mean differences dominate over within-type NB variance) -- higher values make that upper "
+        "branch in the mean-variance plot more pronounced; see the 2026-08-24 count_distribution "
+        "mean-variance investigation.",
+    )
+    parser.add_argument(
+        "--shared-marker-foldchange",
+        type=float,
+        default=2.5,
+        help="Expression multiplier for markers shared across all cell types (same variance-inflation "
+        "caveat as --marker-foldchange, but shared markers don't differ between types so the effect "
+        "is much smaller in practice).",
+    )
+    parser.add_argument(
         "--base-gene-lognormal",
         type=float,
         nargs=2,
@@ -145,6 +163,18 @@ def parse_args():
         type=float,
         default=MANUSCRIPT_BATCH_SIGMA,
         help="Standard deviation of the per-slice, per-gene log-fold-change batch effect.",
+    )
+    parser.add_argument(
+        "--domain-size-factors",
+        type=float,
+        nargs=6,
+        default=None,
+        metavar=("D0", "D1", "D2", "D3", "D4", "D5"),
+        help="Per-domain expression scale factor (6 values, one per domain -- this script's "
+        "n_domains=6 is hardcoded below). Multiplies every gene's NB mean uniformly for cells "
+        "in that domain (sim_app's existing domain_size_factors kwarg -- a per-domain library-size "
+        "shift, independent of cell type; NOT a per-gene profile the way cell-type markers are). "
+        "Defaults to None (all domains =1.0, no effect, current manuscript behavior).",
     )
     parser.add_argument(
         "--sphere-r-um",
@@ -196,7 +226,10 @@ SLICE_AXIS = args.slice_axis
 THETA = args.theta
 THETA_JITTER = args.theta_jitter
 NOISE_SCALE = args.noise_scale
+MARKER_FOLDCHANGE = args.marker_foldchange
+SHARED_MARKER_FOLDCHANGE = args.shared_marker_foldchange
 BATCH_SIGMA = args.batch_sigma
+DOMAIN_SIZE_FACTORS = args.domain_size_factors
 BASE_GENE_LOGNORMAL = tuple(args.base_gene_lognormal)
 N_CELLS = args.n_cells
 SPHERE_R_UM = args.sphere_r_um
@@ -219,6 +252,7 @@ PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 def generate_modality(
     output_modality, slice_axis, theta, theta_jitter, noise_scale, batch_sigma, base_gene_lognormal,
     n_cells, sphere_r_um, capture_window_um, core_fuzz_width_um, max_shift,
+    marker_foldchange, shared_marker_foldchange, domain_size_factors,
 ):
     # sim_app.generate_data() doesn't forward theta/theta_jitter/noise_scale/
     # base_gene_lognormal, so call the lower-level simulator directly and pull
@@ -264,8 +298,11 @@ def generate_modality(
         theta=theta,
         theta_jitter=theta_jitter,
         noise_scale=noise_scale,
+        marker_foldchange=marker_foldchange,
+        shared_marker_foldchange=shared_marker_foldchange,
         base_gene_lognormal=base_gene_lognormal,
         batch_sigma=batch_sigma,
+        domain_size_factors=domain_size_factors,
         max_deg=270.0,
         max_shift=max_shift,
         output_modalities=(output_modality,),
@@ -284,8 +321,11 @@ def generate_modality(
         "core_fuzz_width_um": core_fuzz_width_um,
         "max_shift": max_shift,
         "noise_scale": noise_scale,
+        "marker_foldchange": marker_foldchange,
+        "shared_marker_foldchange": shared_marker_foldchange,
         "batch_sigma": batch_sigma,
         "base_gene_lognormal": list(base_gene_lognormal),
+        "domain_size_factors": list(domain_size_factors) if domain_size_factors is not None else None,
     }
     return adata
 
@@ -300,6 +340,7 @@ print(
 adata = generate_modality(
     OUTPUT_MODALITY, SLICE_AXIS, THETA, THETA_JITTER, NOISE_SCALE, BATCH_SIGMA, BASE_GENE_LOGNORMAL,
     N_CELLS, SPHERE_R_UM, CAPTURE_WINDOW_UM, CORE_FUZZ_WIDTH_UM, MAX_SHIFT,
+    MARKER_FOLDCHANGE, SHARED_MARKER_FOLDCHANGE, DOMAIN_SIZE_FACTORS,
 )
 print("\nGenerated AnnData:")
 print(adata)

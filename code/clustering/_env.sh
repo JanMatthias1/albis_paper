@@ -15,7 +15,12 @@ if command -v conda >/dev/null 2>&1; then
     # shellcheck source=/dev/null
     source "${CONDA_BASE}/etc/profile.d/conda.sh"
     conda activate "${ENV_PREFIX}"
-    PYTHON_BIN="$(command -v python)"
+    # Don't overwrite PYTHON_BIN with `command -v python` here: if the job's
+    # inherited PATH already has another env's bin/ (e.g. sim-app-banksy)
+    # ahead of what `conda activate` prepends -- seen in practice on a busy
+    # node, 2026-08-25 -- this silently resolves to the WRONG interpreter
+    # even though `conda activate` itself "succeeded". The absolute path
+    # set above is unambiguous regardless of PATH ordering.
 else
     echo "WARNING: conda was not found; using ${PYTHON_BIN} directly." >&2
     if [[ ! -x "${PYTHON_BIN}" ]]; then

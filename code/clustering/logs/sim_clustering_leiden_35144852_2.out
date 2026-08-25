@@ -1,0 +1,18 @@
+Job started: Tue Aug 25 03:40:05 AM EDT 2026
+Host: compute-174.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-banksy/bin/python
+Modality: cell
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-banksy/bin/python sim_paper/code/clustering/clustering_leiden_louvain.py --modality cell --input sim_paper/data/clustering_packing_pf0p04/cell/banksy_pca_harmony_qc/simulation_cell_z_banksy_pca_harmony_qc.h5ad --output-dir sim_paper/data/clustering_packing_pf0p04/cell/leiden_pca_banksy_res0p2 --pipeline pca_harmony --resolution 0.2
+[load] sim_paper/data/clustering_packing_pf0p04/cell/banksy_pca_harmony_qc/simulation_cell_z_banksy_pca_harmony_qc.h5ad
+[neighbors] Using first 30 dimensions of X_pca_harmony with n_neighbors=15
+[leiden] resolution=0.2, key=cluster_label
+Traceback (most recent call last):
+  File "/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/clustering_leiden_louvain.py", line 305, in <module>
+    main()
+  File "/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/clustering_leiden_louvain.py", line 264, in main
+    cluster_fn(
+  File "/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-banksy/lib/python3.10/site-packages/scanpy/tools/_leiden.py", line 144, in leiden
+    part = leidenalg.find_partition(g, partition_type, **partition_kwargs)
+  File "/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-banksy/lib/python3.10/site-packages/leidenalg/functions.py", line 81, in find_partition
+    partition = partition_type(graph,
+TypeError: RBConfigurationVertexPartition.__init__() got an unexpected keyword argument 'flavor'

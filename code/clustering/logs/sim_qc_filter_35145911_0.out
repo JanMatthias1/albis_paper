@@ -1,0 +1,13 @@
+Job started: Tue Aug 25 03:56:55 AM EDT 2026
+Host: compute-178.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-banksy/bin/python
+Modality: spot
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-banksy/bin/python sim_paper/code/clustering/00_qc_filter.py --modality spot --packing-tag packing_pf0p04_log_mu_-2.5
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_log_mu_-2.5/simulation_spot_z.h5ad
+[load] AnnData shape: 5290 x 556
+[qc] fully-empty (total_counts == 0): 164 (3.10%)
+[qc] near-empty (0 < total_counts, n_genes < 3): 7 (0.13%)
+[qc] dropped 171 observations (3.23%); 5119 remain
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_log_mu_-2.5/simulation_spot_z_qc_summary.json
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_log_mu_-2.5/simulation_spot_z_qc.h5ad
+Job finished: Tue Aug 25 03:56:57 AM EDT 2026

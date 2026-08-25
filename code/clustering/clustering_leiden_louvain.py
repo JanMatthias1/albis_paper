@@ -136,6 +136,62 @@ def plot_umap(adata, color_key: str, output_path: Path) -> None:
     plt.close(fig)
 
 
+def plot_umap_true_vs_predicted(adata, true_key: str, pred_key: str, output_path: Path) -> None:
+    """Side-by-side UMAP: ground truth on the left, predicted clusters on the right,
+    same coordinates/axis limits so shapes are directly comparable without flipping
+    between two separate images."""
+    coords = np.asarray(adata.obsm["X_umap"])
+    xlim = (coords[:, 0].min() - 1, coords[:, 0].max() + 1)
+    ylim = (coords[:, 1].min() - 1, coords[:, 1].max() + 1)
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5.5))
+    for ax, key, title in ((axes[0], true_key, f"Ground truth: {true_key}"), (axes[1], pred_key, f"Predicted: {pred_key}")):
+        colors, categories = color_values(adata.obs, key)
+        scatter = ax.scatter(coords[:, 0], coords[:, 1], c=colors, s=5, linewidths=0, cmap="tab20", alpha=0.85)
+        ax.set_xlabel("UMAP 1")
+        ax.set_ylabel("UMAP 2")
+        ax.set_title(title)
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
+        if categories is not None:
+            handles = [
+                plt.Line2D([0], [0], marker="o", color="w", markerfacecolor=scatter.cmap(scatter.norm(i)), markersize=6, label=label)
+                for i, label in enumerate(categories)
+            ]
+            ax.legend(handles=handles, title=key, bbox_to_anchor=(0.5, -0.15), loc="upper center", ncol=min(len(categories), 8), frameon=False, fontsize=7)
+
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    plt.close(fig)
+
+
+def plot_contingency_heatmap(adata, true_key: str, pred_key: str, output_path: Path) -> None:
+    """Row-normalized contingency table (true label x predicted cluster): for each
+    true category, what fraction of its cells landed in each predicted cluster.
+    A clean recovery shows up as (close to) one bright cell per row; a smeared row
+    means that true category isn't separable from the others in this embedding."""
+    true_labels = adata.obs[true_key].astype(str)
+    pred_labels = adata.obs[pred_key].astype(str)
+    table = pd.crosstab(true_labels, pred_labels)
+    table = table.reindex(sorted(table.index, key=str), axis=0)
+    table = table.reindex(sorted(table.columns, key=lambda x: int(x) if x.lstrip("-").isdigit() else x), axis=1)
+    frac = table.div(table.sum(axis=1), axis=0)
+
+    fig, ax = plt.subplots(figsize=(max(5, 0.6 * frac.shape[1] + 2), max(4, 0.5 * frac.shape[0] + 1.5)))
+    im = ax.imshow(frac.to_numpy(), cmap="viridis", vmin=0, vmax=1, aspect="auto")
+    ax.set_xticks(range(frac.shape[1]))
+    ax.set_xticklabels(frac.columns, rotation=90)
+    ax.set_yticks(range(frac.shape[0]))
+    ax.set_yticklabels(frac.index)
+    ax.set_xlabel(f"Predicted cluster ({pred_key})")
+    ax.set_ylabel(f"Ground truth ({true_key})")
+    ax.set_title(f"Fraction of each {true_key} category per predicted cluster")
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="fraction of row")
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    plt.close(fig)
+
+
 def main() -> None:
     args = parse_args()
     clustering_root = (
@@ -223,6 +279,14 @@ def main() -> None:
 
     for color_key in valid_colors:
         plot_umap(adata, color_key, plot_dir / f"umap_by_{color_key}.png")
+
+    # Ground-truth-vs-predicted comparisons: side-by-side UMAP + contingency heatmap,
+    # for each true-label column that's actually present alongside cluster_label.
+    for true_key in ("cell_type_true", "domain_true"):
+        if true_key not in adata.obs or args.cluster_key not in adata.obs:
+            continue
+        plot_umap_true_vs_predicted(adata, true_key, args.cluster_key, plot_dir / f"umap_true_vs_predicted_{true_key}.png")
+        plot_contingency_heatmap(adata, true_key, args.cluster_key, plot_dir / f"contingency_{true_key}.png")
 
     adata.uns[f"{args.algorithm}_umap"] = {
         "algorithm": args.algorithm,

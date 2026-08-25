@@ -1,0 +1,5 @@
+Job started: Tue Aug 25 08:09:08 AM EDT 2026
+Host: compute-127.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Modality: cell
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python generate_simulation_noisy.py --modality cell --base-gene-lognormal -0.5 0.7 --theta 0.25 --out-tag log_mu_-0.5_theta_0.25
