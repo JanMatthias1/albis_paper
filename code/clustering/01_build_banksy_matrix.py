@@ -96,8 +96,11 @@ def parse_args() -> argparse.Namespace:
     if args.input is None:
         args.input = root / f"simulation_{args.modality}_z.h5ad"
     if args.output_dir is None:
+        # "_qc" in the dirname since this script is meant to run on QC-filtered input
+        # (see 00_qc_filter.py / figure.md 2026-08-24) -- named explicitly so it's
+        # never ambiguous with a hypothetical non-QC BANKSY run.
         args.output_dir = (
-            SIM_PAPER_DIR / "data" / f"clustering_{args.packing_tag}" / args.modality / "banksy_pca_harmony"
+            SIM_PAPER_DIR / "data" / f"clustering_{args.packing_tag}" / args.modality / "banksy_pca_harmony_qc"
         )
     return args
 
@@ -281,7 +284,7 @@ def main() -> None:
     # obsm["X_pca_harmony"] is the key clustering_leiden_louvain.py's
     # --pipeline pca_harmony expects -- point --input at this file and it
     # needs no changes to run Leiden/Louvain on the BANKSY-derived embedding.
-    out_path = args.output_dir / f"simulation_{args.modality}_z_banksy_pca_harmony.h5ad"
+    out_path = args.output_dir / f"simulation_{args.modality}_z_banksy_pca_harmony_qc.h5ad"
     print(f"\n[save] {out_path}")
     bdata.write_h5ad(out_path)
     print("[save] done")
