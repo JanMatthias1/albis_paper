@@ -1,0 +1,17 @@
+Job started: Tue Aug 25 11:22:35 AM EDT 2026
+Host: compute-169.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Modality: spot
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/ari_vs_ground_truth.py --modality spot --packing-tag packing_pf0p04_bsigma015 --input sim_paper/data/clustering_packing_pf0p04_bsigma015/spot/banksy_pca_harmony_qc_lambda0p2/simulation_spot_z_banksy_pca_harmony_qc.h5ad --output-dir sim_paper/data/clustering_packing_pf0p04_bsigma015/spot/banksy_ari_recovery_lambda0p2
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] sim_paper/data/clustering_packing_pf0p04_bsigma015/spot/banksy_pca_harmony_qc_lambda0p2/simulation_spot_z_banksy_pca_harmony_qc.h5ad
+[load] AnnData shape: 5131 x 1668
+[neighbors] n_pcs=30 n_neighbors=15
+[ari] domain_true: target_k=6
+[ari] domain_true: resolution=0.0158 achieved_k=7 (target 6)  ARI=0.0262
+[ari] cell_type_true: target_k=8
+[ari] cell_type_true: resolution=0.0567 achieved_k=8 (target 8)  ARI=0.0003
+[save] sim_paper/data/clustering_packing_pf0p04_bsigma015/spot/banksy_ari_recovery_lambda0p2/ari_summary_spot.json
+[save] sim_paper/data/clustering_packing_pf0p04_bsigma015/spot/banksy_ari_recovery_lambda0p2/simulation_spot_z_ari_recovery.h5ad
+Job finished: Tue Aug 25 11:22:59 AM EDT 2026

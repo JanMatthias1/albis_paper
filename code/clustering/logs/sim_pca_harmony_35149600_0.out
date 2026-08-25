@@ -1,0 +1,50 @@
+Job started: Tue Aug 25 08:59:57 AM EDT 2026
+Host: compute-129.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Modality: spot
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/pca_harmony.py --modality spot --input sim_paper/data/noisy/packing_pf0p04_bsigma010/simulation_spot_z_qc.h5ad --output sim_paper/data/clustering_packing_pf0p04_bsigma010/spot/pca_harmony_qc/simulation_spot_z_pca_harmony_qc.h5ad
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] sim_paper/data/noisy/packing_pf0p04_bsigma010/simulation_spot_z_qc.h5ad
+[load] AnnData shape: 5131 observations x 556 genes
+[pca] Running PCA with 30 components over all genes
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/functools.py:889: UserWarning: zero-centering a sparse array/matrix densifies it.
+  return dispatch(args[0].__class__)(*args, **kw)
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/scanpy/preprocessing/_pca/__init__.py:226: FutureWarning: Argument `use_highly_variable` is deprecated, consider using the mask argument. Use_highly_variable=True can be called through mask_var="highly_variable". Use_highly_variable=False can be called through mask_var=None
+  mask_var_param, mask_var = _handle_mask_var(
+[harmony] Correcting X_pca_pre_harmony by obs['slice_id']
+2026-08-25 09:00:00,855 - harmonypy - INFO - Running Harmony
+2026-08-25 09:00:00,855 - harmonypy - INFO -   Parameters:
+2026-08-25 09:00:00,855 - harmonypy - INFO -     max_iter_harmony: 10
+2026-08-25 09:00:00,855 - harmonypy - INFO -     max_iter_kmeans: 4
+2026-08-25 09:00:00,856 - harmonypy - INFO -     epsilon_cluster: 0.001
+2026-08-25 09:00:00,856 - harmonypy - INFO -     epsilon_harmony: 0.01
+2026-08-25 09:00:00,856 - harmonypy - INFO -     nclust: 100
+2026-08-25 09:00:00,856 - harmonypy - INFO -     block_size: 0.05
+2026-08-25 09:00:00,856 - harmonypy - INFO -     lamb: dynamic (alpha=0.2)
+2026-08-25 09:00:00,856 - harmonypy - INFO -     theta: [2. 2. 2. 2. 2. 2. 2. 2. 2. 2.]
+2026-08-25 09:00:00,857 - harmonypy - INFO -     sigma: [0.1 0.1 0.1 0.1 0.1]...
+2026-08-25 09:00:00,857 - harmonypy - INFO -     verbose: True
+2026-08-25 09:00:00,857 - harmonypy - INFO -     random_state: 0
+2026-08-25 09:00:00,857 - harmonypy - INFO -   Data: 30 PCs × 5131 cells
+2026-08-25 09:00:00,857 - harmonypy - INFO -   Batch variables: ['slice_id']
+2026-08-25 09:00:00,865 - harmonypy - INFO - Computing initial centroids...
+2026-08-25 09:00:01,009 - harmonypy - INFO - Initialization complete.
+2026-08-25 09:00:01,010 - harmonypy - INFO - Iteration 1 of 10
+2026-08-25 09:00:01,112 - harmonypy - INFO - Iteration 2 of 10
+2026-08-25 09:00:01,219 - harmonypy - INFO - Iteration 3 of 10
+2026-08-25 09:00:01,326 - harmonypy - INFO - Iteration 4 of 10
+2026-08-25 09:00:01,434 - harmonypy - INFO - Iteration 5 of 10
+2026-08-25 09:00:01,541 - harmonypy - INFO - Iteration 6 of 10
+2026-08-25 09:00:01,648 - harmonypy - INFO - Iteration 7 of 10
+2026-08-25 09:00:01,755 - harmonypy - INFO - Converged after 7 iterations
+[plot] Saving PCA before/after plots under sim_paper/data/clustering_packing_pf0p04_bsigma010/spot/pca_harmony_qc/plots
+[umap] Computing UMAP before Harmony from PCA
+[umap] Computing UMAP after Harmony from PCA
+[plot] Saving before/after UMAP plots under sim_paper/data/clustering_packing_pf0p04_bsigma010/spot/pca_harmony_qc/plots
+[pc_pairs] Plotting PC pairs by slice_id under sim_paper/data/clustering_packing_pf0p04_bsigma010/spot/pca_harmony_qc/plots/pc_pairs
+[pc_pairs] Plotting 30 PCs (15 adjacent pairs) using all observations
+[pc_pairs] Saved -> sim_paper/data/clustering_packing_pf0p04_bsigma010/spot/pca_harmony_qc/plots/pc_pairs/by_slice_id/pc_pairs_pre_harmony_by_slice_id.png
+[pc_pairs] Saved -> sim_paper/data/clustering_packing_pf0p04_bsigma010/spot/pca_harmony_qc/plots/pc_pairs/by_slice_id/pc_pairs_post_harmony_by_slice_id.png
+[save] sim_paper/data/clustering_packing_pf0p04_bsigma010/spot/pca_harmony_qc/simulation_spot_z_pca_harmony_qc.h5ad
+Job finished: Tue Aug 25 09:00:34 AM EDT 2026

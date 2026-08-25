@@ -1,0 +1,15 @@
+Job started: Tue Aug 25 11:29:16 AM EDT 2026
+Host: compute-178.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Modality: bin
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python sim_paper/code/clustering/00_qc_filter.py --modality bin --packing-tag packing_pf0p04_bsigma08
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_bsigma08/simulation_bin_z.h5ad
+[load] AnnData shape: 772840 x 556
+[qc] fully-empty (total_counts == 0): 45166 (5.84%)
+[qc] near-empty (0 < total_counts, n_genes < 3): 11483 (1.49%)
+[qc] dropped 56649 observations (7.33%); 716191 remain
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_bsigma08/simulation_bin_z_qc_summary.json
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_bsigma08/simulation_bin_z_qc.h5ad
+Job finished: Tue Aug 25 11:29:37 AM EDT 2026

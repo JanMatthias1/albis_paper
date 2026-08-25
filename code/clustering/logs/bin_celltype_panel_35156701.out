@@ -1,0 +1,10 @@
+[ari] resolution-matched ARI recovery
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+usage: ari_vs_ground_truth.py [-h] --modality {bin,spot,cell}
+                              [--packing-tag PACKING_TAG] [--input INPUT]
+                              [--output-dir OUTPUT_DIR] [--n-pcs N_PCS]
+                              [--n-neighbors N_NEIGHBORS]
+                              [--random-state RANDOM_STATE] [--res-lo RES_LO]
+                              [--res-hi RES_HI] [--max-iter MAX_ITER]
+ari_vs_ground_truth.py: error: the following arguments are required: --modality
