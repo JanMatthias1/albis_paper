@@ -37,6 +37,13 @@ SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
 CLUSTERING_ROOT = SIM_PAPER_DIR / "data" / "clustering"
 DEFAULT_INPUT = CLUSTERING_ROOT / "spot" / "pca_harmony" / "simulation_spot_z_pca_harmony.h5ad"
 DEFAULT_OUTPUT_DIR = CLUSTERING_ROOT
+
+# Shared with pca_harmony.py's plot_umap_before_after so the two side-by-side UMAP
+# comparison panels in Figure 3 come out at the same aspect ratio (see that
+# function for why bbox_inches="tight" isn't used here).
+PANEL_FIGSIZE = (12, 6)
+PANEL_DPI = 180
+PANEL_RECT = (0.0, 0.10, 1.0, 0.93)
 VALID_MODALITIES = ("spot", "bin", "cell")
 VALID_ALGORITHMS = ("leiden", "louvain")
 VALID_PIPELINES = ("pca_harmony", "gene_harmony")

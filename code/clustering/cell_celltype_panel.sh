@@ -66,10 +66,22 @@ echo "[ari] resolution-matched ARI recovery"
     --input "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad" \
     --output-dir "${CLUSTER_ROOT}/ari_recovery_qc"
 
-echo "[leiden] fixed-resolution qualitative plots (UMAP true-vs-predicted, contingency heatmap)"
+# Use the SAME resolution ari_vs_ground_truth.py's binary search already found
+# for cell_type_true (achieves the true category count exactly), rather than a
+# fixed guess -- otherwise this qualitative plot's predicted-cluster count can
+# drift from the true count and look like a mismatch that isn't really there
+# (found 2026-08-25 on spot: fixed res=0.5 landed on 7 clusters vs. 8 true
+# types, while the matched res=0.524 hits 8/8).
+RESOLUTION=$("${PYTHON_BIN}" -c "
+import json
+with open('${CLUSTER_ROOT}/ari_recovery_qc/ari_summary_${MODALITY}.json') as f:
+    summary = json.load(f)
+print(next(r['resolution'] for r in summary if r['ground_truth'] == 'cell_type_true'))
+")
+echo "[leiden] cell_type_true-matched-resolution qualitative plots (resolution=${RESOLUTION}, UMAP true-vs-predicted, contingency heatmap)"
 "${PYTHON_BIN}" sim_paper/code/clustering/clustering_leiden_louvain.py \
     --input "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad" \
-    --output-dir "${CLUSTER_ROOT}/leiden_pca_qc_res0p5" \
-    --pipeline pca_harmony --resolution 0.5
+    --output-dir "${CLUSTER_ROOT}/leiden_pca_qc_celltype_matched" \
+    --pipeline pca_harmony --resolution "${RESOLUTION}"
 
 echo "[done] cell_type_true ARI -> ${CLUSTER_ROOT}/ari_recovery_qc/ari_summary_${MODALITY}.json"

@@ -38,6 +38,13 @@ CLUSTERING_ROOT = SIM_PAPER_DIR / "data" / "clustering"
 DEFAULT_OUTPUT = CLUSTERING_ROOT / "spot" / "pca_harmony" / "simulation_spot_z_pca_harmony.h5ad"
 VALID_MODALITIES = ("spot", "bin", "cell")
 
+# Shared with clustering_leiden_louvain.py's plot_umap_true_vs_predicted so the two
+# side-by-side UMAP comparison panels come out at the same aspect ratio (see
+# plot_umap_before_after for why bbox_inches="tight" isn't used here).
+PANEL_FIGSIZE = (12, 6)
+PANEL_DPI = 180
+PANEL_RECT = (0.0, 0.10, 1.0, 0.93)
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -72,6 +79,13 @@ def parse_args() -> argparse.Namespace:
         nargs="+",
         default=["slice_id", "domain_true", "cell_type_true"],
         help="obs columns to use for PCA before/after Harmony plots.",
+    )
+    parser.add_argument(
+        "--plots-only",
+        action="store_true",
+        help="Skip PCA/Harmony (--input must already have X_pca_pre_harmony/X_pca_post_harmony, "
+        "e.g. an existing *_pca_harmony*.h5ad output) and just regenerate the PCA/UMAP plots -- "
+        "for re-plotting after a plot-formatting change without rerunning Harmony.",
     )
     return parser.parse_args()
 
@@ -109,6 +123,11 @@ def run_harmony(adata, batch_key: str, basis: str, adjusted_basis: str) -> None:
         f"Harmony returned shape {corrected.shape}; expected {pca.shape} "
         f"or its transpose for adata.obsm[{adjusted_basis!r}]."
     )
+
+
+def pretty_label(key: str) -> str:
+    """Display-friendly version of an obs column name, e.g. 'slice_id' -> 'Slice Id'."""
+    return key.replace("_", " ").title()
 
 
 def color_values(obs: pd.DataFrame, key: str, max_categories: int = 20):
@@ -220,7 +239,7 @@ def plot_umap_before_after(
     pre = np.asarray(adata.obsm["X_umap_pca_pre_harmony"])
     post = np.asarray(adata.obsm["X_umap_pca_post_harmony"])
 
-    fig, axes = plt.subplots(1, 2, figsize=(11, 5), sharex=False, sharey=False)
+    fig, axes = plt.subplots(1, 2, figsize=PANEL_FIGSIZE, sharex=False, sharey=False)
     scatters = []
     for ax, coords, title in [
         (axes[0], pre, "Before Harmony"),
@@ -241,7 +260,7 @@ def plot_umap_before_after(
         ax.set_title(title)
 
     if categories is None:
-        fig.colorbar(scatters[-1], ax=axes, fraction=0.046, pad=0.04, label=color_key)
+        fig.colorbar(scatters[-1], ax=axes, fraction=0.046, pad=0.04, label=pretty_label(color_key))
     else:
         handles = [
             plt.Line2D(
@@ -258,16 +277,22 @@ def plot_umap_before_after(
         ncol = min(len(categories), 10)
         fig.legend(
             handles=handles,
-            title=color_key,
+            title=pretty_label(color_key),
             loc="upper center",
             bbox_to_anchor=(0.5, 0.02),
             ncol=ncol,
             frameon=False,
         )
 
-    fig.suptitle(f"PCA UMAP before vs after Harmony by {color_key}")
-    fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    fig.suptitle(f"PCA UMAP before vs after Harmony by {pretty_label(color_key)}", fontweight="bold")
+    # Fixed figsize + no bbox_inches="tight" here (unlike the other plot_* functions in this
+    # file) so the saved canvas is always exactly PANEL_FIGSIZE * PANEL_DPI, matching
+    # clustering_leiden_louvain.py's plot_umap_true_vs_predicted pixel-for-pixel -- both are
+    # side-by-side UMAP comparison panels shown together in Figure 3 and need the same aspect
+    # ratio. "tight" cropping makes the final size depend on legend/title content, which is why
+    # the two used to drift apart.
+    fig.tight_layout(rect=PANEL_RECT)
+    fig.savefig(output_path, dpi=PANEL_DPI)
     plt.close(fig)
 
 
@@ -316,13 +341,22 @@ def main() -> None:
     if args.batch_key not in adata.obs:
         raise KeyError(f"Batch key {args.batch_key!r} was not found in adata.obs.")
 
-    print(f"[pca] Running PCA with {args.n_pcs} components over all genes")
-    preprocess_for_pca(adata, args.n_pcs, args.random_state, args.target_sum)
+    if args.plots_only:
+        for key in ("X_pca_pre_harmony", "X_pca_post_harmony"):
+            if key not in adata.obsm:
+                raise KeyError(
+                    f"--plots-only requires {key!r} in adata.obsm; {args.input} looks like raw "
+                    "input, not a previous pca_harmony.py output."
+                )
+        print("[plots-only] Skipping PCA/Harmony, using precomputed obsm from --input")
+    else:
+        print(f"[pca] Running PCA with {args.n_pcs} components over all genes")
+        preprocess_for_pca(adata, args.n_pcs, args.random_state, args.target_sum)
 
-    print(f"[harmony] Correcting X_pca_pre_harmony by obs['{args.batch_key}']")
-    run_harmony(adata, args.batch_key, "X_pca_pre_harmony", "X_pca_post_harmony")
-    adata.obsm["X_pca"] = adata.obsm["X_pca_pre_harmony"].copy()
-    adata.obsm["X_pca_harmony"] = adata.obsm["X_pca_post_harmony"].copy()
+        print(f"[harmony] Correcting X_pca_pre_harmony by obs['{args.batch_key}']")
+        run_harmony(adata, args.batch_key, "X_pca_pre_harmony", "X_pca_post_harmony")
+        adata.obsm["X_pca"] = adata.obsm["X_pca_pre_harmony"].copy()
+        adata.obsm["X_pca_harmony"] = adata.obsm["X_pca_post_harmony"].copy()
 
     print(f"[plot] Saving PCA before/after plots under {plot_dir}")
     save_pca_plots(adata, plot_dir, args.plot_colors)
@@ -355,6 +389,10 @@ def main() -> None:
 
     print(f"[plot] Saving before/after UMAP plots under {plot_dir}")
     save_umap_plots(umap_adata, plot_dir, args.plot_colors, args.point_size, args.alpha)
+
+    if args.plots_only:
+        print("[plots-only] Done, not touching the existing PCA/Harmony output file")
+        return
 
     print(f"[pc_pairs] Plotting PC pairs by {args.batch_key} under {plot_dir / 'pc_pairs'}")
     plot_pc_pairs(

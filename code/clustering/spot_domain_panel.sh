@@ -69,10 +69,21 @@ echo "[ari] resolution-matched ARI recovery"
     --input "${CLUSTER_ROOT}/banksy_pca_harmony_qc/simulation_${MODALITY}_z_banksy_pca_harmony_qc.h5ad" \
     --output-dir "${CLUSTER_ROOT}/banksy_ari_recovery"
 
-echo "[leiden] fixed-resolution qualitative plots (UMAP true-vs-predicted, contingency heatmap)"
+# Use the SAME resolution ari_vs_ground_truth.py's binary search already found
+# for domain_true (achieves the true category count exactly), rather than a
+# fixed guess -- same fix as the celltype panels (see cell_celltype_panel.sh),
+# 2026-08-25: fixed res=0.5 gave 9 predicted clusters vs. 6 true domains here,
+# while the matched res=0.057 hits 6/6 (ARI=0.611).
+RESOLUTION=$("${TUTORIAL_PYTHON}" -c "
+import json
+with open('${CLUSTER_ROOT}/banksy_ari_recovery/ari_summary_${MODALITY}.json') as f:
+    summary = json.load(f)
+print(next(r['resolution'] for r in summary if r['ground_truth'] == 'domain_true'))
+")
+echo "[leiden] domain_true-matched-resolution qualitative plots (resolution=${RESOLUTION}, UMAP true-vs-predicted, contingency heatmap)"
 "${TUTORIAL_PYTHON}" sim_paper/code/clustering/clustering_leiden_louvain.py \
     --input "${CLUSTER_ROOT}/banksy_pca_harmony_qc/simulation_${MODALITY}_z_banksy_pca_harmony_qc.h5ad" \
-    --output-dir "${CLUSTER_ROOT}/leiden_pca_banksy_res0p5" \
-    --pipeline pca_harmony --resolution 0.5
+    --output-dir "${CLUSTER_ROOT}/leiden_pca_banksy_domain_matched" \
+    --pipeline pca_harmony --resolution "${RESOLUTION}"
 
 echo "[done] domain_true ARI -> ${CLUSTER_ROOT}/banksy_ari_recovery/ari_summary_${MODALITY}.json"
