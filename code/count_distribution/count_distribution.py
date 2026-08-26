@@ -106,6 +106,24 @@ def parse_args() -> argparse.Namespace:
         help="Label used for --compare-input in plot legends/titles and default output path.",
     )
     parser.add_argument(
+        "--slice-id",
+        type=int,
+        default=None,
+        help="Restrict --input (the sim/primary dataset) to a single obs['slice_id'] value before "
+        "computing any stats or plots, instead of pooling all slices. Real --compare-input data has "
+        "no slice_id and is never filtered by this flag.",
+    )
+    parser.add_argument(
+        "--use-batch-effect",
+        action="store_true",
+        help="Use --input's X (post-batch-effect counts) uniformly for every stat/plot, "
+        "instead of the default 'counts_pre_batch' layer when present. Real --compare-input data "
+        "has no pre-batch version -- whatever technical noise it carries is just baked into its "
+        "counts -- so this makes the sim side match that: apples-to-apples, not artificially "
+        "cleaner than real can ever be. Also fixes an inconsistency where raw_norm_log_compare "
+        "already always used X while the other four comparison panels used counts_pre_batch.",
+    )
+    parser.add_argument(
         "--match-panel-size",
         action="store_true",
         help="HVG-subset whichever of --input/--compare-input has the larger gene panel down to "
@@ -452,10 +470,29 @@ def plot_raw_norm_log_compare(
     plt.close(fig)
 
 
+def select_counts(adata: ad.AnnData, use_batch_effect: bool):
+    if use_batch_effect:
+        return adata.X
+    return adata.layers["counts_pre_batch"] if "counts_pre_batch" in adata.layers else adata.X
+
+
+def restrict_to_slice(adata: ad.AnnData, slice_id: int) -> ad.AnnData:
+    if "slice_id" not in adata.obs.columns:
+        raise SystemExit(f"--slice-id {slice_id} given but 'slice_id' not found in obs columns")
+    keep = adata.obs["slice_id"] == slice_id
+    if not keep.any():
+        raise SystemExit(f"--slice-id {slice_id} matches no observations (available: "
+                          f"{sorted(adata.obs['slice_id'].unique().tolist())})")
+    print(f"[slice] restricting to slice_id={slice_id}: {adata.n_obs} -> {int(keep.sum())} observations")
+    return adata[keep].copy()
+
+
 def run_compare(args: argparse.Namespace, rng: np.random.Generator) -> None:
     print(f"[load] primary: {args.input}")
     primary = sc.read_h5ad(args.input)
     print(f"[load] primary shape: {primary.n_obs} observations x {primary.n_vars} genes")
+    if args.slice_id is not None:
+        primary = restrict_to_slice(primary, args.slice_id)
 
     print(f"[load] compare: {args.compare_input}")
     compare = sc.read_h5ad(args.compare_input)
@@ -474,7 +511,7 @@ def run_compare(args: argparse.Namespace, rng: np.random.Generator) -> None:
         larger = compare if larger_name == "compare" else primary
         print(f"[panel-match] subsetting {larger_name} from {larger.n_vars} to top-{n_target} "
               f"highly-variable genes (matching the smaller panel)")
-        larger_counts = larger.layers["counts_pre_batch"] if "counts_pre_batch" in larger.layers else larger.X
+        larger_counts = select_counts(larger, args.use_batch_effect)
         hvg_source = ad.AnnData(X=larger_counts.copy(), var=larger.var.copy())
         sc.pp.highly_variable_genes(hvg_source, n_top_genes=n_target, flavor="seurat_v3")
         larger = larger[:, hvg_source.var["highly_variable"]].copy()
@@ -493,7 +530,7 @@ def run_compare(args: argparse.Namespace, rng: np.random.Generator) -> None:
     ]
     for spec in specs:
         adata = spec["adata"]
-        raw_counts = adata.layers["counts_pre_batch"] if "counts_pre_batch" in adata.layers else adata.X
+        raw_counts = select_counts(adata, args.use_batch_effect)
         mean, var = gene_mean_var(raw_counts)
         spec["mean"] = mean
         spec["var"] = var
@@ -502,8 +539,8 @@ def run_compare(args: argparse.Namespace, rng: np.random.Generator) -> None:
         spec["total_counts"] = np.asarray(raw_counts.sum(axis=1)).ravel()
         spec["n_genes"] = genes_per_cell(raw_counts)
         spec["sparsity"] = compute_sparsity_stats(raw_counts, spec["n_genes"])
-        print(f"[nb] {spec['label']}: theta_hat = {spec['theta']:.2f}, "
-              f"{'counts_pre_batch' if 'counts_pre_batch' in adata.layers else 'X'} used for mean-variance/total-counts")
+        used = "X" if (args.use_batch_effect or "counts_pre_batch" not in adata.layers) else "counts_pre_batch"
+        print(f"[nb] {spec['label']}: theta_hat = {spec['theta']:.2f}, {used} used for mean-variance/total-counts")
         print(f"[sparsity] {spec['label']}: {spec['sparsity']['matrix_zero_frac'] * 100:.2f}% zero entries, "
               f"{spec['sparsity']['empty_row_frac'] * 100:.2f}% fully-empty cells")
 
@@ -526,6 +563,8 @@ def run_compare(args: argparse.Namespace, rng: np.random.Generator) -> None:
         "modality": args.modality,
         "compare_label": args.compare_label,
         "match_panel_size": bool(args.match_panel_size),
+        "use_batch_effect": bool(args.use_batch_effect),
+        "slice_id": args.slice_id,
         "n_obs": {s["label"]: int(s["adata"].n_obs) for s in specs},
         "n_vars": {s["label"]: int(s["adata"].n_vars) for s in specs},
         "theta_hat": {s["label"]: s["theta"] for s in specs},
@@ -566,9 +605,12 @@ def main() -> None:
     print(f"[load] {args.input}")
     adata = sc.read_h5ad(args.input)
     print(f"[load] AnnData shape: {adata.n_obs} observations x {adata.n_vars} genes")
+    if args.slice_id is not None:
+        adata = restrict_to_slice(adata, args.slice_id)
 
-    raw_counts = adata.layers["counts_pre_batch"] if "counts_pre_batch" in adata.layers else adata.X
-    print(f"[nb] Using {'counts_pre_batch' if 'counts_pre_batch' in adata.layers else 'X'} for mean-variance/total-counts")
+    raw_counts = select_counts(adata, args.use_batch_effect)
+    used = "X" if (args.use_batch_effect or "counts_pre_batch" not in adata.layers) else "counts_pre_batch"
+    print(f"[nb] Using {used} for mean-variance/total-counts")
 
     print("[mean_variance] Computing per-gene mean/variance and fitting a common NB dispersion")
     mean, var = gene_mean_var(raw_counts)

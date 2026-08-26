@@ -48,7 +48,7 @@ fi
 # full_panel: mean_variance/mean_dropout dispersion fit -- full gene panel,
 # no HVG-matching (HVG selection would bias the dispersion estimate itself).
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
-    --modality "${MODALITY}" --input "${SIM_RAW}" \
+    --modality "${MODALITY}" --input "${SIM_RAW}" --slice-id 5 \
     --compare-input "${REAL_INPUT}" --compare-label "${REAL_LABEL}" \
     --output-dir "${OUT_ROOT}/full_panel"
 
@@ -56,21 +56,21 @@ fi
 # QC-filtered (QC-filtering sim here would hide the zero-inflation this
 # stat exists to report).
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
-    --modality "${MODALITY}" --input "${SIM_RAW}" \
+    --modality "${MODALITY}" --input "${SIM_RAW}" --slice-id 5 \
     --compare-input "${REAL_INPUT}" --compare-label "${REAL_LABEL}" \
     --match-panel-size \
     --output-dir "${OUT_ROOT}/hvg_matched"
 
 # qc_filtered: total_counts (secondary use) with QC'd sim, full gene panel.
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
-    --modality "${MODALITY}" --input "${SIM_QC}" \
+    --modality "${MODALITY}" --input "${SIM_QC}" --slice-id 5 \
     --compare-input "${REAL_INPUT}" --compare-label "${REAL_LABEL}" \
     --output-dir "${OUT_ROOT}/qc_filtered"
 
 # qc_and_hvg_matched: total_counts/genes_per_cell -- both corrections
 # together, the fair like-for-like for these two panels specifically.
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
-    --modality "${MODALITY}" --input "${SIM_QC}" \
+    --modality "${MODALITY}" --input "${SIM_QC}" --slice-id 5 \
     --compare-input "${REAL_INPUT}" --compare-label "${REAL_LABEL}" \
     --match-panel-size \
     --output-dir "${OUT_ROOT}/qc_and_hvg_matched"

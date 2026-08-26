@@ -40,8 +40,8 @@ MODALITY="bin"
 REAL_LABEL="breast_cancer_visium_hd_16um"
 SIM_RAW="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
 SIM_QC="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
-REAL_INPUT="sim_paper/data/real_data_qc/${REAL_LABEL}/${REAL_LABEL}_qc.h5ad"
-OUT_ROOT="sim_paper/data/count_distribution/figure_2/bin16um_vs_${REAL_LABEL}"
+REAL_INPUT="sim_paper/data/real_data_qc/${REAL_LABEL}/breast_cancer_visium_hd_qc.h5ad"
+OUT_ROOT="sim_paper/data/count_distribution/figure_2/${MODALITY}_vs_${REAL_LABEL}"
 
 if [[ ! -f "${SIM_RAW}" ]]; then
     echo "[generate] ${SIM_TAG} not found, generating"
@@ -59,23 +59,23 @@ if [[ ! -f "${SIM_QC}" ]]; then
 fi
 
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
-    --modality "${MODALITY}" --input "${SIM_RAW}" \
+    --modality "${MODALITY}" --input "${SIM_RAW}" --slice-id 5 \
     --compare-input "${REAL_INPUT}" --compare-label "${REAL_LABEL}" \
     --output-dir "${OUT_ROOT}/full_panel"
 
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
-    --modality "${MODALITY}" --input "${SIM_RAW}" \
+    --modality "${MODALITY}" --input "${SIM_RAW}" --slice-id 5 \
     --compare-input "${REAL_INPUT}" --compare-label "${REAL_LABEL}" \
     --match-panel-size \
     --output-dir "${OUT_ROOT}/hvg_matched"
 
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
-    --modality "${MODALITY}" --input "${SIM_QC}" \
+    --modality "${MODALITY}" --input "${SIM_QC}" --slice-id 5 \
     --compare-input "${REAL_INPUT}" --compare-label "${REAL_LABEL}" \
     --output-dir "${OUT_ROOT}/qc_filtered"
 
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
-    --modality "${MODALITY}" --input "${SIM_QC}" \
+    --modality "${MODALITY}" --input "${SIM_QC}" --slice-id 5 \
     --compare-input "${REAL_INPUT}" --compare-label "${REAL_LABEL}" \
     --match-panel-size \
     --output-dir "${OUT_ROOT}/qc_and_hvg_matched"

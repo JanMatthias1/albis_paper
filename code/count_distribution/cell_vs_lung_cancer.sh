@@ -46,23 +46,23 @@ if [[ ! -f "${SIM_QC}" ]]; then
 fi
 
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
-    --modality "${MODALITY}" --input "${SIM_RAW}" \
+    --modality "${MODALITY}" --input "${SIM_RAW}" --slice-id 5 \
     --compare-input "${REAL_INPUT}" --compare-label "${REAL_LABEL}" \
     --output-dir "${OUT_ROOT}/full_panel"
 
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
-    --modality "${MODALITY}" --input "${SIM_RAW}" \
+    --modality "${MODALITY}" --input "${SIM_RAW}" --slice-id 5 \
     --compare-input "${REAL_INPUT}" --compare-label "${REAL_LABEL}" \
     --match-panel-size \
     --output-dir "${OUT_ROOT}/hvg_matched"
 
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
-    --modality "${MODALITY}" --input "${SIM_QC}" \
+    --modality "${MODALITY}" --input "${SIM_QC}" --slice-id 5 \
     --compare-input "${REAL_INPUT}" --compare-label "${REAL_LABEL}" \
     --output-dir "${OUT_ROOT}/qc_filtered"
 
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
-    --modality "${MODALITY}" --input "${SIM_QC}" \
+    --modality "${MODALITY}" --input "${SIM_QC}" --slice-id 5 \
     --compare-input "${REAL_INPUT}" --compare-label "${REAL_LABEL}" \
     --match-panel-size \
     --output-dir "${OUT_ROOT}/qc_and_hvg_matched"

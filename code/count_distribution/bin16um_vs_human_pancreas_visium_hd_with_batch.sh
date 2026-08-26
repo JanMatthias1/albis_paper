@@ -1,16 +1,15 @@
 #!/bin/bash
-#SBATCH --job-name=fig2_bin16um_vs_human_pancreas_visium_hd
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/logs/fig2_bin16um_vs_human_pancreas_visium_hd_%j.out
+#SBATCH --job-name=fig2_bin16um_vs_human_pancreas_visium_hd_with_batch
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/logs/fig2_bin16um_vs_human_pancreas_visium_hd_with_batch_%j.out
 #SBATCH --time=08:00:00
 #SBATCH --mem=250G
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# Figure 2 final comparison: bin vs. Visium HD human_pancreas_visium_hd, at
-# the 16um bin resolution. Fully self-contained: generates the sim data (if
-# not already present), QC-filters it, then runs all 4 count_distribution.py
-# modes. Same sim config and rationale as bin16um_vs_breast_cancer_visium_hd.sh
-# -- see that script's header for the full explanation.
+# Same pairing as bin16um_vs_human_pancreas_visium_hd.sh, but with
+# --use-batch-effect and --slice-id 5 -- see
+# bin16um_vs_breast_cancer_visium_hd_with_batch.sh for the full rationale
+# (same config, different real reference). Writes to figure_2_with_batch/.
 
 set -euo pipefail
 
@@ -24,7 +23,7 @@ REAL_LABEL="human_pancreas_visium_hd_16um"
 SIM_RAW="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
 SIM_QC="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
 REAL_INPUT="sim_paper/data/real_data_qc/${REAL_LABEL}/human_pancreas_visium_hd_qc.h5ad"
-OUT_ROOT="sim_paper/data/count_distribution/figure_2/${MODALITY}_vs_${REAL_LABEL}"
+OUT_ROOT="sim_paper/data/count_distribution/figure_2_with_batch/${MODALITY}_vs_${REAL_LABEL}"
 
 if [[ ! -f "${SIM_RAW}" ]]; then
     echo "[generate] ${SIM_TAG} not found, generating"
@@ -42,23 +41,23 @@ if [[ ! -f "${SIM_QC}" ]]; then
 fi
 
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
-    --modality "${MODALITY}" --input "${SIM_RAW}" --slice-id 5 \
+    --modality "${MODALITY}" --input "${SIM_RAW}" --slice-id 5 --use-batch-effect \
     --compare-input "${REAL_INPUT}" --compare-label "${REAL_LABEL}" \
     --output-dir "${OUT_ROOT}/full_panel"
 
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
-    --modality "${MODALITY}" --input "${SIM_RAW}" --slice-id 5 \
+    --modality "${MODALITY}" --input "${SIM_RAW}" --slice-id 5 --use-batch-effect \
     --compare-input "${REAL_INPUT}" --compare-label "${REAL_LABEL}" \
     --match-panel-size \
     --output-dir "${OUT_ROOT}/hvg_matched"
 
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
-    --modality "${MODALITY}" --input "${SIM_QC}" --slice-id 5 \
+    --modality "${MODALITY}" --input "${SIM_QC}" --slice-id 5 --use-batch-effect \
     --compare-input "${REAL_INPUT}" --compare-label "${REAL_LABEL}" \
     --output-dir "${OUT_ROOT}/qc_filtered"
 
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
-    --modality "${MODALITY}" --input "${SIM_QC}" --slice-id 5 \
+    --modality "${MODALITY}" --input "${SIM_QC}" --slice-id 5 --use-batch-effect \
     --compare-input "${REAL_INPUT}" --compare-label "${REAL_LABEL}" \
     --match-panel-size \
     --output-dir "${OUT_ROOT}/qc_and_hvg_matched"
