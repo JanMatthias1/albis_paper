@@ -1,0 +1,12 @@
+Sample: breast_cancer
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/real_data/breast_cancer/Visium_HD_11mm_Human_Breast_Cancer/binned_outputs/square_016um
+[load] AnnData shape: 368184 bins x 18085 genes
+[qc] Running SpotSweeper local_outliers (n_neighbors=36, cutoff=3.0)
+[qc] low_qc bins: 3930 / 368184
+[plot] Per-metric spatial diagnostics
+[qc] Dropped 3930 low_qc bins; 364254 remain
+[save] Summary written to sim_paper/data/real_data_qc/breast_cancer_visium_hd_16um/qc_summary.json
+[save] QC-filtered AnnData written to sim_paper/data/real_data_qc/breast_cancer_visium_hd_16um/breast_cancer_visium_hd_qc.h5ad
+[save] Plots written to sim_paper/data/real_data_qc/breast_cancer_visium_hd_16um

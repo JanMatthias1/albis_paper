@@ -1,0 +1,6 @@
+Job started: Tue Aug 25 11:52:46 AM EDT 2026
+Host: compute-174.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Modality: cell
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python generate_simulation_noisy.py --modality cell --base-gene-lognormal -2.5 0.7 --theta 0.25 --batch-sigma 0.8 --out-tag log_mu_-2.5_theta_0.25_bsigma08
+slurmstepd: error: *** JOB 35153807 ON compute-174 CANCELLED AT 2026-08-25T11:55:31 ***

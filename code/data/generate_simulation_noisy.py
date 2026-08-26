@@ -79,6 +79,42 @@ MANUSCRIPT_BATCH_SIGMA = 0.22
 # per-cell total counts / genes detected without touching dispersion/noise.
 NOISY_BASE_GENE_LOGNORMAL = (0.7, 0.7)
 
+# Manuscript-baseline domain_type_mix (6 domains x 8 cell types) makes several
+# domains only weakly distinguishable by composition: domain 5 (core) is
+# exactly uniform, domain 4 deviates only 12% from uniform, domain 3 only
+# 28% -- pairwise L1 distance between domains ranges just 0.06-0.36. No
+# clustering method (plain, BANKSY, or a domain expression shift) can recover
+# domains whose true compositions barely differ. This alternative gives every
+# domain two strongly-enriched "signature" cell types (0.30 each vs. a 0.125
+# uniform baseline) and leaves no domain uniform -- pairwise L1 distance
+# becomes 0.467-0.933, i.e. more than 3x the old matrix's *maximum* at its
+# *minimum*. Opt-in only (--strong-domain-mix) -- the default stays the
+# original matrix so this never silently affects Figure 2 count-distribution
+# comparisons, only dedicated Figure 3 domain-recovery test runs. See
+# figure.md, 2026-08-25, "domain_type_mix compositional distinguishability".
+MANUSCRIPT_DOMAIN_TYPE_MIX = np.array(
+    [
+        [0.18, 0.18, 0.13, 0.12, 0.11, 0.10, 0.09, 0.09],
+        [0.11, 0.12, 0.18, 0.18, 0.13, 0.10, 0.09, 0.09],
+        [0.10, 0.11, 0.12, 0.13, 0.18, 0.18, 0.09, 0.09],
+        [0.10, 0.10, 0.11, 0.12, 0.13, 0.13, 0.16, 0.15],
+        [0.14, 0.13, 0.12, 0.11, 0.12, 0.13, 0.13, 0.12],
+        [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+    ],
+    dtype=float,
+)
+STRONG_DOMAIN_TYPE_MIX = np.array(
+    [
+        [0.30, 0.30, 0.0667, 0.0667, 0.0667, 0.0667, 0.0667, 0.0667],
+        [0.0667, 0.0667, 0.30, 0.30, 0.0667, 0.0667, 0.0667, 0.0667],
+        [0.0667, 0.0667, 0.0667, 0.0667, 0.30, 0.30, 0.0667, 0.0667],
+        [0.0667, 0.0667, 0.0667, 0.0667, 0.0667, 0.0667, 0.30, 0.30],
+        [0.30, 0.0667, 0.0667, 0.0667, 0.30, 0.0667, 0.0667, 0.0667],
+        [0.0667, 0.0667, 0.30, 0.0667, 0.0667, 0.0667, 0.0667, 0.30],
+    ],
+    dtype=float,
+)
+
 # Manuscript-baseline geometry (sphere_R_um=6000, n_cells=600_000) packs cells
 # at only ~0.16% of sphere volume -- real tissue is essentially fully packed.
 # A fixed 8um bin grid over that mostly lands in empty interstitial space:
@@ -165,6 +201,13 @@ def parse_args():
         help="Standard deviation of the per-slice, per-gene log-fold-change batch effect.",
     )
     parser.add_argument(
+        "--strong-domain-mix",
+        action="store_true",
+        help="Use STRONG_DOMAIN_TYPE_MIX instead of the manuscript-baseline domain_type_mix -- "
+        "opt-in only, for dedicated Figure 3 domain-recovery test runs. Never affects Figure 2 "
+        "count-distribution comparisons since it defaults off.",
+    )
+    parser.add_argument(
         "--domain-size-factors",
         type=float,
         nargs=6,
@@ -189,6 +232,37 @@ def parse_args():
         "--n-cells",
         type=int,
         default=NOISY_N_CELLS,
+    )
+    parser.add_argument(
+        "--cell-r-mean",
+        type=float,
+        default=7.5,
+        help="Lognormal mean cell radius (um), which also sets the mean molecule-spillover "
+        "radius per cell (sample_molecule_coords_for_cell scales molecule spread to this). "
+        "Never varied by any packing-fraction sweep to date -- candidate lever for bin's "
+        "bimodal genes-per-cell shape, see figure.md 2026-08-25.",
+    )
+    parser.add_argument(
+        "--allow-cell-overlap",
+        action="store_true",
+        help="Passed through to simulate_3d_molecule_sphere_multires (default False). Needed to "
+        "test --cell-r-mean values large enough that non-overlapping placement at the given "
+        "--n-cells/--sphere-r-um becomes geometrically infeasible. Already validated elsewhere "
+        "in this project as not changing bin-level count statistics at the manuscript radius.",
+    )
+    parser.add_argument(
+        "--bin-size-um",
+        type=float,
+        default=8.0,
+        help="Bin modality grid spacing (um). Manuscript baseline is 8um (Visium-HD-like). "
+        "A larger bin aggregates more of each cell's molecule cloud per observation, which "
+        "directly addresses two issues diagnosed at 8um: the near-binary empty/non-empty bin "
+        "sampling caused by bin size being comparable to --cell-r-mean (see the "
+        "--cell-r-mean/--allow-cell-overlap radius sweep, figure.md 2026-08-25), and weak "
+        "per-bin domain-compositional signal for BANKSY domain recovery (same "
+        "aggregation-reveals-composition mechanism documented for spot vs. bin/cell, "
+        "figure.md 2026-08-25 domain_type_mix section). Real Visium HD ships 8um/16um (and "
+        "2um) bins, so this is a legitimate alternate real configuration, not just a knob.",
     )
     parser.add_argument(
         "--capture-window-um",
@@ -230,8 +304,12 @@ MARKER_FOLDCHANGE = args.marker_foldchange
 SHARED_MARKER_FOLDCHANGE = args.shared_marker_foldchange
 BATCH_SIGMA = args.batch_sigma
 DOMAIN_SIZE_FACTORS = args.domain_size_factors
+DOMAIN_TYPE_MIX = STRONG_DOMAIN_TYPE_MIX if args.strong_domain_mix else None
 BASE_GENE_LOGNORMAL = tuple(args.base_gene_lognormal)
 N_CELLS = args.n_cells
+CELL_R_MEAN = args.cell_r_mean
+ALLOW_CELL_OVERLAP = args.allow_cell_overlap
+BIN_SIZE_UM = args.bin_size_um
 SPHERE_R_UM = args.sphere_r_um
 CAPTURE_WINDOW_UM = args.capture_window_um if args.capture_window_um is not None else SPHERE_R_UM * WINDOW_TO_R
 CORE_FUZZ_WIDTH_UM = args.core_fuzz_width_um if args.core_fuzz_width_um is not None else SPHERE_R_UM * CORE_FUZZ_TO_R
@@ -251,8 +329,8 @@ PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 # ---------------------------------------------------------------------------
 def generate_modality(
     output_modality, slice_axis, theta, theta_jitter, noise_scale, batch_sigma, base_gene_lognormal,
-    n_cells, sphere_r_um, capture_window_um, core_fuzz_width_um, max_shift,
-    marker_foldchange, shared_marker_foldchange, domain_size_factors,
+    n_cells, cell_r_mean, allow_cell_overlap, sphere_r_um, capture_window_um, core_fuzz_width_um, max_shift,
+    marker_foldchange, shared_marker_foldchange, domain_size_factors, domain_type_mix, bin_size_um,
 ):
     # sim_app.generate_data() doesn't forward theta/theta_jitter/noise_scale/
     # base_gene_lognormal, so call the lower-level simulator directly and pull
@@ -276,25 +354,20 @@ def generate_modality(
         n_cells=n_cells,
         cell_radius_kwargs=dict(
             radius_dist="lognormal",
-            r_mean=7.5,
+            r_mean=cell_r_mean,
             r_sigma=0.28,
-            r_min=4.0,
-            r_max=14.0,
+            # r_min/r_max scaled proportionally to cell_r_mean (manuscript ratio: 4.0/7.5,
+            # 14.0/7.5) -- sample_cell_radii() clips to [r_min, r_max] regardless of r_mean,
+            # so leaving these fixed at the manuscript's absolute values would silently
+            # clamp any --cell-r-mean override back down near the old default.
+            r_min=cell_r_mean * (4.0 / 7.5),
+            r_max=cell_r_mean * (14.0 / 7.5),
         ),
+        allow_cell_overlap=allow_cell_overlap,
         n_cell_types=8,
-        domain_type_mix=np.array(
-            [
-                [0.18, 0.18, 0.13, 0.12, 0.11, 0.10, 0.09, 0.09],
-                [0.11, 0.12, 0.18, 0.18, 0.13, 0.10, 0.09, 0.09],
-                [0.10, 0.11, 0.12, 0.13, 0.18, 0.18, 0.09, 0.09],
-                [0.10, 0.10, 0.11, 0.12, 0.13, 0.13, 0.16, 0.15],
-                [0.14, 0.13, 0.12, 0.11, 0.12, 0.13, 0.13, 0.12],
-                [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
-            ],
-            dtype=float,
-        ),
+        domain_type_mix=domain_type_mix if domain_type_mix is not None else MANUSCRIPT_DOMAIN_TYPE_MIX,
         n_slices=10,
-        bin_size_um=8.0,
+        bin_size_um=bin_size_um,
         theta=theta,
         theta_jitter=theta_jitter,
         noise_scale=noise_scale,
@@ -316,6 +389,9 @@ def generate_modality(
         "theta": theta,
         "theta_jitter": theta_jitter,
         "n_cells": n_cells,
+        "cell_r_mean": cell_r_mean,
+        "allow_cell_overlap": allow_cell_overlap,
+        "bin_size_um": bin_size_um,
         "sphere_r_um": sphere_r_um,
         "capture_window_um": capture_window_um,
         "core_fuzz_width_um": core_fuzz_width_um,
@@ -326,6 +402,7 @@ def generate_modality(
         "batch_sigma": batch_sigma,
         "base_gene_lognormal": list(base_gene_lognormal),
         "domain_size_factors": list(domain_size_factors) if domain_size_factors is not None else None,
+        "strong_domain_mix": domain_type_mix is not None,
     }
     return adata
 
@@ -334,13 +411,14 @@ print(
     f"\nGenerating {OUTPUT_MODALITY} data for slice axis {SLICE_AXIS} with "
     f"theta={THETA}, theta_jitter={THETA_JITTER}, noise_scale={NOISE_SCALE}, "
     f"batch_sigma={BATCH_SIGMA}, base_gene_lognormal={BASE_GENE_LOGNORMAL}, "
-    f"n_cells={N_CELLS}, sphere_r_um={SPHERE_R_UM}, capture_window_um={CAPTURE_WINDOW_UM}, "
-    f"core_fuzz_width_um={CORE_FUZZ_WIDTH_UM}, max_shift={MAX_SHIFT}"
+    f"n_cells={N_CELLS}, cell_r_mean={CELL_R_MEAN}, allow_cell_overlap={ALLOW_CELL_OVERLAP}, "
+    f"sphere_r_um={SPHERE_R_UM}, capture_window_um={CAPTURE_WINDOW_UM}, "
+    f"core_fuzz_width_um={CORE_FUZZ_WIDTH_UM}, max_shift={MAX_SHIFT}, bin_size_um={BIN_SIZE_UM}"
 )
 adata = generate_modality(
     OUTPUT_MODALITY, SLICE_AXIS, THETA, THETA_JITTER, NOISE_SCALE, BATCH_SIGMA, BASE_GENE_LOGNORMAL,
-    N_CELLS, SPHERE_R_UM, CAPTURE_WINDOW_UM, CORE_FUZZ_WIDTH_UM, MAX_SHIFT,
-    MARKER_FOLDCHANGE, SHARED_MARKER_FOLDCHANGE, DOMAIN_SIZE_FACTORS,
+    N_CELLS, CELL_R_MEAN, ALLOW_CELL_OVERLAP, SPHERE_R_UM, CAPTURE_WINDOW_UM, CORE_FUZZ_WIDTH_UM, MAX_SHIFT,
+    MARKER_FOLDCHANGE, SHARED_MARKER_FOLDCHANGE, DOMAIN_SIZE_FACTORS, DOMAIN_TYPE_MIX, BIN_SIZE_UM,
 )
 print("\nGenerated AnnData:")
 print(adata)

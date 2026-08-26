@@ -1,0 +1,174 @@
+[config] theta=4.0 log_mu=-2.0 tag=packing_pf0p04_bin16um_theta4.0_log_mu_-2.0
+[generate] packing_pf0p04_bin16um_theta4.0_log_mu_-2.0 not found, generating
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+sim_app module: /dcs04/hicks/data/Jan/sim_project/sim_app/sim_app/__init__.py
+sim_app version: 0.1.0
+
+Generating bin data for slice axis Z with theta=4.0, theta_jitter=1.0, noise_scale=1.3, batch_sigma=0.22, base_gene_lognormal=(-2.0, 0.7), n_cells=600000, cell_r_mean=7.5, allow_cell_overlap=False, sphere_r_um=2050.0, capture_window_um=2220.833333333333, core_fuzz_width_um=102.5, max_shift=1025.0, bin_size_um=16.0
+
+Generated AnnData:
+AnnData object with n_obs × n_vars = 193210 × 556
+    obs: 'slice_axis', 'slice_id', 'bin_size_um', 'window_center0', 'window_center1', 'window_size0', 'window_size1', 'plane_dim0', 'plane_dim1', 'cell_type_true', 'domain_true'
+    var: 'gene_class', 'is_noise', 'is_shared_marker'
+    uns: 'batch_effect_factors', 'rigid_perturb_inplane', 'output', 'sim_params'
+    obsm: 'spatial', 'cell_type_frac_true', 'domain_frac_true', 'spatial_3d', 'spatial_unaligned', 'spatial_3d_unaligned'
+    layers: 'counts_pre_batch'
+
+[nb] empirical theta_hat = 1.21 (real data fits ~0.15-0.16 via count_distribution.py --compare-input; lower --theta further if this is still much higher)
+
+Summary:
+{
+  "n_obs": 193210,
+  "n_vars": 556,
+  "total_counts": 45342525,
+  "nonzero_counts": 20505703,
+  "platform": "bin",
+  "slice_axis": "Z",
+  "n_slices": 10,
+  "slice_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "obs_columns": [
+    "slice_axis",
+    "slice_id",
+    "bin_size_um",
+    "window_center0",
+    "window_center1",
+    "window_size0",
+    "window_size1",
+    "plane_dim0",
+    "plane_dim1",
+    "cell_type_true",
+    "domain_true"
+  ],
+  "var_columns": [
+    "gene_class",
+    "is_noise",
+    "is_shared_marker"
+  ],
+  "layers": [
+    "counts_pre_batch"
+  ],
+  "obsm_keys": [
+    "spatial",
+    "cell_type_frac_true",
+    "domain_frac_true",
+    "spatial_3d",
+    "spatial_unaligned",
+    "spatial_3d_unaligned"
+  ],
+  "uns_keys": [
+    "batch_effect_factors",
+    "rigid_perturb_inplane",
+    "output",
+    "sim_params"
+  ],
+  "truth_annotations": [
+    "layers['counts_pre_batch']",
+    "obs['cell_type_true']",
+    "obs['domain_true']",
+    "obsm['cell_type_frac_true']",
+    "obsm['domain_frac_true']"
+  ]
+}
+
+Saved summary -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/simulation_bin_z_summary.json
+
+Generating diagnostic plots...
+Plotting a deterministic subset of 100,000 / 193,210 observations.
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/plots/simulation_bin_z/01_aligned_domain_true.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/plots/simulation_bin_z/02_aligned_cell_type_true.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/plots/simulation_bin_z/03_unaligned_slice_id.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/plots/simulation_bin_z/04_qc_count_distributions.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/plots/simulation_bin_z/05_bins_per_slice.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/plots/simulation_bin_z/06_domain_composition_per_slice.png
+
+All diagnostic plots saved under /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/plots/simulation_bin_z
+
+Saved dataset -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/simulation_bin_z.h5ad
+[qc] sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/simulation_bin_z_qc.h5ad not found, running 00_qc_filter.py
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/simulation_bin_z.h5ad
+[load] AnnData shape: 193210 x 556
+[qc] fully-empty (total_counts == 0): 8278 (4.28%)
+[qc] near-empty (0 < total_counts, n_genes < 3): 1475 (0.76%)
+[qc] dropped 9753 observations (5.05%); 183457 remain
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/simulation_bin_z_qc_summary.json
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/simulation_bin_z_qc.h5ad
+[compare] packing_pf0p04_bin16um_theta4.0_log_mu_-2.0 vs breast_cancer_visium_hd_16um (qc_filtered)
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/legacy_api_wrap/__init__.py:88: UserWarning: Some cells have zero counts
+  return fn(*args_all, **kw)
+[load] primary: sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/simulation_bin_z_qc.h5ad
+[load] primary shape: 183457 observations x 556 genes
+[load] compare: sim_paper/data/real_data_qc/breast_cancer_visium_hd_16um/breast_cancer_visium_hd_qc.h5ad
+[load] compare shape: 364254 observations x 18085 genes
+[nb] bin: theta_hat = 1.36, counts_pre_batch used for mean-variance/total-counts
+[sparsity] bin: 72.00% zero entries, 0.00% fully-empty cells
+[nb] breast_cancer_visium_hd_16um: theta_hat = 1.72, X used for mean-variance/total-counts
+[sparsity] breast_cancer_visium_hd_16um: 93.37% zero entries, 0.00% fully-empty cells
+[save] Comparison plots written to sim_paper/data/count_distribution/sweeps/bin16um_logmu_sweep/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0_qc_filtered_vs_breast_cancer_visium_hd_16um
+[save] Numeric summary written to sim_paper/data/count_distribution/sweeps/bin16um_logmu_sweep/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0_qc_filtered_vs_breast_cancer_visium_hd_16um/comparison_summary.json
+[compare] packing_pf0p04_bin16um_theta4.0_log_mu_-2.0 vs breast_cancer_visium_hd_16um (qc_and_hvg_matched)
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/legacy_api_wrap/__init__.py:88: UserWarning: Some cells have zero counts
+  return fn(*args_all, **kw)
+[load] primary: sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/simulation_bin_z_qc.h5ad
+[load] primary shape: 183457 observations x 556 genes
+[load] compare: sim_paper/data/real_data_qc/breast_cancer_visium_hd_16um/breast_cancer_visium_hd_qc.h5ad
+[load] compare shape: 364254 observations x 18085 genes
+[panel-match] subsetting compare from 18085 to top-556 highly-variable genes (matching the smaller panel)
+[panel-match] compare shape after HVG subset: 364254 observations x 556 genes
+[nb] bin: theta_hat = 1.36, counts_pre_batch used for mean-variance/total-counts
+[sparsity] bin: 72.00% zero entries, 0.00% fully-empty cells
+[nb] breast_cancer_visium_hd_16um: theta_hat = 0.37, X used for mean-variance/total-counts
+[sparsity] breast_cancer_visium_hd_16um: 85.16% zero entries, 0.00% fully-empty cells
+[save] Comparison plots written to sim_paper/data/count_distribution/sweeps/bin16um_logmu_sweep/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0_qc_and_hvg_matched_vs_breast_cancer_visium_hd_16um
+[save] Numeric summary written to sim_paper/data/count_distribution/sweeps/bin16um_logmu_sweep/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0_qc_and_hvg_matched_vs_breast_cancer_visium_hd_16um/comparison_summary.json
+[compare] packing_pf0p04_bin16um_theta4.0_log_mu_-2.0 vs human_pancreas_visium_hd_16um (qc_filtered)
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/legacy_api_wrap/__init__.py:88: UserWarning: Some cells have zero counts
+  return fn(*args_all, **kw)
+[load] primary: sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/simulation_bin_z_qc.h5ad
+[load] primary shape: 183457 observations x 556 genes
+[load] compare: sim_paper/data/real_data_qc/human_pancreas_visium_hd_16um/human_pancreas_visium_hd_qc.h5ad
+[load] compare shape: 300377 observations x 18085 genes
+[nb] bin: theta_hat = 1.36, counts_pre_batch used for mean-variance/total-counts
+[sparsity] bin: 72.00% zero entries, 0.00% fully-empty cells
+[nb] human_pancreas_visium_hd_16um: theta_hat = 1.67, X used for mean-variance/total-counts
+[sparsity] human_pancreas_visium_hd_16um: 92.43% zero entries, 0.00% fully-empty cells
+[save] Comparison plots written to sim_paper/data/count_distribution/sweeps/bin16um_logmu_sweep/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0_qc_filtered_vs_human_pancreas_visium_hd_16um
+[save] Numeric summary written to sim_paper/data/count_distribution/sweeps/bin16um_logmu_sweep/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0_qc_filtered_vs_human_pancreas_visium_hd_16um/comparison_summary.json
+[compare] packing_pf0p04_bin16um_theta4.0_log_mu_-2.0 vs human_pancreas_visium_hd_16um (qc_and_hvg_matched)
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/legacy_api_wrap/__init__.py:88: UserWarning: Some cells have zero counts
+  return fn(*args_all, **kw)
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/legacy_api_wrap/__init__.py:88: UserWarning: Some cells have zero counts
+  return fn(*args_all, **kw)
+[load] primary: sim_paper/data/noisy/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0/simulation_bin_z_qc.h5ad
+[load] primary shape: 183457 observations x 556 genes
+[load] compare: sim_paper/data/real_data_qc/human_pancreas_visium_hd_16um/human_pancreas_visium_hd_qc.h5ad
+[load] compare shape: 300377 observations x 18085 genes
+[panel-match] subsetting compare from 18085 to top-556 highly-variable genes (matching the smaller panel)
+[panel-match] compare shape after HVG subset: 300377 observations x 556 genes
+[nb] bin: theta_hat = 1.36, counts_pre_batch used for mean-variance/total-counts
+[sparsity] bin: 72.00% zero entries, 0.00% fully-empty cells
+[nb] human_pancreas_visium_hd_16um: theta_hat = 0.03, X used for mean-variance/total-counts
+[sparsity] human_pancreas_visium_hd_16um: 91.31% zero entries, 0.10% fully-empty cells
+[save] Comparison plots written to sim_paper/data/count_distribution/sweeps/bin16um_logmu_sweep/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0_qc_and_hvg_matched_vs_human_pancreas_visium_hd_16um
+[save] Numeric summary written to sim_paper/data/count_distribution/sweeps/bin16um_logmu_sweep/packing_pf0p04_bin16um_theta4.0_log_mu_-2.0_qc_and_hvg_matched_vs_human_pancreas_visium_hd_16um/comparison_summary.json
+[done] packing_pf0p04_bin16um_theta4.0_log_mu_-2.0

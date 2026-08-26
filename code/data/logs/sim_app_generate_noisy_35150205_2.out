@@ -1,0 +1,97 @@
+Job started: Tue Aug 25 09:57:57 AM EDT 2026
+Host: compute-174.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+Modality: cell
+Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python generate_simulation_noisy.py --modality cell --base-gene-lognormal -2.5 0.7 --theta 0.25 --theta-jitter 0.05 --out-tag log_mu_-2.5_theta_0.25_jitter0.05
+Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
+sim_app module: /dcs04/hicks/data/Jan/sim_project/sim_app/sim_app/__init__.py
+sim_app version: 0.1.0
+
+Generating cell data for slice axis Z with theta=0.25, theta_jitter=0.05, noise_scale=1.3, batch_sigma=0.22, base_gene_lognormal=(-2.5, 0.7), n_cells=600000, sphere_r_um=6000.0, capture_window_um=6500.0, core_fuzz_width_um=300.0, max_shift=3000.0
+
+Generated AnnData:
+AnnData object with n_obs × n_vars = 600000 × 556
+    obs: 'domain_true', 'cell_type_true', 'cell_radius', 'cell_sigma_for_95pct', 'slice_id_X', 'slice_id_Y', 'slice_id_Z', 'slice_axis', 'slice_id'
+    var: 'gene_class', 'is_noise', 'is_shared_marker'
+    uns: 'sim_params', 'batch_effect_factors', 'rigid_perturb_inplane', 'output'
+    obsm: 'spatial', 'spatial_3d', 'spatial_unaligned', 'spatial_3d_unaligned'
+    layers: 'counts_pre_batch'
+
+[nb] empirical theta_hat = 0.15 (real data fits ~0.15-0.16 via count_distribution.py --compare-input; lower --theta further if this is still much higher)
+
+Summary:
+{
+  "n_obs": 600000,
+  "n_vars": 556,
+  "total_counts": 51445825,
+  "nonzero_counts": 22291315,
+  "platform": "cell",
+  "slice_axis": "Z",
+  "n_slices": 10,
+  "slice_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "obs_columns": [
+    "domain_true",
+    "cell_type_true",
+    "cell_radius",
+    "cell_sigma_for_95pct",
+    "slice_id_X",
+    "slice_id_Y",
+    "slice_id_Z",
+    "slice_axis",
+    "slice_id"
+  ],
+  "var_columns": [
+    "gene_class",
+    "is_noise",
+    "is_shared_marker"
+  ],
+  "layers": [
+    "counts_pre_batch"
+  ],
+  "obsm_keys": [
+    "spatial",
+    "spatial_3d",
+    "spatial_unaligned",
+    "spatial_3d_unaligned"
+  ],
+  "uns_keys": [
+    "sim_params",
+    "batch_effect_factors",
+    "rigid_perturb_inplane",
+    "output"
+  ],
+  "truth_annotations": [
+    "layers['counts_pre_batch']",
+    "obs['cell_type_true']",
+    "obs['domain_true']",
+    "obs['cell_radius']",
+    "obs['cell_sigma_for_95pct']"
+  ]
+}
+
+Saved summary -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/log_mu_-2.5_theta_0.25_jitter0.05/simulation_cell_z_summary.json
+
+Generating diagnostic plots...
+Plotting a deterministic subset of 100,000 / 600,000 observations.
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/log_mu_-2.5_theta_0.25_jitter0.05/plots/simulation_cell_z/01_aligned_domain_true.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/log_mu_-2.5_theta_0.25_jitter0.05/plots/simulation_cell_z/02_aligned_cell_type_true.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/log_mu_-2.5_theta_0.25_jitter0.05/plots/simulation_cell_z/03_unaligned_slice_id.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/log_mu_-2.5_theta_0.25_jitter0.05/plots/simulation_cell_z/04_qc_count_distributions.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/log_mu_-2.5_theta_0.25_jitter0.05/plots/simulation_cell_z/05_cells_per_slice.png
+  saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/log_mu_-2.5_theta_0.25_jitter0.05/plots/simulation_cell_z/06_domain_composition_per_slice.png
+
+All diagnostic plots saved under /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/log_mu_-2.5_theta_0.25_jitter0.05/plots/simulation_cell_z
+
+Saved dataset -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy/log_mu_-2.5_theta_0.25_jitter0.05/simulation_cell_z.h5ad
+Job finished: Tue Aug 25 10:01:33 AM EDT 2026
