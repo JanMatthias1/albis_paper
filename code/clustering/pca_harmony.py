@@ -39,11 +39,14 @@ DEFAULT_OUTPUT = CLUSTERING_ROOT / "spot" / "pca_harmony" / "simulation_spot_z_p
 VALID_MODALITIES = ("spot", "bin", "cell")
 
 # Shared with clustering_leiden_louvain.py's plot_umap_true_vs_predicted so the two
-# side-by-side UMAP comparison panels come out at the same aspect ratio (see
-# plot_umap_before_after for why bbox_inches="tight" isn't used here).
+# side-by-side UMAP comparison panels come out at the same aspect ratio AND the
+# same axes-box geometry within that canvas (see plot_umap_before_after for why
+# bbox_inches="tight"/tight_layout aren't used here -- both make the final layout
+# depend on each plot's own title/legend content, which is exactly what made the
+# two panel types drift apart before).
 PANEL_FIGSIZE = (12, 6)
 PANEL_DPI = 180
-PANEL_RECT = (0.0, 0.10, 1.0, 0.93)
+PANEL_MARGINS = dict(left=0.06, right=0.98, top=0.85, bottom=0.20, wspace=0.25)
 
 
 def parse_args() -> argparse.Namespace:
@@ -279,19 +282,25 @@ def plot_umap_before_after(
             handles=handles,
             title=pretty_label(color_key),
             loc="upper center",
-            bbox_to_anchor=(0.5, 0.02),
+            # y=0.14, inside the bottom margin PANEL_MARGINS reserves (axes bottom
+            # edge at y=0.20) instead of extending below the fixed canvas -- with no
+            # bbox_inches="tight" to rescue an off-canvas legend anymore, it would
+            # otherwise render invisible instead of just untrimmed.
+            bbox_to_anchor=(0.5, 0.14),
             ncol=ncol,
             frameon=False,
         )
 
     fig.suptitle(f"PCA UMAP before vs after Harmony by {pretty_label(color_key)}", fontweight="bold")
-    # Fixed figsize + no bbox_inches="tight" here (unlike the other plot_* functions in this
-    # file) so the saved canvas is always exactly PANEL_FIGSIZE * PANEL_DPI, matching
+    # Fixed figsize + fixed subplots_adjust margins + no bbox_inches="tight" here (unlike the
+    # other plot_* functions in this file) so the saved canvas AND the axes box within it are
+    # always exactly PANEL_FIGSIZE * PANEL_DPI / PANEL_MARGINS, matching
     # clustering_leiden_louvain.py's plot_umap_true_vs_predicted pixel-for-pixel -- both are
-    # side-by-side UMAP comparison panels shown together in Figure 3 and need the same aspect
-    # ratio. "tight" cropping makes the final size depend on legend/title content, which is why
-    # the two used to drift apart.
-    fig.tight_layout(rect=PANEL_RECT)
+    # side-by-side UMAP comparison panels shown together in Figure 3 and need to look the same
+    # size, not just have the same outer canvas. tight_layout/"tight" cropping both make the
+    # final layout depend on each plot's own legend/title content, which is why the two used to
+    # drift apart.
+    fig.subplots_adjust(**PANEL_MARGINS)
     fig.savefig(output_path, dpi=PANEL_DPI)
     plt.close(fig)
 

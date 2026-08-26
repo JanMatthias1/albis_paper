@@ -39,11 +39,14 @@ DEFAULT_INPUT = CLUSTERING_ROOT / "spot" / "pca_harmony" / "simulation_spot_z_pc
 DEFAULT_OUTPUT_DIR = CLUSTERING_ROOT
 
 # Shared with pca_harmony.py's plot_umap_before_after so the two side-by-side UMAP
-# comparison panels in Figure 3 come out at the same aspect ratio (see that
-# function for why bbox_inches="tight" isn't used here).
+# comparison panels in Figure 3 come out at the same aspect ratio AND the same
+# axes-box geometry within that canvas (see that function for why
+# bbox_inches="tight"/tight_layout aren't used here -- both make the final
+# layout depend on each plot's own title/legend content, which is exactly what
+# made the two panel types drift apart before).
 PANEL_FIGSIZE = (12, 6)
 PANEL_DPI = 180
-PANEL_RECT = (0.0, 0.10, 1.0, 0.93)
+PANEL_MARGINS = dict(left=0.06, right=0.98, top=0.85, bottom=0.20, wspace=0.25)
 VALID_MODALITIES = ("spot", "bin", "cell")
 VALID_ALGORITHMS = ("leiden", "louvain")
 VALID_PIPELINES = ("pca_harmony", "gene_harmony")
@@ -81,11 +84,24 @@ def parse_args() -> argparse.Namespace:
         default=["domain_true", "cell_type_true", "cluster_label"],
         help="obs columns to use for UMAP plots.",
     )
+    parser.add_argument(
+        "--plots-only",
+        action="store_true",
+        help="Skip neighbors/clustering/UMAP and just regenerate plots from the existing "
+        "output h5ad for this --modality/--algorithm/--pipeline/--resolution (must already "
+        "have --cluster-key and X_umap) -- for re-plotting after a plot-formatting change "
+        "without rerunning clustering.",
+    )
     return parser.parse_args()
 
 
 def resolution_tag(resolution: float) -> str:
     return str(resolution).replace(".", "p").replace("-", "m")
+
+
+def pretty_label(key: str) -> str:
+    """Display-friendly version of an obs column name, e.g. 'domain_true' -> 'Domain True'."""
+    return key.replace("_", " ").title()
 
 
 def color_values(obs: pd.DataFrame, key: str):
@@ -113,10 +129,10 @@ def plot_umap(adata, color_key: str, output_path: Path) -> None:
     )
     ax.set_xlabel("UMAP 1")
     ax.set_ylabel("UMAP 2")
-    ax.set_title(f"UMAP: {color_key}")
+    ax.set_title(f"UMAP: {pretty_label(color_key)}")
 
     if categories is None:
-        fig.colorbar(scatter, ax=ax, fraction=0.046, pad=0.04, label=color_key)
+        fig.colorbar(scatter, ax=ax, fraction=0.046, pad=0.04, label=pretty_label(color_key))
     else:
         handles = [
             plt.Line2D(
@@ -132,7 +148,7 @@ def plot_umap(adata, color_key: str, output_path: Path) -> None:
         ]
         ax.legend(
             handles=handles,
-            title=color_key,
+            title=pretty_label(color_key),
             bbox_to_anchor=(1.02, 1),
             loc="upper left",
             frameon=False,
@@ -151,8 +167,11 @@ def plot_umap_true_vs_predicted(adata, true_key: str, pred_key: str, output_path
     xlim = (coords[:, 0].min() - 1, coords[:, 0].max() + 1)
     ylim = (coords[:, 1].min() - 1, coords[:, 1].max() + 1)
 
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5.5))
-    for ax, key, title in ((axes[0], true_key, f"Ground truth: {true_key}"), (axes[1], pred_key, f"Predicted: {pred_key}")):
+    fig, axes = plt.subplots(1, 2, figsize=PANEL_FIGSIZE)
+    for ax, key, title in (
+        (axes[0], true_key, f"Ground truth: {pretty_label(true_key)}"),
+        (axes[1], pred_key, f"Predicted: {pretty_label(pred_key)}"),
+    ):
         colors, categories = color_values(adata.obs, key)
         scatter = ax.scatter(coords[:, 0], coords[:, 1], c=colors, s=5, linewidths=0, cmap="tab20", alpha=0.85)
         ax.set_xlabel("UMAP 1")
@@ -165,10 +184,14 @@ def plot_umap_true_vs_predicted(adata, true_key: str, pred_key: str, output_path
                 plt.Line2D([0], [0], marker="o", color="w", markerfacecolor=scatter.cmap(scatter.norm(i)), markersize=6, label=label)
                 for i, label in enumerate(categories)
             ]
-            ax.legend(handles=handles, title=key, bbox_to_anchor=(0.5, -0.15), loc="upper center", ncol=min(len(categories), 8), frameon=False, fontsize=7)
+            ax.legend(handles=handles, title=pretty_label(key), bbox_to_anchor=(0.5, -0.15), loc="upper center", ncol=min(len(categories), 8), frameon=False, fontsize=7)
 
-    fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    # Fixed (not tight_layout-computed) margins, identical to pca_harmony.py's
+    # plot_umap_before_after, so the two side-by-side UMAP panel types produce
+    # pixel-identical axes boxes -- not just the same canvas size -- regardless of
+    # each plot's own title/legend content (see PANEL_MARGINS).
+    fig.subplots_adjust(**PANEL_MARGINS)
+    fig.savefig(output_path, dpi=PANEL_DPI)
     plt.close(fig)
 
 
@@ -190,9 +213,9 @@ def plot_contingency_heatmap(adata, true_key: str, pred_key: str, output_path: P
     ax.set_xticklabels(frac.columns, rotation=90)
     ax.set_yticks(range(frac.shape[0]))
     ax.set_yticklabels(frac.index)
-    ax.set_xlabel(f"Predicted cluster ({pred_key})")
-    ax.set_ylabel(f"Ground truth ({true_key})")
-    ax.set_title(f"Fraction of each {true_key} category per predicted cluster")
+    ax.set_xlabel(f"Predicted cluster ({pretty_label(pred_key)})")
+    ax.set_ylabel(f"Ground truth ({pretty_label(true_key)})")
+    ax.set_title(f"Fraction of each {pretty_label(true_key)} category per predicted cluster")
     fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="fraction of row")
     fig.tight_layout()
     fig.savefig(output_path, dpi=180, bbox_inches="tight")
@@ -226,6 +249,27 @@ def main() -> None:
     output = args.output_dir / f"simulation_{args.modality}_z_{args.algorithm}_{pipeline_tag}_res{tag}.h5ad"
     plot_dir = args.output_dir / "plots"
     plot_dir.mkdir(parents=True, exist_ok=True)
+
+    if args.plots_only:
+        if not output.is_file():
+            raise SystemExit(f"--plots-only requires an existing output file: {output}")
+        print(f"[plots-only] Loading existing output {output}")
+        adata = sc.read_h5ad(output)
+        if "X_umap" not in adata.obsm or args.cluster_key not in adata.obs:
+            raise KeyError(
+                f"--plots-only requires 'X_umap' in obsm and {args.cluster_key!r} in obs; "
+                f"{output} looks like it wasn't produced by this script."
+            )
+        valid_colors = [key for key in args.plot_colors if key in adata.obs]
+        for color_key in valid_colors:
+            plot_umap(adata, color_key, plot_dir / f"umap_by_{color_key}.png")
+        for true_key in ("cell_type_true", "domain_true"):
+            if true_key not in adata.obs or args.cluster_key not in adata.obs:
+                continue
+            plot_umap_true_vs_predicted(adata, true_key, args.cluster_key, plot_dir / f"umap_true_vs_predicted_{true_key}.png")
+            plot_contingency_heatmap(adata, true_key, args.cluster_key, plot_dir / f"contingency_{true_key}.png")
+        print("[plots-only] Done, not touching the existing output file")
+        return
 
     print(f"[load] {args.input}")
     adata = sc.read_h5ad(args.input)

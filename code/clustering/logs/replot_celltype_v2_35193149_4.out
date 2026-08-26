@@ -1,0 +1,4 @@
+/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[plots-only] Loading existing output sim_paper/data/figure_3/pca_harmony_single_cell/cell/leiden_pca_qc_celltype_matched/simulation_cell_z_leiden_pca_res0p38375.h5ad
+[plots-only] Done, not touching the existing output file

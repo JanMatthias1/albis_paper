@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 ARI between re-clustered data and ground-truth domain/cell-type labels, for
-Figure 1C: how well does spatial-domain and cell-type structure survive
+Figure 3B: how well does spatial-domain and cell-type structure survive
 bin/spot/cell aggregation and re-clustering?
 
 Builds a neighbor graph from the pca_harmony-corrected PCA embedding

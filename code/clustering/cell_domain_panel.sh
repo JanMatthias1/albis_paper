@@ -92,6 +92,7 @@ print(next(r['resolution'] for r in summary if r['ground_truth'] == 'domain_true
 ")
 echo "[leiden] domain_true-matched-resolution qualitative plots (resolution=${RESOLUTION}, UMAP true-vs-predicted, contingency heatmap)"
 "${TUTORIAL_PYTHON}" sim_paper/code/clustering/clustering_leiden_louvain.py \
+    --modality "${MODALITY}" \
     --input "${CLUSTER_ROOT}/banksy_pca_harmony_qc/simulation_${MODALITY}_z_banksy_pca_harmony_qc.h5ad" \
     --output-dir "${CLUSTER_ROOT}/leiden_pca_banksy_domain_matched" \
     --pipeline pca_harmony --resolution "${RESOLUTION}"

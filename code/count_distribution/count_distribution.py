@@ -52,6 +52,7 @@ Example:
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 import matplotlib
@@ -107,12 +108,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--match-panel-size",
         action="store_true",
-        help="Subset --compare-input to its top-N highly-variable genes (N = --input's gene count) "
-        "before computing any comparison metric, when the real reference has a much larger gene "
-        "panel than the simulated one. Deliberately NOT a random subsample -- the simulated panel "
-        "is designed to be marker/signal-heavy, so a size-matched HVG subset of real data is the "
-        "closer like-for-like comparison, and it directly shrinks apparent total-counts/sparsity "
-        "gaps that are really just panel-size artifacts rather than simulator fidelity issues.",
+        help="HVG-subset whichever of --input/--compare-input has the larger gene panel down to "
+        "the other's gene count, before computing any comparison metric. Usually shrinks the real "
+        "reference (bin/spot vs. Visium(HD): 18,085-36,601 real genes vs. 556 sim genes), but is "
+        "symmetric -- for cell vs. Xenium, sim's panel (556) is actually larger than Xenium's "
+        "(392), so this shrinks sim instead. Deliberately NOT a random subsample -- HVG selection "
+        "keeps the marker/signal-heavy genes on the larger side, giving the closer like-for-like "
+        "comparison, and it directly removes apparent total-counts/sparsity gaps that are really "
+        "just panel-size artifacts rather than simulator fidelity issues.",
     )
     args = parser.parse_args()
 
@@ -458,18 +461,31 @@ def run_compare(args: argparse.Namespace, rng: np.random.Generator) -> None:
     compare = sc.read_h5ad(args.compare_input)
     print(f"[load] compare shape: {compare.n_obs} observations x {compare.n_vars} genes")
 
-    if args.match_panel_size and compare.n_vars > primary.n_vars:
-        n_target = primary.n_vars
-        print(f"[panel-match] subsetting compare from {compare.n_vars} to top-{n_target} "
-              f"highly-variable genes (matching {args.modality}'s panel size)")
-        compare_counts = compare.layers["counts_pre_batch"] if "counts_pre_batch" in compare.layers else compare.X
-        hvg_source = ad.AnnData(X=compare_counts.copy(), var=compare.var.copy())
+    if args.match_panel_size and compare.n_vars != primary.n_vars:
+        # Whichever side has the larger panel gets HVG-subsetted down to the
+        # smaller side's gene count -- e.g. compare (real) is much larger for
+        # bin/spot vs. Visium(HD), but primary (sim) is actually the larger
+        # panel for cell vs. Xenium (556 vs. 392 genes), so this must be
+        # symmetric rather than always shrinking `compare`.
+        if compare.n_vars > primary.n_vars:
+            larger_name, n_target = "compare", primary.n_vars
+        else:
+            larger_name, n_target = "primary", compare.n_vars
+        larger = compare if larger_name == "compare" else primary
+        print(f"[panel-match] subsetting {larger_name} from {larger.n_vars} to top-{n_target} "
+              f"highly-variable genes (matching the smaller panel)")
+        larger_counts = larger.layers["counts_pre_batch"] if "counts_pre_batch" in larger.layers else larger.X
+        hvg_source = ad.AnnData(X=larger_counts.copy(), var=larger.var.copy())
         sc.pp.highly_variable_genes(hvg_source, n_top_genes=n_target, flavor="seurat_v3")
-        compare = compare[:, hvg_source.var["highly_variable"]].copy()
-        print(f"[panel-match] compare shape after HVG subset: {compare.n_obs} observations x {compare.n_vars} genes")
+        larger = larger[:, hvg_source.var["highly_variable"]].copy()
+        if larger_name == "compare":
+            compare = larger
+        else:
+            primary = larger
+        print(f"[panel-match] {larger_name} shape after HVG subset: {larger.n_obs} observations x {larger.n_vars} genes")
     elif args.match_panel_size:
-        print(f"[panel-match] skipped -- compare ({compare.n_vars} genes) is not larger than "
-              f"{args.modality} ({primary.n_vars} genes)")
+        print(f"[panel-match] skipped -- compare ({compare.n_vars} genes) and {args.modality} "
+              f"({primary.n_vars} genes) are already the same size")
 
     specs = [
         {"label": args.modality, "color": PRIMARY_COLOR, "adata": primary},
@@ -501,6 +517,36 @@ def run_compare(args: argparse.Namespace, rng: np.random.Generator) -> None:
         args.target_sum, args.sample_size, rng, args.output_dir / "raw_norm_log_compare.png",
     )
     print(f"[save] Comparison plots written to {args.output_dir}")
+
+    # Numeric summary alongside the plots -- lets a sweep across many configs be scored
+    # programmatically (theta_hat, total_counts, empty-bin fraction, ...) instead of having
+    # to eyeball every PNG, which is how prior sweeps (see figure.md/DATA_VERSIONS.md bin
+    # packing-fraction x log_mu history) were tracked by hand.
+    summary = {
+        "modality": args.modality,
+        "compare_label": args.compare_label,
+        "match_panel_size": bool(args.match_panel_size),
+        "n_obs": {s["label"]: int(s["adata"].n_obs) for s in specs},
+        "n_vars": {s["label"]: int(s["adata"].n_vars) for s in specs},
+        "theta_hat": {s["label"]: s["theta"] for s in specs},
+        "total_counts_median": {s["label"]: float(np.median(s["total_counts"])) for s in specs},
+        "total_counts_mean": {s["label"]: float(np.mean(s["total_counts"])) for s in specs},
+        "genes_per_cell_median": {s["label"]: float(np.median(s["n_genes"])) for s in specs},
+        "matrix_zero_frac": {s["label"]: s["sparsity"]["matrix_zero_frac"] for s in specs},
+        "empty_row_frac": {s["label"]: s["sparsity"]["empty_row_frac"] for s in specs},
+    }
+    primary_label, compare_label = args.modality, args.compare_label
+    summary["ratio_primary_over_compare"] = {
+        "theta_hat": summary["theta_hat"][primary_label] / summary["theta_hat"][compare_label]
+        if summary["theta_hat"][compare_label] not in (0, None) and np.isfinite(summary["theta_hat"][compare_label])
+        else None,
+        "total_counts_median": summary["total_counts_median"][primary_label] / summary["total_counts_median"][compare_label]
+        if summary["total_counts_median"][compare_label] else None,
+    }
+    summary_path = args.output_dir / "comparison_summary.json"
+    with open(summary_path, "w") as f:
+        json.dump(summary, f, indent=2)
+    print(f"[save] Numeric summary written to {summary_path}")
 
 
 def main() -> None:
