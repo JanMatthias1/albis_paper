@@ -29,10 +29,18 @@ Produces six PNGs:
     is conditional on each gene's mean, so it can't tell you the overall
     sparsity if gene means themselves differ between datasets; this does.
 
-"Raw counts" means adata.layers["counts_pre_batch"] when present (the counts
-before the synthetic batch-effect multiplier is applied), otherwise adata.X.
-The raw/norm/log panel always uses adata.X, since that is what the
-clustering pipeline actually consumes.
+"Raw counts" means adata.X (post-batch-effect counts) by default, so the sim
+side carries the same baked-in technical noise the real reference does --
+apples-to-apples. Pass --no-batch-effect to instead use
+adata.layers["counts_pre_batch"] when present (counts before the synthetic
+batch-effect multiplier). The raw/norm/log panel always uses adata.X
+regardless, since that is what the clustering pipeline actually consumes.
+
+By default --input is also restricted to a single slice (--slice-id 5, a
+representative near-equatorial interior section) rather than pooling all 10
+z-planes, matching the single-section nature of every real reference. Pass
+--all-slices to pool. Real --compare-input data has no slice_id and is never
+filtered.
 
 Pass --compare-input (plus --compare-label) to overlay a second dataset --
 e.g. real Xenium data -- on the same four diagnostics instead of plotting
@@ -108,20 +116,28 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--slice-id",
         type=int,
-        default=None,
-        help="Restrict --input (the sim/primary dataset) to a single obs['slice_id'] value before "
-        "computing any stats or plots, instead of pooling all slices. Real --compare-input data has "
-        "no slice_id and is never filtered by this flag.",
+        default=5,
+        help="Restrict --input (the sim/primary dataset) to this single obs['slice_id'] value "
+        "before computing any stats or plots, instead of pooling all slices. Defaults to 5 (a "
+        "representative near-equatorial interior section); pass --all-slices to pool instead. Real "
+        "--compare-input data has no slice_id and is never filtered by this flag.",
     )
     parser.add_argument(
-        "--use-batch-effect",
+        "--all-slices",
         action="store_true",
-        help="Use --input's X (post-batch-effect counts) uniformly for every stat/plot, "
-        "instead of the default 'counts_pre_batch' layer when present. Real --compare-input data "
-        "has no pre-batch version -- whatever technical noise it carries is just baked into its "
-        "counts -- so this makes the sim side match that: apples-to-apples, not artificially "
-        "cleaner than real can ever be. Also fixes an inconsistency where raw_norm_log_compare "
-        "already always used X while the other four comparison panels used counts_pre_batch.",
+        help="Pool every slice of --input instead of restricting to --slice-id. Overrides --slice-id.",
+    )
+    parser.add_argument(
+        "--no-batch-effect",
+        dest="use_batch_effect",
+        action="store_false",
+        default=True,
+        help="Use --input's 'counts_pre_batch' layer (counts before the synthetic batch-effect "
+        "multiplier) when present, instead of the default X (post-batch-effect counts). By default "
+        "X is used uniformly for every stat/plot so the sim side matches real --compare-input data, "
+        "which has no pre-batch version -- whatever technical noise it carries is just baked into "
+        "its counts -- making it apples-to-apples rather than artificially cleaner than real can "
+        "ever be. (The raw_norm_log_compare panel always used X regardless.)",
     )
     parser.add_argument(
         "--match-panel-size",
@@ -136,6 +152,9 @@ def parse_args() -> argparse.Namespace:
         "just panel-size artifacts rather than simulator fidelity issues.",
     )
     args = parser.parse_args()
+
+    if args.all_slices:
+        args.slice_id = None
 
     if args.input is None:
         args.input = SIM_PAPER_DIR / "data" / f"simulation_{args.modality}_z.h5ad"
