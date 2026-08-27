@@ -21,10 +21,28 @@
 # each panel gets the dataset built for its own question -- see figure.md,
 # 2026-08-25, "two-dataset strategy".
 #
-# batch_sigma=0.22 (manuscript default) -- cell has zero spatial aggregation
-# to dilute real signal, so the default batch strength never visibly
-# dominates at cell resolution; no batch_sigma tuning was needed here
-# (contrast with bin/spot, which needed modality-specific values).
+# 2026-08-26: switched to the EXACT SAME dataset as Figure 2's
+# figure_2_with_batch_tuned/cell_vs_non_diseased_lung comparison
+# (log_mu_-2.5_theta_0.25_jitter0.15_bsigma022) instead of this panel's own
+# previously-separate packing_pf0p04 tag. This is a bigger change than
+# bin/spot's (which only differed by log_mu): the old tag used
+# sphere_r_um=2050 (~4% packing, borrowed from bin/spot) with default
+# dispersion (theta=2.0/jitter=1.0/log_mu=0.7); Figure 2's tag uses cell's
+# own baseline sphere_r_um=6000 default (~0.16% packing -- cell has no
+# aggregation to need the bin/spot packing fix) with the marker-gene
+# mean-variance-branch-fixing dispersion config (log_mu=-2.5, theta=0.25,
+# theta_jitter=0.15). Per user decision, this panel now reads Figure 2's
+# data directly (SIM_RAW/SIM_QC point at data/figure_2/<tag>/, not a
+# separate data/noisy/<tag>/ copy). If that file isn't there yet, the
+# fallback below generates+QCs it with the identical config Figure 2 uses,
+# then moves it into data/figure_2/ itself (same pattern as
+# code/count_distribution/cell_vs_non_diseased_lung_with_batch_tuned.sh).
+#
+# batch_sigma=0.22 (manuscript default, unchanged by this switch) -- cell
+# has zero spatial aggregation to dilute real signal, so the default batch
+# strength never visibly dominates at cell resolution; no batch_sigma tuning
+# was needed here (contrast with bin/spot, which needed modality-specific
+# values).
 # Pipeline: plain PCA+Harmony, NOT BANKSY -- BANKSY is neutral-to-destructive
 # for cell_type_true recovery at cell resolution in every test run so far.
 
@@ -34,22 +52,33 @@ mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-SIM_TAG="packing_pf0p04"
+SIM_TAG="log_mu_-2.5_theta_0.25_jitter0.15_bsigma022"
 MODALITY="cell"
-SIM_QC="sim_paper/data/noisy/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
+SIM_RAW="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
+SIM_QC="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
+NOISY_DIR="sim_paper/data/noisy/${SIM_TAG}"
+FIG2_DIR="sim_paper/data/figure_2/${SIM_TAG}"
 # Final-config output lives under figure_3/ (2026-08-25 reorg, same convention
 # as the figure_2/ move) -- not the generic clustering_<tag>/ sweep location.
 CLUSTER_ROOT="sim_paper/data/figure_3/pca_harmony_single_cell/${MODALITY}"
 
-if [[ ! -f "sim_paper/data/noisy/${SIM_TAG}/simulation_${MODALITY}_z.h5ad" ]]; then
-    echo "[generate] ${SIM_TAG} not found, generating"
-    "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
-        --modality "${MODALITY}" --sphere-r-um 2050 --out-tag "${SIM_TAG}"
-fi
-
 if [[ ! -f "${SIM_QC}" ]]; then
-    echo "[qc] ${SIM_QC} not found, running 00_qc_filter.py"
-    "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
+    if [[ ! -f "${SIM_RAW}" ]]; then
+        echo "[generate] ${SIM_TAG} not found under data/figure_2/, generating (same config as Figure 2)"
+        "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
+            --modality "${MODALITY}" \
+            --base-gene-lognormal -2.5 0.7 --theta 0.25 --theta-jitter 0.15 --batch-sigma 0.22 \
+            --out-tag "${SIM_TAG}"
+        echo "[qc] ${SIM_TAG}"
+        "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
+        echo "[move] ${NOISY_DIR} -> ${FIG2_DIR}"
+        mkdir -p sim_paper/data/figure_2
+        mv "${NOISY_DIR}" "${FIG2_DIR}"
+    else
+        echo "[qc] ${SIM_QC} not found but raw exists, running 00_qc_filter.py directly against figure_2/"
+        "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" \
+            --input "${SIM_RAW}" --output "${SIM_QC}"
+    fi
 fi
 
 if [[ ! -f "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad" ]]; then

@@ -1,48 +1,41 @@
 #!/bin/bash
-#SBATCH --job-name=bin_celltype_panel
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs/bin_celltype_panel_%j.out
+#SBATCH --job-name=bin16um_celltype_panel
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs/bin16um_celltype_panel_%j.out
 #SBATCH --time=12:00:00
 #SBATCH --mem=250G
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# Figure 3, cell-type recovery panel, BIN modality (8um Visium-HD-like grid).
+# Figure 3, cell-type recovery panel, BIN modality at the 16um Visium HD
+# bin resolution (new 2026-08-26, alongside the existing 8um
+# bin_celltype_panel.sh -- both resolutions are canonical, not a
+# replacement, matching Figure 2's bin-at-both-resolutions decision).
 # Fully self-contained: generates the sim data if not already present,
 # QC-filters, runs plain PCA->Harmony->Leiden, reports ARI against
 # cell_type_true, and produces the ground-truth-vs-predicted UMAP +
 # contingency heatmap plots.
 #
-# Uses the WEAK (manuscript-baseline) domain_type_mix -- separate dataset
-# from the domain panel (bin_domain_panel.sh) by design, see
-# cell_celltype_panel.sh for why the two panels don't share one dataset.
+# Uses the EXACT SAME dataset as Figure 2's
+# figure_2_with_batch_tuned/bin_vs_breast_cancer_visium_hd_16um comparison
+# (packing_pf0p04_bin16um_log_mu_-2.5_bsigma05) -- per user decision, this
+# panel reads Figure 2's data directly (SIM_RAW/SIM_QC point at
+# data/figure_2/<tag>/, not a separate data/noisy/<tag>/ copy). If that file
+# isn't there yet, the fallback below generates+QCs it with the identical
+# config Figure 2 uses, then moves it into data/figure_2/ itself (same
+# pattern as
+# code/count_distribution/bin16um_vs_breast_cancer_visium_hd_with_batch_tuned.sh).
+# batch_sigma=0.5, same as the 8um bin panel (bin's Figure-3-decided value,
+# applied at both resolutions per 2026-08-26 user decision) -- see
+# bin_celltype_panel.sh for the batch_sigma=0.5 rationale (small-footprint
+# aggregation needs a stronger shift than the manuscript default to produce
+# a visible pre/post-Harmony correction story); not yet separately verified
+# whether 0.5 is still the right value at 16um's larger aggregation
+# footprint (16um pools ~4x the area of 8um), left as-is for now.
 #
-# 2026-08-26: switched to the EXACT SAME dataset as Figure 2's
-# figure_2_with_batch_tuned/bin_vs_breast_cancer_visium_hd comparison
-# (packing_pf0p04_log_mu_0.0_bsigma05) instead of this panel's own
-# previously-separate packing_pf0p04_bsigma05 tag -- the only difference
-# between the two was log_mu (0.7 default here vs. Figure 2's real-data-
-# tuned 0.0); batch_sigma=0.5 already matched. Per user decision, Figure 3's
-# cell-typing panels now read Figure 2's data directly (SIM_RAW/SIM_QC point
-# at data/figure_2/<tag>/, not a separate data/noisy/<tag>/ copy) so both
-# figures are guaranteed to describe the same simulated bin dataset. If that
-# file isn't there yet, the fallback below generates+QCs it with the
-# identical config Figure 2 uses, then moves it into data/figure_2/ itself
-# (same move-based pattern as
-# code/count_distribution/bin_vs_breast_cancer_visium_hd_with_batch_tuned.sh,
-# avoiding the data/noisy-vs-data/figure_2 path mismatch documented in
-# figure.md 2026-08-26).
-#
-# batch_sigma=0.5 (NOT the manuscript default 0.22): at 0.22, bin's small
-# 8um aggregation footprint retains so much real signal that batch effect
-# never visibly separates slices even before Harmony runs -- no meaningful
-# before/after correction story to demonstrate. 0.5 gives a striking
-# "flower petal" separation pre-Harmony and a near-complete merge after
-# (0.33 was too weak, 0.8 pushed too far and left a visible residual
-# cluster uncorrected). See figure.md, 2026-08-25, batch_sigma bracket.
-# Pipeline: plain PCA+Harmony, NOT BANKSY -- BANKSY collapses bin's
-# cell_type_true ARI (0.28 plain -> 0.004 BANKSY on the domain-panel
-# dataset); every BANKSY parameter tried so far (k_geom, nbr_weight_decay,
-# max_m) has failed to stabilize it for bin.
+# Uses the WEAK (manuscript-baseline) domain_type_mix, same as the 8um
+# celltype panel -- separate dataset from any future 16um domain panel.
+# Pipeline: plain PCA+Harmony, NOT BANKSY -- same rationale as the 8um bin
+# panel (BANKSY collapses bin's cell_type_true ARI; see bin_celltype_panel.sh).
 
 set -euo pipefail
 
@@ -50,22 +43,24 @@ mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-SIM_TAG="packing_pf0p04_log_mu_0.0_bsigma05"
+SIM_TAG="packing_pf0p04_bin16um_log_mu_-2.5_bsigma05"
 MODALITY="bin"
 SIM_RAW="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
 SIM_QC="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
 NOISY_DIR="sim_paper/data/noisy/${SIM_TAG}"
 FIG2_DIR="sim_paper/data/figure_2/${SIM_TAG}"
-# Final-config output lives under figure_3/ (2026-08-25 reorg, same convention
-# as the figure_2/ move) -- not the generic clustering_<tag>/ sweep location.
-CLUSTER_ROOT="sim_paper/data/figure_3/pca_harmony_single_cell/${MODALITY}"
+# "bin16um" (not "bin") keeps this panel's output separate from the 8um
+# bin_celltype_panel.sh output -- the underlying --modality passed to the
+# python tools below is still "bin" (bin/spot/cell are the only valid
+# modality values), only the output directory name is resolution-qualified.
+CLUSTER_ROOT="sim_paper/data/figure_3/pca_harmony_single_cell/bin16um"
 
 if [[ ! -f "${SIM_QC}" ]]; then
     if [[ ! -f "${SIM_RAW}" ]]; then
         echo "[generate] ${SIM_TAG} not found under data/figure_2/, generating (same config as Figure 2)"
         "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
-            --modality "${MODALITY}" --sphere-r-um 2050 \
-            --base-gene-lognormal 0.0 0.7 --batch-sigma 0.5 \
+            --modality "${MODALITY}" --sphere-r-um 2050 --bin-size-um 16 \
+            --base-gene-lognormal -2.5 0.7 --batch-sigma 0.5 \
             --out-tag "${SIM_TAG}"
         echo "[qc] ${SIM_TAG}"
         "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
@@ -95,10 +90,7 @@ echo "[ari] resolution-matched ARI recovery"
 
 # Use the SAME resolution ari_vs_ground_truth.py's binary search already found
 # for cell_type_true (achieves the true category count exactly), rather than a
-# fixed guess -- otherwise this qualitative plot's predicted-cluster count can
-# drift from the true count and look like a mismatch that isn't really there
-# (found 2026-08-25 on spot: fixed res=0.5 landed on 7 clusters vs. 8 true
-# types, while the matched res=0.524 hits 8/8).
+# fixed guess -- see bin_celltype_panel.sh for why.
 RESOLUTION=$("${PYTHON_BIN}" -c "
 import json
 with open('${CLUSTER_ROOT}/ari_recovery_qc/ari_summary_${MODALITY}.json') as f:

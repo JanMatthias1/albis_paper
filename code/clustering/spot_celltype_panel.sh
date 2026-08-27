@@ -17,6 +17,19 @@
 # from the domain panel (spot_domain_panel.sh), see cell_celltype_panel.sh
 # for why the two panels don't share one dataset.
 #
+# 2026-08-26: switched to the EXACT SAME dataset as Figure 2's
+# figure_2_with_batch_tuned/spot_vs_breast_cancer_visium comparison
+# (packing_pf0p04_log_mu_-2.5_bsigma015) instead of this panel's own
+# previously-separate packing_pf0p04_bsigma015 tag -- the only difference
+# between the two was log_mu (0.7 default here vs. Figure 2's real-data-
+# tuned -2.5); batch_sigma=0.15 already matched. Per user decision, this
+# panel now reads Figure 2's data directly (SIM_RAW/SIM_QC point at
+# data/figure_2/<tag>/, not a separate data/noisy/<tag>/ copy). If that file
+# isn't there yet, the fallback below generates+QCs it with the identical
+# config Figure 2 uses, then moves it into data/figure_2/ itself (same
+# pattern as
+# code/count_distribution/spot_vs_breast_cancer_visium_with_batch_tuned.sh).
+#
 # batch_sigma=0.15 (NOT the manuscript default 0.22): spot's large capture
 # radius pools far more cells per observation than bin/cell, diluting real
 # biological signal relative to the same fixed-size batch shift -- at 0.22,
@@ -33,22 +46,33 @@ mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-SIM_TAG="packing_pf0p04_bsigma015"
+SIM_TAG="packing_pf0p04_log_mu_-2.5_bsigma015"
 MODALITY="spot"
-SIM_QC="sim_paper/data/noisy/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
+SIM_RAW="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
+SIM_QC="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
+NOISY_DIR="sim_paper/data/noisy/${SIM_TAG}"
+FIG2_DIR="sim_paper/data/figure_2/${SIM_TAG}"
 # Final-config output lives under figure_3/ (2026-08-25 reorg, same convention
 # as the figure_2/ move) -- not the generic clustering_<tag>/ sweep location.
 CLUSTER_ROOT="sim_paper/data/figure_3/pca_harmony_single_cell/${MODALITY}"
 
-if [[ ! -f "sim_paper/data/noisy/${SIM_TAG}/simulation_${MODALITY}_z.h5ad" ]]; then
-    echo "[generate] ${SIM_TAG} not found, generating"
-    "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
-        --modality "${MODALITY}" --sphere-r-um 2050 --batch-sigma 0.15 --out-tag "${SIM_TAG}"
-fi
-
 if [[ ! -f "${SIM_QC}" ]]; then
-    echo "[qc] ${SIM_QC} not found, running 00_qc_filter.py"
-    "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
+    if [[ ! -f "${SIM_RAW}" ]]; then
+        echo "[generate] ${SIM_TAG} not found under data/figure_2/, generating (same config as Figure 2)"
+        "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
+            --modality "${MODALITY}" --sphere-r-um 2050 \
+            --base-gene-lognormal -2.5 0.7 --batch-sigma 0.15 \
+            --out-tag "${SIM_TAG}"
+        echo "[qc] ${SIM_TAG}"
+        "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
+        echo "[move] ${NOISY_DIR} -> ${FIG2_DIR}"
+        mkdir -p sim_paper/data/figure_2
+        mv "${NOISY_DIR}" "${FIG2_DIR}"
+    else
+        echo "[qc] ${SIM_QC} not found but raw exists, running 00_qc_filter.py directly against figure_2/"
+        "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" \
+            --input "${SIM_RAW}" --output "${SIM_QC}"
+    fi
 fi
 
 if [[ ! -f "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad" ]]; then
