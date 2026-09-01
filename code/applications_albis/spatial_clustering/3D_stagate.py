@@ -1,0 +1,297 @@
+"""
+Figure 4B -- 3D spatial-domain identification on an ALBIS sphere z-stack with
+STAGATE (PyG port).
+
+Adapted from STAGATE Tutorial 5 ("3D spatial domain identification"):
+    https://stagate.readthedocs.io/en/latest/T5_3D.html
+The tutorial builds a 3D spatial network (2D SNN within each section + edges
+between adjacent sections) so the autoencoder can share signal across
+consecutive sections and smooth out section-specific technical noise.
+
+Differences from the tutorial:
+  * Input is an ALBIS `simulation_<modality>_z_qc.h5ad` file (a locked Figure 2
+    tag, post-batch QC). It already carries:
+        obsm['spatial']        true aligned in-plane XY (ground truth)
+        obsm['spatial_3d']     the same, with the real z stacked on
+        obs['slice_id']        0..9  -> the "sections"
+        obs['domain_true']     D0..D5 (6)  -> the domain label STAGATE targets
+        obs['cell_type_true']  8 types      -> secondary reference
+    Unlike Figure 4C (alignment), this task assumes the stack is ALREADY
+    aligned -- we feed STAGATE the true coords and ask it to recover domains.
+  * Sections are obs['slice_id'] (not a Puck id); section_order is the sorted
+    slice_id list.
+  * rad_cutoff_2D / rad_cutoff_Zaxis default to a multiple of the median
+    nearest-neighbour spacing measured per section, so one script works across
+    bin16um / spot / cell without hand-tuned radii (override with --rad-2d /
+    --rad-z / --rad-mult).
+  * Runs STAGATE twice -- with the 3D network and with the 2D-only network --
+    and reports ARI/NMI for both, which is the comparison Figure 4B makes.
+
+Output (per dataset) under
+    sim_paper/data/figure_4/spatial_clustering/STAGATE/<dataset>/
+        adata_results/Sim_3D_STAGATE_<dataset>.h5ad
+            obsm['STAGATE'] / obsm['STAGATE_2D']   the two embeddings
+            obs['mclust_3d'] / obs['mclust_2d']    mclust labels (k = 6)
+        metrics.json    ARI / NMI vs domain_true (primary) and cell_type_true,
+                        3D vs 2D, plus per-slice ARI for the 3D run
+        plots/          3D domain scatter (true | STAGATE-3D | STAGATE-2D),
+                        UMAP of the 3D embedding coloured by domain / slice
+"""
+
+import argparse
+import json
+import os
+import random
+import sys
+
+import numpy as np
+import pandas as pd
+import scanpy as sc
+import anndata as ad
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+
+from sklearn.neighbors import NearestNeighbors  # noqa: E402
+from sklearn.metrics import (  # noqa: E402
+    adjusted_rand_score,
+    normalized_mutual_info_score,
+)
+
+print(sys.executable)
+
+import torch  # noqa: E402
+import STAGATE_pyG as ST  # noqa: E402
+
+SEED = 0
+random.seed(SEED)
+np.random.seed(SEED)
+torch.manual_seed(SEED)
+torch.cuda.manual_seed_all(SEED)
+print("Torch:", torch.__version__, "| CUDA:", torch.cuda.is_available(), torch.version.cuda)
+
+
+# --------------------------------------------------------------------------- #
+# dataset table                                                              #
+# --------------------------------------------------------------------------- #
+FIG2 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2"
+BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/spatial_clustering/STAGATE"
+
+DATASETS = {
+    # 16 um Visium HD bin z-stack
+    "bin16um": dict(
+        h5ad=f"{FIG2}/packing_pf0p04_bin16um_log_mu_-2.5_bsigma07/simulation_bin_z_qc.h5ad",
+    ),
+    # Visium spot z-stack
+    "spot": dict(
+        h5ad=f"{FIG2}/packing_pf0p04_log_mu_-2.5_bsigma03/simulation_spot_z_qc.h5ad",
+    ),
+    # single-cell z-stack
+    "cell": dict(
+        h5ad=f"{FIG2}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad",
+    ),
+}
+
+N_DOMAINS = 6  # obs['domain_true'] has D0..D5
+N_TOP_GENES = 3000  # HVG cap; the ALBIS panel is 556 genes so this keeps them all
+
+
+# --------------------------------------------------------------------------- #
+# helpers                                                                    #
+# --------------------------------------------------------------------------- #
+def prepare_input(adata, n_top_genes=N_TOP_GENES):
+    """Tutorial-style normalisation; section key + 2D coords for STAGATE."""
+    adata.var_names_make_unique()
+    adata.obs["slice_id"] = adata.obs["slice_id"].astype(str)
+
+    # true aligned in-plane coords -> obsm['spatial'] (this is the domain-ID
+    # task: the stack is assumed already aligned)
+    adata.obsm["spatial"] = np.asarray(adata.obsm["spatial"], dtype=float)[:, :2].copy()
+
+    sc.pp.highly_variable_genes(adata, flavor="seurat_v3",
+                                n_top_genes=min(n_top_genes, adata.n_vars))
+    sc.pp.normalize_total(adata, target_sum=1e4)
+    sc.pp.log1p(adata)
+    return adata
+
+
+def auto_radius(adata, key_section="slice_id", mult=2.5):
+    """Median nearest-neighbour spacing across sections, times `mult`."""
+    dists = []
+    for sec in adata.obs[key_section].unique():
+        xy = adata.obsm["spatial"][(adata.obs[key_section] == sec).values]
+        if xy.shape[0] < 2:
+            continue
+        nn = NearestNeighbors(n_neighbors=2).fit(xy)
+        d, _ = nn.kneighbors(xy)
+        dists.append(np.median(d[:, 1]))
+    nn_med = float(np.median(dists))
+    return nn_med, nn_med * mult
+
+
+def run_stagate(adata, spatial_net, n_epochs, key_added):
+    """One STAGATE fit against a given (2D or 3D) spatial network."""
+    a = adata.copy()
+    a.uns["Spatial_Net"] = spatial_net.copy()
+    a = ST.train_STAGATE(a, n_epochs=n_epochs, key_added=key_added,
+                         device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return a.obsm[key_added]
+
+
+def cluster_scores(labels_pred, adata):
+    out = {}
+    for ref in ("domain_true", "cell_type_true"):
+        if ref not in adata.obs:
+            continue
+        y = adata.obs[ref].astype(str).values
+        out[f"ari_{ref}"] = float(adjusted_rand_score(y, labels_pred))
+        out[f"nmi_{ref}"] = float(normalized_mutual_info_score(y, labels_pred))
+    return out
+
+
+def per_slice_ari(labels_pred, adata, ref="domain_true"):
+    out = {}
+    lab = pd.Series(labels_pred, index=adata.obs_names)
+    for sid in sorted(adata.obs["slice_id"].unique(), key=float):
+        m = (adata.obs["slice_id"] == sid).values
+        out[str(sid)] = float(adjusted_rand_score(
+            adata.obs.loc[m, ref].astype(str).values, lab[m].values))
+    return out
+
+
+# --------------------------------------------------------------------------- #
+# plotting                                                                   #
+# --------------------------------------------------------------------------- #
+def plot_3d_panels(adata, z, outdir):
+    cols = [("domain_true", "true domains"),
+            ("mclust_3d", "STAGATE-3D"),
+            ("mclust_2d", "STAGATE-2D")]
+    fig = plt.figure(figsize=(13, 4.5))
+    for i, (key, title) in enumerate(cols):
+        ax = fig.add_subplot(1, 3, i + 1, projection="3d")
+        vals = adata.obs[key].astype(str).values
+        for j, lab in enumerate(sorted(np.unique(vals))):
+            m = vals == lab
+            ax.scatter(adata.obsm["spatial"][m, 0], adata.obsm["spatial"][m, 1],
+                       z[m], s=0.5, marker="o", label=lab,
+                       color=plt.cm.tab10(j % 10))
+        ax.set_title(title)
+        ax.set_xticklabels([]); ax.set_yticklabels([]); ax.set_zticklabels([])
+        ax.elev = 15; ax.azim = -60
+    fig.tight_layout()
+    fig.savefig(os.path.join(outdir, "domains_3d_true_vs_stagate.png"), dpi=200)
+    plt.close(fig)
+
+
+def plot_umap(adata, outdir):
+    try:
+        sc.pp.neighbors(adata, use_rep="STAGATE")
+        sc.tl.umap(adata)
+        fig = sc.pl.umap(adata, color=["domain_true", "mclust_3d", "slice_id"],
+                         show=False, return_fig=True)
+        fig.savefig(os.path.join(outdir, "umap_stagate3d.png"), dpi=200, bbox_inches="tight")
+        plt.close(fig)
+    except Exception as e:  # noqa: BLE001
+        print("[warn] UMAP plot skipped:", e)
+
+
+# --------------------------------------------------------------------------- #
+# main                                                                       #
+# --------------------------------------------------------------------------- #
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dataset", required=True, choices=sorted(DATASETS))
+    ap.add_argument("--n-epochs", type=int, default=500)
+    ap.add_argument("--rad-mult", type=float, default=2.5,
+                    help="rad_cutoff = rad_mult * median NN spacing (per-section)")
+    ap.add_argument("--rad-2d", type=float, default=None, help="override rad_cutoff_2D (um)")
+    ap.add_argument("--rad-z", type=float, default=None, help="override rad_cutoff_Zaxis (um)")
+    ap.add_argument("--subsample", type=int, default=0,
+                    help="randomly keep this many obs before building the graph (0 = all)")
+    args = ap.parse_args()
+
+    spec = DATASETS[args.dataset]
+    if not os.path.exists(spec["h5ad"]):
+        raise FileNotFoundError(spec["h5ad"])
+
+    outdir = os.path.join(BASE_OUTDIR, args.dataset)
+    out_adata = os.path.join(outdir, "adata_results")
+    out_plots = os.path.join(outdir, "plots")
+    for d in (out_adata, out_plots):
+        os.makedirs(d, exist_ok=True)
+
+    print(f"[load] {spec['h5ad']}")
+    adata = sc.read_h5ad(spec["h5ad"])
+    print(f"[load] {adata.shape}")
+
+    if args.subsample and args.subsample < adata.n_obs:
+        rng = np.random.default_rng(SEED)
+        keep = rng.choice(adata.n_obs, size=args.subsample, replace=False)
+        adata = adata[np.sort(keep)].copy()
+        print(f"[subsample] -> {adata.shape}")
+
+    adata = prepare_input(adata)
+
+    section_order = [str(s) for s in sorted(adata.obs["slice_id"].astype(float).unique())]
+    print("[sections]", section_order)
+
+    nn_med, rad_auto = auto_radius(adata, mult=args.rad_mult)
+    rad_2d = args.rad_2d if args.rad_2d is not None else rad_auto
+    rad_z = args.rad_z if args.rad_z is not None else rad_auto
+    print(f"[radius] median NN spacing = {nn_med:.2f} um -> rad_2d = {rad_2d:.2f}, rad_z = {rad_z:.2f}")
+
+    ST.Cal_Spatial_Net_3D(adata, rad_cutoff_2D=rad_2d, rad_cutoff_Zaxis=rad_z,
+                          key_section="slice_id", section_order=section_order,
+                          verbose=True)
+    net_3d = adata.uns["Spatial_Net"].copy()
+    net_2d = adata.uns["Spatial_Net_2D"].copy()
+    print(f"[net] 3D edges = {len(net_3d)}  | 2D-only edges = {len(net_2d)}")
+
+    # ---- STAGATE with the 3D network ----------------------------------------
+    print("[stagate] 3D network")
+    adata.obsm["STAGATE"] = run_stagate(adata, net_3d, args.n_epochs, "STAGATE")
+    adata = ST.mclust_R(adata, N_DOMAINS, used_obsm="STAGATE")
+    adata.obs["mclust_3d"] = adata.obs["mclust"].astype(str)
+
+    # ---- STAGATE with the 2D-only network (tutorial comparison) ------------
+    print("[stagate] 2D-only network")
+    adata.obsm["STAGATE_2D"] = run_stagate(adata, net_2d, args.n_epochs, "STAGATE_2D")
+    tmp = adata.copy()
+    tmp.obsm["STAGATE"] = adata.obsm["STAGATE_2D"]
+    tmp = ST.mclust_R(tmp, N_DOMAINS, used_obsm="STAGATE")
+    adata.obs["mclust_2d"] = tmp.obs["mclust"].astype(str).values
+
+    # ---- metrics ---------------------------------------------------------
+    metrics = {
+        "dataset": args.dataset,
+        "n_obs": int(adata.n_obs),
+        "n_vars": int(adata.n_vars),
+        "n_epochs": args.n_epochs,
+        "median_nn_spacing_um": nn_med,
+        "rad_cutoff_2D": float(rad_2d),
+        "rad_cutoff_Zaxis": float(rad_z),
+        "n_edges_3d": int(len(net_3d)),
+        "n_edges_2d": int(len(net_2d)),
+        "stagate_3d": cluster_scores(adata.obs["mclust_3d"].values, adata),
+        "stagate_2d": cluster_scores(adata.obs["mclust_2d"].values, adata),
+        "stagate_3d_ari_domain_true_per_slice": per_slice_ari(
+            adata.obs["mclust_3d"].values, adata),
+    }
+    with open(os.path.join(out_adata, "metrics.json"), "w") as fh:
+        json.dump(metrics, fh, indent=2)
+    print("METRICS:", json.dumps(metrics, indent=2))
+
+    # ---- plots + save --------------------------------------------------
+    z = (np.asarray(adata.obsm["spatial_3d"])[:, 2]
+         if "spatial_3d" in adata.obsm else adata.obs["slice_id"].astype(float).values)
+    plot_3d_panels(adata, z, out_plots)
+    plot_umap(adata, out_plots)
+
+    out_h5ad = os.path.join(out_adata, f"Sim_3D_STAGATE_{args.dataset}.h5ad")
+    adata.write(out_h5ad)
+    print("wrote", out_h5ad)
+
+
+if __name__ == "__main__":
+    main()
