@@ -34,6 +34,7 @@ from matplotlib.lines import Line2D
 
 BASE = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/alignment"
 ALL_DATASETS = ["bin16um", "spot", "cell"]
+DATASET_CHOICES = ALL_DATASETS + ["bin16um_realwindow", "spot_realwindow"]
 COL_LABELS = ["Unaligned (input)", "STAIR aligned", "Ground truth"]
 
 
@@ -180,7 +181,7 @@ def plot_rmse(data, outdir):
 
 def parse_args():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--datasets", nargs="+", default=ALL_DATASETS, choices=ALL_DATASETS)
+    ap.add_argument("--datasets", nargs="+", default=ALL_DATASETS, choices=DATASET_CHOICES)
     ap.add_argument("--color-by", default="slice_id",
                     choices=["slice_id", "domain_true", "cell_type_true"])
     ap.add_argument("--no-procrustes", action="store_true",

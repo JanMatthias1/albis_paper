@@ -80,18 +80,29 @@ print("Torch:", torch.__version__, "| CUDA:", torch.cuda.is_available(), torch.v
 # dataset table                                                              #
 # --------------------------------------------------------------------------- #
 FIG2 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2"
+CDIST = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/count_distribution"
 BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/alignment/STAIR"
 
+# 2026-09-01: realwindow is now the baked-in default for the Figure 2 tags, so
+# bin16um / spot carry a real 6.5 mm platform window with ~77% off-tissue
+# bins/spots labelled domain_true="unassigned" / is_empty=True pre-QC. Point
+# STAIR at the QC-filtered h5ad (00_qc_filter.py drops the empty border, leaving
+# the clean 6-domain disc) -- the raw simulation_<mod>_z.h5ad would feed STAIR a
+# mostly-empty stack and a 7th "unassigned" domain. cell has no off-tissue
+# observations (12x24 mm window fully covered) so it stays on the raw h5ad.
+# The former *_realwindow DATASETS entries + run_stair_3D_realwindow.sh were
+# dropped here -- they pointed at data/count_distribution/..._realwindow/ paths
+# that no longer exist, and are now redundant with these defaults.
 DATASETS = {
     # 16 um Visium HD bin z-stack
     "bin16um": dict(
-        h5ad=f"{FIG2}/packing_pf0p04_bin16um_log_mu_-2.5_bsigma07/simulation_bin_z.h5ad",
+        h5ad=f"{FIG2}/packing_pf0p04_bin16um_log_mu_-2.5_bsigma07/simulation_bin_z_qc.h5ad",
         n_neigh_hom=4,
         c_neigh_het=0.97,
     ),
     # Visium spot z-stack
     "spot": dict(
-        h5ad=f"{FIG2}/packing_pf0p04_log_mu_-2.5_bsigma03/simulation_spot_z.h5ad",
+        h5ad=f"{FIG2}/packing_pf0p04_log_mu_-2.5_bsigma03/simulation_spot_z_qc.h5ad",
         n_neigh_hom=8,
         c_neigh_het=0.90,
     ),
