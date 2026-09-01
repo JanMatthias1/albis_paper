@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # Figure 4C -- run STAIR 3D alignment on the three ALBIS z-stacks.
+# Optional $1: a job id to gate all three submissions on
+# (--dependency=afterok:<id>), e.g. the QC-regen job. "none" / unset = no dep.
 set -euo pipefail
+
+DEP_JOB="${1:-none}"
+DEP_ARG=()
+[[ "${DEP_JOB}" != "none" ]] && DEP_ARG=(--dependency="afterok:${DEP_JOB}")
 
 SCRIPT="/dcs04/hicks/data/Jan/sim_project/sim_paper/code/applications_albis/alignment/3D_stair.py"
 CONDA_SH="/jhpce/shared/jhpce/core/anaconda3/2023.03/etc/profile.d/conda.sh"
@@ -18,6 +24,7 @@ DATASETS=(
 
 for d in "${DATASETS[@]}"; do
   sbatch \
+  "${DEP_ARG[@]}" \
   --job-name="3D_stair" \
   --partition=gpu \
   --gres=gpu:l40s:1 \

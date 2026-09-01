@@ -76,20 +76,61 @@ print("Torch:", torch.__version__, "| CUDA:", torch.cuda.is_available(), torch.v
 # dataset table                                                              #
 # --------------------------------------------------------------------------- #
 FIG2 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2"
+SIMDATA = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/spatial_clustering/sim_data"
 BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/spatial_clustering/STAGATE"
 
+# Figure 4B runs a 2x2: {weak | strong domain_type_mix} x {tuned | very-low
+# batch_sigma}, on bin16um / spot / cell. Every config is the matching Figure 2
+# config; only --strong-domain-mix and --batch-sigma vary across the grid. All
+# realwindow + post-batch QC.
+#   tuned batch  = bin16um 0.7 / spot 0.3 / cell 1.5   (Figure 2 finalized values)
+#   low batch    = 0.05 everywhere
+# family 1 reuses data/figure_2/ in place; families 2/3/4 are Figure-4B-only and
+# live under data/figure_4/spatial_clustering/sim_data/ (generate_strongmix.sh
+# builds 2 + 4, generate_figure2_lowbatch.sh builds 3).
 DATASETS = {
-    # 16 um Visium HD bin z-stack
+    # -- family 1: WEAK mix, TUNED batch. Domain ARI ~0 by design; the
+    # cross-modality baseline (also consistent with Figure 4A/4C).
     "bin16um": dict(
         h5ad=f"{FIG2}/packing_pf0p04_bin16um_log_mu_-2.5_bsigma07/simulation_bin_z_qc.h5ad",
     ),
-    # Visium spot z-stack
     "spot": dict(
         h5ad=f"{FIG2}/packing_pf0p04_log_mu_-2.5_bsigma03/simulation_spot_z_qc.h5ad",
     ),
-    # single-cell z-stack
     "cell": dict(
         h5ad=f"{FIG2}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad",
+    ),
+    # -- family 2: STRONG mix, TUNED batch. The main 3D-vs-2D domain-recovery
+    # comparison.
+    "bin16um_strongmix": dict(
+        h5ad=f"{SIMDATA}/packing_pf0p04_bin16um_log_mu_-2.5_bsigma07_strongmix/simulation_bin_z_qc.h5ad",
+    ),
+    "spot_strongmix": dict(
+        h5ad=f"{SIMDATA}/packing_pf0p04_log_mu_-2.5_bsigma03_strongmix/simulation_spot_z_qc.h5ad",
+    ),
+    "cell_strongmix": dict(
+        h5ad=f"{SIMDATA}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma15_strongmix/simulation_cell_z_qc.h5ad",
+    ),
+    # -- family 3: WEAK mix, VERY LOW batch (0.05). Batch control for family 1.
+    "bin16um_lowbatch": dict(
+        h5ad=f"{SIMDATA}/packing_pf0p04_bin16um_log_mu_-2.5_bsigma005/simulation_bin_z_qc.h5ad",
+    ),
+    "spot_lowbatch": dict(
+        h5ad=f"{SIMDATA}/packing_pf0p04_log_mu_-2.5_bsigma005/simulation_spot_z_qc.h5ad",
+    ),
+    "cell_lowbatch": dict(
+        h5ad=f"{SIMDATA}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma005/simulation_cell_z_qc.h5ad",
+    ),
+    # -- family 4: STRONG mix, VERY LOW batch (0.05). Pairs against family 2 to
+    # test whether 3D's advantage is batch-noise suppression.
+    "bin16um_strongmix_lowbatch": dict(
+        h5ad=f"{SIMDATA}/packing_pf0p04_bin16um_log_mu_-2.5_bsigma005_strongmix/simulation_bin_z_qc.h5ad",
+    ),
+    "spot_strongmix_lowbatch": dict(
+        h5ad=f"{SIMDATA}/packing_pf0p04_log_mu_-2.5_bsigma005_strongmix/simulation_spot_z_qc.h5ad",
+    ),
+    "cell_strongmix_lowbatch": dict(
+        h5ad=f"{SIMDATA}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma005_strongmix/simulation_cell_z_qc.h5ad",
     ),
 }
 
@@ -179,7 +220,8 @@ def plot_3d_panels(adata, z, outdir):
         ax.set_title(title)
         ax.set_xticklabels([]); ax.set_yticklabels([]); ax.set_zticklabels([])
         ax.elev = 15; ax.azim = -60
-    fig.tight_layout()
+        ax.legend(markerscale=6, fontsize=6, loc="upper left")
+    fig.subplots_adjust(left=0.02, right=0.98, wspace=0.05)
     fig.savefig(os.path.join(outdir, "domains_3d_true_vs_stagate.png"), dpi=200)
     plt.close(fig)
 
@@ -203,8 +245,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dataset", required=True, choices=sorted(DATASETS))
     ap.add_argument("--n-epochs", type=int, default=500)
-    ap.add_argument("--rad-mult", type=float, default=2.5,
-                    help="rad_cutoff = rad_mult * median NN spacing (per-section)")
+    ap.add_argument("--rad-mult", type=float, default=1.5,
+                    help="rad_cutoff = rad_mult * median NN spacing (per-section); "
+                         "~1.5 -> first neighbour ring, ~2.5 -> ~3 rings")
     ap.add_argument("--rad-2d", type=float, default=None, help="override rad_cutoff_2D (um)")
     ap.add_argument("--rad-z", type=float, default=None, help="override rad_cutoff_Zaxis (um)")
     ap.add_argument("--subsample", type=int, default=0,
@@ -233,7 +276,9 @@ def main():
 
     adata = prepare_input(adata)
 
-    section_order = [str(s) for s in sorted(adata.obs["slice_id"].astype(float).unique())]
+    # section_order MUST hold the same string values as obs['slice_id']
+    # (Cal_Spatial_Net_3D matches them with .isin) -- just sorted numerically.
+    section_order = sorted(adata.obs["slice_id"].unique(), key=float)
     print("[sections]", section_order)
 
     nn_med, rad_auto = auto_radius(adata, mult=args.rad_mult)
@@ -257,10 +302,8 @@ def main():
     # ---- STAGATE with the 2D-only network (tutorial comparison) ------------
     print("[stagate] 2D-only network")
     adata.obsm["STAGATE_2D"] = run_stagate(adata, net_2d, args.n_epochs, "STAGATE_2D")
-    tmp = adata.copy()
-    tmp.obsm["STAGATE"] = adata.obsm["STAGATE_2D"]
-    tmp = ST.mclust_R(tmp, N_DOMAINS, used_obsm="STAGATE")
-    adata.obs["mclust_2d"] = tmp.obs["mclust"].astype(str).values
+    adata = ST.mclust_R(adata, N_DOMAINS, used_obsm="STAGATE_2D")
+    adata.obs["mclust_2d"] = adata.obs["mclust"].astype(str)
 
     # ---- metrics ---------------------------------------------------------
     metrics = {

@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Figure 4B -- run STAGATE 3D spatial-domain identification on the three ALBIS
-# z-stacks (bin16um / spot / cell), same Figure 2 tags as Figure 4C.
-# Optional $1: a job id to gate all three submissions on
-# (--dependency=afterok:<id>), e.g. the QC-regen job. "none" / unset = no dep.
+# Figure 4B -- run STAGATE 3D spatial-domain identification on the ALBIS
+# z-stacks: the weak-mix Figure 2 tags (bin16um / spot / cell) AND the
+# strong-domain-mix tags (bin8 / spot / cell) used by the BANKSY domain panels.
+# Optional $1: a job id to gate every submission on (--dependency=afterok:<id>),
+#   e.g. a QC-regen job. "none" / unset = no dependency.
+# Optional $2..$N: explicit dataset names to run instead of the full set.
 set -euo pipefail
 
 DEP_JOB="${1:-none}"
@@ -17,11 +19,22 @@ OUTDIR="/dcs04/hicks/data/Jan/sim_project/sim_paper/code/applications_albis/spat
 LOGDIR="${OUTDIR}/logs_stagate_3D"
 mkdir -p "${LOGDIR}"
 
-DATASETS=(
-  "bin16um"
-  "spot"
-  "cell"
-)
+# weak-mix Figure 2 tags + strong-domain-mix tags (see 3D_stagate.py DATASETS).
+# Override by passing dataset names as $2..$N, e.g.:
+#   bash run_stagate_3D.sh none spot_strongmix cell_strongmix
+DATASETS=("${@:2}")
+if [[ ${#DATASETS[@]} -eq 0 ]]; then
+  DATASETS=(
+    # family 1: weak mix, tuned batch (canonical Figure 2, reused in place)
+    "bin16um" "spot" "cell"
+    # family 2: strong domain mix, tuned batch
+    "bin16um_strongmix" "spot_strongmix" "cell_strongmix"
+    # family 3: weak mix, very low batch (0.05)
+    "bin16um_lowbatch" "spot_lowbatch" "cell_lowbatch"
+    # family 4: strong mix, very low batch (0.05)
+    "bin16um_strongmix_lowbatch" "spot_strongmix_lowbatch" "cell_strongmix_lowbatch"
+  )
+fi
 
 for d in "${DATASETS[@]}"; do
   sbatch \
@@ -31,7 +44,7 @@ for d in "${DATASETS[@]}"; do
   --gres=gpu:l40s:1 \
   --mem=150G \
   --cpus-per-task=4 \
-  --time=48:00:00 \
+  --time=06:00:00 \
   --output="${LOGDIR}/stagate_${d}_%j.out" \
-  --wrap="bash -c 'source ${CONDA_SH} && conda activate ${STAGATE_ENV} && ${PYTHON_BIN} ${SCRIPT} --dataset ${d}'"
+  --wrap="bash -c 'source ${CONDA_SH} && conda activate ${STAGATE_ENV} && export LD_LIBRARY_PATH=${STAGATE_ENV}/lib:\${LD_LIBRARY_PATH:-} R_HOME=${STAGATE_ENV}/lib/R && ${PYTHON_BIN} ${SCRIPT} --dataset ${d}'"
 done
