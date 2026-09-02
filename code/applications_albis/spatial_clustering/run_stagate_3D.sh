@@ -11,6 +11,13 @@ DEP_JOB="${1:-none}"
 DEP_ARG=()
 [[ "${DEP_JOB}" != "none" ]] && DEP_ARG=(--dependency="afterok:${DEP_JOB}")
 
+# STAGATE_pyG trains full-batch: the whole 3D SNN graph lives on the GPU at once.
+# bin16um (~366k nodes / 7.8M edges) and cell (~600k nodes) OOM on the 46GB L40S
+# (peak ~48-50GB); only spot fits. Default to the 80GB A100 (7 on the gpu
+# partition, ~30GB headroom); override for the 96GB H100 (only 2, longer queue):
+#   GPU_GRES=gpu:tesh100:1 bash run_stagate_3D.sh ...
+GPU_GRES="${GPU_GRES:-gpu:tesa100:1}"
+
 SCRIPT="/dcs04/hicks/data/Jan/sim_project/sim_paper/code/applications_albis/spatial_clustering/3D_stagate.py"
 CONDA_SH="/jhpce/shared/jhpce/core/anaconda3/2023.03/etc/profile.d/conda.sh"
 STAGATE_ENV="/dcs04/hicks/data/Jan/sim_project/sim_paper/env/stagate-pyg"
@@ -41,10 +48,10 @@ for d in "${DATASETS[@]}"; do
   "${DEP_ARG[@]}" \
   --job-name="3D_stagate" \
   --partition=gpu \
-  --gres=gpu:l40s:1 \
+  --gres="${GPU_GRES}" \
   --mem=150G \
   --cpus-per-task=4 \
   --time=06:00:00 \
   --output="${LOGDIR}/stagate_${d}_%j.out" \
-  --wrap="bash -c 'source ${CONDA_SH} && conda activate ${STAGATE_ENV} && export LD_LIBRARY_PATH=${STAGATE_ENV}/lib:\${LD_LIBRARY_PATH:-} R_HOME=${STAGATE_ENV}/lib/R && ${PYTHON_BIN} ${SCRIPT} --dataset ${d}'"
+  --wrap="bash -c 'source ${CONDA_SH} && conda activate ${STAGATE_ENV} && export LD_LIBRARY_PATH=${STAGATE_ENV}/lib:\${LD_LIBRARY_PATH:-} R_HOME=${STAGATE_ENV}/lib/R PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True && ${PYTHON_BIN} ${SCRIPT} --dataset ${d}'"
 done

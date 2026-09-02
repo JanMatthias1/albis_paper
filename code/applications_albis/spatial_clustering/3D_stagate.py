@@ -99,6 +99,11 @@ DATASETS = {
     ),
     "cell": dict(
         h5ad=f"{FIG2}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad",
+        # cell positions are irregular (jitter), so rad_mult*median-NN-spacing
+        # under-connects: 1.5x -> ~1.4 nbrs/cell. Smoke test (radius_smoke.py):
+        # 60um -> ~8 in-plane + ~8 per adjacent section (Z-SNN uses XY dist only,
+        # true ~1100um z gap is ignored) -> ~24 total 3D degree, like Tutorial 5.
+        rad_2d=60.0, rad_z=60.0,
     ),
     # -- family 2: STRONG mix, TUNED batch. The main 3D-vs-2D domain-recovery
     # comparison.
@@ -110,6 +115,7 @@ DATASETS = {
     ),
     "cell_strongmix": dict(
         h5ad=f"{SIMDATA}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma15_strongmix/simulation_cell_z_qc.h5ad",
+        rad_2d=60.0, rad_z=60.0,  # see "cell" note
     ),
     # -- family 3: WEAK mix, VERY LOW batch (0.05). Batch control for family 1.
     "bin16um_lowbatch": dict(
@@ -120,6 +126,7 @@ DATASETS = {
     ),
     "cell_lowbatch": dict(
         h5ad=f"{SIMDATA}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma005/simulation_cell_z_qc.h5ad",
+        rad_2d=60.0, rad_z=60.0,  # see "cell" note
     ),
     # -- family 4: STRONG mix, VERY LOW batch (0.05). Pairs against family 2 to
     # test whether 3D's advantage is batch-noise suppression.
@@ -131,6 +138,7 @@ DATASETS = {
     ),
     "cell_strongmix_lowbatch": dict(
         h5ad=f"{SIMDATA}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma005_strongmix/simulation_cell_z_qc.h5ad",
+        rad_2d=60.0, rad_z=60.0,  # see "cell" note
     ),
 }
 
@@ -282,8 +290,11 @@ def main():
     print("[sections]", section_order)
 
     nn_med, rad_auto = auto_radius(adata, mult=args.rad_mult)
-    rad_2d = args.rad_2d if args.rad_2d is not None else rad_auto
-    rad_z = args.rad_z if args.rad_z is not None else rad_auto
+    # precedence: CLI flag > per-dataset spec (DATASETS[...]['rad_2d'/'rad_z']) > auto
+    rad_2d = (args.rad_2d if args.rad_2d is not None
+              else spec.get("rad_2d", rad_auto))
+    rad_z = (args.rad_z if args.rad_z is not None
+             else spec.get("rad_z", rad_auto))
     print(f"[radius] median NN spacing = {nn_med:.2f} um -> rad_2d = {rad_2d:.2f}, rad_z = {rad_z:.2f}")
 
     ST.Cal_Spatial_Net_3D(adata, rad_cutoff_2D=rad_2d, rad_cutoff_Zaxis=rad_z,
@@ -291,7 +302,16 @@ def main():
                           verbose=True)
     net_3d = adata.uns["Spatial_Net"].copy()
     net_2d = adata.uns["Spatial_Net_2D"].copy()
-    print(f"[net] 3D edges = {len(net_3d)}  | 2D-only edges = {len(net_2d)}")
+    deg_3d = len(net_3d) / adata.n_obs
+    deg_2d = len(net_2d) / adata.n_obs
+    print(f"[net] 3D edges = {len(net_3d)} ({deg_3d:.1f}/cell)  | "
+          f"2D-only edges = {len(net_2d)} ({deg_2d:.1f}/cell)")
+    # STAGATE needs a real spatial graph; below ~3 nbrs/cell the GAT has nothing
+    # to propagate and mclust on the embedding collapses to ~chance ARI.
+    if deg_2d < 3.0:
+        raise RuntimeError(
+            f"spatial graph too sparse: {deg_2d:.2f} 2D nbrs/cell (rad_2d={rad_2d:.1f} um). "
+            "Raise rad_2d / --rad-mult (or set rad_2d in DATASETS) so degree is ~6-10.")
 
     # ---- STAGATE with the 3D network ----------------------------------------
     print("[stagate] 3D network")
