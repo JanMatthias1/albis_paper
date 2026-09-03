@@ -328,13 +328,18 @@ def main():
     ap.add_argument("--k-z", type=int, default=None, help="KNN: between-section neighbours each way (default 3)")
     ap.add_argument("--subsample", type=int, default=0,
                     help="randomly keep this many obs before building the graph (0 = all)")
+    ap.add_argument("--use-pre-batch", action="store_true",
+                    help="oracle run: swap X <- layers['counts_pre_batch'] (the clean "
+                         "pre-batch counts) to bound what STAGATE can recover with no "
+                         "batch noise; writes to <dataset>_prebatch/")
     args = ap.parse_args()
 
     spec = DATASETS[args.dataset]
     if not os.path.exists(spec["h5ad"]):
         raise FileNotFoundError(spec["h5ad"])
 
-    outdir = os.path.join(BASE_OUTDIR, args.dataset)
+    run_tag = args.dataset + ("_prebatch" if args.use_pre_batch else "")
+    outdir = os.path.join(BASE_OUTDIR, run_tag)
     out_adata = os.path.join(outdir, "adata_results")
     out_plots = os.path.join(outdir, "plots")
     for d in (out_adata, out_plots):
@@ -343,6 +348,14 @@ def main():
     print(f"[load] {spec['h5ad']}")
     adata = sc.read_h5ad(spec["h5ad"])
     print(f"[load] {adata.shape}")
+
+    if args.use_pre_batch:
+        if "counts_pre_batch" not in adata.layers:
+            raise KeyError("--use-pre-batch: layers['counts_pre_batch'] not in "
+                           f"{spec['h5ad']}")
+        adata.X = adata.layers["counts_pre_batch"].copy()
+        adata.layers["counts_post_batch"] = adata.layers.pop("counts_pre_batch")
+        print("[oracle] X <- counts_pre_batch (no batch effect)")
 
     if args.subsample and args.subsample < adata.n_obs:
         rng = np.random.default_rng(SEED)
@@ -358,16 +371,32 @@ def main():
     print("[sections]", section_order)
 
     nn_med, rad_auto = auto_radius(adata, mult=args.rad_mult)
-    # precedence: CLI flag > per-dataset spec (DATASETS[...]['rad_2d'/'rad_z']) > auto
-    rad_2d = (args.rad_2d if args.rad_2d is not None
-              else spec.get("rad_2d", rad_auto))
-    rad_z = (args.rad_z if args.rad_z is not None
-             else spec.get("rad_z", rad_auto))
-    print(f"[radius] median NN spacing = {nn_med:.2f} um -> rad_2d = {rad_2d:.2f}, rad_z = {rad_z:.2f}")
 
-    ST.Cal_Spatial_Net_3D(adata, rad_cutoff_2D=rad_2d, rad_cutoff_Zaxis=rad_z,
-                          key_section="slice_id", section_order=section_order,
-                          verbose=True)
+    # precedence: CLI flag > per-dataset spec > default. 'knn' builds a fixed-degree
+    # graph (needed for the sparse/irregular cell point cloud); 'radius' is the
+    # tutorial default and stays the choice for bin16um / spot.
+    graph_model = (args.graph_model if args.graph_model is not None
+                   else spec.get("graph_model", "radius"))
+    rad_2d = rad_z = float("nan")
+    k_2d = k_z = None
+
+    if graph_model == "knn":
+        k_2d = args.k_2d if args.k_2d is not None else spec.get("k_2d", 6)
+        k_z = args.k_z if args.k_z is not None else spec.get("k_z", 3)
+        print(f"[graph] KNN 3D net: k_2d = {k_2d}, k_z = {k_z} "
+              f"(median NN spacing = {nn_med:.2f} um)")
+        cal_spatial_net_3d_knn(adata, k_2d=k_2d, k_z=k_z, key_section="slice_id",
+                               section_order=section_order, verbose=True)
+    else:
+        rad_2d = (args.rad_2d if args.rad_2d is not None
+                  else spec.get("rad_2d", rad_auto))
+        rad_z = (args.rad_z if args.rad_z is not None
+                 else spec.get("rad_z", rad_auto))
+        print(f"[radius] median NN spacing = {nn_med:.2f} um -> "
+              f"rad_2d = {rad_2d:.2f}, rad_z = {rad_z:.2f}")
+        ST.Cal_Spatial_Net_3D(adata, rad_cutoff_2D=rad_2d, rad_cutoff_Zaxis=rad_z,
+                              key_section="slice_id", section_order=section_order,
+                              verbose=True)
     net_3d = adata.uns["Spatial_Net"].copy()
     net_2d = adata.uns["Spatial_Net_2D"].copy()
     deg_3d = len(net_3d) / adata.n_obs
@@ -377,9 +406,11 @@ def main():
     # STAGATE needs a real spatial graph; below ~3 nbrs/cell the GAT has nothing
     # to propagate and mclust on the embedding collapses to ~chance ARI.
     if deg_2d < 3.0:
+        knob = (f"k_2d={k_2d} (--k-2d)" if graph_model == "knn"
+                else f"rad_2d={rad_2d:.1f} um (--rad-2d / --rad-mult)")
         raise RuntimeError(
-            f"spatial graph too sparse: {deg_2d:.2f} 2D nbrs/cell (rad_2d={rad_2d:.1f} um). "
-            "Raise rad_2d / --rad-mult (or set rad_2d in DATASETS) so degree is ~6-10.")
+            f"spatial graph too sparse: {deg_2d:.2f} 2D nbrs/cell [{knob}]. "
+            "Raise it (or set it in DATASETS) so degree is ~6-10.")
 
     # ---- STAGATE with the 3D network ----------------------------------------
     print("[stagate] 3D network")
@@ -396,14 +427,20 @@ def main():
     # ---- metrics ---------------------------------------------------------
     metrics = {
         "dataset": args.dataset,
+        "use_pre_batch": bool(args.use_pre_batch),
         "n_obs": int(adata.n_obs),
         "n_vars": int(adata.n_vars),
         "n_epochs": args.n_epochs,
         "median_nn_spacing_um": nn_med,
+        "graph_model": graph_model,
         "rad_cutoff_2D": float(rad_2d),
         "rad_cutoff_Zaxis": float(rad_z),
+        "k_2d": k_2d,
+        "k_z": k_z,
         "n_edges_3d": int(len(net_3d)),
         "n_edges_2d": int(len(net_2d)),
+        "deg_3d": deg_3d,
+        "deg_2d": deg_2d,
         "stagate_3d": cluster_scores(adata.obs["mclust_3d"].values, adata),
         "stagate_2d": cluster_scores(adata.obs["mclust_2d"].values, adata),
         "stagate_3d_ari_domain_true_per_slice": per_slice_ari(
