@@ -99,11 +99,13 @@ DATASETS = {
     ),
     "cell": dict(
         h5ad=f"{FIG2}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad",
-        # cell positions are irregular (jitter), so rad_mult*median-NN-spacing
-        # under-connects: 1.5x -> ~1.4 nbrs/cell. Smoke test (radius_smoke.py):
-        # 60um -> ~8 in-plane + ~8 per adjacent section (Z-SNN uses XY dist only,
-        # true ~1100um z gap is ignored) -> ~24 total 3D degree, like Tutorial 5.
-        rad_2d=60.0, rad_z=60.0,
+        # cell is ~25x the sphere volume of bin/spot with only 600k cells, so a
+        # fixed radius both under-connects (45um -> 4.8 in-plane nbrs/cell, vs
+        # 7.7 for bin/spot) and, because positions are jittered, gives very
+        # uneven degree. Use a KNN graph instead: exactly k nbrs/cell regardless
+        # of local density, edge count capped (~k_2d + 2*k_z per cell) so it
+        # stays on the 80GB A100.
+        graph_model="knn", k_2d=6, k_z=3,
     ),
     # -- family 2: STRONG mix, TUNED batch. The main 3D-vs-2D domain-recovery
     # comparison.
@@ -115,7 +117,7 @@ DATASETS = {
     ),
     "cell_strongmix": dict(
         h5ad=f"{SIMDATA}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma15_strongmix/simulation_cell_z_qc.h5ad",
-        rad_2d=60.0, rad_z=60.0,  # see "cell" note
+        graph_model="knn", k_2d=6, k_z=3,  # see "cell" note
     ),
     # -- family 3: WEAK mix, VERY LOW batch (0.05). Batch control for family 1.
     "bin16um_lowbatch": dict(
@@ -126,7 +128,7 @@ DATASETS = {
     ),
     "cell_lowbatch": dict(
         h5ad=f"{SIMDATA}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma005/simulation_cell_z_qc.h5ad",
-        rad_2d=60.0, rad_z=60.0,  # see "cell" note
+        graph_model="knn", k_2d=6, k_z=3,  # see "cell" note
     ),
     # -- family 4: STRONG mix, VERY LOW batch (0.05). Pairs against family 2 to
     # test whether 3D's advantage is batch-noise suppression.
@@ -138,7 +140,7 @@ DATASETS = {
     ),
     "cell_strongmix_lowbatch": dict(
         h5ad=f"{SIMDATA}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma005_strongmix/simulation_cell_z_qc.h5ad",
-        rad_2d=60.0, rad_z=60.0,  # see "cell" note
+        graph_model="knn", k_2d=6, k_z=3,  # see "cell" note
     ),
 }
 
@@ -177,6 +179,67 @@ def auto_radius(adata, key_section="slice_id", mult=2.5):
         dists.append(np.median(d[:, 1]))
     nn_med = float(np.median(dists))
     return nn_med, nn_med * mult
+
+
+def _knn_edges(coor_a, idx_a, coor_b, idx_b, k):
+    """k nearest points of `b` for every point of `a`; (Cell1, Cell2, Distance) rows."""
+    k = int(min(k, len(idx_b)))
+    if k < 1:
+        return []
+    nn = NearestNeighbors(n_neighbors=k).fit(coor_b)
+    dist, ind = nn.kneighbors(coor_a)
+    rows = []
+    for i in range(ind.shape[0]):
+        for j in range(ind.shape[1]):
+            rows.append((idx_a[i], idx_b[ind[i, j]], float(dist[i, j])))
+    return rows
+
+
+def cal_spatial_net_3d_knn(adata, k_2d, k_z, key_section="slice_id",
+                           section_order=None, verbose=True):
+    """KNN analogue of ST.Cal_Spatial_Net_3D.
+
+    A fixed radius starves the irregular cell-resolution point cloud (see the
+    'cell' note in DATASETS); KNN gives every cell exactly k neighbours no
+    matter the local density. Populates the same uns keys the library builds:
+    Spatial_Net_2D (within-section, k_2d NN), Spatial_Net_Zaxis (between
+    adjacent sections, k_z NN queried BOTH directions so cross-section edges
+    are guaranteed), and their concat Spatial_Net.
+    """
+    obs_names = np.asarray(adata.obs_names)
+    xy = np.asarray(adata.obsm["spatial"], dtype=float)
+    sec = adata.obs[key_section].astype(str).values
+    if section_order is None:
+        section_order = sorted(np.unique(sec), key=float)
+
+    net_2d = []
+    for s in section_order:
+        m = np.where(sec == s)[0]
+        df = pd.DataFrame(_knn_edges(xy[m], obs_names[m], xy[m], obs_names[m], k_2d + 1),
+                          columns=["Cell1", "Cell2", "Distance"])
+        df = df[df["Distance"] > 0]
+        df["SNN"] = s
+        net_2d.append(df)
+        if verbose:
+            print(f"------2D KNN section {s}: {len(df)} edges, {len(m)} cells "
+                  f"({len(df) / max(len(m), 1):.2f}/cell)")
+    net_2d = pd.concat(net_2d, ignore_index=True)
+
+    net_z = []
+    for s1, s2 in zip(section_order[:-1], section_order[1:]):
+        m1, m2 = np.where(sec == s1)[0], np.where(sec == s2)[0]
+        rows = (_knn_edges(xy[m1], obs_names[m1], xy[m2], obs_names[m2], k_z)
+                + _knn_edges(xy[m2], obs_names[m2], xy[m1], obs_names[m1], k_z))
+        df = pd.DataFrame(rows, columns=["Cell1", "Cell2", "Distance"])
+        df["SNN"] = f"{s1}-{s2}"
+        net_z.append(df)
+        if verbose:
+            print(f"------Z KNN {s1}-{s2}: {len(df)} cross-section edges")
+    net_z = pd.concat(net_z, ignore_index=True)
+
+    adata.uns["Spatial_Net_2D"] = net_2d
+    adata.uns["Spatial_Net_Zaxis"] = net_z
+    adata.uns["Spatial_Net"] = pd.concat([net_2d, net_z], ignore_index=True)
 
 
 def run_stagate(adata, spatial_net, n_epochs, key_added):
@@ -258,6 +321,11 @@ def main():
                          "~1.5 -> first neighbour ring, ~2.5 -> ~3 rings")
     ap.add_argument("--rad-2d", type=float, default=None, help="override rad_cutoff_2D (um)")
     ap.add_argument("--rad-z", type=float, default=None, help="override rad_cutoff_Zaxis (um)")
+    ap.add_argument("--graph-model", choices=("radius", "knn"), default=None,
+                    help="spatial graph: 'radius' (default) or 'knn' (fixed degree; "
+                         "overrides DATASETS[...]['graph_model'])")
+    ap.add_argument("--k-2d", type=int, default=None, help="KNN: within-section neighbours (default 6)")
+    ap.add_argument("--k-z", type=int, default=None, help="KNN: between-section neighbours each way (default 3)")
     ap.add_argument("--subsample", type=int, default=0,
                     help="randomly keep this many obs before building the graph (0 = all)")
     args = ap.parse_args()

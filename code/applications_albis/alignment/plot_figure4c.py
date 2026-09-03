@@ -34,6 +34,7 @@ from matplotlib.lines import Line2D
 
 BASE = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/alignment"
 ALL_DATASETS = ["bin16um", "spot", "cell"]
+FIG4 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4"
 DATASET_CHOICES = ALL_DATASETS + ["bin16um_realwindow", "spot_realwindow"]
 COL_LABELS = ["Unaligned (input)", "STAIR aligned", "Ground truth"]
 
@@ -186,13 +187,20 @@ def parse_args():
                     choices=["slice_id", "domain_true", "cell_type_true"])
     ap.add_argument("--no-procrustes", action="store_true",
                     help="show the STAIR result in its own (slice-0) frame")
-    ap.add_argument("--outdir", default=os.path.join(BASE, "plots"))
+    ap.add_argument("--base", default=BASE,
+                    help="dir holding STAIR/<dataset>/adata_results/ "
+                         "(e.g. .../figure_4/alignment_window_sizing); "
+                         "--outdir defaults to <base>/plots")
+    ap.add_argument("--outdir", default=None)
     return ap.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    os.makedirs(args.outdir, exist_ok=True)
+    BASE = args.base
+    outdir = args.outdir or os.path.join(BASE, "plots")
+    args.outdir = outdir
+    os.makedirs(outdir, exist_ok=True)
     do_pro = not args.no_procrustes
 
     data = {}
