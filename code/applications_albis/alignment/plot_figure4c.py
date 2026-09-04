@@ -7,9 +7,9 @@ Reads the STAIR outputs written by 3D_stair.py
         metrics.json
 
 Produces, under sim_paper/data/figure_4/alignment/plots/ :
-    figure4c_overlay_2d_<colorby>.png   rows = modality, cols = [unaligned | STAIR | truth]
-                                        all 10 slices overlaid, 2D
-    figure4c_sphere_3d_<colorby>.png    same columns, 3D scatter (the reconstructed sphere)
+    figure4c_overlay_2d_<colorby>_<dataset>.png  one modality per image, cols =
+                                        [unaligned | STAIR | truth], all 10 slices overlaid, 2D
+    figure4c_sphere_3d_<colorby>_<dataset>.png   same columns, 3D scatter (the reconstructed sphere)
     figure4c_rmse.png                   joint-Procrustes RMSE, unaligned vs STAIR, per modality
     figure4c_metrics.csv                the numbers behind the bar chart
 
@@ -30,13 +30,20 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 from matplotlib.lines import Line2D
 
 BASE = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/alignment"
 ALL_DATASETS = ["bin16um", "spot", "cell"]
 FIG4 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4"
 DATASET_CHOICES = ALL_DATASETS + ["bin16um_realwindow", "spot_realwindow"]
-COL_LABELS = ["Unaligned (input)", "STAIR aligned", "Ground truth"]
+COL_LABELS = ["Unaligned", "STAIR aligned", "Ground truth"]
+
+# soft but saturated qualitative palette for domain / cell-type coloring
+# (seaborn "muted" -- pastel-toned but with enough saturation to stay visible
+# under alpha-blended overplotting)
+PASTEL = ["#4878d0", "#ee854a", "#6acc64", "#d65f5f", "#956cb4",
+          "#8c613c", "#dc7ec0", "#797979", "#d5bb67", "#82c6e2"]
 
 
 def procrustes_fit(X, Y):
@@ -69,8 +76,7 @@ def color_vec(adata, color_by):
         lut = {c: cmap(i % 10) for i, c in enumerate(cats)}
     else:
         cats = list(pd.Categorical(adata.obs[color_by]).categories)
-        cmap = plt.get_cmap("tab10" if len(cats) <= 10 else "tab20")
-        lut = {c: cmap(i % cmap.N) for i, c in enumerate(cats)}
+        lut = {c: mcolors.to_rgba(PASTEL[i % len(PASTEL)]) for i, c in enumerate(cats)}
     colors = adata.obs[color_by].astype(str).map({str(k): v for k, v in lut.items()}).values
     return np.vstack(colors), cats, lut
 
@@ -97,59 +103,59 @@ def panels_for(adata, do_procrustes):
     }
 
 
-def plot_overlay_2d(data, color_by, do_procrustes, outpath):
-    nrow = len(data)
-    fig, axes = plt.subplots(nrow, 3, figsize=(12, 4 * nrow), squeeze=False)
-    for r, (ds, (adata, _)) in enumerate(data.items()):
+def plot_overlay_2d(data, color_by, do_procrustes, outdir, tag):
+    for ds, (adata, _) in data.items():
         col, cats, lut = color_vec(adata, color_by)
         idx = subsample(adata.n_obs, 60000)
         cols3 = panels_for(adata, do_procrustes)["2d"]
         s = 1.0 if adata.n_obs > 20000 else 6.0
+        fig, axes = plt.subplots(1, 3, figsize=(12, 4.3), squeeze=False)
         for c in range(3):
-            ax = axes[r][c]
+            ax = axes[0][c]
             xy = cols3[c][idx]
-            ax.scatter(xy[:, 0], xy[:, 1], s=s, c=col[idx], linewidths=0, alpha=0.6)
+            ax.scatter(xy[:, 0], xy[:, 1], s=s, c=col[idx], linewidths=0, alpha=0.85)
             ax.set_aspect("equal")
-            ax.set_xticks([]); ax.set_yticks([])
-            if r == 0:
-                ax.set_title(COL_LABELS[c], fontsize=13)
-            if c == 0:
-                ax.set_ylabel(ds, fontsize=13)
-    handles = [Line2D([0], [0], marker="o", ls="", mfc=lut[c], mec="none",
-                      label=str(c)) for c in cats]
-    fig.legend(handles=handles, loc="lower center", ncol=min(len(cats), 10),
-               frameon=False, title=color_by)
-    fig.suptitle("Figure 4C -- ALBIS sphere z-stack, before / after STAIR alignment", fontsize=15)
-    fig.tight_layout(rect=[0, 0.05, 1, 0.96])
-    fig.savefig(outpath, dpi=200)
-    plt.close(fig)
-    print("wrote", outpath)
+            ax.axis("off")
+            ax.set_title(COL_LABELS[c], fontsize=13)
+        handles = [Line2D([0], [0], marker="o", ls="", mfc=lut[c], mec="none",
+                          label=str(c)) for c in cats]
+        fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.0),
+                   borderaxespad=0.2, ncol=min(len(cats), 10), frameon=False,
+                   title=color_by)
+        fig.patch.set_facecolor("white")
+        fig.tight_layout(rect=[0, 0.035, 1, 0.94])
+        outpath = os.path.join(outdir, f"figure4c_overlay_2d_{tag}_{ds}.png")
+        fig.savefig(outpath, dpi=200, facecolor="white")
+        plt.close(fig)
+        print("wrote", outpath)
 
 
-def plot_sphere_3d(data, color_by, do_procrustes, outpath):
-    nrow = len(data)
-    fig = plt.figure(figsize=(12, 4 * nrow))
-    for r, (ds, (adata, _)) in enumerate(data.items()):
+def plot_sphere_3d(data, color_by, do_procrustes, outdir, tag):
+    for ds, (adata, _) in data.items():
         col, cats, lut = color_vec(adata, color_by)
         idx = subsample(adata.n_obs, 40000)
         cols3 = panels_for(adata, do_procrustes)["3d"]
+        fig = plt.figure(figsize=(12, 4.3))
         for c in range(3):
-            ax = fig.add_subplot(nrow, 3, r * 3 + c + 1, projection="3d")
+            ax = fig.add_subplot(1, 3, c + 1, projection="3d")
             xyz = cols3[c][idx]
             ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2], s=1.5, c=col[idx],
-                       linewidths=0, alpha=0.5)
-            ax.set_xticks([]); ax.set_yticks([]); ax.set_zticks([])
+                       linewidths=0, alpha=0.75)
+            ax.set_axis_off()
             ax.view_init(elev=12, azim=-60)
-            if r == 0:
-                ax.set_title(COL_LABELS[c], fontsize=13)
-            if c == 0:
-                ax.text2D(-0.1, 0.5, ds, transform=ax.transAxes, fontsize=13,
-                          rotation=90, va="center")
-    fig.suptitle("Figure 4C -- reconstructed 10-slice sphere", fontsize=15)
-    fig.tight_layout(rect=[0, 0, 1, 0.96])
-    fig.savefig(outpath, dpi=200)
-    plt.close(fig)
-    print("wrote", outpath)
+            ax.set_box_aspect(None, zoom=1.3)  # crop the wide default 3D margins
+            ax.set_title(COL_LABELS[c], fontsize=13, y=0.95)
+        handles = [Line2D([0], [0], marker="o", ls="", mfc=lut[c], mec="none",
+                          label=str(c)) for c in cats]
+        fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.0),
+                   borderaxespad=0.2, ncol=min(len(cats), 10), frameon=False,
+                   title=color_by)
+        fig.patch.set_facecolor("white")
+        fig.subplots_adjust(left=0.01, right=0.99, top=0.92, bottom=0.08, wspace=0.0)
+        outpath = os.path.join(outdir, f"figure4c_sphere_3d_{tag}_{ds}.png")
+        fig.savefig(outpath, dpi=200, facecolor="white")
+        plt.close(fig)
+        print("wrote", outpath)
 
 
 def plot_rmse(data, outdir):
@@ -213,8 +219,6 @@ if __name__ == "__main__":
         raise SystemExit("no STAIR outputs found")
 
     tag = args.color_by
-    plot_overlay_2d(data, args.color_by, do_pro,
-                    os.path.join(args.outdir, f"figure4c_overlay_2d_{tag}.png"))
-    plot_sphere_3d(data, args.color_by, do_pro,
-                   os.path.join(args.outdir, f"figure4c_sphere_3d_{tag}.png"))
+    plot_overlay_2d(data, args.color_by, do_pro, args.outdir, tag)
+    plot_sphere_3d(data, args.color_by, do_pro, args.outdir, tag)
     plot_rmse(data, args.outdir)
