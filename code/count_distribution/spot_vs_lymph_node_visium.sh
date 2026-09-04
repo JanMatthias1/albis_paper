@@ -1,49 +1,48 @@
 #!/bin/bash
-#SBATCH --job-name=fig2_bin16um_vs_human_pancreas_visium_hd
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/logs/fig2_bin16um_vs_human_pancreas_visium_hd_%j.out
+#SBATCH --job-name=fig2_spot_vs_lymph_node_visium
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/logs/fig2_spot_vs_lymph_node_visium_%j.out
 #SBATCH --time=08:00:00
 #SBATCH --mem=250G
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# Figure 2 final comparison: bin vs. Visium HD human_pancreas_visium_hd, at
-# the 16um bin resolution. Fully self-contained: generates the sim data (if
-# not already present), QC-filters it, then runs all 4 count_distribution.py
-# modes. Same sim config and rationale as bin16um_vs_breast_cancer_visium_hd.sh
-# -- see that script's header for the full explanation.
-
-# 2026-08-27: SIM_TAG now carries the per-modality batch_sigma finalized for
-# the SHARED Figure 2 / Figure 3 dataset (cell 1.5, bin8 0.8, bin16 0.7,
-# spot 0.3), tuned on the Figure 3 pre/post-Harmony demo then confirmed here
-# to still match the real count distribution. count_distribution.py now
-# defaults to --slice-id 5 and post-batch counts, so those flags are no
-# longer passed per-call below. The matching clustering panel is
-# code/clustering/<modality>_celltype_panel.sh (same SIM_TAG).
+# Figure 2 second real-Visium comparison: spot vs. Visium V2 Human Lymph
+# Node (probe-based CytAssist FFPE -- see real_data_qc/run_visium_lymph_qc.sh
+# for provenance), run alongside spot_vs_breast_cancer_visium.sh
+# (whole-transcriptome, fresh-frozen) so the "spot" count-distribution match
+# is checked against two different capture chemistries, not just one tissue.
+# Same SIM_TAG / sim data as spot_vs_breast_cancer_visium.sh -- only the real
+# reference changes -- so this is fully self-contained (generates the sim
+# data if not already present) but in practice reuses what that script
+# already built under data/figure_2/.
 #
-# 2026-08-31: realwindow is now the default (the old sphere-scaled tight
-# capture window is retired). generate_simulation_noisy.py no longer scales
-# the window with --sphere-r-um; with --capture-window-um unset it uses the
-# real instrument window (6.5 x 6.5 mm for Visium / Visium HD). The ~2050 um
-# tissue disc sits inside that window with a wide empty border: off-tissue
-# bins get domain_true / cell_type_true = "unassigned", obs["is_empty"] = True,
-# and are dropped by 00_qc_filter.py (~77% of rows). Only the qc_filtered /
-# qc_and_hvg_matched panels are meaningful for the figure; full_panel /
-# hvg_matched are now empty-swamped diagnostics. Sim data is (re)generated
-# under data/noisy/<tag>/ then moved into data/figure_2/<tag>/; pre-realwindow
-# data is archived at data/figure_2_oldwindow_20260831/.
+# Prereq: real_data_qc/run_visium_lymph_qc.sh (writes
+# data/real_data_qc/lymph_node_visium/lymph_node_visium_qc.h5ad).
+#
+# 2026-09-04: initial run, ad hoc (not yet via sbatch) -- see
+# data/count_distribution/figure_2/spot_vs_lymph_node_visium/*/comparison_summary.json.
+# qc_filtered (no panel match): total_counts median ratio sim/real = 0.05
+# (sim ~20x lower than breast_cancer_visium's 6.7x gap -- lymph node's probe
+# panel is far deeper per spot than WTA); theta_hat ratio 0.59 (real less
+# dispersed than sim here, opposite of breast_cancer's near-1:1 match).
+# qc_and_hvg_matched (top-556 HVGs): total_counts ratio improves to 0.59,
+# genes_per_cell median sim 358 vs real 394 (close), but theta_hat ratio
+# flips to 1.87 (sim now more dispersed than real). Open question for
+# figure.md: whether tuned batch_sigma=0.3 (fit against breast_cancer_visium)
+# still holds against a probe-based reference, or needs a separate check.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/logs
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-SIM_TAG="packing_pf0p04_bin16um_log_mu_-2.5_bsigma07"
-MODALITY="bin"
-REAL_LABEL="human_pancreas_visium_hd_16um"
+SIM_TAG="packing_pf0p04_log_mu_-2.5_bsigma03"
+MODALITY="spot"
+REAL_LABEL="lymph_node_visium"
 SIM_RAW="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
 SIM_QC="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
 NOISY_DIR="sim_paper/data/noisy/${SIM_TAG}"
-REAL_INPUT="sim_paper/data/real_data_qc/${REAL_LABEL}/human_pancreas_visium_hd_qc.h5ad"
+REAL_INPUT="sim_paper/data/real_data_qc/${REAL_LABEL}/${REAL_LABEL}_qc.h5ad"
 OUT_ROOT="sim_paper/data/count_distribution/figure_2/${MODALITY}_vs_${REAL_LABEL}"
 
 # generate_simulation_noisy.py only writes under data/noisy/<out-tag>/, so
@@ -54,9 +53,8 @@ if [[ ! -f "${SIM_RAW}" ]]; then
         "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
             --modality "${MODALITY}" \
             --sphere-r-um 2050 \
-            --bin-size-um 16 \
             --base-gene-lognormal -2.5 0.7 \
-            --batch-sigma 0.7 \
+            --batch-sigma 0.3 \
             --out-tag "${SIM_TAG}"
     fi
     if [[ ! -f "${NOISY_DIR}/simulation_${MODALITY}_z_qc.h5ad" ]]; then
@@ -71,6 +69,11 @@ if [[ ! -f "${SIM_QC}" ]]; then
     echo "[qc] ${SIM_QC} not found, running 00_qc_filter.py"
     "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
         --modality "${MODALITY}" --input "${SIM_RAW}" --output "${SIM_QC}"
+fi
+
+if [[ ! -f "${REAL_INPUT}" ]]; then
+    echo "ERROR: ${REAL_INPUT} not found -- run real_data_qc/run_visium_lymph_qc.sh first" >&2
+    exit 1
 fi
 
 "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \

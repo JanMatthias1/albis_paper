@@ -1,10 +1,10 @@
 # Count distribution diagnostics
 
-Run from the project root after activating the sim_app tutorial env (same env
+Run from the project root after activating the albis tutorial env (same env
 as `sim_paper/code/clustering`, no extra packages needed):
 
 ```bash
-conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial
+conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
 python sim_paper/code/count_distribution/count_distribution.py --modality spot
 python sim_paper/code/count_distribution/count_distribution.py --modality bin
 python sim_paper/code/count_distribution/count_distribution.py --modality cell

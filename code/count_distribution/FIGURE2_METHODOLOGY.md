@@ -11,18 +11,20 @@ the calibration history.
 
 ## What's being compared
 
-Seven modality-vs-real pairings, one script each under this directory
-(`<pairing>.sh` and `<pairing>_with_batch.sh`):
+Seven modality-vs-real pairings, **one script each** under this directory
+(`<pairing>.sh` -- the `_with_batch.sh` / `_with_batch_tuned.sh` variants
+were retired 2026-08-27 once slice-5 + post-batch became the defaults, see
+below):
 
 | Modality | Real reference | Sim config tag |
 |---|---|---|
-| cell | Xenium `non_diseased_lung` | `log_mu_-2.5_theta_0.25_jitter0.15` |
-| cell | Xenium `lung_cancer` | `log_mu_-2.5_theta_0.25_jitter0.15` (same) |
-| bin (8um) | Visium HD `breast_cancer_visium_hd` | `packing_pf0p04_log_mu_0.0` |
-| bin (8um) | Visium HD `human_pancreas_visium_hd` | `packing_pf0p04_log_mu_0.0` (same) |
-| bin (16um) | Visium HD `breast_cancer_visium_hd_16um` | `packing_pf0p04_bin16um_log_mu_-2.5` |
-| bin (16um) | Visium HD `human_pancreas_visium_hd_16um` | `packing_pf0p04_bin16um_log_mu_-2.5` (same) |
-| spot | Visium `breast_cancer_visium` | `packing_pf0p04_log_mu_-2.5` |
+| cell | Xenium `non_diseased_lung` | `log_mu_-2.3_theta_0.40_jitter0.15_bsigma15` |
+| cell | Xenium `lung_cancer` | `log_mu_-2.3_theta_0.40_jitter0.15_bsigma15` (same) |
+| bin (8um) | Visium HD `breast_cancer_visium_hd` | `packing_pf0p04_log_mu_0.0_bsigma08` |
+| bin (8um) | Visium HD `human_pancreas_visium_hd` | `packing_pf0p04_log_mu_0.0_bsigma08` (same) |
+| bin (16um) | Visium HD `breast_cancer_visium_hd_16um` | `packing_pf0p04_bin16um_log_mu_-2.5_bsigma07` |
+| bin (16um) | Visium HD `human_pancreas_visium_hd_16um` | `packing_pf0p04_bin16um_log_mu_-2.5_bsigma07` (same) |
+| spot | Visium `breast_cancer_visium` | `packing_pf0p04_log_mu_-2.5_bsigma03` |
 
 Each script is self-contained: generates the sim data if missing, QC-filters
 it (`code/clustering/00_qc_filter.py` -- drops fully-empty and near-empty
@@ -34,7 +36,13 @@ are resampled from the same raw 10x `binned_outputs/` at 16um instead of
 are canonical Visium HD configurations, not a replacement of one by the
 other.
 
-## Two methodological choices, currently run in parallel
+**The same seven sim `.h5ad` files are used for Figure 3's cell-typing
+panels** (`code/clustering/<modality>_celltype_panel.sh`, plus a
+`bin16um_celltype_panel.sh`), so Figure 2 and Figure 3 report on
+byte-identical data. Figure 2's scripts and the celltype-panel scripts each
+carry a matching generate-if-missing fallback with the identical config.
+
+## Three methodological choices, now baked in as defaults
 
 **1. Single representative slice, not pooled.** Every sim dataset has 10
 z-plane slices through the simulated tissue sphere (`slice_id` 0-9). Real
@@ -44,37 +52,53 @@ the sphere's poles) are geometrically degenerate -- their cross-sectional
 disc is much smaller than at the equator, so most observations land
 off-tissue (~21% empty bins vs. <0.5% for the 8 interior slices on the
 bin16um config). Pooling silently dragged the aggregate stats down.
-**Decision: restrict to `slice_id=5`** (near-equator, representative)
-via `count_distribution.py --slice-id 5`, applied to the sim/primary side
-only (real data has no `slice_id`).
+**Decision: restrict to `slice_id=5`** (near-equator, representative),
+applied to the sim/primary side only (real data has no `slice_id`). This is
+now the `count_distribution.py` **default** (`--slice-id 5`); pass
+`--all-slices` to pool.
 
-**2. Batch effect: kept both ways, not yet decided.** The sim's synthetic
-per-slice technical batch shift (`batch_sigma`, used elsewhere to test
-Harmony correction) can be included or excluded from the count-distribution
-stats via `count_distribution.py --use-batch-effect`. Default excludes it
-(uses `counts_pre_batch`); the flag makes it use `X` uniformly instead.
-Real data has no "pre-batch" version -- whatever technical noise a real
-section carries is just baked into its counts -- so arguably including the
-sim's batch effect is the fairer comparison now that we're down to one
-slice. It is *not* a small effect (bin16um `theta_hat` at slice 5: 1.22
-pre-batch vs. 0.18 post-batch), so this is a real methodological choice,
-not a rounding correction.
+**2. Batch effect: included (post-batch counts).** The sim's synthetic
+per-slice technical batch shift (`batch_sigma`) is included in the
+count-distribution stats -- `count_distribution.py` uses `X` (post-batch)
+uniformly by **default**; pass `--no-batch-effect` to fall back to the
+`counts_pre_batch` layer. Real data has no "pre-batch" version -- whatever
+technical noise a real section carries is just baked into its counts -- so
+including the sim's batch effect is the fairer comparison now that we're
+down to one slice. It is *not* a small effect (bin16um `theta_hat` at slice
+5: ~1.2 pre-batch vs. ~0.18 post-batch).
 
-Both variants are generated side by side so neither is lost:
-- `sim_paper/data/count_distribution/figure_2/` -- slice 5, pre-batch
-  (`counts_pre_batch`, the historical default).
-- `sim_paper/data/count_distribution/figure_2_with_batch/` -- slice 5,
-  post-batch (`X`, includes the synthetic batch shift).
+**`batch_sigma` is set per modality** (cell 1.5, bin 8um 0.8, bin 16um 0.7,
+spot 0.3), finalized 2026-08-27. The value is chosen on Figure 3's
+pre/post-Harmony slice-separation demo -- each modality's aggregation
+footprint dilutes the fixed-size per-slice shift differently, so one global
+value would be invisible for some modalities and overwhelming for others --
+then confirmed here to still match the real count distribution (spot's and
+cell's `theta_hat` in particular are sensitive to it). Sweep scripts:
+`code/clustering/misc/batch_sigma_sweep.sh` and `batch_sigma_opt_round2.sh`.
 
-**Not yet decided which becomes the one cited in the manuscript.** Compare
-both once landed; `figure_2_with_batch` is the more defensible
-apples-to-apples choice on paper, but check the actual plots before
-committing.
+**3. Real platform capture window ("realwindow"), baked in 2026-08-31.**
+`generate_simulation_noisy.py` no longer scales the capture window with
+`--sphere-r-um`. With `--capture-window-um` unset it uses the real instrument
+window: 6.5 x 6.5 mm for bin/spot (Visium / Visium HD), 12 x 24 mm for cell
+(Xenium, via `xenium_capture_window_um`). The ~2050 um simulated tissue disc
+now sits inside the full Visium(HD) window with a wide empty border, so
+**~77% of bins/spots are off-tissue before QC**. Off-tissue observations get
+`domain_true` / `cell_type_true` = `"unassigned"` and `obs["is_empty"] = True`
+(previously `np.argmax` of an all-zero fraction row silently labelled them
+`D0`, contaminating that domain's ground truth and producing the polar-slice
+border artifact). `00_qc_filter.py` drops them, so the QC'd sim is a clean
+6-domain / 8-cell-type dataset. This mirrors real Visium HD, which ships the
+whole capture window and excludes off-tissue bins via `in_tissue` + QC. cell
+is unaffected in practice (cells are only placed within the tissue sphere,
+r = 6000 < 12 mm, so there are no off-tissue cells). Pre-realwindow sim data
+is archived at `data/figure_2_oldwindow_20260831/`; the prior comparison
+outputs at `data/count_distribution/sweeps/figure_2_oldwindow_20260831/`.
 
 ## The four comparison modes
 
 Each pairing script runs `count_distribution.py` four times, into
-`<OUT_ROOT>/{full_panel,hvg_matched,qc_filtered,qc_and_hvg_matched}/`:
+`<OUT_ROOT>/{full_panel,hvg_matched,qc_filtered,qc_and_hvg_matched}/`
+under `sim_paper/data/count_distribution/figure_2/<modality>_vs_<real>/`:
 
 | Mode | Sim input | `--match-panel-size` | Use for |
 |---|---|---|---|
@@ -82,6 +106,14 @@ Each pairing script runs `count_distribution.py` four times, into
 | `hvg_matched` | raw (not QC'd) | yes | `sparsity_summary`/empty-row-rate -- panel-matched but not QC'd, since QC-filtering sim here would hide the zero-inflation these stats exist to report. |
 | `qc_filtered` | QC'd | no | `total_counts` (secondary use) with QC'd sim, full gene panel. |
 | `qc_and_hvg_matched` | QC'd | yes | `total_counts`/`genes_per_cell` -- both corrections together, the fair like-for-like for these two panels specifically. |
+
+**Since the realwindow switch (2026-08-31), `full_panel` and `hvg_matched`
+for bin and spot are dominated by off-tissue empty rows** (sim
+`total_counts_median` = 0, `empty_row_frac` ~0.69 at slice 5) and are not
+used in the figure -- the bin/spot panels are read only from `qc_filtered` /
+`qc_and_hvg_matched`. The two raw modes stay meaningful for **cell** (no
+off-tissue observations) and are still generated for all modalities as
+diagnostics.
 
 `--match-panel-size` HVG-subsets whichever side (sim or real) has the
 larger gene panel down to the smaller side's count, using `seurat_v3`
@@ -99,20 +131,40 @@ Only cite the mode each panel type is designed for -- e.g. never read
 
 ```bash
 cd /dcs04/hicks/data/Jan/sim_project
-sbatch sim_paper/code/count_distribution/<pairing>.sh              # pre-batch
-sbatch sim_paper/code/count_distribution/<pairing>_with_batch.sh   # post-batch
+sbatch sim_paper/code/count_distribution/<pairing>.sh
 ```
 
 Each is idempotent for the generate/QC steps (skips if the sim `.h5ad`
 already exists) but always reruns all 4 `count_distribution.py` modes.
 To change the sim config, edit `SIM_TAG` + the `generate_simulation_noisy.py`
 flags together at the top of the relevant script(s) and resubmit -- doesn't
-touch the other pairings.
+touch the other pairings. Keep the matching
+`code/clustering/<modality>_celltype_panel.sh` in sync.
 
-To point a run at a different slice or toggle the batch effect manually
-(e.g. for a quick one-off check), the two relevant `count_distribution.py`
-flags are `--slice-id <int>` and `--use-batch-effect` (see
-`count_distribution.py --help` or `README.md` for the rest of the CLI).
+`code/data/misc/generate_figure2_batch_tuned.sh` is a convenience SLURM
+array that (re)generates all four sim configs at once into
+`data/figure_2/<tag>/`; the per-pairing scripts don't need it but it's the
+fastest way to rebuild everything.
+
+For a quick one-off check at a different slice or without the batch effect,
+pass `--all-slices` or `--no-batch-effect` to `count_distribution.py`.
+
+## Superseded output (archived)
+
+Retired 2026-08-27 into `sim_paper/data/count_distribution/sweeps/`:
+- `figure_2_prebatch_slice5/` -- slice 5, pre-batch (the old default).
+- `figure_2_with_batch_flat022/` -- slice 5, post-batch, flat `batch_sigma=0.22`.
+- `figure_2_with_batch_tuned_presweep/` -- slice 5, post-batch, the earlier
+  0.22/0.5/0.5/0.15 per-modality values before the 2026-08-27 re-sweep.
+
+Retired 2026-08-31 (realwindow switch):
+- `sim_paper/data/figure_2_oldwindow_20260831/` -- the 4 sim `.h5ad` tags as
+  generated under the old sphere-scaled tight capture window.
+- `sim_paper/data/count_distribution/sweeps/figure_2_oldwindow_20260831/` --
+  all 7 comparison outputs from those tags.
+- `code/clustering/*_celltype_panel.sh` (Figure 3) still point at the
+  now-archived old-window tags and need the same regeneration + rerun --
+  tracked in `figure.md` / `DATA_VERSIONS.md`, not done in this pass.
 
 ## Known open gaps (not addressed by this methodology, tracked in figure.md)
 
@@ -124,9 +176,9 @@ flags are `--slice-id <int>` and `--use-batch-effect` (see
 - QC-parity gap: real bin/spot data goes through SpotSweeper local-outlier
   QC before comparison; sim only gets the minimal `00_qc_filter.py` pass
   (empty/near-empty only). Parked, not addressed here.
-- Per-modality `batch_sigma` values (used for Figure 3's Harmony-correction
-  demo) are a separate, larger tuning question from the include/exclude
-  choice in `--use-batch-effect` here -- this doc doesn't change what
-  `batch_sigma` each sim config used to *generate* the data, only whether
-  Figure 2's stats read the pre- or post-batch layer of what's already
-  there.
+- cell was retuned 2026-08-27 (log_mu -2.3, theta 0.40) so the WITH-batch
+  theta_hat lands ~0.083 (real Xenium ~0.16) instead of ~0.056, and
+  cell_type_true ARI recovers to 0.64. Remaining soft spot: median
+  total_counts overshoots (~327 vs real ~90) -- the batch_sigma=1.5 needed
+  for the visible Figure 3 Harmony demo inflates it. Accepted for the shared
+  dataset; revisit if Figure 2 cell total-counts fidelity becomes priority.

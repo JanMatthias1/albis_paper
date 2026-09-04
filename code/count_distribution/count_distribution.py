@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Plot count-distribution diagnostics for a sim_app (or real) dataset.
+Plot count-distribution diagnostics for an albis (or real) dataset.
 
 Produces six PNGs:
   - mean_variance.png: per-gene mean vs variance (log-log), with the Poisson
@@ -48,7 +48,7 @@ e.g. real Xenium data -- on the same four diagnostics instead of plotting
 regardless of how many cells/genes each one has.
 
 Expected environment:
-    conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial
+    conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
 
 Example:
     python sim_paper/code/count_distribution/count_distribution.py --modality cell
@@ -90,7 +90,7 @@ def parse_args() -> argparse.Namespace:
         "--modality",
         default="spot",
         help="Label used for default input/output paths and plot titles "
-        "(spot/bin/cell for sim_app data; any label when --input is a real dataset).",
+        "(spot/bin/cell for albis data; any label when --input is a real dataset).",
     )
     parser.add_argument("--output-dir", type=Path, default=None)
     parser.add_argument("--target-sum", type=float, default=1e4)

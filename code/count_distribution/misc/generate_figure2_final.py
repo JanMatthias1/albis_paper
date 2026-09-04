@@ -36,7 +36,7 @@ this is a snapshot of the current best candidates as of 2026-08-24, not a
 fixed final answer.
 
 Expected environment:
-    conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial
+    conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
 
 Example:
     python sim_paper/code/count_distribution/generate_figure2_final.py
