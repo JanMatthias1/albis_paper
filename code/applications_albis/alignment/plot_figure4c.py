@@ -12,6 +12,12 @@ Produces, under sim_paper/data/figure_4/alignment/plots/ :
     figure4c_sphere_3d_<colorby>_<dataset>.png   same columns, 3D scatter (the reconstructed sphere)
     figure4c_rmse.png                   joint-Procrustes RMSE, unaligned vs STAIR, per modality
     figure4c_metrics.csv                the numbers behind the bar chart
+    figure4c_mnn_domain_agreement.csv    domain-recovery quantification, unaligned vs STAIR: for
+                                        every pair of the 10 slices, cross-slice mutual nearest
+                                        neighbors (in the 2D spatial embedding) and what fraction
+                                        share the same domain_true label. Skip with
+                                        --no-mnn-metrics. Plotted by plot_stair_mnn_accuracy.py
+                                        (stair_mnn_accuracy.png) -- not plotted from this script.
 
 The STAIR result is anchored on slice 0, so for a shared frame with the
 ground-truth column we rigidly Procrustes-rotate the STAIR stack onto the truth
@@ -20,6 +26,7 @@ joint Procrustes fit and are unaffected.
 """
 
 import argparse
+import itertools
 import json
 import os
 
@@ -32,6 +39,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.lines import Line2D
+from sklearn.neighbors import NearestNeighbors
 
 BASE = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/alignment"
 ALL_DATASETS = ["bin16um", "spot", "cell"]
@@ -186,6 +194,59 @@ def plot_rmse(data, outdir):
     print(df)
 
 
+def _mutual_nn_domain_agreement(xa, da, xb, db):
+    """Fraction of cross-set mutual-nearest-neighbor pairs (point i in xa whose
+    nearest neighbor in xb is j, and vice versa) whose domain labels agree."""
+    jb = NearestNeighbors(n_neighbors=1).fit(xb).kneighbors(xa, return_distance=False)[:, 0]
+    ia = NearestNeighbors(n_neighbors=1).fit(xa).kneighbors(xb, return_distance=False)[:, 0]
+    mutual = ia[jb] == np.arange(len(xa))
+    if not mutual.any():
+        return np.nan, 0
+    agree = (da[mutual] == db[jb[mutual]]).mean()
+    return agree, int(mutual.sum())
+
+
+def cross_slice_mnn_domain_agreement(data, max_points_per_slice=4000, seed=0):
+    """For every pair of slices, find cross-slice mutual nearest neighbors in
+    the 2D spatial embedding (points that are each other's closest match
+    across the two slices) and report what fraction share a domain_true label
+    -- unaligned vs STAIR-aligned. Plain percent agreement, no clustering step
+    and no chance-adjustment (see plot_stair_mnn_accuracy.py for the plot,
+    which marks the chance level -- sum(p_i^2) over domain_true proportions --
+    for reference instead). One row per (dataset, method, slice pair)."""
+    rows = []
+    for ds, (adata, _) in data.items():
+        domain = adata.obs["domain_true"].astype(str).values
+        slice_id = adata.obs["slice_id"].astype(str).values
+        slices = sorted(adata.obs["slice_id"].unique(), key=float)
+        per_slice_idx = {}
+        for sl in slices:
+            full_idx = np.where(slice_id == str(sl))[0]
+            per_slice_idx[sl] = full_idx[subsample(len(full_idx), max_points_per_slice, seed=seed)]
+        panels = panels_for(adata, do_procrustes=True)["2d"]
+        for method, xy in zip(["unaligned", "stair"], panels[:2]):
+            for a, b in itertools.combinations(slices, 2):
+                ia, ib = per_slice_idx[a], per_slice_idx[b]
+                agree, n_mnn = _mutual_nn_domain_agreement(xy[ia], domain[ia], xy[ib], domain[ib])
+                if n_mnn == 0:
+                    continue
+                rows.append(dict(dataset=ds, method=method, slice_a=a, slice_b=b,
+                                  agreement=agree, n_mnn=n_mnn))
+    return pd.DataFrame(rows)
+
+
+def write_mnn_metrics(data, outdir):
+    """Compute cross_slice_mnn_domain_agreement and write it to CSV. The
+    actual plot (with chance-level reference line) lives in the sibling
+    script plot_stair_mnn_accuracy.py, which reads this CSV -- kept separate
+    so there's a single source of truth for the final figure."""
+    mnn_df = cross_slice_mnn_domain_agreement(data)
+    csv_path = os.path.join(outdir, "figure4c_mnn_domain_agreement.csv")
+    mnn_df.to_csv(csv_path, index=False)
+    print("wrote", csv_path)
+    print((100 * mnn_df.groupby(["dataset", "method"])["agreement"].mean()).round(1))
+
+
 def parse_args():
     ap = argparse.ArgumentParser()
     ap.add_argument("--datasets", nargs="+", default=ALL_DATASETS, choices=DATASET_CHOICES)
@@ -198,6 +259,9 @@ def parse_args():
                          "(e.g. .../figure_4/alignment_window_sizing); "
                          "--outdir defaults to <base>/plots")
     ap.add_argument("--outdir", default=None)
+    ap.add_argument("--no-mnn-metrics", action="store_true",
+                    help="skip the cross-slice MNN domain-agreement CSV (nearest-neighbor "
+                         "search over all slice pairs, slower than the other plots)")
     return ap.parse_args()
 
 
@@ -222,3 +286,5 @@ if __name__ == "__main__":
     plot_overlay_2d(data, args.color_by, do_pro, args.outdir, tag)
     plot_sphere_3d(data, args.color_by, do_pro, args.outdir, tag)
     plot_rmse(data, args.outdir)
+    if not args.no_mnn_metrics:
+        write_mnn_metrics(data, args.outdir)

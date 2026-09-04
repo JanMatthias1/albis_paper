@@ -48,10 +48,6 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 import anndata as ad
-import matplotlib
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
 
 from sklearn.neighbors import NearestNeighbors  # noqa: E402
 from sklearn.metrics import (  # noqa: E402
@@ -63,6 +59,8 @@ print(sys.executable)
 
 import torch  # noqa: E402
 import STAGATE_pyG as ST  # noqa: E402
+
+from plot_stagate_figures import plot_3d_panels, plot_umap  # noqa: E402
 
 SEED = 0
 random.seed(SEED)
@@ -273,44 +271,8 @@ def per_slice_ari(labels_pred, adata, ref="domain_true"):
 
 
 # --------------------------------------------------------------------------- #
-# plotting                                                                   #
-# --------------------------------------------------------------------------- #
-def plot_3d_panels(adata, z, outdir):
-    cols = [("domain_true", "true domains"),
-            ("mclust_3d", "STAGATE-3D"),
-            ("mclust_2d", "STAGATE-2D")]
-    fig = plt.figure(figsize=(13, 4.5))
-    for i, (key, title) in enumerate(cols):
-        ax = fig.add_subplot(1, 3, i + 1, projection="3d")
-        vals = adata.obs[key].astype(str).values
-        for j, lab in enumerate(sorted(np.unique(vals))):
-            m = vals == lab
-            ax.scatter(adata.obsm["spatial"][m, 0], adata.obsm["spatial"][m, 1],
-                       z[m], s=0.5, marker="o", label=lab,
-                       color=plt.cm.tab10(j % 10))
-        ax.set_title(title)
-        ax.set_xticklabels([]); ax.set_yticklabels([]); ax.set_zticklabels([])
-        ax.elev = 15; ax.azim = -60
-        ax.legend(markerscale=6, fontsize=6, loc="upper left")
-    fig.subplots_adjust(left=0.02, right=0.98, wspace=0.05)
-    fig.savefig(os.path.join(outdir, "domains_3d_true_vs_stagate.png"), dpi=200)
-    plt.close(fig)
-
-
-def plot_umap(adata, outdir):
-    try:
-        sc.pp.neighbors(adata, use_rep="STAGATE")
-        sc.tl.umap(adata)
-        fig = sc.pl.umap(adata, color=["domain_true", "mclust_3d", "slice_id"],
-                         show=False, return_fig=True)
-        fig.savefig(os.path.join(outdir, "umap_stagate3d.png"), dpi=200, bbox_inches="tight")
-        plt.close(fig)
-    except Exception as e:  # noqa: BLE001
-        print("[warn] UMAP plot skipped:", e)
-
-
-# --------------------------------------------------------------------------- #
-# main                                                                       #
+# plotting -- plot_3d_panels / plot_umap now live in plot_stagate_figures.py #
+# (CPU-only) so plots can be regenerated without a GPU allocation           #
 # --------------------------------------------------------------------------- #
 def main():
     ap = argparse.ArgumentParser()
