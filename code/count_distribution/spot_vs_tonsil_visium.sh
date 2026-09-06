@@ -1,23 +1,22 @@
 #!/bin/bash
-#SBATCH --job-name=fig2_spot_vs_lymph_node_visium
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/logs/fig2_spot_vs_lymph_node_visium_%j.out
+#SBATCH --job-name=fig2_spot_vs_tonsil_visium
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/logs/fig2_spot_vs_tonsil_visium_%j.out
 #SBATCH --time=08:00:00
 #SBATCH --mem=250G
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# Figure 2, "spot" modality, real reference 1 of 2: simulated Visium-like
-# SPOTS (100um spacing, 27.5um capture radius) vs. Visium V2 Human Lymph
-# Node (probe-based CytAssist FFPE, 18k-gene panel -- see
-# real_data_qc/run_visium_lymph_qc.sh for provenance). Run alongside
-# spot_vs_tonsil_visium.sh, which uses the SAME SIM_TAG against the second
-# probe reference (CytAssist FFPE Human Tonsil); spot's config is tuned
+# Figure 2, "spot" modality, real reference 2 of 2: simulated Visium-like
+# SPOTS (100um spacing, 27.5um capture radius) vs. CytAssist FFPE Protein
+# Expression Human Tonsil AddOns (probe-based CytAssist, 18k-gene panel --
+# see real_data_qc/run_visium_tonsil_qc.sh for provenance). Run alongside
+# spot_vs_lymph_node_visium.sh, which uses the SAME SIM_TAG against the
+# first probe reference (Visium V2 Human Lymph Node); spot's config is tuned
 # jointly against both, not either one alone.
 #
 # 2026-09-05: spot retuned onto the two 18k CytAssist probe references.
 # breast_cancer_visium (36k whole-transcriptome, fresh-frozen) was dropped
-# as spot's tuning target on 2026-09-04, so this pairing replaces the old
-# spot_vs_breast_cancer_visium.sh (deleted). New SIM_TAG:
+# as spot's tuning target on 2026-09-04. SIM_TAG:
 #   packing_pf0p04_log_mu_-2.0_theta_0.25_bsigma03
 # base_gene_lognormal log_mu -2.5 -> -2.0, theta (NB dispersion) 2.0 -> 0.25;
 # sphere_r_um 2050 (packing_pf0p04) and batch_sigma 0.3 unchanged (batch_sigma
@@ -26,12 +25,13 @@
 # tabulated by summary_spot_logmu_theta_joint.sh): lowest composite
 # = sum of |ln(sim/real ratio)| over {theta_hat, total_counts_median,
 # matrix_zero_frac}, summed across BOTH probe refs. At -2.0/0.25, hvg_matched
-# vs lymph_node: theta_hat 0.87 vs 0.76 (1.14x), total_counts median 2210 vs
-# 2468 (0.90x), zero-frac 0.52 vs 0.34 (1.52x) -- lymph_node is the strong
-# half of the joint fit; tonsil is looser (theta_hat still ~2.5x high, tonsil's
-# real HVG-matched theta_hat is only ~0.34). Residual: genes_per_cell median
-# ~274 sim vs 394 lymph_node -- pre-existing spot genes_per_cell gap, not in
-# the composite, see figure.md Panel C.
+# vs tonsil: theta_hat 0.87 vs 0.34 (2.52x), total_counts median 2210 vs 1707
+# (1.30x), zero-frac 0.52 vs 0.48 (1.10x). Tonsil is the LOOSER half of the
+# joint fit -- its real HVG-matched theta_hat (~0.34) is well below lymph_node's
+# (~0.76), so every config in the sweep overshoots tonsil dispersion by >=1.8x;
+# -2.0/0.25 is the joint optimum, not a tonsil-specific fit. Residual:
+# genes_per_cell median ~274 sim vs ~258 tonsil (close here) -- pre-existing
+# spot genes_per_cell gap, not in the composite, see figure.md Panel C.
 #
 # The SIM_TAG data was staged from the sweep build
 # (data/noisy/spot_joint_logmu_-2.0_theta_0.25/, byte-identical generate
@@ -47,8 +47,8 @@
 # qc_and_hvg_matched are meaningful for the figure; full_panel / hvg_matched
 # are empty-swamped diagnostics.
 #
-# Prereq: real_data_qc/run_visium_lymph_qc.sh (writes
-# data/real_data_qc/lymph_node_visium/lymph_node_visium_qc.h5ad).
+# Prereq: real_data_qc/run_visium_tonsil_qc.sh (writes
+# data/real_data_qc/tonsil_visium/tonsil_visium_qc.h5ad).
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/logs
@@ -57,7 +57,7 @@ cd /dcs04/hicks/data/Jan/sim_project
 
 SIM_TAG="packing_pf0p04_log_mu_-2.0_theta_0.25_bsigma03"
 MODALITY="spot"
-REAL_LABEL="lymph_node_visium"
+REAL_LABEL="tonsil_visium"
 SIM_RAW="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
 SIM_QC="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
 NOISY_DIR="sim_paper/data/noisy/${SIM_TAG}"
@@ -92,7 +92,7 @@ if [[ ! -f "${SIM_QC}" ]]; then
 fi
 
 if [[ ! -f "${REAL_INPUT}" ]]; then
-    echo "ERROR: ${REAL_INPUT} not found -- run real_data_qc/run_visium_lymph_qc.sh first" >&2
+    echo "ERROR: ${REAL_INPUT} not found -- run real_data_qc/run_visium_tonsil_qc.sh first" >&2
     exit 1
 fi
 

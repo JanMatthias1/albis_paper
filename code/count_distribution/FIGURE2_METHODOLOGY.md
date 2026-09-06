@@ -11,10 +11,11 @@ the calibration history.
 
 ## What's being compared
 
-Seven modality-vs-real pairings, **one script each** under this directory
+Eight modality-vs-real pairings, **one script each** under this directory
 (`<pairing>.sh` -- the `_with_batch.sh` / `_with_batch_tuned.sh` variants
-were retired 2026-08-27 once slice-5 + post-batch became the defaults, see
-below):
+were retired 2026-08-27 once slice-5 + post-batch became the defaults, and
+`spot_vs_breast_cancer_visium.sh` was retired 2026-09-05 when spot's real
+reference moved to the two probe panels, see "Superseded output" below):
 
 | Modality | Real reference | Sim config tag |
 |---|---|---|
@@ -24,7 +25,21 @@ below):
 | bin (8um) | Visium HD `human_pancreas_visium_hd` | `packing_pf0p04_log_mu_0.0_bsigma08` (same) |
 | bin (16um) | Visium HD `breast_cancer_visium_hd_16um` | `packing_pf0p04_bin16um_log_mu_-2.5_bsigma07` |
 | bin (16um) | Visium HD `human_pancreas_visium_hd_16um` | `packing_pf0p04_bin16um_log_mu_-2.5_bsigma07` (same) |
-| spot | Visium `breast_cancer_visium` | `packing_pf0p04_log_mu_-2.5_bsigma03` |
+| spot | Visium `lymph_node_visium` (probe, CytAssist FFPE) | `packing_pf0p04_log_mu_-2.0_theta_0.25_bsigma03` |
+| spot | Visium `tonsil_visium` (probe, CytAssist FFPE) | `packing_pf0p04_log_mu_-2.0_theta_0.25_bsigma03` (same) |
+
+**Spot (2026-09-05):** `breast_cancer_visium` (36k whole-transcriptome,
+fresh-frozen) was dropped as spot's tuning target on 2026-09-04 and replaced
+by the two 18k CytAssist probe references, tuned jointly against both. The
+config moved `log_mu` -2.5 -> -2.0 and `theta` 2.0 -> 0.25 (`sphere_r_um`
+2050 and `batch_sigma` 0.3 held). Picked by the probe sweeps
+(`code/data/misc/sweep_spot_logmu_probe.sh`, `sweep_spot_theta_probe.sh`,
+`sweep_spot_logmu_theta_joint_probe.sh`, tabulated by
+`summary_spot_logmu_theta_joint.sh`) on the lowest composite = sum of
+`|ln(sim/real ratio)|` over {`theta_hat`, `total_counts_median`,
+`matrix_zero_frac`}, summed across BOTH probe refs. lymph_node is the strong
+half of the fit; tonsil's real HVG-matched `theta_hat` (~0.34) is low enough
+that every swept config overshoots its dispersion by >=1.8x.
 
 Each script is self-contained: generates the sim data if missing, QC-filters
 it (`code/clustering/00_qc_filter.py` -- drops fully-empty and near-empty
@@ -36,11 +51,20 @@ are resampled from the same raw 10x `binned_outputs/` at 16um instead of
 are canonical Visium HD configurations, not a replacement of one by the
 other.
 
-**The same seven sim `.h5ad` files are used for Figure 3's cell-typing
-panels** (`code/clustering/<modality>_celltype_panel.sh`, plus a
+**The same sim `.h5ad` files are used for Figure 3's cell-typing panels**
+(`code/clustering/<modality>_celltype_panel.sh`, plus a
 `bin16um_celltype_panel.sh`), so Figure 2 and Figure 3 report on
-byte-identical data. Figure 2's scripts and the celltype-panel scripts each
-carry a matching generate-if-missing fallback with the identical config.
+byte-identical data -- the two spot pairings above share one sim file, as do
+the two cell / two bin8 / two bin16 pairings, so it is four distinct sim
+configs across the eight pairings. Figure 2's scripts and the celltype-panel
+scripts each carry a matching generate-if-missing fallback with the identical
+config. `spot_celltype_panel.sh` was moved to the new spot tag on 2026-09-05
+alongside this retune and resubmitted; its pre-retune outputs are archived at
+`data/figure_3/pca_harmony_single_cell/spot_pre_probe_retune_20260905/`. The
+Figure 4/5 application scripts (`code/applications_albis/**`,
+`code/clustering/domain_celltype_composition.py`, the `_strongmix`
+derivative) still read the old `packing_pf0p04_log_mu_-2.5_bsigma03` tag,
+which stays on disk -- migrating those is a separate pass.
 
 ## Three methodological choices, now baked in as defaults
 
@@ -166,13 +190,34 @@ Retired 2026-08-31 (realwindow switch):
   now-archived old-window tags and need the same regeneration + rerun --
   tracked in `figure.md` / `DATA_VERSIONS.md`, not done in this pass.
 
+Retired 2026-09-05 (spot moved to probe references):
+- `code/count_distribution/spot_vs_breast_cancer_visium.sh` -- **deleted.** Its
+  outputs stay on disk at
+  `data/count_distribution/figure_2/spot_vs_breast_cancer_visium/` (last run
+  2026-09-01, the old `packing_pf0p04_log_mu_-2.5_bsigma03` config).
+- `data/figure_2/packing_pf0p04_log_mu_-2.5_bsigma03/` -- **kept on disk**, not
+  archived: still read by the Figure 4/5 application scripts. The new spot tag
+  `packing_pf0p04_log_mu_-2.0_theta_0.25_bsigma03` sits alongside it, staged
+  from the `spot_joint_logmu_-2.0_theta_0.25` sweep build.
+- `data/figure_3/pca_harmony_single_cell/spot_pre_probe_retune_20260905/` --
+  the pre-retune Figure 3 spot cell-typing outputs, moved aside so
+  `spot_celltype_panel.sh` (not tag-scoped at `CLUSTER_ROOT`) recomputes on
+  resubmit instead of skipping.
+
 ## Known open gaps (not addressed by this methodology, tracked in figure.md)
 
 - Pancreas is a known-bad calibration target for bin (extreme real
   overdispersion from a few dominant hormone genes) -- not expected to
   match well regardless of slice/batch choice.
 - Spot's `genes_per_cell` still mismatches real even panel-matched --
-  open issue, unrelated to slice/batch.
+  open issue, unrelated to slice/batch. After the 2026-09-05 probe retune,
+  qc_and_hvg_matched `genes_per_cell` median is ~274 sim vs ~394 lymph_node
+  (undershoots) but ~258 tonsil (close) -- not in the composite the sweep
+  optimizes.
+- Spot's `theta=0.25` is the low end of the swept range and it won the joint
+  composite; the true optimum on `theta` may be lower still (tonsil `theta_hat`
+  is the limiting term). One confirmation point at `theta` ~0.15-0.20
+  (`log_mu` -2.0) is worth running before treating the config as final.
 - QC-parity gap: real bin/spot data goes through SpotSweeper local-outlier
   QC before comparison; sim only gets the minimal `00_qc_filter.py` pass
   (empty/near-empty only). Parked, not addressed here.
