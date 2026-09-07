@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 """
-Run PCA and Harmony correction for the simulated sim_app dataset.
+Run PCA and Harmony correction for the simulated albis dataset.
 
 This script uses all genes by default because the simulated data has only
 about 550 genes. Harmony is run over ``obs['slice_id']``, which is the same
-field used by sim_app when adding slice-specific batch effects.
+field used by albis when adding slice-specific batch effects.
 
 Expected environment:
-    conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial
+    conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
     python -m pip install -r sim_paper/code/clustering/requirements.txt
 
 Example:
@@ -419,9 +419,15 @@ def main() -> None:
         "pre_harmony_obsm": "X_pca_pre_harmony",
         "post_harmony_obsm": "X_pca_post_harmony",
         "n_neighbors": int(args.n_neighbors),
-        "umap_obsm_note": "before/after UMAP is diagnostic-plot-only, computed on a subsample "
-        "(see umap_n_obs) and not stored in this file; downstream clustering uses pre_harmony_obsm/"
-        "post_harmony_obsm from the full data.",
+        "umap_obsm_note": (
+            "X_umap_pca_pre_harmony / X_umap_pca_post_harmony are the FULL-data before/after-"
+            "Harmony UMAP embeddings, stored here so clustering_leiden_louvain.py can reuse "
+            "X_umap_pca_post_harmony and its figures share this exact embedding."
+            if umap_adata is adata
+            else "before/after UMAP is diagnostic-plot-only, computed on a subsample "
+            "(see umap_n_obs) and not stored in this file; downstream clustering uses "
+            "pre_harmony_obsm/post_harmony_obsm from the full data."
+        ),
         "umap_n_obs": int(umap_adata.n_obs),
         "input": str(args.input),
     }

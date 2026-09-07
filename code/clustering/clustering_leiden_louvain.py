@@ -320,8 +320,17 @@ def main() -> None:
         **extra_kwargs,
     )
 
-    print(f"[umap] Computing UMAP from the {args.pipeline} neighbor graph")
-    sc.tl.umap(adata, random_state=args.random_state)
+    shared_umap_key = "X_umap_pca_post_harmony"
+    if shared_umap_key in adata.obsm:
+        print(
+            f"[umap] Reusing {shared_umap_key} from the pca_harmony.py output -- this figure's "
+            "UMAP is then the exact same embedding as the before/after-Harmony panel "
+            "(clustering/Leiden still uses its own neighbor graph above)."
+        )
+        adata.obsm["X_umap"] = np.asarray(adata.obsm[shared_umap_key]).copy()
+    else:
+        print(f"[umap] Computing UMAP from the {args.pipeline} neighbor graph")
+        sc.tl.umap(adata, random_state=args.random_state)
 
     valid_colors = [key for key in args.plot_colors if key in adata.obs]
     missing = sorted(set(args.plot_colors) - set(valid_colors))

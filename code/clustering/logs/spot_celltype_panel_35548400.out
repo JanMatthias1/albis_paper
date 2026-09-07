@@ -1,0 +1,64 @@
+[pca_harmony] running
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] sim_paper/data/figure_2/packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad
+[load] AnnData shape: 10034 observations x 556 genes
+[pca] Running PCA with 30 components over all genes
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/functools.py:889: UserWarning: zero-centering a sparse array/matrix densifies it.
+  return dispatch(args[0].__class__)(*args, **kw)
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/scanpy/preprocessing/_pca/__init__.py:226: FutureWarning: Argument `use_highly_variable` is deprecated, consider using the mask argument. Use_highly_variable=True can be called through mask_var="highly_variable". Use_highly_variable=False can be called through mask_var=None
+  mask_var_param, mask_var = _handle_mask_var(
+[harmony] Correcting X_pca_pre_harmony by obs['slice_id']
+2026-09-06 19:27:52,485 - harmonypy - INFO - Running Harmony
+2026-09-06 19:27:52,485 - harmonypy - INFO -   Parameters:
+2026-09-06 19:27:52,485 - harmonypy - INFO -     max_iter_harmony: 10
+2026-09-06 19:27:52,485 - harmonypy - INFO -     max_iter_kmeans: 4
+2026-09-06 19:27:52,485 - harmonypy - INFO -     epsilon_cluster: 0.001
+2026-09-06 19:27:52,485 - harmonypy - INFO -     epsilon_harmony: 0.01
+2026-09-06 19:27:52,485 - harmonypy - INFO -     nclust: 100
+2026-09-06 19:27:52,485 - harmonypy - INFO -     block_size: 0.05
+2026-09-06 19:27:52,485 - harmonypy - INFO -     lamb: dynamic (alpha=0.2)
+2026-09-06 19:27:52,485 - harmonypy - INFO -     theta: [2. 2. 2. 2. 2. 2. 2. 2. 2. 2.]
+2026-09-06 19:27:52,486 - harmonypy - INFO -     sigma: [0.1 0.1 0.1 0.1 0.1]...
+2026-09-06 19:27:52,486 - harmonypy - INFO -     verbose: True
+2026-09-06 19:27:52,486 - harmonypy - INFO -     random_state: 0
+2026-09-06 19:27:52,486 - harmonypy - INFO -   Data: 30 PCs × 10034 cells
+2026-09-06 19:27:52,486 - harmonypy - INFO -   Batch variables: ['slice_id']
+2026-09-06 19:27:52,539 - harmonypy - INFO - Computing initial centroids...
+2026-09-06 19:27:52,854 - harmonypy - INFO - Initialization complete.
+2026-09-06 19:27:52,854 - harmonypy - INFO - Iteration 1 of 10
+2026-09-06 19:27:53,114 - harmonypy - INFO - Iteration 2 of 10
+2026-09-06 19:27:53,392 - harmonypy - INFO - Iteration 3 of 10
+2026-09-06 19:27:53,665 - harmonypy - INFO - Iteration 4 of 10
+2026-09-06 19:27:53,936 - harmonypy - INFO - Iteration 5 of 10
+2026-09-06 19:27:54,209 - harmonypy - INFO - Converged after 5 iterations
+[plot] Saving PCA before/after plots under sim_paper/data/figure_3/pca_harmony_single_cell/spot/pca_harmony_qc/plots
+[umap] Computing UMAP before Harmony from PCA
+[umap] Computing UMAP after Harmony from PCA
+[plot] Saving before/after UMAP plots under sim_paper/data/figure_3/pca_harmony_single_cell/spot/pca_harmony_qc/plots
+[pc_pairs] Plotting PC pairs by slice_id under sim_paper/data/figure_3/pca_harmony_single_cell/spot/pca_harmony_qc/plots/pc_pairs
+[pc_pairs] Plotting 30 PCs (15 adjacent pairs) using all observations
+[pc_pairs] Saved -> sim_paper/data/figure_3/pca_harmony_single_cell/spot/pca_harmony_qc/plots/pc_pairs/by_slice_id/pc_pairs_pre_harmony_by_slice_id.png
+[pc_pairs] Saved -> sim_paper/data/figure_3/pca_harmony_single_cell/spot/pca_harmony_qc/plots/pc_pairs/by_slice_id/pc_pairs_post_harmony_by_slice_id.png
+[save] sim_paper/data/figure_3/pca_harmony_single_cell/spot/pca_harmony_qc/simulation_spot_z_pca_harmony_qc.h5ad
+[ari] resolution-matched ARI recovery
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] sim_paper/data/figure_3/pca_harmony_single_cell/spot/pca_harmony_qc/simulation_spot_z_pca_harmony_qc.h5ad
+[load] AnnData shape: 10034 x 556
+[neighbors] n_pcs=30 n_neighbors=15
+[ari] domain_true: target_k=6
+[ari] domain_true: resolution=0.8977 achieved_k=6 (target 6)  ARI=0.0087
+[ari] cell_type_true: target_k=8
+[ari] cell_type_true: resolution=0.9210 achieved_k=8 (target 8)  ARI=0.0136
+[save] sim_paper/data/figure_3/pca_harmony_single_cell/spot/ari_recovery_qc/ari_summary_spot.json
+[save] sim_paper/data/figure_3/pca_harmony_single_cell/spot/ari_recovery_qc/simulation_spot_z_ari_recovery.h5ad
+[leiden] cell_type_true-matched-resolution qualitative plots (resolution=0.9210156249999999, UMAP true-vs-predicted, contingency heatmap)
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] sim_paper/data/figure_3/pca_harmony_single_cell/spot/pca_harmony_qc/simulation_spot_z_pca_harmony_qc.h5ad
+[neighbors] Using first 30 dimensions of X_pca_harmony with n_neighbors=15
+[leiden] resolution=0.9210156249999999, key=cluster_label
+[umap] Reusing X_umap_pca_post_harmony from the pca_harmony.py output -- this figure's UMAP is then the exact same embedding as the before/after-Harmony panel (clustering/Leiden still uses its own neighbor graph above).
+[save] sim_paper/data/figure_3/pca_harmony_single_cell/spot/leiden_pca_qc_celltype_matched/simulation_spot_z_leiden_pca_res0p9210156249999999.h5ad
+[done] cell_type_true ARI -> sim_paper/data/figure_3/pca_harmony_single_cell/spot/ari_recovery_qc/ari_summary_spot.json

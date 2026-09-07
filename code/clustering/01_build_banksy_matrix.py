@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Build a BANKSY-augmented embedding for a simulated sim_app dataset: BANKSY ->
+Build a BANKSY-augmented embedding for a simulated albis dataset: BANKSY ->
 PCA -> Harmony -> (this script stops here; clustering_leiden_louvain.py does
 Leiden/Louvain from the output). This is the spatially-aware counterpart to
 pca_harmony.py, which runs plain PCA -> Harmony with no spatial information
@@ -15,12 +15,12 @@ neighbors of each other, which is meaningless.
 IMPORTANT: this script requires the isolated `sim-app-banksy` conda env
 (banksy_py pins a much older scanpy/numpy/anndata/pandas/scikit-learn/scipy
 stack than the rest of this project -- see
-sim_app/env/create_banksy_env.sh). Everything downstream of this script's
+sim_paper/env/create_banksy_env.sh). Everything downstream of this script's
 output (clustering_leiden_louvain.py, etc.) runs in the normal
-sim-app-tutorial env, since nothing after this step needs banksy_py itself.
+albis-tutorial env, since nothing after this step needs banksy_py itself.
 
 Expected environment:
-    conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-banksy
+    conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/sim-app-banksy
 
 Example:
     python sim_paper/code/clustering/01_build_banksy_matrix.py \\

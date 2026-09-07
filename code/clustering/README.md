@@ -4,31 +4,38 @@ Two conda envs are involved:
 
 ```bash
 # Everything except the BANKSY build step
-conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial
+conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
 python -m pip install -r sim_paper/code/clustering/requirements.txt
 
 # BANKSY build step only (01_build_banksy_matrix.py) -- banksy_py pins an
 # older scanpy/numpy/anndata/pandas/scikit-learn/scipy stack, incompatible
-# with sim-app-tutorial. See sim_app/env/create_banksy_env.sh.
-conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-banksy
+# with albis-tutorial. See sim_paper/env/create_banksy_env.sh.
+conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/sim-app-banksy
 ```
 
-All scripts here source `_env.sh` (sim-app-tutorial) or `_env_banksy.sh`
+All scripts here source `_env.sh` (albis-tutorial) or `_env_banksy.sh`
 (sim-app-banksy) for the conda-activation boilerplate.
 
 ## Reproduce Figure 3: run one panel script per modality x task
 
-The fastest path to reproducing a Figure 3 panel is one of these six
-self-contained scripts, one per (modality x cell-type-or-domain panel):
+The fastest path to reproducing a Figure 3 panel is one of these seven
+self-contained scripts, one per (modality x cell-type-or-domain panel);
+bin has an extra 16um cell-type variant:
 
 ```bash
 sbatch sim_paper/code/clustering/spot_celltype_panel.sh
 sbatch sim_paper/code/clustering/bin_celltype_panel.sh
+sbatch sim_paper/code/clustering/bin16um_celltype_panel.sh
 sbatch sim_paper/code/clustering/cell_celltype_panel.sh
 sbatch sim_paper/code/clustering/spot_domain_panel.sh
 sbatch sim_paper/code/clustering/bin_domain_panel.sh
 sbatch sim_paper/code/clustering/cell_domain_panel.sh
 ```
+
+The four `*_celltype_panel.sh` scripts read the exact same sim `.h5ad`
+files as Figure 2 (`data/figure_2/<tag>/`, tags carrying the per-modality
+`batch_sigma`: cell 1.5, bin8 0.8, bin16 0.7, spot 0.3). The domain panels
+use their own strong-`domain_type_mix` datasets -- see below.
 
 Each is idempotent end-to-end: generates the sim dataset if it isn't already
 on disk, QC-filters it, clusters it (plain PCA+Harmony for the cell-type
@@ -76,7 +83,7 @@ dataset built for its own question:
    ```
 3. **Cluster** -- one of:
    - `pca_harmony.py`: plain PCA -> Harmony (on `obs["slice_id"]`, the batch
-     key sim_app's synthetic batch effects are applied per). Writes PCA and
+     key albis's synthetic batch effects are applied per). Writes PCA and
      before/after-Harmony UMAP diagnostic plots plus PC-pairs plots
      (`pc_pairs.py`, imported, not a standalone CLI).
      ```bash
@@ -156,21 +163,21 @@ not a guarantee.
 
 ## `misc/`
 
-Two different kinds of thing live here, not one:
+One-off exploration/tuning scripts, kept for provenance:
 
-- **Superseded/deprecated**: `gene_harmony_umap.py`, `run_gene_harmony_umap.sh`,
-  `run_louvain_umap.sh` (the gene-space Harmony pipeline `pca_harmony.py`
-  replaced; `clustering_leiden_louvain.py --pipeline gene_harmony` still
-  supports reading its output if regenerated, but nothing currently
-  regenerates it), `pc_pairs.py` used to be here too -- **moved back** to
-  top-level 2026-08-26 after discovering `pca_harmony.py` still imports it
-  directly (it's a live dependency, not dead code; same for the `run_*.sh`
-  step wrappers below, which figure.md's own documented reproduce commands
-  reference at their top-level path -- don't re-move things into `misc/`
-  without grepping `figure.md`/`DATA_VERSIONS.md` for existing references
-  first).
-- **One-off exploration/tuning scripts**, kept for provenance:
-  `tune_banksy_bin_kgeom.sh`, `tune_banksy_cell.sh` (BANKSY hyperparameter
-  sweeps, see figure.md), `replot_*.sh` (one-off re-plots after a
-  plot-formatting fix, superseded once the fix is merged into the scripts
-  themselves).
+- `batch_sigma_sweep.sh`, `batch_sigma_opt_round2.sh` -- the 2026-08-27
+  sweep that picked the per-modality `batch_sigma` now used for the shared
+  Figure 2 / Figure 3 datasets (cell 1.5, bin8 0.8, bin16 0.7, spot 0.3).
+- `tune_banksy_bin_kgeom.sh`, `tune_banksy_cell.sh` -- BANKSY hyperparameter
+  sweeps for the domain panels (see figure.md).
+- `replot_celltype_panels_v2.sh`, `replot_pca_harmony_qc.sh` -- one-off
+  re-plots after a plot-formatting fix, superseded once the fix is merged
+  into the scripts themselves.
+
+The gene-space Harmony pipeline (`gene_harmony_umap.py` + its `run_*.sh`
+wrappers) was deleted 2026-08-27 -- `pca_harmony.py` replaced it and nothing
+regenerated its output. `clustering_leiden_louvain.py` still has a dormant
+`--pipeline gene_harmony` branch; the panel scripts only ever use
+`--pipeline pca_harmony`. The top-level `run_*.sh` step wrappers are kept
+(figure.md's documented reproduce commands reference them at their
+top-level path -- grep `figure.md`/`DATA_VERSIONS.md` before moving them).

@@ -25,7 +25,7 @@ since they're exactly what motivated the pipeline split documented in
 figure.md's 2026-08-25 "task/pipeline split" decision.
 
 Expected environment:
-    conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial
+    conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
 
 Example:
     python sim_paper/code/clustering/plot_ari_recovery.py
@@ -43,7 +43,17 @@ import numpy as np
 SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
 
-MODALITY_ORDER = ["cell", "bin", "spot"]
+MODALITY_ORDER = ["cell", "bin", "bin16um", "spot"]
+MODALITY_DISPLAY = {"cell": "Cell", "bin": "Bin (8µm)", "bin16um": "Bin (16µm)", "spot": "Spot"}
+# label -> (dir under data/figure_3/pca_harmony_single_cell/, modality name in the
+# summary filename). bin16um's cell-type panel lives in its own bin16um/ dir but
+# ari_vs_ground_truth.py was run with --modality bin, so the file is ari_summary_bin.json.
+CELLTYPE_PANEL = {
+    "cell": ("cell", "cell"),
+    "bin": ("bin", "bin"),
+    "bin16um": ("bin16um", "bin"),
+    "spot": ("spot", "spot"),
+}
 GROUND_TRUTH_LABELS = {"domain_true": "Spatial domain recovery", "cell_type_true": "Cell type recovery"}
 
 # Domain-panel (BANKSY) tag per modality -- see each modality's
@@ -78,16 +88,18 @@ def load_results(domain_tags: dict[str, str]) -> dict[str, dict[str, dict[str, f
             print(f"[load] {summary_path.relative_to(SIM_PAPER_DIR)}: {pipeline} / {modality} / {gt} = {r['ari']:.4f}")
 
     for modality in MODALITY_ORDER:
+        ct_dir, ct_file_mod = CELLTYPE_PANEL[modality]
         load_one(
-            SIM_PAPER_DIR / "data" / "figure_3" / "pca_harmony_single_cell" / modality
-            / "ari_recovery_qc" / f"ari_summary_{modality}.json",
+            SIM_PAPER_DIR / "data" / "figure_3" / "pca_harmony_single_cell" / ct_dir
+            / "ari_recovery_qc" / f"ari_summary_{ct_file_mod}.json",
             modality, is_banksy=False,
         )
-        load_one(
-            SIM_PAPER_DIR / "data" / f"clustering_{domain_tags[modality]}" / modality
-            / "banksy_ari_recovery" / f"ari_summary_{modality}.json",
-            modality, is_banksy=True,
-        )
+        if modality in domain_tags:
+            load_one(
+                SIM_PAPER_DIR / "data" / f"clustering_{domain_tags[modality]}" / modality
+                / "banksy_ari_recovery" / f"ari_summary_{modality}.json",
+                modality, is_banksy=True,
+            )
 
     return out
 
@@ -105,7 +117,7 @@ def plot_one(ax, data_by_pipeline: dict[str, dict[str, float]], title: str) -> N
         ax.bar_label(bars, fmt="%.3f", fontsize=8, padding=2)
 
     ax.set_xticks(x)
-    ax.set_xticklabels([m.capitalize() for m in MODALITY_ORDER])
+    ax.set_xticklabels([MODALITY_DISPLAY[m] for m in MODALITY_ORDER])
     ax.set_ylabel("Adjusted Rand Index")
     ax.set_title(title)
     ax.axhline(0, color="black", linewidth=0.8)
@@ -118,6 +130,14 @@ def main() -> None:
     parser.add_argument("--cell-domain-tag", default=DEFAULT_DOMAIN_TAGS["cell"])
     parser.add_argument("--spot-domain-tag", default=DEFAULT_DOMAIN_TAGS["spot"])
     parser.add_argument("--output-dir", type=Path, default=None)
+    parser.add_argument(
+        "--ground-truths",
+        nargs="+",
+        choices=list(GROUND_TRUTH_LABELS),
+        default=list(GROUND_TRUTH_LABELS),
+        help="Which ground-truth charts to emit (default: both). "
+        "e.g. --ground-truths cell_type_true to skip the domain panel.",
+    )
     args = parser.parse_args()
     domain_tags = {"bin": args.bin_domain_tag, "cell": args.cell_domain_tag, "spot": args.spot_domain_tag}
 
@@ -128,6 +148,8 @@ def main() -> None:
     data = load_results(domain_tags)
 
     for gt, label in GROUND_TRUTH_LABELS.items():
+        if gt not in args.ground_truths:
+            continue
         if not data.get(gt):
             print(f"[skip] no results found for {gt}")
             continue
@@ -141,7 +163,7 @@ def main() -> None:
         print(f"[save] {out_path}")
 
     # Combined 1x2 figure for the paper.
-    present_gts = [gt for gt in GROUND_TRUTH_LABELS if data.get(gt)]
+    present_gts = [gt for gt in GROUND_TRUTH_LABELS if gt in args.ground_truths and data.get(gt)]
     if len(present_gts) == 2:
         fig, axes = plt.subplots(1, 2, figsize=(11, 4.5))
         for ax, gt in zip(axes, present_gts):

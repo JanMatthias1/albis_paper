@@ -17,25 +17,49 @@
 # from the domain panel (spot_domain_panel.sh), see cell_celltype_panel.sh
 # for why the two panels don't share one dataset.
 #
-# 2026-08-26: switched to the EXACT SAME dataset as Figure 2's
-# figure_2_with_batch_tuned/spot_vs_breast_cancer_visium comparison
-# (packing_pf0p04_log_mu_-2.5_bsigma015) instead of this panel's own
-# previously-separate packing_pf0p04_bsigma015 tag -- the only difference
-# between the two was log_mu (0.7 default here vs. Figure 2's real-data-
-# tuned -2.5); batch_sigma=0.15 already matched. Per user decision, this
-# panel now reads Figure 2's data directly (SIM_RAW/SIM_QC point at
+# 2026-08-26: switched to the EXACT SAME dataset as Figure 2's spot
+# count-distribution comparison, instead of this panel's own
+# previously-separate packing_pf0p04_bsigma015 tag. Per user decision, this
+# panel reads Figure 2's data directly (SIM_RAW/SIM_QC point at
 # data/figure_2/<tag>/, not a separate data/noisy/<tag>/ copy). If that file
 # isn't there yet, the fallback below generates+QCs it with the identical
-# config Figure 2 uses, then moves it into data/figure_2/ itself (same
-# pattern as
-# code/count_distribution/spot_vs_breast_cancer_visium_with_batch_tuned.sh).
+# config Figure 2 uses, then moves it into data/figure_2/ itself.
 #
-# batch_sigma=0.15 (NOT the manuscript default 0.22): spot's large capture
-# radius pools far more cells per observation than bin/cell, diluting real
-# biological signal relative to the same fixed-size batch shift -- at 0.22,
-# Harmony completely fails to correct it (stays as 10 isolated per-slice
-# islands). 0.15 gives a real pre-Harmony separation that Harmony fully
-# resolves. See figure.md, 2026-08-24/25, spot batch_sigma diagnosis.
+# 2026-09-05: spot's Figure 2 config was retuned onto the two 18k CytAssist
+# probe references (lymph_node_visium + tonsil_visium; breast_cancer_visium
+# dropped 2026-09-04). SIM_TAG here follows Figure 2:
+#   packing_pf0p04_log_mu_-2.5_bsigma03 -> packing_pf0p04_log_mu_-2.0_theta_0.25_bsigma03
+# (log_mu -2.5 -> -2.0, theta 2.0 -> 0.25; sphere_r_um 2050 + batch_sigma 0.3
+# unchanged -- batch_sigma stays fixed, it is set on this panel's Harmony
+# demo). Winner of code/data/misc/sweep_spot_*_probe.sh.
+#
+# 2026-09-06: --theta-jitter added, SIM_TAG bumped to
+#   packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03
+# The shared spot config generated with --theta 0.25 and NO --theta-jitter,
+# so generate_simulation_noisy.py fell back to its default THETA_JITTER=1.0 --
+# per-gene NB dispersion ~N(0.25, 1.0), ~40% of genes floored to 1e-3, which
+# shows up as a disjoint upper cloud in Figure 2's mean_variance /
+# mean_dropout panels. Same artifact fixed for `cell` on 2026-08-25
+# (--theta-jitter 0.15). --theta-jitter 0.10 (largest of the swept
+# 0.10/0.15/0.25, code/data/misc/sweep_spot_jitter_probe.sh job 35536033)
+# fully collapses the two clouds; theta unchanged at 0.25. This resubmit
+# recomputes Figure 3's spot cell-typing on the fixed shared dataset; the
+# pre-jitter-fix outputs are archived at
+# data/figure_3/pca_harmony_single_cell/spot_pre_jitter_fix_20260906/
+# (the 2026-09-05 pre-probe-retune outputs at spot_pre_probe_retune_20260905/).
+# NOTE: the Figure 4/5 application scripts (code/applications_albis/**,
+# code/clustering/domain_celltype_composition.py, the _strongmix derivative)
+# still point at the old packing_pf0p04_log_mu_-2.5_bsigma03 tag, which stays
+# on disk -- migrating those is a separate pass.
+#
+# batch_sigma=0.3 (per-modality value for the shared Fig 2 / Fig 3 spot
+# dataset, finalized 2026-08-27): spot's large capture radius pools far more
+# cells per observation than bin/cell, diluting real biological signal
+# relative to the same fixed-size batch shift, so spot needs a larger
+# per-slice shift than bin/cell to show a pre-Harmony separation that Harmony
+# then fully resolves. Held fixed through the 2026-09-05 probe retune (only
+# log_mu + theta moved). See figure.md, 2026-08-24/25/27, spot batch_sigma
+# diagnosis.
 # Pipeline: plain PCA+Harmony (this panel; domain panel uses BANKSY instead,
 # see spot_domain_panel.sh -- spot is the one modality where the two panels'
 # best pipelines actually differ).
@@ -46,7 +70,7 @@ mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-SIM_TAG="packing_pf0p04_log_mu_-2.5_bsigma015"
+SIM_TAG="packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03"
 MODALITY="spot"
 SIM_RAW="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
 SIM_QC="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
@@ -61,7 +85,7 @@ if [[ ! -f "${SIM_QC}" ]]; then
         echo "[generate] ${SIM_TAG} not found under data/figure_2/, generating (same config as Figure 2)"
         "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
             --modality "${MODALITY}" --sphere-r-um 2050 \
-            --base-gene-lognormal -2.5 0.7 --batch-sigma 0.15 \
+            --base-gene-lognormal -2.0 0.7 --theta 0.25 --theta-jitter 0.10 --batch-sigma 0.3 \
             --out-tag "${SIM_TAG}"
         echo "[qc] ${SIM_TAG}"
         "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
@@ -79,6 +103,7 @@ if [[ ! -f "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_
     echo "[pca_harmony] running"
     "${PYTHON_BIN}" sim_paper/code/clustering/pca_harmony.py \
         --modality "${MODALITY}" --input "${SIM_QC}" \
+        --no-umap-sample \
         --output "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad"
 fi
 

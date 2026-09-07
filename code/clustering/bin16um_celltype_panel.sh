@@ -16,8 +16,8 @@
 # contingency heatmap plots.
 #
 # Uses the EXACT SAME dataset as Figure 2's
-# figure_2_with_batch_tuned/bin_vs_breast_cancer_visium_hd_16um comparison
-# (packing_pf0p04_bin16um_log_mu_-2.5_bsigma05) -- per user decision, this
+# figure_2/bin_vs_breast_cancer_visium_hd_16um comparison
+# (packing_pf0p04_bin16um_log_mu_-2.5_bsigma07) -- per user decision, this
 # panel reads Figure 2's data directly (SIM_RAW/SIM_QC point at
 # data/figure_2/<tag>/, not a separate data/noisy/<tag>/ copy). If that file
 # isn't there yet, the fallback below generates+QCs it with the identical
@@ -43,7 +43,7 @@ mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-SIM_TAG="packing_pf0p04_bin16um_log_mu_-2.5_bsigma05"
+SIM_TAG="packing_pf0p04_bin16um_log_mu_-2.5_bsigma07"
 MODALITY="bin"
 SIM_RAW="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
 SIM_QC="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
@@ -60,7 +60,7 @@ if [[ ! -f "${SIM_QC}" ]]; then
         echo "[generate] ${SIM_TAG} not found under data/figure_2/, generating (same config as Figure 2)"
         "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
             --modality "${MODALITY}" --sphere-r-um 2050 --bin-size-um 16 \
-            --base-gene-lognormal -2.5 0.7 --batch-sigma 0.5 \
+            --base-gene-lognormal -2.5 0.7 --batch-sigma 0.7 \
             --out-tag "${SIM_TAG}"
         echo "[qc] ${SIM_TAG}"
         "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
@@ -78,6 +78,7 @@ if [[ ! -f "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_
     echo "[pca_harmony] running"
     "${PYTHON_BIN}" sim_paper/code/clustering/pca_harmony.py \
         --modality "${MODALITY}" --input "${SIM_QC}" \
+        --no-umap-sample \
         --output "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad"
 fi
 

@@ -17,8 +17,8 @@
 # cell_celltype_panel.sh for why the two panels don't share one dataset.
 #
 # 2026-08-26: switched to the EXACT SAME dataset as Figure 2's
-# figure_2_with_batch_tuned/bin_vs_breast_cancer_visium_hd comparison
-# (packing_pf0p04_log_mu_0.0_bsigma05) instead of this panel's own
+# figure_2/bin_vs_breast_cancer_visium_hd comparison
+# (packing_pf0p04_log_mu_0.0_bsigma08) instead of this panel's own
 # previously-separate packing_pf0p04_bsigma05 tag -- the only difference
 # between the two was log_mu (0.7 default here vs. Figure 2's real-data-
 # tuned 0.0); batch_sigma=0.5 already matched. Per user decision, Figure 3's
@@ -50,7 +50,7 @@ mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-SIM_TAG="packing_pf0p04_log_mu_0.0_bsigma05"
+SIM_TAG="packing_pf0p04_log_mu_0.0_bsigma08"
 MODALITY="bin"
 SIM_RAW="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
 SIM_QC="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
@@ -65,7 +65,7 @@ if [[ ! -f "${SIM_QC}" ]]; then
         echo "[generate] ${SIM_TAG} not found under data/figure_2/, generating (same config as Figure 2)"
         "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
             --modality "${MODALITY}" --sphere-r-um 2050 \
-            --base-gene-lognormal 0.0 0.7 --batch-sigma 0.5 \
+            --base-gene-lognormal 0.0 0.7 --batch-sigma 0.8 \
             --out-tag "${SIM_TAG}"
         echo "[qc] ${SIM_TAG}"
         "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
@@ -83,6 +83,7 @@ if [[ ! -f "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_
     echo "[pca_harmony] running"
     "${PYTHON_BIN}" sim_paper/code/clustering/pca_harmony.py \
         --modality "${MODALITY}" --input "${SIM_QC}" \
+        --no-umap-sample \
         --output "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad"
 fi
 

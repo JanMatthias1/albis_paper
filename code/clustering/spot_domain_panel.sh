@@ -30,7 +30,7 @@ mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
 
 # Two envs, matching 01_build_banksy_matrix.py's cross-env handoff design:
 # the BANKSY build step needs the isolated sim-app-banksy stack; everything
-# else (generate/QC/ari/leiden) runs in the normal sim-app-tutorial env.
+# else (generate/QC/ari/leiden) runs in the normal albis-tutorial env.
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env_banksy.sh
 BANKSY_PYTHON="${PYTHON_BIN}"
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env.sh

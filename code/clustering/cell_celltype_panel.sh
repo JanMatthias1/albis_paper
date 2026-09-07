@@ -22,27 +22,23 @@
 # 2026-08-25, "two-dataset strategy".
 #
 # 2026-08-26: switched to the EXACT SAME dataset as Figure 2's
-# figure_2_with_batch_tuned/cell_vs_non_diseased_lung comparison
-# (log_mu_-2.5_theta_0.25_jitter0.15_bsigma022) instead of this panel's own
-# previously-separate packing_pf0p04 tag. This is a bigger change than
-# bin/spot's (which only differed by log_mu): the old tag used
-# sphere_r_um=2050 (~4% packing, borrowed from bin/spot) with default
-# dispersion (theta=2.0/jitter=1.0/log_mu=0.7); Figure 2's tag uses cell's
-# own baseline sphere_r_um=6000 default (~0.16% packing -- cell has no
-# aggregation to need the bin/spot packing fix) with the marker-gene
-# mean-variance-branch-fixing dispersion config (log_mu=-2.5, theta=0.25,
-# theta_jitter=0.15). Per user decision, this panel now reads Figure 2's
-# data directly (SIM_RAW/SIM_QC point at data/figure_2/<tag>/, not a
-# separate data/noisy/<tag>/ copy). If that file isn't there yet, the
-# fallback below generates+QCs it with the identical config Figure 2 uses,
-# then moves it into data/figure_2/ itself (same pattern as
-# code/count_distribution/cell_vs_non_diseased_lung_with_batch_tuned.sh).
+# figure_2/cell_vs_non_diseased_lung comparison instead of this panel's own
+# previously-separate packing_pf0p04 tag. The old tag used sphere_r_um=2050
+# (~4% packing, borrowed from bin/spot) with default dispersion
+# (theta=2.0/jitter=1.0/log_mu=0.7); the shared tag uses cell's own baseline
+# sphere_r_um=6000 default (~0.16% packing -- cell has no aggregation to need
+# the bin/spot packing fix). This panel reads Figure 2's data directly
+# (SIM_RAW/SIM_QC point at data/figure_2/<tag>/); the fallback below
+# regenerates the identical config if it's missing.
 #
-# batch_sigma=0.22 (manuscript default, unchanged by this switch) -- cell
-# has zero spatial aggregation to dilute real signal, so the default batch
-# strength never visibly dominates at cell resolution; no batch_sigma tuning
-# was needed here (contrast with bin/spot, which needed modality-specific
-# values).
+# 2026-08-27: cell config retuned to log_mu=-2.3, theta=0.40, theta_jitter=0.15,
+# batch_sigma=1.5 (tag log_mu_-2.3_theta_0.40_jitter0.15_bsigma15). batch_sigma
+# had to go to 1.5 for a visible pre/post-Harmony demo, but at the earlier
+# log_mu=-2.5/theta=0.25 that dropped cell_type_true ARI to 0.47 (from 0.54
+# pre-batch) and cell's Figure 2 theta_hat to 0.056 (real ~0.16). Raising theta
+# to 0.40 pre-compensates the batch-effect dispersion drop: ARI recovers to
+# 0.64, Figure 2 theta_hat to ~0.083, genes/cell 30->42. Tradeoff: median
+# total_counts overshoots (~327 vs real ~90). See figure.md.
 # Pipeline: plain PCA+Harmony, NOT BANKSY -- BANKSY is neutral-to-destructive
 # for cell_type_true recovery at cell resolution in every test run so far.
 
@@ -52,7 +48,7 @@ mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-SIM_TAG="log_mu_-2.5_theta_0.25_jitter0.15_bsigma022"
+SIM_TAG="log_mu_-2.3_theta_0.40_jitter0.15_bsigma15"
 MODALITY="cell"
 SIM_RAW="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
 SIM_QC="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
@@ -67,7 +63,7 @@ if [[ ! -f "${SIM_QC}" ]]; then
         echo "[generate] ${SIM_TAG} not found under data/figure_2/, generating (same config as Figure 2)"
         "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
             --modality "${MODALITY}" \
-            --base-gene-lognormal -2.5 0.7 --theta 0.25 --theta-jitter 0.15 --batch-sigma 0.22 \
+            --base-gene-lognormal -2.3 0.7 --theta 0.40 --theta-jitter 0.15 --batch-sigma 1.5 \
             --out-tag "${SIM_TAG}"
         echo "[qc] ${SIM_TAG}"
         "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
@@ -85,6 +81,7 @@ if [[ ! -f "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_
     echo "[pca_harmony] running"
     "${PYTHON_BIN}" sim_paper/code/clustering/pca_harmony.py \
         --modality "${MODALITY}" --input "${SIM_QC}" \
+        --no-umap-sample \
         --output "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad"
 fi
 

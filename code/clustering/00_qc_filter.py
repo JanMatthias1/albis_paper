@@ -14,13 +14,14 @@ empty at this packing fraction) -- their near-identical, degenerate
 embeddings can form many tiny disconnected components that no resolution
 merges into the main structure.
 
-Filters:
+Filters (computed on the POST-batch count matrix -- see note at the filter
+site; this is the matrix every downstream step consumes):
   - total_counts > 0 (drop fully-empty observations)
   - n_genes_detected >= --min-genes (drop near-empty observations with too
     few nonzero genes to carry real signal)
 
 Expected environment:
-    conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial
+    conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
 
 Example:
     python sim_paper/code/clustering/00_qc_filter.py --modality bin --packing-tag packing_pf0p04
@@ -76,7 +77,15 @@ def main() -> None:
     n_before = adata.n_obs
     print(f"[load] AnnData shape: {n_before} x {adata.n_vars}")
 
-    X = adata.layers["counts_pre_batch"] if "counts_pre_batch" in adata.layers else adata.X
+    # Filter on the POST-batch counts -- the matrix every downstream step
+    # actually consumes (count_distribution.py runs post-batch by default since
+    # 2026-08-27, pca_harmony.py always did, STAIR reads the post-QC X). Using
+    # counts_pre_batch here let near-empty bins pass the >=min-genes floor on
+    # their pre-batch counts and then get zeroed by the batch noise, entering
+    # PCA as empty rows (the detached-island artifact in the Fig 3 UMAPs).
+    # In the raw noisy h5ad, adata.X is the post-batch integer counts; the
+    # counts_pre_batch layer is the only pre-batch store.
+    X = adata.layers["counts"] if "counts" in adata.layers else adata.X
     n_genes = np.asarray(X.getnnz(axis=1) if sparse.issparse(X) else np.count_nonzero(X, axis=1)).ravel()
     total_counts = np.asarray(X.sum(axis=1)).ravel()
 

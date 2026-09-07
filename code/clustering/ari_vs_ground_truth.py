@@ -13,7 +13,7 @@ confounded by over/under-clustering -- and reports
 sklearn.metrics.adjusted_rand_score against each.
 
 Expected environment:
-    conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial
+    conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
 
 Example:
     python sim_paper/code/clustering/ari_vs_ground_truth.py --modality bin --packing-tag packing_pf0p04
