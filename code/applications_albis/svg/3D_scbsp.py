@@ -54,7 +54,17 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[2]
 
 # modality -> (Figure 2 canonical tag, modality name in the h5ad filename).
-# Same three tags used by Figure 4B (STAGATE) / Figure 4C (STAIR).
+# bin16um / cell match Figure 2/3/4B/4C. The "spot" tag does NOT (see note).
+#
+# NOTE (2026-09-06): the "spot" entry is DELIBERATELY NOT the spot dataset
+# used by Figure 2 / Figure 3 / Figure 4C. Those moved to
+# `packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03` (2026-09-05
+# CytAssist probe-reference retune + 2026-09-06 `--theta-jitter 0.10`
+# two-cloud fix). Figure 4A (and 4B/STAGATE) stay on the older
+# `packing_pf0p04_log_mu_-2.5_bsigma03` spot config on purpose: the 4A/4B
+# conclusions are about spatial-signal strength (domain-mix coupling), not
+# real-data count-distribution fidelity. If 4A ever needs to match the rest
+# of Figure 4, bump this "spot" tag + generate the strongmix sibling.
 DATASETS = {
     "bin16um": ("packing_pf0p04_bin16um_log_mu_-2.5_bsigma07", "bin"),
     "spot": ("packing_pf0p04_log_mu_-2.5_bsigma03", "spot"),

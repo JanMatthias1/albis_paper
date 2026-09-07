@@ -93,6 +93,20 @@ BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/alignme
 # The former *_realwindow DATASETS entries + run_stair_3D_realwindow.sh were
 # dropped here -- they pointed at data/count_distribution/..._realwindow/ paths
 # that no longer exist, and are now redundant with these defaults.
+#
+# 2026-09-05: spot's Figure 2 config was retuned onto the two CytAssist probe
+# references (log_mu -2.5 -> -2.0, theta 2.0 -> 0.25; see
+# code/count_distribution/FIGURE2_METHODOLOGY.md). spot tag bumped here to
+# match; pre-retune STAIR outputs archived at
+# data/figure_4/alignment/STAIR/spot_pre_probe_retune_20260905/. bin16um / cell
+# tags unchanged.
+# 2026-09-06: spot tag bumped again -- ..._theta_0.25_bsigma03 ->
+# ..._theta_0.25_jitter0.10_bsigma03. The shared spot config had no
+# --theta-jitter so it fell back to the generator default 1.0, flooring ~40%
+# of per-gene NB dispersions to 1e-3 (the disjoint upper cloud in Figure 2's
+# mean_variance panel). --theta-jitter 0.10 collapses it. Same data fix that
+# was applied to `cell` on 2026-08-25. Pre-jitter-fix STAIR outputs archived
+# at data/figure_4/alignment/STAIR/spot_pre_jitter_fix_20260906/.
 DATASETS = {
     # 16 um Visium HD bin z-stack
     "bin16um": dict(
@@ -102,7 +116,7 @@ DATASETS = {
     ),
     # Visium spot z-stack
     "spot": dict(
-        h5ad=f"{FIG2}/packing_pf0p04_log_mu_-2.5_bsigma03/simulation_spot_z_qc.h5ad",
+        h5ad=f"{FIG2}/packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad",
         n_neigh_hom=8,
         c_neigh_het=0.90,
     ),

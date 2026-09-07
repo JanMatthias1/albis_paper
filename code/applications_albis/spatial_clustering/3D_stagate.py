@@ -86,9 +86,20 @@ BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/spatial
 # family 1 reuses data/figure_2/ in place; families 2/3/4 are Figure-4B-only and
 # live under data/figure_4/spatial_clustering/sim_data/ (generate_strongmix.sh
 # builds 2 + 4, generate_figure2_lowbatch.sh builds 3).
+#
+# NOTE (2026-09-06): the "spot" tag below is DELIBERATELY NOT the spot dataset
+# used by Figure 2 / Figure 3 / Figure 4C. Those moved to
+# `packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03` (2026-09-05
+# CytAssist probe-reference retune + 2026-09-06 `--theta-jitter 0.10`
+# two-cloud fix). Figure 4B (and 4A/SVG) stay on the older
+# `packing_pf0p04_log_mu_-2.5_bsigma03` spot config on purpose -- the 4B
+# result is about domain-mix coupling strength, not spot count-distribution
+# fidelity, and the strongmix/lowbatch families here have no jitter0.10
+# siblings. bin16um and cell already match the current shared tags.
 DATASETS = {
     # -- family 1: WEAK mix, TUNED batch. Domain ARI ~0 by design; the
-    # cross-modality baseline (also consistent with Figure 4A/4C).
+    # cross-modality baseline. bin16um/cell also match Figure 4A/4C; "spot"
+    # does not -- see NOTE above.
     "bin16um": dict(
         h5ad=f"{FIG2}/packing_pf0p04_bin16um_log_mu_-2.5_bsigma07/simulation_bin_z_qc.h5ad",
     ),
