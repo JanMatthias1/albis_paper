@@ -206,14 +206,16 @@ def _mutual_nn_domain_agreement(xa, da, xb, db):
     return agree, int(mutual.sum())
 
 
-def cross_slice_mnn_domain_agreement(data, max_points_per_slice=4000, seed=0):
+def cross_slice_mnn_domain_agreement(data, max_points_per_slice=None, seed=0):
     """For every pair of slices, find cross-slice mutual nearest neighbors in
     the 2D spatial embedding (points that are each other's closest match
     across the two slices) and report what fraction share a domain_true label
     -- unaligned vs STAIR-aligned. Plain percent agreement, no clustering step
-    and no chance-adjustment (see plot_stair_mnn_accuracy.py for the plot,
-    which marks the chance level -- sum(p_i^2) over domain_true proportions --
-    for reference instead). One row per (dataset, method, slice pair)."""
+    and no chance-adjustment. One row per (dataset, method, slice pair).
+
+    max_points_per_slice: optionally cap each section to this many observations
+    (fixed seed) before the nearest-neighbour search. None (default) uses every
+    observation -- the metric is a fraction and is insensitive to the cap."""
     rows = []
     for ds, (adata, _) in data.items():
         domain = adata.obs["domain_true"].astype(str).values
@@ -222,7 +224,10 @@ def cross_slice_mnn_domain_agreement(data, max_points_per_slice=4000, seed=0):
         per_slice_idx = {}
         for sl in slices:
             full_idx = np.where(slice_id == str(sl))[0]
-            per_slice_idx[sl] = full_idx[subsample(len(full_idx), max_points_per_slice, seed=seed)]
+            if max_points_per_slice is None or len(full_idx) <= max_points_per_slice:
+                per_slice_idx[sl] = full_idx
+            else:
+                per_slice_idx[sl] = full_idx[subsample(len(full_idx), max_points_per_slice, seed=seed)]
         panels = panels_for(adata, do_procrustes=True)["2d"]
         for method, xy in zip(["unaligned", "stair"], panels[:2]):
             for a, b in itertools.combinations(slices, 2):
