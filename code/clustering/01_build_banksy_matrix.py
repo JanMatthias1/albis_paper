@@ -83,6 +83,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--nbr-weight-decay", default="scaled_gaussian", choices=("scaled_gaussian", "reciprocal", "ranked"))
     parser.add_argument(
+        "--skip-umap", action="store_true",
+        help="Skip the pre/post-Harmony UMAP computation and the UMAP diagnostic "
+        "plots. Only X_pca_harmony is needed downstream (ARI / composition "
+        "scoring); UMAP on 600k-700k obs dominates runtime in a parameter sweep.",
+    )
+    parser.add_argument(
         "--stagger-scale", type=float, default=1.5,
         help="Multiple of the widest slice's x-range used as the per-slice x-offset when staggering.",
     )
@@ -231,29 +237,37 @@ def main() -> None:
     bdata = banksy_dict[args.nbr_weight_decay][args.lambda_value]["adata"]
     bdata.obsm["spatial"] = adata.obsm["spatial"].copy()
     bdata.obs = adata.obs.copy()
+    # carry over the soft ground-truth composition vectors (BANKSY doesn't
+    # subset obs, so they stay row-aligned) -- composition_recovery.py needs
+    # them to score bin/spot as mixtures rather than argmax labels.
+    for k in list(adata.obsm):
+        if k.endswith("_frac_true") and k not in bdata.obsm:
+            bdata.obsm[k] = np.asarray(adata.obsm[k]).copy()
     print(f"[banksy] BANKSY matrix shape: {bdata.shape[0]} x {bdata.shape[1]}")
     del adata
 
     banksy_dict = {args.nbr_weight_decay: {args.lambda_value: {"adata": bdata}}}
 
     # ── PCA + UMAP (pre-Harmony) ─────────────────────────────────────────────
-    print("\n[pca] pre-Harmony PCA + UMAP")
-    pca_umap(banksy_dict, pca_dims=[args.n_pcs], add_umap=True, plt_remaining_var=True)
+    print(f"\n[pca] pre-Harmony PCA{'' if args.skip_umap else ' + UMAP'}")
+    pca_umap(banksy_dict, pca_dims=[args.n_pcs], add_umap=not args.skip_umap, plt_remaining_var=True)
 
     pc_key = f"reduced_pc_{args.n_pcs}"
     umap_key = f"{pc_key}_umap"
     bdata.obsm["X_pca_pre_harmony"] = bdata.obsm[pc_key].copy()
-    bdata.obsm["X_umap_pre_harmony"] = bdata.obsm[umap_key].copy()
+    if not args.skip_umap:
+        bdata.obsm["X_umap_pre_harmony"] = bdata.obsm[umap_key].copy()
 
     for col in args.plot_colors:
         save_embedding_plot(
             bdata.obsm[pc_key], bdata.obs, col, f"BANKSY PCA pre-Harmony | {col}",
             plot_dir / f"pca_preharmony_by_{col}.png", axis_labels=("PC1", "PC2"),
         )
-        save_embedding_plot(
-            bdata.obsm[umap_key], bdata.obs, col, f"BANKSY UMAP pre-Harmony | {col}",
-            plot_dir / f"umap_preharmony_by_{col}.png", axis_labels=("UMAP1", "UMAP2"),
-        )
+        if not args.skip_umap:
+            save_embedding_plot(
+                bdata.obsm[umap_key], bdata.obs, col, f"BANKSY UMAP pre-Harmony | {col}",
+                plot_dir / f"umap_preharmony_by_{col}.png", axis_labels=("UMAP1", "UMAP2"),
+            )
 
     # ── Harmony batch correction (harmonypy -- matches pca_harmony.py) ───────
     print(f"\n[harmony] batch_key={args.batch_key}")
@@ -266,19 +280,21 @@ def main() -> None:
     bdata.obsm["X_pca_harmony"] = corrected
 
     # ── UMAP (post-Harmony) ───────────────────────────────────────────────────
-    print("\n[umap] post-Harmony UMAP")
-    reducer = umap_lib.UMAP(random_state=args.random_state)
-    bdata.obsm["X_umap_post_harmony"] = reducer.fit_transform(corrected)
+    if not args.skip_umap:
+        print("\n[umap] post-Harmony UMAP")
+        reducer = umap_lib.UMAP(random_state=args.random_state)
+        bdata.obsm["X_umap_post_harmony"] = reducer.fit_transform(corrected)
 
     for col in args.plot_colors:
         save_embedding_plot(
             bdata.obsm["X_pca_harmony"], bdata.obs, col, f"BANKSY PCA post-Harmony | {col}",
             plot_dir / f"pca_postharmony_by_{col}.png", axis_labels=("PC1", "PC2"),
         )
-        save_embedding_plot(
-            bdata.obsm["X_umap_post_harmony"], bdata.obs, col, f"BANKSY UMAP post-Harmony | {col}",
-            plot_dir / f"umap_postharmony_by_{col}.png", axis_labels=("UMAP1", "UMAP2"),
-        )
+        if not args.skip_umap:
+            save_embedding_plot(
+                bdata.obsm["X_umap_post_harmony"], bdata.obs, col, f"BANKSY UMAP post-Harmony | {col}",
+                plot_dir / f"umap_postharmony_by_{col}.png", axis_labels=("UMAP1", "UMAP2"),
+            )
 
     # ── write ──────────────────────────────────────────────────────────────
     # obsm["X_pca_harmony"] is the key clustering_leiden_louvain.py's
