@@ -1,0 +1,12 @@
+[task 1] modality=cell batch=tuned
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/banksy_batch_compare/cell/tuned/ari/simulation_cell_z_ari_recovery.h5ad
+[load] 600,000 x 1,668
+[sample] 50,000 / 600,000 observations
+[umap] after Harmony (X_pca_harmony)
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/banksy_batch_compare/cell/tuned/ari/plots/umap_true_vs_predicted_domain_true.png
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/banksy_batch_compare/cell/tuned/ari/plots/contingency_domain_true.png
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/banksy_batch_compare/cell/tuned/ari/plots/umap_true_vs_predicted_cell_type_true.png
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/banksy_batch_compare/cell/tuned/ari/plots/contingency_cell_type_true.png
+[done] task 1
