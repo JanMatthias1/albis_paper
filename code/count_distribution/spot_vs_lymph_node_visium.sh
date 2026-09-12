@@ -17,27 +17,41 @@
 # 2026-09-05: spot retuned onto the two 18k CytAssist probe references.
 # breast_cancer_visium (36k whole-transcriptome, fresh-frozen) was dropped
 # as spot's tuning target on 2026-09-04, so this pairing replaces the old
-# spot_vs_breast_cancer_visium.sh (deleted). New SIM_TAG:
-#   packing_pf0p04_log_mu_-2.0_theta_0.25_bsigma03
+# spot_vs_breast_cancer_visium.sh (deleted).
 # base_gene_lognormal log_mu -2.5 -> -2.0, theta (NB dispersion) 2.0 -> 0.25;
 # sphere_r_um 2050 (packing_pf0p04) and batch_sigma 0.3 unchanged (batch_sigma
 # stays fixed -- it is set on the Figure 3 Harmony demo, explicit user
 # constraint). Winner of the probe sweeps (code/data/misc/sweep_spot_*_probe.sh,
 # tabulated by summary_spot_logmu_theta_joint.sh): lowest composite
 # = sum of |ln(sim/real ratio)| over {theta_hat, total_counts_median,
-# matrix_zero_frac}, summed across BOTH probe refs. At -2.0/0.25, hvg_matched
-# vs lymph_node: theta_hat 0.87 vs 0.76 (1.14x), total_counts median 2210 vs
-# 2468 (0.90x), zero-frac 0.52 vs 0.34 (1.52x) -- lymph_node is the strong
+# matrix_zero_frac}, summed across BOTH probe refs. lymph_node is the strong
 # half of the joint fit; tonsil is looser (theta_hat still ~2.5x high, tonsil's
 # real HVG-matched theta_hat is only ~0.34). Residual: genes_per_cell median
-# ~274 sim vs 394 lymph_node -- pre-existing spot genes_per_cell gap, not in
+# undershoots lymph_node -- pre-existing spot genes_per_cell gap, not in
 # the composite, see figure.md Panel C.
 #
-# The SIM_TAG data was staged from the sweep build
-# (data/noisy/spot_joint_logmu_-2.0_theta_0.25/, byte-identical generate
-# flags, rng seeded) into data/figure_2/<tag>/. If absent, the block below
-# regenerates it identically. Figure 3's code/clustering/spot_celltype_panel.sh
-# reads the same SIM_TAG (byte-identical shared dataset).
+# 2026-09-06: --theta-jitter added, SIM_TAG bumped to
+#   packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03
+# The shared spot config generated with --theta 0.25 and NO --theta-jitter,
+# so generate_simulation_noisy.py fell back to its default THETA_JITTER=1.0.
+# Per-gene NB dispersion ~N(0.25, 1.0) -> ~40% of genes floored to 1e-3
+# (extreme overdispersion), producing the disjoint upper cloud far above the
+# NB fit in mean_variance_compare.png / mean_dropout_compare.png. Same
+# artifact fixed for `cell` on 2026-08-25 (--theta-jitter 0.15); the fix was
+# never carried to spot through the 2026-09-05 probe retune. --theta-jitter
+# 0.10 is the largest of the swept values (0.10/0.15/0.25,
+# code/data/misc/sweep_spot_jitter_probe.sh, job 35536033) that fully
+# collapses the two clouds into one continuous locus (0.4% of genes floored,
+# vs 40%); per-gene theta_hat median ~0.20, lymph_node hvg composite 0.68.
+# theta itself unchanged at 0.25 -- a re-check now that jitter is sane is
+# still open (figure.md 2026-09-06).
+#
+# The SIM_TAG data was staged from the jitter sweep build
+# (data/noisy/spot_jitter_sweep_0.10/, byte-identical generate flags + the
+# --out-tag, rng seeded) into data/figure_2/<tag>/. If absent, the block
+# below regenerates it identically. Figure 3's
+# code/clustering/spot_celltype_panel.sh reads the same SIM_TAG
+# (byte-identical shared dataset).
 #
 # 2026-08-31 realwindow (still in force): generate_simulation_noisy.py uses
 # the real 6.5x6.5 mm Visium window (no --capture-window-um); the ~2050 um
@@ -55,7 +69,7 @@ mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/log
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-SIM_TAG="packing_pf0p04_log_mu_-2.0_theta_0.25_bsigma03"
+SIM_TAG="packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03"
 MODALITY="spot"
 REAL_LABEL="lymph_node_visium"
 SIM_RAW="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
@@ -74,6 +88,7 @@ if [[ ! -f "${SIM_RAW}" ]]; then
             --sphere-r-um 2050 \
             --base-gene-lognormal -2.0 0.7 \
             --theta 0.25 \
+            --theta-jitter 0.10 \
             --batch-sigma 0.3 \
             --out-tag "${SIM_TAG}"
     fi

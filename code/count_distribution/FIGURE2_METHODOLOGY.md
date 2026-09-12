@@ -25,8 +25,8 @@ reference moved to the two probe panels, see "Superseded output" below):
 | bin (8um) | Visium HD `human_pancreas_visium_hd` | `packing_pf0p04_log_mu_0.0_bsigma08` (same) |
 | bin (16um) | Visium HD `breast_cancer_visium_hd_16um` | `packing_pf0p04_bin16um_log_mu_-2.5_bsigma07` |
 | bin (16um) | Visium HD `human_pancreas_visium_hd_16um` | `packing_pf0p04_bin16um_log_mu_-2.5_bsigma07` (same) |
-| spot | Visium `lymph_node_visium` (probe, CytAssist FFPE) | `packing_pf0p04_log_mu_-2.0_theta_0.25_bsigma03` |
-| spot | Visium `tonsil_visium` (probe, CytAssist FFPE) | `packing_pf0p04_log_mu_-2.0_theta_0.25_bsigma03` (same) |
+| spot | Visium `lymph_node_visium` (probe, CytAssist FFPE) | `packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03` |
+| spot | Visium `tonsil_visium` (probe, CytAssist FFPE) | `packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03` (same) |
 
 **Spot (2026-09-05):** `breast_cancer_visium` (36k whole-transcriptome,
 fresh-frozen) was dropped as spot's tuning target on 2026-09-04 and replaced
@@ -40,6 +40,30 @@ config moved `log_mu` -2.5 -> -2.0 and `theta` 2.0 -> 0.25 (`sphere_r_um`
 `matrix_zero_frac`}, summed across BOTH probe refs. lymph_node is the strong
 half of the fit; tonsil's real HVG-matched `theta_hat` (~0.34) is low enough
 that every swept config overshoots its dispersion by >=1.8x.
+
+**Spot (2026-09-06) -- `--theta-jitter` bug fix.** The shared spot config was
+generating with `--theta 0.25` and **no `--theta-jitter`**, so
+`generate_simulation_noisy.py` fell back to its module default
+`NOISY_THETA_JITTER = 1.0`. Per-gene NB dispersion is drawn `~N(theta,
+theta_jitter)` = `~N(0.25, 1.0)`, so ~40% of genes drew a value <= 0 and were
+floored to `1e-3` (extreme overdispersion). Result: `mean_variance_compare.png`
+and `mean_dropout_compare.png` showed the sim genes as **two disjoint clouds** --
+a dense upper cloud (the floored genes) far above the NB fit, plus the main
+cloud on it. This is the **same artifact fixed for `cell` on 2026-08-25**
+(`--theta-jitter 0.15`, cell tag `..._jitter0.15_...`); the fix was never
+carried over when spot was retuned onto the probe refs. `--theta-jitter` was
+bracketed (0.10 / 0.15 / 0.25, `code/data/misc/sweep_spot_jitter_probe.sh`
+job 35536033, tabulated by `summary_spot_jitter.sh`): **0.10** is the largest
+value that fully collapses the two clouds into one continuous locus (0.4% of
+genes floored vs 40%; per-gene `theta_hat` median ~0.20, smooth unimodal).
+0.15 leaves a faint residual cloud, 0.25 clearly reforms it. `theta` itself
+is unchanged at 0.25 -- the 2026-09-05 joint `theta` sweep ran with
+`jitter=1.0`, and the floored subpopulation drags the median `theta_hat`
+down, so `theta` should be re-checked now that jitter is sane (open, see
+`figure.md` 2026-09-06). The jitter sweep's `spot_jitter_sweep_0.10` build
+(identical generate flags + `--theta-jitter 0.10`) was staged into
+`data/figure_2/packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03/`,
+no regeneration.
 
 Each script is self-contained: generates the sim data if missing, QC-filters
 it (`code/clustering/00_qc_filter.py` -- drops fully-empty and near-empty
@@ -60,7 +84,9 @@ configs across the eight pairings. Figure 2's scripts and the celltype-panel
 scripts each carry a matching generate-if-missing fallback with the identical
 config. `spot_celltype_panel.sh` was moved to the new spot tag on 2026-09-05
 alongside this retune and resubmitted; its pre-retune outputs are archived at
-`data/figure_3/pca_harmony_single_cell/spot_pre_probe_retune_20260905/`. The
+`data/figure_3/pca_harmony_single_cell/spot_pre_probe_retune_20260905/`, and
+the pre-`--theta-jitter`-fix outputs (2026-09-06) at
+`.../spot_pre_jitter_fix_20260906/`. The
 Figure 4/5 application scripts (`code/applications_albis/**`,
 `code/clustering/domain_celltype_composition.py`, the `_strongmix`
 derivative) still read the old `packing_pf0p04_log_mu_-2.5_bsigma03` tag,
@@ -204,6 +230,21 @@ Retired 2026-09-05 (spot moved to probe references):
   `spot_celltype_panel.sh` (not tag-scoped at `CLUSTER_ROOT`) recomputes on
   resubmit instead of skipping.
 
+Retired 2026-09-06 (spot `--theta-jitter` bug fix, see "Spot (2026-09-06)"
+above):
+- `data/count_distribution/sweeps/figure_2_spot_pre_jitter_fix_20260906/`
+  `spot_vs_{lymph_node,tonsil}_visium/` -- the pre-fix Figure 2 spot
+  comparison outputs (two disjoint gene clouds in the mean_variance /
+  mean_dropout panels).
+- `data/figure_3/pca_harmony_single_cell/spot_pre_jitter_fix_20260906/` --
+  pre-fix Figure 3 spot cell-typing.
+- `data/figure_4/alignment/STAIR/spot_pre_jitter_fix_20260906/` -- pre-fix
+  Figure 4C STAIR spot alignment.
+- `data/figure_2/packing_pf0p04_log_mu_-2.0_theta_0.25_bsigma03/` -- the
+  pre-fix (`theta_jitter=1.0`) spot sim data, kept on disk (still read by the
+  un-migrated Figure 4/5 application scripts, same as the older
+  `..._log_mu_-2.5_bsigma03` tag).
+
 ## Known open gaps (not addressed by this methodology, tracked in figure.md)
 
 - Pancreas is a known-bad calibration target for bin (extreme real
@@ -214,10 +255,13 @@ Retired 2026-09-05 (spot moved to probe references):
   qc_and_hvg_matched `genes_per_cell` median is ~274 sim vs ~394 lymph_node
   (undershoots) but ~258 tonsil (close) -- not in the composite the sweep
   optimizes.
-- Spot's `theta=0.25` is the low end of the swept range and it won the joint
-  composite; the true optimum on `theta` may be lower still (tonsil `theta_hat`
-  is the limiting term). One confirmation point at `theta` ~0.15-0.20
-  (`log_mu` -2.0) is worth running before treating the config as final.
+- Spot's `theta=0.25` won the 2026-09-05 joint composite, but that sweep ran
+  with the buggy `theta_jitter=1.0` (see "Spot (2026-09-06)"), whose ~40%
+  floored-gene subpopulation drags the median `theta_hat` down -- so `theta`
+  was effectively optimised against the artifact. Now that `--theta-jitter`
+  is 0.10, re-run a short `theta` bracket (~0.15-0.35, `log_mu` -2.0) before
+  treating the config as final. Tonsil `theta_hat` (~0.34 real HVG-matched)
+  is still the limiting term either way.
 - QC-parity gap: real bin/spot data goes through SpotSweeper local-outlier
   QC before comparison; sim only gets the minimal `00_qc_filter.py` pass
   (empty/near-empty only). Parked, not addressed here.
