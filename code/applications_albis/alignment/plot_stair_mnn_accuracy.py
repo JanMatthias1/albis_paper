@@ -5,8 +5,8 @@ Figure 4C -- STAIR cross-section alignment accuracy.
 Reads figure4c_mnn_domain_agreement.csv (written by plot_figure4c.py's
 cross_slice_mnn_domain_agreement). Exact quantity computed there:
 
-  * for each of the C(10, 2) = 45 pairs of tissue sections, each section is
-    subsampled to 4000 observations;
+  * for each of the C(10, 2) = 45 pairs of tissue sections, using every
+    observation (no subsampling);
   * a cross-section mutual-nearest-neighbour (MNN) pair is an observation i in
     section A and an observation j in section B that are each other's single
     nearest neighbour (Euclidean) in the 2D coordinates -- the *unaligned*
