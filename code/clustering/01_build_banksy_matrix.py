@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
 Build a BANKSY-augmented embedding for a simulated albis dataset: BANKSY ->
-PCA -> Harmony -> (this script stops here; 03_clustering_plots.py does
+PCA -> Harmony -> (this script stops here; step03_cluster_and_plot.py does
 Leiden/Louvain from the output). This is the spatially-aware counterpart to
-pca_harmony.py, which runs plain PCA -> Harmony with no spatial information
+01.2_pca_harmony.py, which runs plain PCA -> Harmony with no spatial information
 at all.
 
 Spatial coordinates are staggered PER SLICE before the BANKSY neighbor graph
@@ -16,7 +16,7 @@ IMPORTANT: this script requires the isolated `sim-app-banksy` conda env
 (banksy_py pins a much older scanpy/numpy/anndata/pandas/scikit-learn/scipy
 stack than the rest of this project -- see
 sim_paper/env/create_banksy_env.sh). Everything downstream of this script's
-output (03_clustering_plots.py, etc.) runs in the normal
+output (step03_cluster_and_plot.py, etc.) runs in the normal
 albis-tutorial env, since nothing after this step needs banksy_py itself.
 
 Expected environment:
@@ -72,7 +72,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--n-hvg", type=int, default=None,
         help="Number of highly-variable genes to select. Default (None) uses every gene, matching "
-        "pca_harmony.py's convention -- the simulated gene panel is only ~550 genes already, all "
+        "01.2_pca_harmony.py's convention -- the simulated gene panel is only ~550 genes already, all "
         "either markers, shared markers, or deliberately-uninformative noise genes.",
     )
     parser.add_argument("--k-geom", type=int, default=15, help="Number of spatial neighbors per cell for BANKSY.")
@@ -228,7 +228,7 @@ def main() -> None:
         print(f"[hvg] selected {len(hvg_genes)} of {adata.n_vars} genes")
         adata = adata[:, hvg_genes].copy()
     else:
-        print(f"[hvg] skipped -- using all {adata.n_vars} genes (matches pca_harmony.py's convention)")
+        print(f"[hvg] skipped -- using all {adata.n_vars} genes (matches 01.2_pca_harmony.py's convention)")
     sc.pp.normalize_total(adata, target_sum=1e4)
 
     # ── BANKSY ────────────────────────────────────────────────────────────────
@@ -281,7 +281,7 @@ def main() -> None:
                 plot_dir / f"umap_preharmony_by_{col}.png", axis_labels=("UMAP1", "UMAP2"),
             )
 
-    # ── Harmony batch correction (harmonypy -- matches pca_harmony.py) ───────
+    # ── Harmony batch correction (harmonypy -- matches 01.2_pca_harmony.py) ───────
     print(f"\n[harmony] batch_key={args.batch_key}")
     pca = np.asarray(bdata.obsm[pc_key], dtype=np.float64)
     harmony_out = hm.run_harmony(pca, bdata.obs, args.batch_key)
@@ -309,7 +309,7 @@ def main() -> None:
             )
 
     # ── write ──────────────────────────────────────────────────────────────
-    # obsm["X_pca_harmony"] is the key 03_clustering_plots.py's
+    # obsm["X_pca_harmony"] is the key step03_cluster_and_plot.py's
     # --pipeline pca_harmony expects -- point --input at this file and it
     # needs no changes to run Leiden/Louvain on the BANKSY-derived embedding.
     out_path = args.output_dir / f"simulation_{args.modality}_z_banksy_pca_harmony_qc.h5ad"

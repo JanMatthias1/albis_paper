@@ -4,14 +4,14 @@ Draft Figure 3B (spatial-domain) qualitative panel for a BANKSY run whose
 matrix was built with --skip-umap (e.g. the banksy_lambda_kgeom_sweep_16um
 outputs). Loads one *_ari_recovery.h5ad, computes UMAP on the pre- and
 post-Harmony BANKSY-PCA embeddings, and writes the same plot set the
-*_domain_panel.sh scripts produce via 03_clustering_plots.py:
+*_domain_panel.sh scripts produce via step03_cluster_and_plot.py:
 
   pre/post-Harmony UMAP, before/after side-by-side, by slice_id / domain_true
   UMAP by domain_true / predicted-cluster / slice_id
   UMAP true (domain_true) vs predicted, same coords
   contingency heatmap  predicted x domain_true
 
-Reuses the plotting functions from pca_harmony.py + 03_clustering_plots.py
+Reuses the plotting functions from 01.2_pca_harmony.py + step03_cluster_and_plot.py
 so the draft matches the real panels exactly.
 
 Usage:
@@ -22,6 +22,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import sys
 from pathlib import Path
 
@@ -31,8 +32,15 @@ from sklearn.metrics import adjusted_rand_score
 
 CLUSTERING_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(CLUSTERING_DIR))
-from pca_harmony import plot_umap_before_after  # noqa: E402
-from clustering_leiden_louvain import (  # noqa: E402
+# 01.2_pca_harmony.py's numeric-leading name isn't a valid Python identifier,
+# so it can't be `from ... import`-ed directly -- load it by file path instead.
+_pca_harmony_spec = importlib.util.spec_from_file_location(
+    "pca_harmony", CLUSTERING_DIR / "01.2_pca_harmony.py"
+)
+_pca_harmony = importlib.util.module_from_spec(_pca_harmony_spec)
+_pca_harmony_spec.loader.exec_module(_pca_harmony)
+plot_umap_before_after = _pca_harmony.plot_umap_before_after
+from step03_cluster_and_plot import (  # noqa: E402
     plot_umap, plot_umap_true_vs_predicted, plot_contingency_heatmap,
 )
 

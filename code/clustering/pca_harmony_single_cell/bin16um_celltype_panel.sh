@@ -45,10 +45,10 @@ cd /dcs04/hicks/data/Jan/sim_project
 
 SIM_TAG="packing_pf0p04_bin16um_log_mu_-2.5_bsigma07"
 MODALITY="bin"
-SIM_RAW="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
-SIM_QC="sim_paper/data/figure_2/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
+SIM_RAW="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
+SIM_QC="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
 NOISY_DIR="sim_paper/data/noisy/${SIM_TAG}"
-FIG2_DIR="sim_paper/data/figure_2/${SIM_TAG}"
+FIG2_DIR="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}"
 # "bin16um" (not "bin") keeps this panel's output separate from the 8um
 # bin_celltype_panel.sh output -- the underlying --modality passed to the
 # python tools below is still "bin" (bin/spot/cell are the only valid
@@ -65,7 +65,7 @@ if [[ ! -f "${SIM_QC}" ]]; then
         echo "[qc] ${SIM_TAG}"
         "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
         echo "[move] ${NOISY_DIR} -> ${FIG2_DIR}"
-        mkdir -p sim_paper/data/figure_2
+        mkdir -p sim_paper/data/figure_2/smaller_sphere/data
         mv "${NOISY_DIR}" "${FIG2_DIR}"
     else
         echo "[qc] ${SIM_QC} not found but raw exists, running 00_qc_filter.py directly against figure_2/"
@@ -76,7 +76,7 @@ fi
 
 if [[ ! -f "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad" ]]; then
     echo "[pca_harmony] running"
-    "${PYTHON_BIN}" sim_paper/code/clustering/pca_harmony.py \
+    "${PYTHON_BIN}" sim_paper/code/clustering/01.2_pca_harmony.py \
         --modality "${MODALITY}" --input "${SIM_QC}" \
         --no-umap-sample \
         --output "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad"
@@ -99,7 +99,7 @@ with open('${CLUSTER_ROOT}/ari_recovery_qc/ari_summary_${MODALITY}.json') as f:
 print(next(r['resolution'] for r in summary if r['ground_truth'] == 'cell_type_true'))
 ")
 echo "[leiden] cell_type_true-matched-resolution qualitative plots (resolution=${RESOLUTION}, UMAP true-vs-predicted, contingency heatmap)"
-"${PYTHON_BIN}" sim_paper/code/clustering/03_clustering_plots.py \
+"${PYTHON_BIN}" sim_paper/code/clustering/step03_cluster_and_plot.py \
     --modality "${MODALITY}" \
     --input "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad" \
     --output-dir "${CLUSTER_ROOT}/leiden_pca_qc_celltype_matched" \

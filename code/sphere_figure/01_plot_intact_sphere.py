@@ -2,8 +2,9 @@
 Plot the intact simulated 3D sphere before slicing, capture, or batch effects.
 
 This script uses the same manuscript-scale simulation parameters as
-sim_paper/code/data/generate_simulation.py, but stops at the new base-sphere
-checkpoint and plots cell centroids colored by ground-truth domain.
+sim_paper/code/data/generate_simulation_noisy.py, but stops at the new
+base-sphere checkpoint and plots cell centroids colored by ground-truth
+domain.
 """
 
 import argparse

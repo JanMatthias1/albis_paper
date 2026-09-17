@@ -25,7 +25,8 @@ Reads the STAIR outputs written by 3D_stair.py
 
 Produces, under sim_paper/data/figure_4/alignment/plots/ :
     figure4c_translation_error.csv     dataset, slice_id, unaligned_um, stair_um
-    figure4c_translation_error.png     per-modality before/after strip+bar plot
+    figure4c_translation_error.png     per-modality before/after box plot
+                                        (individual slices overlaid as points)
 """
 
 import argparse
@@ -40,8 +41,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 BASE = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/alignment"
-ALL_DATASETS = ["bin16um", "spot", "cell"]
-MOD_COLORS = {"bin16um": "#4878d0", "spot": "#ee854a", "cell": "#6acc64"}
+ALL_DATASETS = ["bin8um", "bin16um", "spot", "cell"]
+MOD_COLORS = {"bin8um": "#d65f5f", "bin16um": "#4878d0", "spot": "#ee854a", "cell": "#6acc64"}
 
 
 def procrustes_fit(X, Y):
@@ -80,27 +81,51 @@ def per_slice_translation_error(adata):
 
 
 def plot(df, outdir):
-    fig, ax = plt.subplots(figsize=(7, 4.5))
-    datasets = df["dataset"].unique()
+    """Box plot per modality, unaligned vs STAIR-aligned, individual slices
+    overlaid as jittered points (each modality only has 10 slices, so the
+    box alone would hide whether errors are tightly clustered or driven by
+    one or two outlier slices)."""
+    fig, ax = plt.subplots(figsize=(8, 4.5))
+    datasets = list(df["dataset"].unique())
     x = np.arange(len(datasets))
     width = 0.32
-    for i, stage in enumerate(["unaligned_um", "stair_um"]):
-        means = [df.loc[df["dataset"] == d, stage].mean() for d in datasets]
-        offset = (i - 0.5) * width
-        color = "#797979" if stage == "unaligned_um" else "#4878d0"
-        ax.bar(x + offset, means, width=width, color=color,
-               label="Unaligned" if stage == "unaligned_um" else "STAIR aligned")
+    stage_color = {"unaligned_um": "#797979", "stair_um": "#4878d0"}
+    stage_offset = {"unaligned_um": -0.5 * width, "stair_um": 0.5 * width}
+
+    box_data, box_positions, box_colors = [], [], []
     for i, d in enumerate(datasets):
         sub = df[df["dataset"] == d]
-        for stage, offset in [("unaligned_um", -0.5 * width), ("stair_um", 0.5 * width)]:
-            jitter = (np.random.default_rng(0).random(len(sub)) - 0.5) * width * 0.5
-            ax.scatter(np.full(len(sub), i + offset) + jitter, sub[stage],
+        for stage in ("unaligned_um", "stair_um"):
+            box_data.append(sub[stage].to_numpy())
+            box_positions.append(i + stage_offset[stage])
+            box_colors.append(stage_color[stage])
+
+    bp = ax.boxplot(
+        box_data, positions=box_positions, widths=width * 0.85,
+        patch_artist=True, showfliers=False, medianprops=dict(color="black"),
+        zorder=2,
+    )
+    for patch, color in zip(bp["boxes"], box_colors):
+        patch.set_facecolor(color)
+        patch.set_alpha(0.55)
+
+    rng = np.random.default_rng(0)
+    for i, d in enumerate(datasets):
+        sub = df[df["dataset"] == d]
+        for stage in ("unaligned_um", "stair_um"):
+            jitter = (rng.random(len(sub)) - 0.5) * width * 0.5
+            ax.scatter(np.full(len(sub), i + stage_offset[stage]) + jitter, sub[stage],
                        s=14, c="black", alpha=0.6, zorder=3)
+
     ax.set_xticks(x)
     ax.set_xticklabels(datasets)
     ax.set_ylabel("per-slice centroid translation error (um)")
     ax.set_title("Figure 4C -- translation error, unaligned vs STAIR\n(dots = individual slices)")
-    ax.legend(frameon=False)
+    legend_handles = [
+        plt.Rectangle((0, 0), 1, 1, facecolor=stage_color["unaligned_um"], alpha=0.55, label="Unaligned"),
+        plt.Rectangle((0, 0), 1, 1, facecolor=stage_color["stair_um"], alpha=0.55, label="STAIR aligned"),
+    ]
+    ax.legend(handles=legend_handles, frameon=False)
     fig.tight_layout()
     p = os.path.join(outdir, "figure4c_translation_error.png")
     fig.savefig(p, dpi=200)

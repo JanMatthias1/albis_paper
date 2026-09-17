@@ -79,7 +79,7 @@ print("Torch:", torch.__version__, "| CUDA:", torch.cuda.is_available(), torch.v
 # --------------------------------------------------------------------------- #
 # dataset table                                                              #
 # --------------------------------------------------------------------------- #
-FIG2 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2"
+FIG2 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data"
 CDIST = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/count_distribution"
 BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/alignment/STAIR"
 
@@ -107,7 +107,29 @@ BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/alignme
 # mean_variance panel). --theta-jitter 0.10 collapses it. Same data fix that
 # was applied to `cell` on 2026-08-25. Pre-jitter-fix STAIR outputs archived
 # at data/figure_4/alignment/STAIR/spot_pre_jitter_fix_20260906/.
+# 2026-09-17: figure_2 was split into parallel smaller_sphere (r=2050) /
+# larger_sphere (r=6000) tracks (see project_figure2_smaller_larger_sphere
+# memory); the same 4 tags below moved from bare `data/figure_2/<tag>/` to
+# `data/figure_2/smaller_sphere/data/<tag>/` (FIG2 updated above), which had
+# silently broken this script (FileNotFoundError) since that move -- never
+# run end-to-end after it, same failure pattern as the clustering/ path bugs.
+# Also added `bin8um` here for the first time: no prior STAIR run of this
+# modality anywhere in the codebase, so n_neigh_hom/c_neigh_het below are an
+# untuned first pass (reusing bin16um's values, the nearest analog) rather
+# than a tuned choice. All 4 pre-reorg STAIR outputs (bin16um/spot/cell were
+# stale vs. the reorg regardless of bin8um) archived to
+# data/figure_4/alignment/STAIR/<dataset>_pre_reorg_20260917/.
 DATASETS = {
+    # 8 um Visium HD bin z-stack. Untuned first pass -- n_neigh_hom/c_neigh_het
+    # reused from bin16um (nearest analog), not empirically tuned for this
+    # modality. Also by far the largest of the 4 datasets (6.6M obs, ~4x
+    # bin16um's 1.65M) -- resourced separately in run_stair_3D.sh; may need a
+    # resubmit at higher mem/time if it OOMs or times out on the first try.
+    "bin8um": dict(
+        h5ad=f"{FIG2}/packing_pf0p04_log_mu_0.0_bsigma08/simulation_bin_z_qc.h5ad",
+        n_neigh_hom=4,
+        c_neigh_het=0.97,
+    ),
     # 16 um Visium HD bin z-stack
     "bin16um": dict(
         h5ad=f"{FIG2}/packing_pf0p04_bin16um_log_mu_-2.5_bsigma07/simulation_bin_z_qc.h5ad",

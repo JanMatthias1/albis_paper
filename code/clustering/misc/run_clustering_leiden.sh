@@ -24,14 +24,14 @@ MODALITY="${MODALITIES[${SLURM_ARRAY_TASK_ID:-0}]}"
 
 if [[ "$#" -gt 0 ]]; then
     echo "Modality: ${MODALITY}"
-    echo "Command: ${PYTHON_BIN} sim_paper/code/clustering/03_clustering_plots.py --modality ${MODALITY} $*"
-    "${PYTHON_BIN}" sim_paper/code/clustering/03_clustering_plots.py --modality "${MODALITY}" "$@"
+    echo "Command: ${PYTHON_BIN} sim_paper/code/clustering/step03_cluster_and_plot.py --modality ${MODALITY} $*"
+    "${PYTHON_BIN}" sim_paper/code/clustering/step03_cluster_and_plot.py --modality "${MODALITY}" "$@"
 else
     RESOLUTIONS=(0.5 0.1 0.2)
     echo "Modality: ${MODALITY}"
     for resolution in "${RESOLUTIONS[@]}"; do
-        echo "Command: ${PYTHON_BIN} sim_paper/code/clustering/03_clustering_plots.py --modality ${MODALITY} --resolution ${resolution}"
-        "${PYTHON_BIN}" sim_paper/code/clustering/03_clustering_plots.py --modality "${MODALITY}" --resolution "${resolution}"
+        echo "Command: ${PYTHON_BIN} sim_paper/code/clustering/step03_cluster_and_plot.py --modality ${MODALITY} --resolution ${resolution}"
+        "${PYTHON_BIN}" sim_paper/code/clustering/step03_cluster_and_plot.py --modality "${MODALITY}" --resolution "${resolution}"
     done
 fi
 

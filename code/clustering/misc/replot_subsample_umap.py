@@ -19,6 +19,7 @@ Because it subsamples one shared coordinate set, the before/after panel and the
 true-vs-predicted panel stay on the exact same embedding, same as the full run.
 """
 import argparse
+import importlib.util
 import shutil
 import sys
 from pathlib import Path
@@ -27,10 +28,17 @@ import numpy as np
 import scanpy as sc
 
 _here = Path(__file__).resolve().parent
-CLUSTERING_DIR = _here if (_here / "pca_harmony.py").exists() else _here.parent
+CLUSTERING_DIR = _here if (_here / "01.2_pca_harmony.py").exists() else _here.parent
 sys.path.insert(0, str(CLUSTERING_DIR))
-from pca_harmony import plot_umap_before_after  # noqa: E402
-from clustering_leiden_louvain import plot_umap, plot_umap_true_vs_predicted  # noqa: E402
+# 01.2_pca_harmony.py's numeric-leading name isn't a valid Python identifier,
+# so it can't be `from ... import`-ed directly -- load it by file path instead.
+_pca_harmony_spec = importlib.util.spec_from_file_location(
+    "pca_harmony", CLUSTERING_DIR / "01.2_pca_harmony.py"
+)
+_pca_harmony = importlib.util.module_from_spec(_pca_harmony_spec)
+_pca_harmony_spec.loader.exec_module(_pca_harmony)
+plot_umap_before_after = _pca_harmony.plot_umap_before_after
+from step03_cluster_and_plot import plot_umap, plot_umap_true_vs_predicted  # noqa: E402
 
 FIG3 = Path("/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3")
 SRC_ROOT = FIG3 / "pca_harmony_single_cell"

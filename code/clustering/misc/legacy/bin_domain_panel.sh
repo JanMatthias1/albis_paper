@@ -81,7 +81,7 @@ with open('${CLUSTER_ROOT}/banksy_ari_recovery/ari_summary_${MODALITY}.json') as
 print(next(r['resolution'] for r in summary if r['ground_truth'] == 'domain_true'))
 ")
 echo "[leiden] domain_true-matched-resolution qualitative plots (resolution=${RESOLUTION}, UMAP true-vs-predicted, contingency heatmap)"
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/03_clustering_plots.py \
+"${TUTORIAL_PYTHON}" sim_paper/code/clustering/step03_cluster_and_plot.py \
     --modality "${MODALITY}" \
     --input "${CLUSTER_ROOT}/banksy_pca_harmony_qc/simulation_${MODALITY}_z_banksy_pca_harmony_qc.h5ad" \
     --output-dir "${CLUSTER_ROOT}/leiden_pca_banksy_domain_matched" \

@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 """
 Before/after-Harmony UMAPs for the BANKSY batch-compare job (35608415),
-matching pca_harmony.py's plain-pipeline demo panels
+matching 01.2_pca_harmony.py's plain-pipeline demo panels
 (umap_pca_harmony_before_after_by_<color>.png) pixel-for-pixel -- same
 subsampling, neighbors/UMAP params, panel geometry, and color/legend
-handling, reused directly from pca_harmony.py rather than reimplemented.
+handling, reused directly from 01.2_pca_harmony.py rather than reimplemented.
 
 Reads data/figure_3/banksy_batch_compare/<modality>/<batch>/banksy_matrix/
 simulation_<modality>_z_banksy_pca_harmony_qc.h5ad (already has
 obsm["X_pca_pre_harmony"] / obsm["X_pca_harmony"] from 01_build_banksy_matrix.py,
 --skip-umap so no UMAP was computed there -- this script adds it as a
 lightweight post-hoc step on the already-built PCA, subsampled the same way
-pca_harmony.py subsamples for its own diagnostic UMAPs).
+01.2_pca_harmony.py subsamples for its own diagnostic UMAPs).
 
 Usage:
     conda activate /dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial
@@ -21,6 +21,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import sys
 from pathlib import Path
 
@@ -28,9 +29,18 @@ import matplotlib
 matplotlib.use("Agg")
 import scanpy as sc
 
-CLUSTERING_DIR = Path(__file__).resolve().parents[1]
+CLUSTERING_DIR = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(CLUSTERING_DIR))
-from pca_harmony import compute_umap, plot_umap_before_after, PANEL_FIGSIZE  # noqa: E402
+# 01.2_pca_harmony.py's numeric-leading name isn't a valid Python identifier,
+# so it can't be `from ... import`-ed directly -- load it by file path instead.
+_pca_harmony_spec = importlib.util.spec_from_file_location(
+    "pca_harmony", CLUSTERING_DIR / "01.2_pca_harmony.py"
+)
+_pca_harmony = importlib.util.module_from_spec(_pca_harmony_spec)
+_pca_harmony_spec.loader.exec_module(_pca_harmony)
+compute_umap = _pca_harmony.compute_umap
+plot_umap_before_after = _pca_harmony.plot_umap_before_after
+PANEL_FIGSIZE = _pca_harmony.PANEL_FIGSIZE
 from pc_pairs import sampled_indices  # noqa: E402
 
 SIM_PAPER_DIR = CLUSTERING_DIR.parents[1]
@@ -69,10 +79,10 @@ def main() -> None:
 
     obs_idx = sampled_indices(adata.n_obs, args.umap_max_obs, False, args.random_state)
     if len(obs_idx) < adata.n_obs:
-        print(f"[sample] {len(obs_idx):,} / {adata.n_obs:,} observations (matches pca_harmony.py's default)")
+        print(f"[sample] {len(obs_idx):,} / {adata.n_obs:,} observations (matches 01.2_pca_harmony.py's default)")
     umap_adata = adata[obs_idx].copy() if len(obs_idx) < adata.n_obs else adata
 
-    # 01_build_banksy_matrix.py writes X_pca_harmony (post-Harmony); pca_harmony.py's
+    # 01_build_banksy_matrix.py writes X_pca_harmony (post-Harmony); 01.2_pca_harmony.py's
     # shared plotting code expects X_pca_post_harmony -- alias rather than rename on disk.
     umap_adata.obsm["X_pca_post_harmony"] = umap_adata.obsm["X_pca_harmony"]
 

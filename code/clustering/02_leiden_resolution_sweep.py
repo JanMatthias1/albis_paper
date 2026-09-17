@@ -5,7 +5,7 @@ Figure 3B: how well does spatial-domain and cell-type structure survive
 bin/spot/cell aggregation and re-clustering?
 
 Builds a neighbor graph from the pca_harmony-corrected PCA embedding
-(matching 03_clustering_plots.py's pca_harmony defaults: first --n-pcs
+(matching step03_cluster_and_plot.py's pca_harmony defaults: first --n-pcs
 dimensions, --n-neighbors), then separately for domain_true and
 cell_type_true, binary-searches the Leiden resolution until the number of
 clusters found matches the true number of categories -- so ARI isn't
@@ -99,7 +99,7 @@ def find_resolution_for_k(adata, target_k, res_lo, res_hi, max_iter, random_stat
 def main() -> None:
     args = parse_args()
     if not args.input.is_file():
-        raise SystemExit(f"Input not found: {args.input}\nRun pca_harmony.py first.")
+        raise SystemExit(f"Input not found: {args.input}\nRun 01.2_pca_harmony.py first.")
 
     print(f"[load] {args.input}")
     adata = sc.read_h5ad(args.input)

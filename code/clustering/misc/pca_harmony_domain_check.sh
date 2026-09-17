@@ -48,17 +48,17 @@ BATCH="${BATCHES[$i]}"
 
 case "${MOD}" in
   cell)
-    SIM_QC="sim_paper/data/figure_2/log_mu_-2.3_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad"
+    SIM_QC="sim_paper/data/figure_2/smaller_sphere/data/log_mu_-2.3_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad"
     BANKSY_MOD="cell"
     LAM=0.5; KG=200
     ;;
   bin16um)
-    SIM_QC="sim_paper/data/figure_2/packing_pf0p04_bin16um_log_mu_-2.5_bsigma07/simulation_bin_z_qc.h5ad"
+    SIM_QC="sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_bin16um_log_mu_-2.5_bsigma07/simulation_bin_z_qc.h5ad"
     BANKSY_MOD="bin"
     LAM=0.5; KG=100
     ;;
   spot)
-    SIM_QC="sim_paper/data/figure_2/packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad"
+    SIM_QC="sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad"
     BANKSY_MOD="spot"
     LAM=0.1; KG=8
     ;;

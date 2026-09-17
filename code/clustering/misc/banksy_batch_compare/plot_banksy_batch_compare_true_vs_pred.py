@@ -6,13 +6,13 @@ that's already generated for the plain PCA+Harmony cell-type pipeline
 (leiden_pca_qc_celltype_matched/plots/umap_true_vs_predicted_*.png,
 contingency_*.png) but was never run for this job: banksy_batch_compare.sh
 only ran 01_build_banksy_matrix.py -> 02_leiden_resolution_sweep.py ->
-composition_recovery.py, no 03_clustering_plots.py step.
+composition_recovery.py, no step03_cluster_and_plot.py step.
 
 02_leiden_resolution_sweep.py's output h5ad already carries the resolution-matched
 predicted labels for BOTH ground truths (leiden_domain_true, matched to
 domain_true's k; leiden_cell_type_true, matched to cell_type_true's k) plus
 X_pca_harmony -- so this reuses that instead of re-clustering, and reuses
-03_clustering_plots.py's own plotting functions for a pixel-matched
+step03_cluster_and_plot.py's own plotting functions for a pixel-matched
 panel (same PANEL_FIGSIZE/MARGINS/DPI, same true-vs-predicted + contingency
 layout).
 
@@ -24,6 +24,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import sys
 from pathlib import Path
 
@@ -31,10 +32,17 @@ import matplotlib
 matplotlib.use("Agg")
 import scanpy as sc
 
-CLUSTERING_DIR = Path(__file__).resolve().parents[1]
+CLUSTERING_DIR = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(CLUSTERING_DIR))
-from pca_harmony import compute_umap  # noqa: E402
-from clustering_leiden_louvain import plot_umap_true_vs_predicted, plot_contingency_heatmap  # noqa: E402
+# 01.2_pca_harmony.py's numeric-leading name isn't a valid Python identifier,
+# so it can't be `from ... import`-ed directly -- load it by file path instead.
+_pca_harmony_spec = importlib.util.spec_from_file_location(
+    "pca_harmony", CLUSTERING_DIR / "01.2_pca_harmony.py"
+)
+_pca_harmony = importlib.util.module_from_spec(_pca_harmony_spec)
+_pca_harmony_spec.loader.exec_module(_pca_harmony)
+compute_umap = _pca_harmony.compute_umap
+from step03_cluster_and_plot import plot_umap_true_vs_predicted, plot_contingency_heatmap  # noqa: E402
 from pc_pairs import sampled_indices  # noqa: E402
 
 SIM_PAPER_DIR = CLUSTERING_DIR.parents[1]

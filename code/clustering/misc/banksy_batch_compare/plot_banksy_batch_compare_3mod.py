@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-SIM_PAPER_DIR = SCRIPT_DIR.parents[2]
+SIM_PAPER_DIR = SCRIPT_DIR.parents[3]
 FIG3_DIR = SIM_PAPER_DIR / "data" / "figure_3"
 COMPARE_ROOT = FIG3_DIR / "banksy_batch_compare"
 SLIDE_ROOT = FIG3_DIR / "cellbin_batch_sigma_slide"

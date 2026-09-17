@@ -128,7 +128,7 @@ of each step, not every plot inside it: if you change a step's plotting code
 without changing its output data, rerunning the panel script won't
 regenerate that step's plots (its h5ad/json output already exists, so the
 whole step is skipped). Force a re-plot with the underlying script's
-`--plots-only` flag (`pca_harmony.py`, `03_clustering_plots.py`)
+`--plots-only` flag (`01.2_pca_harmony.py`, `step03_cluster_and_plot.py`)
 against the existing output instead.
 
 Each script's header documents its exact sim config (`batch_sigma`,
@@ -163,23 +163,31 @@ dataset built for its own question:
    python sim_paper/code/clustering/00_qc_filter.py --modality bin --packing-tag <tag>
    ```
 3. **Cluster** -- one of:
-   - `pca_harmony.py`: plain PCA -> Harmony (on `obs["slice_id"]`, the batch
+   - `01.2_pca_harmony.py`: plain PCA -> Harmony (on `obs["slice_id"]`, the batch
      key albis's synthetic batch effects are applied per). Writes PCA and
      before/after-Harmony UMAP diagnostic plots plus PC-pairs plots
      (`pc_pairs.py`, imported, not a standalone CLI).
      ```bash
-     python sim_paper/code/clustering/pca_harmony.py --modality bin --input <qc.h5ad> --output <out.h5ad>
+     python sim_paper/code/clustering/01.2_pca_harmony.py --modality bin --input <qc.h5ad> --output <out.h5ad>
      ```
    - `01_build_banksy_matrix.py` (needs the `sim-app-banksy` env): BANKSY ->
      PCA -> Harmony, staggering each slice's coordinates first (all slices
      share one local x/y range, so an unstaggered neighbor graph would treat
      different slices as spatial neighbors). Writes `obsm["X_pca_harmony"]`
-     in the same shape `pca_harmony.py` does, so `03_clustering_plots.py`
-     needs zero changes to consume either.
+     in the same shape `01.2_pca_harmony.py` does, so
+     `step03_cluster_and_plot.py` needs zero changes to consume either.
      ```bash
      python sim_paper/code/clustering/01_build_banksy_matrix.py --modality cell --packing-tag <tag>
      ```
-4. **`03_clustering_plots.py`** -- Leiden or Louvain clustering
+4. **`02_leiden_resolution_sweep.py`** -- Figure 3B: binary-searches the Leiden
+   resolution until the cluster count matches the true category count (so
+   ARI isn't confounded by over/under-clustering), separately for
+   `domain_true` and `cell_type_true`. Runs BEFORE step 5 below, not after --
+   see the note under it.
+   ```bash
+   python sim_paper/code/clustering/02_leiden_resolution_sweep.py --modality bin --packing-tag <tag>
+   ```
+5. **`step03_cluster_and_plot.py`** -- Leiden or Louvain clustering
    (`--algorithm`, default `leiden`) + UMAP from the pca_harmony pipeline's
    output (`--pipeline` kept as a single-choice flag, `pca_harmony`, since a
    second gene-space Harmony pipeline lived here before being deleted
@@ -188,15 +196,20 @@ dataset built for its own question:
    `--cluster-key` and a `*_true` ground-truth column are present) a
    ground-truth-vs-predicted UMAP + contingency heatmap.
    ```bash
-   python sim_paper/code/clustering/03_clustering_plots.py --modality bin --resolution 0.5
+   python sim_paper/code/clustering/step03_cluster_and_plot.py --modality bin --resolution 0.5
    ```
-5. **`02_leiden_resolution_sweep.py`** -- Figure 3B: binary-searches the Leiden
-   resolution until the cluster count matches the true category count (so
-   ARI isn't confounded by over/under-clustering), separately for
-   `domain_true` and `cell_type_true`.
-   ```bash
-   python sim_paper/code/clustering/02_leiden_resolution_sweep.py --modality bin --packing-tag <tag>
-   ```
+   Renamed 2026-09-17 from `clustering_plots.py` (no numeric prefix at all)
+   to `step03_cluster_and_plot.py` -- `step03` rather than a bare `03_`
+   because it's imported as a library (`from step03_cluster_and_plot import
+   plot_umap_true_vs_predicted, ...`) by 3 other scripts, and Python can't
+   `from 03_x import y` -- digits can't start an identifier, but `step03...`
+   is a valid one and still sorts/reads in step order. Every panel script
+   actually runs step 4 first to find the right resolution, extracts it from
+   `ari_summary_<mod>.json`, then passes that exact value to this step's
+   `--resolution` -- a fixed guessed resolution can drift off the true
+   category count (found 2026-08-25 on spot: res=0.5 gave 7 clusters vs. 8
+   true types) and make this step's qualitative plots look like a mismatch
+   that isn't really there.
 6. **`plot_ari_recovery.py`** -- grouped bar chart of `cell_type_true` ARI
    across modality, from `pca_harmony_single_cell/`. Trimmed 2026-09-16 to
    drop the `domain_true`/BANKSY half (it only ever read
@@ -298,17 +311,45 @@ section above for why and its commands). What's left flat in `misc/`:
   from the top level 2026-09-16, superseded: both explicitly called "stale"/
   "superseded" in figure.md (2026-08-27/09-06 entries) once the ARI-based
   domain-vs-celltype framing above was adopted; their outputs are archived at
-  `data/figure_3/_archive_20260914/`. Top-level `composition_recovery.py`
-  (still essential -- every sweep script's `--h5ad` call feeds the
-  `slice_id_leakage_ari` annotation on the manuscript bars) had the other
-  half of this same abandoned framing trimmed out 2026-09-16: it used to also
-  support a no-args mode scoring all 4 canonical modalities and writing the
-  combined `composition_recovery_summary.csv`/`.png` these two scripts read
-  -- nothing has called it that way since, so that mode (`score_modality()`,
-  `make_plot()`, `--modalities`/`--no-plot`, and `FIG3`/`MODS`) is gone;
-  `to_rows()` stays (still used to pretty-print the single result) but
-  `--h5ad`/`--out-dir` are now required -- single-file scoring is all this
-  script does.
+  `data/figure_3/_archive_20260914/`.
+- `composition_recovery.py` -- also moved here from the top level 2026-09-16
+  (still essential: every sweep script's `--h5ad` call feeds the
+  `slice_id_leakage_ari` check). Trimmed twice the same day: first the
+  no-args mode it used to also support (scoring all 4 canonical modalities,
+  writing the combined `composition_recovery_summary.csv`/`.png` the two
+  scripts above read -- `score_modality()`, `make_plot()`,
+  `--modalities`/`--no-plot`, `FIG3`/`MODS`, all gone; `--h5ad`/`--out-dir`
+  now required), then the composition/local_knn/oracle/context metrics
+  (mean JSD/L1/Pearson r, composition R2, kNN concordance, KMeans-on-truth
+  oracle, effective-categories-per-obs) -- also part of the same abandoned
+  framing, unread by anything active except `misc/summary_banksy_lambda_kgeom.py`
+  (dormant, for an already-decided sweep -- it'll break loudly if rerun).
+  Down to hard-label ARI/V-measure + `slice_id_leakage_ari` only, verified
+  byte-identical on those fields against the pre-trim version.
+- The visible **leak-sign removal** (2026-09-16, by decision): `slice_id_leakage_ari`
+  used to get a dagger annotation on `misc/banksy_batch_compare/plot_banksy_batch_compare_3mod.py`'s
+  bars (`ari > threshold` -> `†` + a figure caption) -- both removed, bars now
+  plain values. `cellbin_batch_sigma_slide/plot_batch_sigma_slide_final.py`
+  loaded the same value but only ever `print()`ed it (never drew it) --
+  that dead load/print removed too. The underlying computation stays in
+  `composition_recovery.py` (still read by the console summaries and
+  `summary_banksy_lambda_kgeom.py`'s table).
+- **Bugs found and fixed while testing the above** (2026-09-16): moving
+  `plot_banksy_batch_compare_3mod.py`, `plot_banksy_batch_compare_umap.py`,
+  and `plot_banksy_batch_compare_true_vs_pred.py` into
+  `misc/banksy_batch_compare/` earlier the same day left their
+  `SIM_PAPER_DIR`/`CLUSTERING_DIR` path constants one level too shallow
+  (computed for their old, shallower location) -- silently broken since,
+  never run end-to-end after that move. Fixed (`.parents[N]` incremented by
+  1) and verified by actually running each. Separately, renaming
+  `clustering_leiden_louvain.py` to `03_clustering_leiden_louvain.py` (see
+  below) broke 3 files that `from clustering_leiden_louvain import ...` --
+  Python can't import a digit-prefixed module name that way -- fixed by
+  dropping the numeric prefix for that file instead (see step 5 above).
+  2026-09-17: revisited, since the resulting no-prefix name
+  (`clustering_plots.py`) obscured that it's actually the 3rd pipeline step --
+  renamed to `step03_cluster_and_plot.py`, a valid import target (`step03...`
+  doesn't start with a digit) that still carries the step number.
 - `run_build_banksy_matrix.sh`, `replot_subsample_umap.py` -- moved from the
   top level 2026-09-16, orphaned: `01_build_banksy_matrix.py` is called
   directly (not via this wrapper) by every current BANKSY script, and
@@ -331,8 +372,8 @@ Full dated narrative for all of the above is in figure.md / the
 `figure3_banksy_domain_sweep` memory if you need it -- not duplicated here.
 
 The gene-space Harmony pipeline (`gene_harmony_umap.py` + its `run_*.sh`
-wrappers) was deleted 2026-08-27 -- `pca_harmony.py` replaced it and nothing
-regenerated its output. `03_clustering_plots.py`'s corresponding
+wrappers) was deleted 2026-08-27 -- `01.2_pca_harmony.py` replaced it and nothing
+regenerated its output. `step03_cluster_and_plot.py`'s corresponding
 `--pipeline gene_harmony` branch (dead: called into the deleted script) was
 stripped 2026-09-16; `--pipeline` stays as a single-choice `pca_harmony` flag
 since every caller passes it explicitly. Its own `run_*.sh` step wrappers

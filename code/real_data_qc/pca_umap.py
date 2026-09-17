@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 """
 PCA + UMAP for a QC'd real slice/sample, as a rough "how crazy is our data"
-reference point next to the sim pipeline's pca_harmony.py plots.
+reference point next to the sim pipeline's 01.2_pca_harmony.py plots.
 
 Each real dataset here is a single sample (no batch/slice_id column), so
 there is nothing for Harmony to correct -- this only runs normalize/log/scale
--> PCA (--n-pcs, default 30, matching pca_harmony.py's default) -> neighbors
+-> PCA (--n-pcs, default 30, matching 01.2_pca_harmony.py's default) -> neighbors
 -> Leiden (for an unsupervised coloring, since there's no cell_type_true/
 domain_true ground truth) -> UMAP. low_qc-flagged cells/bins are dropped by
 default (use --keep-low-qc to keep them). Visium HD's whole-transcriptome
 panel (18,085 genes) is subset to the top --n-hvg highly variable genes
 before scaling/PCA to keep the dense step tractable; Xenium's ~400-gene
-panel is small enough to use as-is, matching how pca_harmony.py uses all
+panel is small enough to use as-is, matching how 01.2_pca_harmony.py uses all
 genes for the sim data.
 
 Expected environment:

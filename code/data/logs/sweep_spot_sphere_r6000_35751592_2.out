@@ -1,2 +1,3 @@
 [config] n_cells=15043310 sphere_r_um=6000 log_mu=-2.0 theta=0.25 jitter=0.10 batch_sigma=0.3 tag=spot_sphere_r6000_ncells15043310
 [generate] spot_sphere_r6000_ncells15043310 not found, generating
+slurmstepd: error: *** JOB 35751592 ON compute-155 CANCELLED AT 2026-09-17T06:16:13 DUE TO TIME LIMIT ***

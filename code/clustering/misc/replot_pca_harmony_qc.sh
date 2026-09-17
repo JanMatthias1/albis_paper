@@ -7,12 +7,12 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# One-off (2026-08-26): regenerate the pca_harmony.py before/after-Harmony
+# One-off (2026-08-26): regenerate the 01.2_pca_harmony.py before/after-Harmony
 # UMAP plots on the FULL dataset (--no-umap-sample), not the default 50k
 # subsample -- so the "Before/After Harmony" panel is computed on the same
 # point set as the other Figure 3 panel it sits next to
 # (leiden_pca_qc_celltype_matched/umap_true_vs_predicted_*.png, which
-# 03_clustering_plots.py already computes on all observations, no
+# step03_cluster_and_plot.py already computes on all observations, no
 # subsampling). At 50k/716k (bin) and 50k/600k (cell) the two panels were
 # each a real, independently-fit UMAP embedding, similar overall shape but
 # not the same layout -- not a rendering artifact, just two different inputs.
@@ -35,7 +35,7 @@ MODALITY="${MODALITIES[${SLURM_ARRAY_TASK_ID:-0}]}"
 H5AD="sim_paper/data/figure_3/pca_harmony_single_cell/${MODALITY}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad"
 
 echo "Modality: ${MODALITY}"
-"${PYTHON_BIN}" sim_paper/code/clustering/pca_harmony.py \
+"${PYTHON_BIN}" sim_paper/code/clustering/01.2_pca_harmony.py \
     --modality "${MODALITY}" \
     --input "${H5AD}" \
     --output "${H5AD}" \

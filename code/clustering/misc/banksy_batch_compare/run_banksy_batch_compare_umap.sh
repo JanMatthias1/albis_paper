@@ -9,7 +9,7 @@
 #
 # Before/after-Harmony UMAPs for the completed BANKSY batch-compare job
 # (35608415), one task per (modality, batch) combo -- see
-# plot_banksy_batch_compare_umap.py for what this reuses from pca_harmony.py.
+# plot_banksy_batch_compare_umap.py for what this reuses from 01.2_pca_harmony.py.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
