@@ -59,6 +59,7 @@ if [[ ! -f "${SIM_RAW}" ]]; then
             --sphere-r-um 2050 \
             --base-gene-lognormal 0.0 0.7 \
             --batch-sigma 0.8 \
+            --sync-unaligned-seed \
             --out-tag "${SIM_TAG}"
     fi
     if [[ ! -f "${NOISY_DIR}/simulation_${MODALITY}_z_qc.h5ad" ]]; then

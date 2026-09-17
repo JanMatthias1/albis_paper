@@ -1,0 +1,2 @@
+[config] n_cells=5641241 sphere_r_um=6000 bin_size_um=16 log_mu=-2.5 batch_sigma=0.7 tag=bin16um_sphere_r6000_ncells5641241
+[generate] bin16um_sphere_r6000_ncells5641241 not found, generating

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 QC diagnostics for a real (non-HD) Visium sample using SpotSweeper's
-local-outlier detection, matched to the sim_app spot-level data for
+local-outlier detection, matched to the albis spot-level data for
 comparison.
 
 Loads a raw Visium sample bundle -- this download ships spatial/ as a
@@ -13,7 +13,7 @@ spotsweeper.local_outliers. Flagged spots are dropped before saving; no
 normalization or log-transform is applied.
 
 Expected environment:
-    conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial
+    conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
     pip install spotsweeper   # one-time; not yet in requirements
 
 Example:
@@ -41,6 +41,8 @@ SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
 
 SAMPLE_RAW_DIRS = {
     "breast_cancer": "breast_cancer_visium",
+    "lymph_node": "lymph_node_visium",
+    "tonsil": "tonsil_visium",
 }
 
 # metric -> (direction, log, renamed outlier column)

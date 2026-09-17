@@ -1,0 +1,11 @@
+[task 5] classification  modality=spot subdir=spot label=tuned
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] sim_paper/data/figure_3/pca_harmony_domain_check/spot/tuned/ari/simulation_spot_z_ari_recovery.h5ad
+[load] 10,034 x 1,668
+[umap] after Harmony (X_pca_harmony)
+[save] sim_paper/data/figure_3/pca_harmony_domain_check/spot/tuned/ari/plots/umap_true_vs_predicted_domain_true.png
+[save] sim_paper/data/figure_3/pca_harmony_domain_check/spot/tuned/ari/plots/contingency_domain_true.png
+[save] sim_paper/data/figure_3/pca_harmony_domain_check/spot/tuned/ari/plots/umap_true_vs_predicted_cell_type_true.png
+[save] sim_paper/data/figure_3/pca_harmony_domain_check/spot/tuned/ari/plots/contingency_cell_type_true.png
+[done] task 5

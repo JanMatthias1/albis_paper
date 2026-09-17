@@ -1,0 +1,10 @@
+[task 26] modality=bin lambda=0.5 k_geom=10
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] sim_paper/data/figure_3/cellbin_kgeom_sweep_tuned/bin/lambda0.5_kgeom10/banksy_matrix/simulation_bin_z_banksy_pca_harmony_qc.h5ad
+[load] 365,721 x 1,668
+[neighbors] BANKSY -> PCA -> Leiden, NO Harmony. n_pcs=30 n_neighbors=15
+[RESULT] bin / domain_true (NO Harmony): k=10 (target 6)  ARI=0.0153  slice_leak_ARI=0.9994
+[RESULT] bin / cell_type_true (NO Harmony): k=10 (target 8)  ARI=0.0022  slice_leak_ARI=0.9994
+[save] sim_paper/data/figure_3/cellbin_kgeom_sweep_tuned/bin/lambda0.5_kgeom10/ari_no_harmony/ari_summary_no_harmony_bin.json
+[done] task 26

@@ -1,5 +1,5 @@
 """
-Generate a sim_app synthetic spatial-transcriptomics dataset at a specific
+Generate an albis synthetic spatial-transcriptomics dataset at a specific
 3D cell-packing fraction, along with diagnostic plots, under
 sim_paper/data/noisy.
 
@@ -17,11 +17,12 @@ at only ~0.16% of sphere volume -- real tissue is essentially fully packed.
 A fixed 8um bin grid over that mostly lands in empty interstitial space.
 --sphere-r-um controls packing fraction directly: holding n_cells=600_000
 fixed, smaller sphere_r_um means the same cell count fills a smaller
-volume, so packing fraction scales as 1 / sphere_r_um**3. The other three
-geometry params (--capture-window-um, --core-fuzz-width-um, --max-shift)
-default to scaling proportionally with --sphere-r-um, using the manuscript
-baseline's ratios, so shrinking the sphere doesn't distort the tissue's
-proportions.
+volume, so packing fraction scales as 1 / sphere_r_um**3. --core-fuzz-width-um
+and --max-shift default to scaling proportionally with --sphere-r-um, using
+the manuscript baseline's ratios, so shrinking the sphere doesn't distort the
+tissue's proportions. --capture-window-um does NOT scale: it defaults to the
+fixed 6.5 mm real Visium / Visium HD capture area, so a smaller sphere just
+occupies a smaller fraction of the (real-size) capture window.
 
 Run from anywhere inside the sim_project tree, e.g.:
     cd /dcs04/hicks/data/Jan/sim_project/sim_paper
@@ -34,34 +35,34 @@ import argparse
 from pathlib import Path
 
 import matplotlib
-matplotlib.use("Agg")  # headless-safe backend, must be set before pyplot/sim_app plotting is used
+matplotlib.use("Agg")  # headless-safe backend, must be set before pyplot/albis plotting is used
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 # ---------------------------------------------------------------------------
-# Locate and import sim_app (same logic as the tutorial notebook)
+# Locate and import albis as ab (same logic as the tutorial notebook)
 # ---------------------------------------------------------------------------
 def find_repo_root(start):
     for candidate in [start, *start.parents]:
-        if (candidate / "pyproject.toml").is_file() and (candidate / "sim_app" / "__init__.py").is_file():
+        if (candidate / "pyproject.toml").is_file() and (candidate / "albis" / "__init__.py").is_file():
             return candidate
-        nested = candidate / "sim_app"
-        if (nested / "pyproject.toml").is_file() and (nested / "sim_app" / "__init__.py").is_file():
+        nested = candidate / "albis"
+        if (nested / "pyproject.toml").is_file() and (nested / "albis" / "__init__.py").is_file():
             return nested
-    raise RuntimeError("Could not find the sim_app repository root.")
+    raise RuntimeError("Could not find the albis repository root.")
 
 
 repo_root = find_repo_root(Path.cwd().resolve())
 if str(repo_root) not in sys.path:
     sys.path.insert(0, str(repo_root))
 
-sys.modules.pop("sim_app", None)
-import sim_app
+sys.modules.pop("albis", None)
+import albis as ab
 
 print("Python:", sys.executable)
-print("sim_app module:", getattr(sim_app, "__file__", "<no __file__>"))
-print("sim_app version:", getattr(sim_app, "__version__", "<no __version__>"))
+print("albis module:", getattr(ab, "__file__", "<no __file__>"))
+print("albis version:", getattr(ab, "__version__", "<no __version__>"))
 
 
 # ---------------------------------------------------------------------------
@@ -84,14 +85,18 @@ BASE_GENE_LOGNORMAL = (0.7, 0.7)
 # n_cells fixed); packing fraction scales as 1 / sphere_r_um**3.
 N_CELLS = 600_000
 BASELINE_SPHERE_R_UM = 6000.0
-WINDOW_TO_R = 6500.0 / 6000.0
+# Real Visium / Visium HD capture area is a fixed 6.5 mm square, independent of
+# how much tissue sits in it -- the capture window does NOT scale with
+# --sphere-r-um. (The cell modality's Xenium capture area is the package
+# default xenium_capture_window_um=(12000, 24000) and is likewise not scaled.)
+VISIUM_CAPTURE_WINDOW_UM = 6500.0
 CORE_FUZZ_TO_R = 300.0 / 6000.0
 MAX_SHIFT_TO_R = 3000.0 / 6000.0
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Generate one sim_app modality at a given 3D cell-packing fraction."
+        description="Generate one albis modality at a given 3D cell-packing fraction."
     )
     parser.add_argument(
         "--modality",
@@ -113,9 +118,9 @@ def parse_args():
         "--capture-window-um",
         type=float,
         default=None,
-        help="Square capture window side length. Defaults to "
-        f"sphere_r_um * {WINDOW_TO_R:.4f} (same ratio as the manuscript baseline: "
-        "6500/6000).",
+        help="Square capture window side length (um). Defaults to "
+        f"{VISIUM_CAPTURE_WINDOW_UM:.0f} -- the real Visium / Visium HD capture "
+        "area; NOT scaled by --sphere-r-um.",
     )
     parser.add_argument(
         "--core-fuzz-width-um",
@@ -143,7 +148,7 @@ args = parse_args()
 OUTPUT_MODALITY = args.modality
 SLICE_AXIS = args.slice_axis
 SPHERE_R_UM = args.sphere_r_um
-CAPTURE_WINDOW_UM = args.capture_window_um if args.capture_window_um is not None else SPHERE_R_UM * WINDOW_TO_R
+CAPTURE_WINDOW_UM = args.capture_window_um if args.capture_window_um is not None else VISIUM_CAPTURE_WINDOW_UM
 CORE_FUZZ_WIDTH_UM = args.core_fuzz_width_um if args.core_fuzz_width_um is not None else SPHERE_R_UM * CORE_FUZZ_TO_R
 MAX_SHIFT = args.max_shift if args.max_shift is not None else SPHERE_R_UM * MAX_SHIFT_TO_R
 OUT_TAG = args.out_tag
@@ -160,11 +165,11 @@ PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 # Generate data
 # ---------------------------------------------------------------------------
 def generate_modality(output_modality, slice_axis, sphere_r_um, capture_window_um, core_fuzz_width_um, max_shift):
-    # sim_app.generate_data() doesn't forward the low-level geometry knobs
+    # ab.generate_data() doesn't forward the low-level geometry knobs
     # used here, so call the lower-level simulator directly and pull out the
     # requested modality/axis ourselves (mirrors what generate_data() does
     # internally -- see sim_app/README.md, "Low-level simulator").
-    simulation = sim_app.simulate_3d_molecule_sphere_multires(
+    simulation = ab.simulate_3d_molecule_sphere_multires(
         sphere_R_um=sphere_r_um,
         capture_window_um=(capture_window_um, capture_window_um),
         n_domains=6,
@@ -272,7 +277,7 @@ print(
 # ---------------------------------------------------------------------------
 # Inspect / summarize
 # ---------------------------------------------------------------------------
-summary = sim_app.describe(adata)
+summary = ab.describe(adata)
 print("\nSummary:")
 print(json.dumps(summary, indent=2, default=str))
 
@@ -303,15 +308,15 @@ else:
     plot_adata = adata
 
 # 1. Aligned spatial coordinates colored by ground-truth domain
-fig = sim_app.plot(plot_adata, view="2d", coordinates="aligned", color="domain_true", point_size=4)
+fig = ab.plot(plot_adata, view="2d", coordinates="aligned", color="domain_true", point_size=4)
 savefig(fig, "01_aligned_domain_true.png")
 
 # 2. Aligned spatial coordinates colored by ground-truth cell type
-fig = sim_app.plot(plot_adata, view="2d", coordinates="aligned", color="cell_type_true", point_size=4)
+fig = ab.plot(plot_adata, view="2d", coordinates="aligned", color="cell_type_true", point_size=4)
 savefig(fig, "02_aligned_cell_type_true.png")
 
 # 3. Unaligned (per-slice, pre-registration) coordinates colored by slice id
-fig = sim_app.plot(plot_adata, view="2d", coordinates="unaligned", color="slice_id", point_size=4)
+fig = ab.plot(plot_adata, view="2d", coordinates="unaligned", color="slice_id", point_size=4)
 savefig(fig, "03_unaligned_slice_id.png")
 
 # 4. QC: total counts / genes detected per observation
@@ -368,5 +373,5 @@ print(f"\nAll diagnostic plots saved under {PLOTS_DIR}")
 # ---------------------------------------------------------------------------
 # Save the AnnData object
 # ---------------------------------------------------------------------------
-output_path = sim_app.save(adata, H5AD_PATH)
+output_path = ab.save(adata, H5AD_PATH)
 print(f"\nSaved dataset -> {output_path}")

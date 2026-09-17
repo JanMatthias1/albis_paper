@@ -38,9 +38,23 @@ MODALITIES = ["bin16um", "spot", "cell"]
 MOD_DISPLAY = {"bin16um": "Bin (16 µm)", "spot": "Spot", "cell": "Cell"}
 BATCH_ORDER = {"none": 0, "0.05": 1, "tuned": 2}
 
-# baseline (2D graph) = muted grey-blue, method (3D graph) = deeper teal-blue.
-# Shared with plot_stair_mnn_accuracy.py so the Figure 4 panels read as one.
-C_3D, C_2D, EDGE = "#2F6F8F", "#B7C0C8", "#3a3f44"
+# accent (3D spatial graph, the method) = validated categorical blue;
+# baseline (2D-only graph) = a true neutral gray -- achromatic vs. hued is
+# unambiguous under any color-vision deficiency, so identity never rides on
+# hue discrimination alone. Ink tokens (never the series color) carry text.
+C_3D, C_2D = "#2a78d6", "#9aa1a8"
+INK, INK_SECONDARY = "#0b0b0b", "#52514e"
+GRID, BASELINE = "#e1e0d9", "#c3c2b7"
+
+plt.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": ["DejaVu Sans", "Arial", "Helvetica"],
+    "axes.edgecolor": BASELINE,
+    "text.color": INK,
+    "axes.labelcolor": INK_SECONDARY,
+    "xtick.color": INK_SECONDARY,
+    "ytick.color": INK_SECONDARY,
+})
 
 
 def parse_dataset(name):
@@ -82,37 +96,58 @@ def _xtick(row):
     if row.batch == "none":
         return "no batch\neffect"
     if row.batch == "0.05":
-        return r"$\sigma$=0.05"
-    return f"tuned\n$\\sigma$={row.batch_sigma:g}"
+        return "$\\sigma$ = 0.05"
+    return f"tuned\n$\\sigma$ = {row.batch_sigma:g}"
 
 
 def plot(strong, out_png):
     """strong: the mix == 'strong' rows only, one per (modality, batch)."""
-    fig, axes = plt.subplots(1, len(MODALITIES), figsize=(11, 3.9), sharey=True)
-    for ax, modality in zip(axes, MODALITIES):
+    SURFACE = "#ffffff"
+    fig, axes = plt.subplots(1, len(MODALITIES), figsize=(12.8, 4.6),
+                             sharey=True, facecolor=SURFACE)
+
+    for i, (ax, modality) in enumerate(zip(axes, MODALITIES)):
+        ax.set_facecolor(SURFACE)
         sub = strong[strong.modality == modality].sort_values("_ord")
         x = np.arange(len(sub))
-        w = 0.38
+        w = 0.32
+        gap = 0.02
+
+        ax.grid(axis="y", color=GRID, lw=0.8, zorder=1)
+        ax.set_axisbelow(True)
+
         for offset, col, colour, label in [
-            (-w / 2, "ari_domain_3d", C_3D, "STAGATE-3D"),
-            (+w / 2, "ari_domain_2d", C_2D, "STAGATE-2D"),
+            (-w / 2 - gap / 2, "ari_domain_3d", C_3D, "STAGATE-3D (aligned z-stack)"),
+            (+w / 2 + gap / 2, "ari_domain_2d", C_2D, "STAGATE-2D (per-section)"),
         ]:
             bars = ax.bar(x + offset, sub[col], w, label=label, color=colour,
-                          edgecolor=EDGE, linewidth=0.8)
-            ax.bar_label(bars, fmt="%.2f", fontsize=8, padding=2)
-        ax.set_xticks(x)
-        ax.set_xticklabels([_xtick(r) for _, r in sub.iterrows()], fontsize=9)
-        ax.set_ylim(0, 0.8)
-        ax.set_title(MOD_DISPLAY[modality], fontsize=11)
-        ax.grid(axis="y", ls=":", alpha=0.5)
-        ax.set_axisbelow(True)
-        ax.spines[["top", "right"]].set_visible(False)
+                          edgecolor="none", zorder=3)
+            ax.bar_label(bars, fmt="%.2f", fontsize=8.5, padding=3,
+                        color=INK_SECONDARY)
 
-    axes[0].set_ylabel("spatial-domain ARI (mclust vs. true domains)", fontsize=9)
-    # Cell bars top out ~0.26, so the legend fits in its own empty upper area.
-    axes[-1].legend(fontsize=8, frameon=False, loc="upper right", borderaxespad=0.6)
-    fig.tight_layout()
-    fig.savefig(out_png, dpi=200, facecolor="white", bbox_inches="tight")
+        ax.set_xticks(x)
+        ax.set_xticklabels([_xtick(r) for _, r in sub.iterrows()], fontsize=9.5)
+        ax.set_ylim(0, 0.8)
+        ax.set_title(MOD_DISPLAY[modality], fontsize=12, fontweight="bold",
+                    color=INK, pad=10)
+        ax.tick_params(axis="both", length=0)
+        for side in ("top", "right", "left"):
+            ax.spines[side].set_visible(False)
+        ax.spines["bottom"].set_color(BASELINE)
+        ax.spines["bottom"].set_linewidth(1.0)
+        if i > 0:
+            ax.tick_params(axis="y", labelleft=False)
+
+    axes[0].set_ylabel("Spatial-domain ARI (mclust vs. true domains)",
+                       fontsize=9.5, color=INK_SECONDARY)
+
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="upper right", bbox_to_anchor=(0.99, 1.0),
+              ncol=2, fontsize=9.5, frameon=False, handlelength=1.2,
+              handleheight=1.2, columnspacing=1.4)
+
+    fig.tight_layout(rect=[0, 0, 1, 0.88])
+    fig.savefig(out_png, dpi=300, facecolor=SURFACE, bbox_inches="tight")
     plt.close(fig)
     print("wrote", out_png)
 

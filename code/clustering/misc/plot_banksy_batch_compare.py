@@ -26,7 +26,12 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[2]
 ROOT = SIM_PAPER_DIR / "data" / "figure_3" / "banksy_batch_compare"
 
-MODALITIES = ["cell", "bin", "spot"]
+ALL_MODALITIES = ["cell", "bin", "spot"]
+# bin's official pair now lives under cellbin_batch_sigma_slide/bin/{bs0,bs0.7}
+# (k_geom=100, see figure3_banksy_domain_sweep memory 2026-09-14 declutter) --
+# skip any modality not present here rather than hardcode bin's absence, so
+# this still works unmodified if a modality's dir structure changes again.
+MODALITIES = [m for m in ALL_MODALITIES if (ROOT / m).is_dir()]
 MODALITY_DISPLAY = {"cell": "Cell", "bin": "Bin (16µm)", "spot": "Spot"}
 BATCHES = ["prebatch", "tuned"]
 BATCH_DISPLAY = {"prebatch": "No batch effect", "tuned": "Tuned batch (canonical)"}

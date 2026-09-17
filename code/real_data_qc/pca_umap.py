@@ -15,7 +15,7 @@ panel is small enough to use as-is, matching how pca_harmony.py uses all
 genes for the sim data.
 
 Expected environment:
-    conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial
+    conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
     pip install scikit-misc   # one-time; not yet in requirements -- needed by
                               # sc.pp.highly_variable_genes(flavor="seurat_v3")
 

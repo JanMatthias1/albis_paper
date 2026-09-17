@@ -33,7 +33,7 @@
 #   if domain ARI is up AND slice_id-leakage ARI < ~0.3.
 #
 # Per task: (1) 01_build_banksy_matrix.py in sim-app-banksy env, (2)
-# ari_vs_ground_truth.py + (3) composition_recovery.py --h5ad in
+# 02_leiden_resolution_sweep.py + (3) composition_recovery.py --h5ad in
 # albis-tutorial env (two-env handoff).
 #
 # Outputs under data/figure_3/banksy_lambda_kgeom_sweep_16um/:
@@ -90,7 +90,7 @@ fi
 
 if [[ ! -f "${RUN}/ari/ari_summary_${MOD}.json" ]]; then
     echo "[2/3 ari] resolution-matched Leiden ARI vs domain_true / cell_type_true"
-    "${TUTORIAL_PYTHON}" sim_paper/code/clustering/ari_vs_ground_truth.py \
+    "${TUTORIAL_PYTHON}" sim_paper/code/clustering/02_leiden_resolution_sweep.py \
         --modality "${MOD}" --packing-tag "${SIM_TAG}" \
         --input "${BANKSY_H5AD}" --output-dir "${RUN}/ari"
 else
@@ -98,7 +98,7 @@ else
 fi
 
 echo "[3/3 composition] scoring (+ slice_id leakage ARI)"
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/composition_recovery.py \
+"${TUTORIAL_PYTHON}" sim_paper/code/clustering/misc/composition_recovery.py \
     --h5ad "${ARI_H5AD}" --tag "${MOD}_lam${LAM}_kg${KG}" \
     --out-dir "${SWEEP}/scores"
 

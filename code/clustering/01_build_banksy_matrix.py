@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Build a BANKSY-augmented embedding for a simulated albis dataset: BANKSY ->
-PCA -> Harmony -> (this script stops here; clustering_leiden_louvain.py does
+PCA -> Harmony -> (this script stops here; 03_clustering_plots.py does
 Leiden/Louvain from the output). This is the spatially-aware counterpart to
 pca_harmony.py, which runs plain PCA -> Harmony with no spatial information
 at all.
@@ -16,7 +16,7 @@ IMPORTANT: this script requires the isolated `sim-app-banksy` conda env
 (banksy_py pins a much older scanpy/numpy/anndata/pandas/scikit-learn/scipy
 stack than the rest of this project -- see
 sim_paper/env/create_banksy_env.sh). Everything downstream of this script's
-output (clustering_leiden_louvain.py, etc.) runs in the normal
+output (03_clustering_plots.py, etc.) runs in the normal
 albis-tutorial env, since nothing after this step needs banksy_py itself.
 
 Expected environment:
@@ -309,7 +309,7 @@ def main() -> None:
             )
 
     # ── write ──────────────────────────────────────────────────────────────
-    # obsm["X_pca_harmony"] is the key clustering_leiden_louvain.py's
+    # obsm["X_pca_harmony"] is the key 03_clustering_plots.py's
     # --pipeline pca_harmony expects -- point --input at this file and it
     # needs no changes to run Leiden/Louvain on the BANKSY-derived embedding.
     out_path = args.output_dir / f"simulation_{args.modality}_z_banksy_pca_harmony_qc.h5ad"

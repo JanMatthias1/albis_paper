@@ -1,10 +1,10 @@
 """
-Generate a sim_app synthetic spatial-transcriptomics dataset with higher
+Generate an albis synthetic spatial-transcriptomics dataset with higher
 per-gene count noise (lower NB dispersion), along with diagnostic plots,
 under sim_paper/data/noisy.
 
-Identical to generate_simulation.py except this bypasses sim_app.generate_data()
-and calls sim_app.simulate_3d_molecule_sphere_multires() directly, since the
+Identical to generate_simulation.py except this bypasses ab.generate_data()
+and calls ab.simulate_3d_molecule_sphere_multires() directly, since the
 NB dispersion knobs (theta, theta_jitter, noise_scale) are not forwarded by
 generate_data() -- see sim_app/README.md, "Low-level simulator".
 
@@ -28,34 +28,34 @@ import argparse
 from pathlib import Path
 
 import matplotlib
-matplotlib.use("Agg")  # headless-safe backend, must be set before pyplot/sim_app plotting is used
+matplotlib.use("Agg")  # headless-safe backend, must be set before pyplot/albis plotting is used
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 # ---------------------------------------------------------------------------
-# Locate and import sim_app (same logic as the tutorial notebook)
+# Locate and import albis as ab (same logic as the tutorial notebook)
 # ---------------------------------------------------------------------------
 def find_repo_root(start):
     for candidate in [start, *start.parents]:
-        if (candidate / "pyproject.toml").is_file() and (candidate / "sim_app" / "__init__.py").is_file():
+        if (candidate / "pyproject.toml").is_file() and (candidate / "albis" / "__init__.py").is_file():
             return candidate
-        nested = candidate / "sim_app"
-        if (nested / "pyproject.toml").is_file() and (nested / "sim_app" / "__init__.py").is_file():
+        nested = candidate / "albis"
+        if (nested / "pyproject.toml").is_file() and (nested / "albis" / "__init__.py").is_file():
             return nested
-    raise RuntimeError("Could not find the sim_app repository root.")
+    raise RuntimeError("Could not find the albis repository root.")
 
 
 repo_root = find_repo_root(Path.cwd().resolve())
 if str(repo_root) not in sys.path:
     sys.path.insert(0, str(repo_root))
 
-sys.modules.pop("sim_app", None)
-import sim_app
+sys.modules.pop("albis", None)
+import albis as ab
 
 print("Python:", sys.executable)
-print("sim_app module:", getattr(sim_app, "__file__", "<no __file__>"))
-print("sim_app version:", getattr(sim_app, "__version__", "<no __version__>"))
+print("albis module:", getattr(ab, "__file__", "<no __file__>"))
+print("albis version:", getattr(ab, "__version__", "<no __version__>"))
 
 
 # ---------------------------------------------------------------------------
@@ -132,14 +132,22 @@ STRONG_DOMAIN_TYPE_MIX = np.array(
 # packing_fraction_to_sphere_R() below for the conversion.
 NOISY_N_CELLS = 600_000
 NOISY_SPHERE_R_UM = 6000.0
-WINDOW_TO_R = 6500.0 / 6000.0
+# Capture area = the real instrument's, per modality, independent of how much
+# tissue sits in it -- it does NOT scale with --sphere-r-um. bin/spot get the
+# 6.5 mm Visium / Visium HD square; cell gets the 12 x 24 mm Xenium window
+# (applied via xenium_capture_window_um, which crops cell-level output).
+PLATFORM_CAPTURE_WINDOW_UM = {
+    "bin": (6500.0, 6500.0),
+    "spot": (6500.0, 6500.0),
+    "cell": (12000.0, 24000.0),
+}
 CORE_FUZZ_TO_R = 300.0 / 6000.0
 MAX_SHIFT_TO_R = 3000.0 / 6000.0
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Generate one sim_app modality for the paper dataset, with higher count noise."
+        description="Generate one albis modality for the paper dataset, with higher count noise."
     )
     parser.add_argument(
         "--modality",
@@ -201,6 +209,17 @@ def parse_args():
         help="Standard deviation of the per-slice, per-gene log-fold-change batch effect.",
     )
     parser.add_argument(
+        "--seed",
+        type=int,
+        default=2025,
+        help="Master seed for simulate_3d_molecule_sphere_multires -- drives the base tissue "
+        "(cell placement, domain boundaries, cell types, baseline gene expression) directly, "
+        "and the per-slice batch-effect factors indirectly (seed + a fixed per-modality offset). "
+        "Does NOT affect obsm['spatial_unaligned'] (see --sync-unaligned-seed / base_seed_unaligned, "
+        "seeded independently). Default (2025) matches the library default and all prior runs; "
+        "override to build an independent replicate of the same config for variability/error bars.",
+    )
+    parser.add_argument(
         "--strong-domain-mix",
         action="store_true",
         help="Use STRONG_DOMAIN_TYPE_MIX instead of the manuscript-baseline domain_type_mix -- "
@@ -215,7 +234,7 @@ def parse_args():
         metavar=("D0", "D1", "D2", "D3", "D4", "D5"),
         help="Per-domain expression scale factor (6 values, one per domain -- this script's "
         "n_domains=6 is hardcoded below). Multiplies every gene's NB mean uniformly for cells "
-        "in that domain (sim_app's existing domain_size_factors kwarg -- a per-domain library-size "
+        "in that domain (albis's existing domain_size_factors kwarg -- a per-domain library-size "
         "shift, independent of cell type; NOT a per-gene profile the way cell-type markers are). "
         "Defaults to None (all domains =1.0, no effect, current manuscript behavior).",
     )
@@ -268,9 +287,9 @@ def parse_args():
         "--capture-window-um",
         type=float,
         default=None,
-        help="Square capture window side length. Defaults to "
-        f"sphere_r_um * {WINDOW_TO_R:.4f} (same ratio as the manuscript baseline: "
-        "6500/6000).",
+        help="Square capture window side length (um). Default (unset) uses the "
+        "real platform window for the modality: 6500 for bin/spot (Visium / "
+        "Visium HD), 12000x24000 for cell (Xenium). NOT scaled by --sphere-r-um.",
     )
     parser.add_argument(
         "--core-fuzz-width-um",
@@ -283,6 +302,16 @@ def parse_args():
         type=float,
         default=None,
         help=f"Defaults to sphere_r_um * {MAX_SHIFT_TO_R:.4f} (manuscript ratio: 3000/6000).",
+    )
+    parser.add_argument(
+        "--sync-unaligned-seed",
+        action="store_true",
+        help="Pass sync_unaligned_seed=True through to simulate_3d_molecule_sphere_multires so "
+        "obsm['spatial_unaligned']'s per-slice rigid (rotation+translation) perturbation is seeded "
+        "identically across modalities (same base_seed_unaligned + slice_id, no per-modality offset) "
+        "instead of each modality drawing its own independent perturbation (default). Needed so "
+        "cross_tech_stair.py's cross-technology STAIR alignment starts all three modalities from the "
+        "SAME misalignment for a given slice_id.",
     )
     parser.add_argument(
         "--out-tag",
@@ -311,9 +340,15 @@ CELL_R_MEAN = args.cell_r_mean
 ALLOW_CELL_OVERLAP = args.allow_cell_overlap
 BIN_SIZE_UM = args.bin_size_um
 SPHERE_R_UM = args.sphere_r_um
-CAPTURE_WINDOW_UM = args.capture_window_um if args.capture_window_um is not None else SPHERE_R_UM * WINDOW_TO_R
+CAPTURE_WINDOW_UM = (
+    (args.capture_window_um, args.capture_window_um)
+    if args.capture_window_um is not None
+    else PLATFORM_CAPTURE_WINDOW_UM[OUTPUT_MODALITY]
+)
 CORE_FUZZ_WIDTH_UM = args.core_fuzz_width_um if args.core_fuzz_width_um is not None else SPHERE_R_UM * CORE_FUZZ_TO_R
 MAX_SHIFT = args.max_shift if args.max_shift is not None else SPHERE_R_UM * MAX_SHIFT_TO_R
+SYNC_UNALIGNED_SEED = args.sync_unaligned_seed
+SEED = args.seed
 OUT_TAG = args.out_tag
 DATA_DIR = (BASE_DATA_DIR / OUT_TAG) if OUT_TAG else BASE_DATA_DIR
 DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -331,14 +366,22 @@ def generate_modality(
     output_modality, slice_axis, theta, theta_jitter, noise_scale, batch_sigma, base_gene_lognormal,
     n_cells, cell_r_mean, allow_cell_overlap, sphere_r_um, capture_window_um, core_fuzz_width_um, max_shift,
     marker_foldchange, shared_marker_foldchange, domain_size_factors, domain_type_mix, bin_size_um,
+    sync_unaligned_seed, seed,
 ):
-    # sim_app.generate_data() doesn't forward theta/theta_jitter/noise_scale/
+    # ab.generate_data() doesn't forward theta/theta_jitter/noise_scale/
     # base_gene_lognormal, so call the lower-level simulator directly and pull
     # out the requested modality/axis ourselves (mirrors what generate_data()
     # does internally).
-    simulation = sim_app.simulate_3d_molecule_sphere_multires(
+    # Platform capture window: bin/spot crop via capture_window_um; cell crops
+    # via xenium_capture_window_um.
+    capture_kw = (
+        {"xenium_capture_window_um": tuple(capture_window_um)}
+        if output_modality == "cell"
+        else {"capture_window_um": tuple(capture_window_um)}
+    )
+    simulation = ab.simulate_3d_molecule_sphere_multires(
         sphere_R_um=sphere_r_um,
-        capture_window_um=(capture_window_um, capture_window_um),
+        **capture_kw,
         n_domains=6,
         core_frac=0.55,
         core_bump_amp=0.25,
@@ -378,6 +421,8 @@ def generate_modality(
         domain_size_factors=domain_size_factors,
         max_deg=270.0,
         max_shift=max_shift,
+        sync_unaligned_seed=sync_unaligned_seed,
+        seed=seed,
         output_modalities=(output_modality,),
         slice_axes=(slice_axis,),
     )
@@ -393,7 +438,7 @@ def generate_modality(
         "allow_cell_overlap": allow_cell_overlap,
         "bin_size_um": bin_size_um,
         "sphere_r_um": sphere_r_um,
-        "capture_window_um": capture_window_um,
+        "capture_window_um": list(capture_window_um),
         "core_fuzz_width_um": core_fuzz_width_um,
         "max_shift": max_shift,
         "noise_scale": noise_scale,
@@ -403,6 +448,8 @@ def generate_modality(
         "base_gene_lognormal": list(base_gene_lognormal),
         "domain_size_factors": list(domain_size_factors) if domain_size_factors is not None else None,
         "strong_domain_mix": domain_type_mix is not None,
+        "sync_unaligned_seed": sync_unaligned_seed,
+        "seed": seed,
     }
     return adata
 
@@ -413,12 +460,14 @@ print(
     f"batch_sigma={BATCH_SIGMA}, base_gene_lognormal={BASE_GENE_LOGNORMAL}, "
     f"n_cells={N_CELLS}, cell_r_mean={CELL_R_MEAN}, allow_cell_overlap={ALLOW_CELL_OVERLAP}, "
     f"sphere_r_um={SPHERE_R_UM}, capture_window_um={CAPTURE_WINDOW_UM}, "
-    f"core_fuzz_width_um={CORE_FUZZ_WIDTH_UM}, max_shift={MAX_SHIFT}, bin_size_um={BIN_SIZE_UM}"
+    f"core_fuzz_width_um={CORE_FUZZ_WIDTH_UM}, max_shift={MAX_SHIFT}, bin_size_um={BIN_SIZE_UM}, "
+    f"sync_unaligned_seed={SYNC_UNALIGNED_SEED}, seed={SEED}"
 )
 adata = generate_modality(
     OUTPUT_MODALITY, SLICE_AXIS, THETA, THETA_JITTER, NOISE_SCALE, BATCH_SIGMA, BASE_GENE_LOGNORMAL,
     N_CELLS, CELL_R_MEAN, ALLOW_CELL_OVERLAP, SPHERE_R_UM, CAPTURE_WINDOW_UM, CORE_FUZZ_WIDTH_UM, MAX_SHIFT,
     MARKER_FOLDCHANGE, SHARED_MARKER_FOLDCHANGE, DOMAIN_SIZE_FACTORS, DOMAIN_TYPE_MIX, BIN_SIZE_UM,
+    SYNC_UNALIGNED_SEED, SEED,
 )
 print("\nGenerated AnnData:")
 print(adata)
@@ -453,7 +502,7 @@ print(
 # ---------------------------------------------------------------------------
 # Inspect / summarize
 # ---------------------------------------------------------------------------
-summary = sim_app.describe(adata)
+summary = ab.describe(adata)
 print("\nSummary:")
 print(json.dumps(summary, indent=2, default=str))
 
@@ -484,15 +533,15 @@ else:
     plot_adata = adata
 
 # 1. Aligned spatial coordinates colored by ground-truth domain
-fig = sim_app.plot(plot_adata, view="2d", coordinates="aligned", color="domain_true", point_size=4)
+fig = ab.plot(plot_adata, view="2d", coordinates="aligned", color="domain_true", point_size=4)
 savefig(fig, "01_aligned_domain_true.png")
 
 # 2. Aligned spatial coordinates colored by ground-truth cell type
-fig = sim_app.plot(plot_adata, view="2d", coordinates="aligned", color="cell_type_true", point_size=4)
+fig = ab.plot(plot_adata, view="2d", coordinates="aligned", color="cell_type_true", point_size=4)
 savefig(fig, "02_aligned_cell_type_true.png")
 
 # 3. Unaligned (per-slice, pre-registration) coordinates colored by slice id
-fig = sim_app.plot(plot_adata, view="2d", coordinates="unaligned", color="slice_id", point_size=4)
+fig = ab.plot(plot_adata, view="2d", coordinates="unaligned", color="slice_id", point_size=4)
 savefig(fig, "03_unaligned_slice_id.png")
 
 # 4. QC: total counts / genes detected per observation
@@ -549,5 +598,5 @@ print(f"\nAll diagnostic plots saved under {PLOTS_DIR}")
 # ---------------------------------------------------------------------------
 # Save the AnnData object
 # ---------------------------------------------------------------------------
-output_path = sim_app.save(adata, H5AD_PATH)
+output_path = ab.save(adata, H5AD_PATH)
 print(f"\nSaved dataset -> {output_path}")

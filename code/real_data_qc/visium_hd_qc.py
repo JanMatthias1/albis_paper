@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 QC diagnostics for a real Visium HD sample using SpotSweeper's local-outlier
-detection, matched to the sim_app bin-level data for comparison.
+detection, matched to the albis bin-level data for comparison.
 
 Loads a raw Visium HD `binned_outputs/square_XXXum/` bundle
 (filtered_feature_bc_matrix.h5 + spatial/tissue_positions_list.csv), computes
@@ -12,7 +12,7 @@ dropped before saving; no normalization or log-transform is applied.
 Raw downloads must already be extracted via extract_breast_visium_hd.py.
 
 Expected environment:
-    conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial
+    conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
     pip install spotsweeper   # one-time; not yet in requirements
 
 Example:
@@ -57,7 +57,7 @@ METRICS = {
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="SpotSweeper local-outlier QC for a raw Visium HD sample.")
     parser.add_argument("--sample", choices=sorted(SAMPLE_RAW_DIRS), required=True)
-    parser.add_argument("--bin-size-um", type=int, default=8, help="Matches sim_app's bin_size_um.")
+    parser.add_argument("--bin-size-um", type=int, default=8, help="Matches albis's bin_size_um.")
     parser.add_argument("--input-dir", type=Path, default=None, help="binned_outputs/square_XXXum dir (overrides --sample/--bin-size-um default).")
     parser.add_argument("--output-dir", type=Path, default=None)
     parser.add_argument("--n-neighbors", type=int, default=36)

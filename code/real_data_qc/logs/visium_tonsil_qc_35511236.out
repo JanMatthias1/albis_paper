@@ -1,0 +1,22 @@
+Job started: Fri Sep  4 05:49:49 PM EDT 2026
+Host: compute-178.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/bin/python
+Command: /dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/bin/python sim_paper/code/real_data_qc/visium_qc.py --sample tonsil 
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+/dcs04/hicks/data/Jan/sim_project/sim_paper/code/real_data_qc/visium_qc.py:94: FutureWarning: Use `squidpy.read.visium` instead.
+  adata = sc.read_visium(input_dir, count_file=count_files[0].name)
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/anndata/_core/anndata.py:1758: UserWarning: Variable names are not unique. To make them unique, call `.var_names_make_unique`.
+  utils.warn_names_duplicates("var")
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/anndata/_core/anndata.py:1758: UserWarning: Variable names are not unique. To make them unique, call `.var_names_make_unique`.
+  utils.warn_names_duplicates("var")
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/real_data/tonsil_visium
+[load] AnnData shape: 4908 spots x 18085 genes
+[qc] Running SpotSweeper local_outliers (n_neighbors=36, cutoff=3.0)
+[qc] low_qc spots: 274 / 4908
+[plot] Per-metric spatial diagnostics
+[qc] Dropped 274 low_qc spots; 4634 remain
+[save] Summary written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/real_data_qc/tonsil_visium/qc_summary.json
+[save] QC-filtered AnnData written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/real_data_qc/tonsil_visium/tonsil_visium_qc.h5ad
+[save] Plots written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/real_data_qc/tonsil_visium
+Job finished: Fri Sep  4 05:50:45 PM EDT 2026

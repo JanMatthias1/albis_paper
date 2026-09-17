@@ -1,5 +1,5 @@
 """
-Generate a sim_app synthetic spatial-transcriptomics dataset with a moderate
+Generate an albis synthetic spatial-transcriptomics dataset with a moderate
 per-slice batch effect, along with diagnostic plots, under
 sim_paper/data/batch_effect_moderate.
 
@@ -27,34 +27,34 @@ import argparse
 from pathlib import Path
 
 import matplotlib
-matplotlib.use("Agg")  # headless-safe backend, must be set before pyplot/sim_app plotting is used
+matplotlib.use("Agg")  # headless-safe backend, must be set before pyplot/albis plotting is used
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 # ---------------------------------------------------------------------------
-# Locate and import sim_app (same logic as the tutorial notebook)
+# Locate and import albis as ab (same logic as the tutorial notebook)
 # ---------------------------------------------------------------------------
 def find_repo_root(start):
     for candidate in [start, *start.parents]:
-        if (candidate / "pyproject.toml").is_file() and (candidate / "sim_app" / "__init__.py").is_file():
+        if (candidate / "pyproject.toml").is_file() and (candidate / "albis" / "__init__.py").is_file():
             return candidate
-        nested = candidate / "sim_app"
-        if (nested / "pyproject.toml").is_file() and (nested / "sim_app" / "__init__.py").is_file():
+        nested = candidate / "albis"
+        if (nested / "pyproject.toml").is_file() and (nested / "albis" / "__init__.py").is_file():
             return nested
-    raise RuntimeError("Could not find the sim_app repository root.")
+    raise RuntimeError("Could not find the albis repository root.")
 
 
 repo_root = find_repo_root(Path.cwd().resolve())
 if str(repo_root) not in sys.path:
     sys.path.insert(0, str(repo_root))
 
-sys.modules.pop("sim_app", None)
-import sim_app
+sys.modules.pop("albis", None)
+import albis as ab
 
 print("Python:", sys.executable)
-print("sim_app module:", getattr(sim_app, "__file__", "<no __file__>"))
-print("sim_app version:", getattr(sim_app, "__version__", "<no __version__>"))
+print("albis module:", getattr(ab, "__file__", "<no __file__>"))
+print("albis version:", getattr(ab, "__version__", "<no __version__>"))
 
 
 # ---------------------------------------------------------------------------
@@ -77,7 +77,7 @@ MODERATE_BATCH_SIGMA = 0.8
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Generate one sim_app modality for the paper dataset, with a moderate batch effect."
+        description="Generate one albis modality for the paper dataset, with a moderate batch effect."
     )
     parser.add_argument(
         "--modality",
@@ -110,7 +110,7 @@ PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 # Generate data
 # ---------------------------------------------------------------------------
 def generate_modality(output_modality, slice_axis, batch_sigma):
-    return sim_app.generate_data(
+    return ab.generate_data(
         output=output_modality,
         slice_axis=slice_axis,
         sphere_radius_um=6000.0,
@@ -164,7 +164,7 @@ print(adata)
 # ---------------------------------------------------------------------------
 # Inspect / summarize
 # ---------------------------------------------------------------------------
-summary = sim_app.describe(adata)
+summary = ab.describe(adata)
 print("\nSummary:")
 print(json.dumps(summary, indent=2, default=str))
 
@@ -195,15 +195,15 @@ else:
     plot_adata = adata
 
 # 1. Aligned spatial coordinates colored by ground-truth domain
-fig = sim_app.plot(plot_adata, view="2d", coordinates="aligned", color="domain_true", point_size=4)
+fig = ab.plot(plot_adata, view="2d", coordinates="aligned", color="domain_true", point_size=4)
 savefig(fig, "01_aligned_domain_true.png")
 
 # 2. Aligned spatial coordinates colored by ground-truth cell type
-fig = sim_app.plot(plot_adata, view="2d", coordinates="aligned", color="cell_type_true", point_size=4)
+fig = ab.plot(plot_adata, view="2d", coordinates="aligned", color="cell_type_true", point_size=4)
 savefig(fig, "02_aligned_cell_type_true.png")
 
 # 3. Unaligned (per-slice, pre-registration) coordinates colored by slice id
-fig = sim_app.plot(plot_adata, view="2d", coordinates="unaligned", color="slice_id", point_size=4)
+fig = ab.plot(plot_adata, view="2d", coordinates="unaligned", color="slice_id", point_size=4)
 savefig(fig, "03_unaligned_slice_id.png")
 
 # 4. QC: total counts / genes detected per observation
@@ -260,5 +260,5 @@ print(f"\nAll diagnostic plots saved under {PLOTS_DIR}")
 # ---------------------------------------------------------------------------
 # Save the AnnData object
 # ---------------------------------------------------------------------------
-output_path = sim_app.save(adata, H5AD_PATH)
+output_path = ab.save(adata, H5AD_PATH)
 print(f"\nSaved dataset -> {output_path}")

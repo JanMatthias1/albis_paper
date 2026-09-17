@@ -19,12 +19,12 @@ import numpy as np
 
 def find_repo_root(start):
     for candidate in [start, *start.parents]:
-        nested = candidate / "sim_app"
-        if (nested / "pyproject.toml").is_file() and (nested / "sim_app" / "__init__.py").is_file():
+        nested = candidate / "albis"
+        if (nested / "pyproject.toml").is_file() and (nested / "albis" / "__init__.py").is_file():
             return nested
-        if (candidate / "pyproject.toml").is_file() and (candidate / "sim_app" / "__init__.py").is_file():
+        if (candidate / "pyproject.toml").is_file() and (candidate / "albis" / "__init__.py").is_file():
             return candidate
-    raise RuntimeError("Could not find the sim_app repository root.")
+    raise RuntimeError("Could not find the albis repository root.")
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -33,8 +33,8 @@ REPO_ROOT = find_repo_root(SCRIPT_DIR)
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-sys.modules.pop("sim_app", None)
-import sim_app
+sys.modules.pop("albis", None)
+import albis as ab
 
 
 DOMAIN_COLORS = {
@@ -111,7 +111,7 @@ def main():
     args.outdir.mkdir(parents=True, exist_ok=True)
 
     print("Generating intact base sphere...")
-    base = sim_app.simulate_3d_molecule_sphere_base(**manuscript_simulation_kwargs())
+    base = ab.simulate_3d_molecule_sphere_base(**manuscript_simulation_kwargs())
     adata = base["adata_cell_true"]
     coords = np.asarray(adata.obsm["spatial"])
     domains = adata.obs["domain_true"].astype(str).to_numpy()

@@ -1,0 +1,2 @@
+[config] n_cells=3008662 sphere_r_um=6000 log_mu=-2.0 theta=0.25 jitter=0.10 batch_sigma=0.3 tag=spot_sphere_r6000_ncells3008662
+[generate] spot_sphere_r6000_ncells3008662 not found, generating

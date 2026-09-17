@@ -4,14 +4,14 @@ Draft Figure 3B (spatial-domain) qualitative panel for a BANKSY run whose
 matrix was built with --skip-umap (e.g. the banksy_lambda_kgeom_sweep_16um
 outputs). Loads one *_ari_recovery.h5ad, computes UMAP on the pre- and
 post-Harmony BANKSY-PCA embeddings, and writes the same plot set the
-*_domain_panel.sh scripts produce via clustering_leiden_louvain.py:
+*_domain_panel.sh scripts produce via 03_clustering_plots.py:
 
   pre/post-Harmony UMAP, before/after side-by-side, by slice_id / domain_true
   UMAP by domain_true / predicted-cluster / slice_id
   UMAP true (domain_true) vs predicted, same coords
   contingency heatmap  predicted x domain_true
 
-Reuses the plotting functions from pca_harmony.py + clustering_leiden_louvain.py
+Reuses the plotting functions from pca_harmony.py + 03_clustering_plots.py
 so the draft matches the real panels exactly.
 
 Usage:

@@ -25,12 +25,12 @@ import numpy as np
 
 def find_repo_root(start):
     for candidate in [start, *start.parents]:
-        nested = candidate / "sim_app"
-        if (nested / "pyproject.toml").is_file() and (nested / "sim_app" / "__init__.py").is_file():
+        nested = candidate / "albis"
+        if (nested / "pyproject.toml").is_file() and (nested / "albis" / "__init__.py").is_file():
             return nested
-        if (candidate / "pyproject.toml").is_file() and (candidate / "sim_app" / "__init__.py").is_file():
+        if (candidate / "pyproject.toml").is_file() and (candidate / "albis" / "__init__.py").is_file():
             return candidate
-    raise RuntimeError("Could not find the sim_app repository root.")
+    raise RuntimeError("Could not find the albis repository root.")
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -38,8 +38,8 @@ REPO_ROOT = find_repo_root(SCRIPT_DIR)
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-sys.modules.pop("sim_app", None)
-import sim_app
+sys.modules.pop("albis", None)
+import albis as ab
 
 
 DOMAIN_COLORS = {
@@ -186,7 +186,7 @@ def run_sectioning(base):
     # (180 deg / 200 um) for this schematic -- a toned-down illustrative version of
     # the misalignment used in the actual analyzed dataset (generate_simulation.py
     # uses max_deg=270, max_shift=3000).
-    return sim_app.section_3d_molecule_sphere(
+    return ab.section_3d_molecule_sphere(
         base,
         n_slices=10,
         batch_sigma=0.22,
@@ -268,7 +268,7 @@ def main():
     args.outdir.mkdir(parents=True, exist_ok=True)
 
     print("Generating base sphere with full molecule stream for binning...")
-    base = sim_app.simulate_3d_molecule_sphere_base(**manuscript_simulation_kwargs())
+    base = ab.simulate_3d_molecule_sphere_base(**manuscript_simulation_kwargs())
     plot_capture_window(base, args.outdir, args.dpi, args.max_cells)
 
     print("Sectioning sphere into Visium HD-like bins...")

@@ -38,7 +38,7 @@ CLUSTERING_ROOT = SIM_PAPER_DIR / "data" / "clustering"
 DEFAULT_OUTPUT = CLUSTERING_ROOT / "spot" / "pca_harmony" / "simulation_spot_z_pca_harmony.h5ad"
 VALID_MODALITIES = ("spot", "bin", "cell")
 
-# Shared with clustering_leiden_louvain.py's plot_umap_true_vs_predicted so the two
+# Shared with 03_clustering_plots.py's plot_umap_true_vs_predicted so the two
 # side-by-side UMAP comparison panels come out at the same aspect ratio AND the
 # same axes-box geometry within that canvas (see plot_umap_before_after for why
 # bbox_inches="tight"/tight_layout aren't used here -- both make the final layout
@@ -295,7 +295,7 @@ def plot_umap_before_after(
     # Fixed figsize + fixed subplots_adjust margins + no bbox_inches="tight" here (unlike the
     # other plot_* functions in this file) so the saved canvas AND the axes box within it are
     # always exactly PANEL_FIGSIZE * PANEL_DPI / PANEL_MARGINS, matching
-    # clustering_leiden_louvain.py's plot_umap_true_vs_predicted pixel-for-pixel -- both are
+    # 03_clustering_plots.py's plot_umap_true_vs_predicted pixel-for-pixel -- both are
     # side-by-side UMAP comparison panels shown together in Figure 3 and need to look the same
     # size, not just have the same outer canvas. tight_layout/"tight" cropping both make the
     # final layout depend on each plot's own legend/title content, which is why the two used to
@@ -421,7 +421,7 @@ def main() -> None:
         "n_neighbors": int(args.n_neighbors),
         "umap_obsm_note": (
             "X_umap_pca_pre_harmony / X_umap_pca_post_harmony are the FULL-data before/after-"
-            "Harmony UMAP embeddings, stored here so clustering_leiden_louvain.py can reuse "
+            "Harmony UMAP embeddings, stored here so 03_clustering_plots.py can reuse "
             "X_umap_pca_post_harmony and its figures share this exact embedding."
             if umap_adata is adata
             else "before/after UMAP is diagnostic-plot-only, computed on a subsample "

@@ -90,6 +90,7 @@ if [[ ! -f "${SIM_RAW}" ]]; then
             --theta 0.25 \
             --theta-jitter 0.10 \
             --batch-sigma 0.3 \
+            --sync-unaligned-seed \
             --out-tag "${SIM_TAG}"
     fi
     if [[ ! -f "${NOISY_DIR}/simulation_${MODALITY}_z_qc.h5ad" ]]; then

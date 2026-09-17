@@ -255,13 +255,19 @@ above):
   qc_and_hvg_matched `genes_per_cell` median is ~274 sim vs ~394 lymph_node
   (undershoots) but ~258 tonsil (close) -- not in the composite the sweep
   optimizes.
-- Spot's `theta=0.25` won the 2026-09-05 joint composite, but that sweep ran
-  with the buggy `theta_jitter=1.0` (see "Spot (2026-09-06)"), whose ~40%
-  floored-gene subpopulation drags the median `theta_hat` down -- so `theta`
-  was effectively optimised against the artifact. Now that `--theta-jitter`
-  is 0.10, re-run a short `theta` bracket (~0.15-0.35, `log_mu` -2.0) before
-  treating the config as final. Tonsil `theta_hat` (~0.34 real HVG-matched)
-  is still the limiting term either way.
+- **RESOLVED 2026-09-13:** Spot's `theta=0.25` re-checked with `theta_jitter=0.10`
+  fixed (the re-bracket this item asked for). A lower `theta=0.15` scores
+  better on the composite (1.773 vs 2.764) but, holding `jitter=0.10` fixed,
+  reintroduces a small floored-gene upper-cloud artifact (0.36% -> 6.8% of
+  genes) since `theta`/`theta_jitter` aren't independent -- the jitter would
+  need rescaling (~0.06) to match, which wasn't verified. Decision: **kept
+  `theta=0.25`/`jitter=0.10`**, prioritizing the already-verified
+  artifact-free mean-variance/mean-dropout plots over the marginal composite
+  gain. Tonsil `theta_hat` (~0.34 real HVG-matched) remains the limiting term
+  regardless of `theta` -- a known ceiling, not something this bracket could
+  fix. See `figure.md`, 2026-09-13, and
+  `data/count_distribution/sweeps/spot_theta_rebracket_probe/` for the sweep.
+  Figure 2 spot config is final.
 - QC-parity gap: real bin/spot data goes through SpotSweeper local-outlier
   QC before comparison; sim only gets the minimal `00_qc_filter.py` pass
   (empty/near-empty only). Parked, not addressed here.

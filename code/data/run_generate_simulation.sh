@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=sim_app_generate
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/data/logs/sim_app_generate_%A_%a.out
+#SBATCH --job-name=albis_generate
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/data/logs/albis_generate_%A_%a.out
 #SBATCH --array=0-2
 #SBATCH --time=04:00:00
 #SBATCH --mem=250G
@@ -13,10 +13,10 @@ set -euo pipefail
 # Make sure the log directory exists (SLURM needs it to exist before the job starts writing)
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/data/logs
 
-ENV_PREFIX="/dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial"
+ENV_PREFIX="/dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial"
 PYTHON_BIN="${ENV_PREFIX}/bin/python"
 
-# Activate the conda environment used by sim_app. Batch shells often do not
+# Activate the conda environment used by albis. Batch shells often do not
 # source .bashrc, so conda activate is unavailable until conda.sh is loaded.
 if ! command -v conda >/dev/null 2>&1; then
     module load conda 2>/dev/null || true
@@ -35,7 +35,7 @@ else
     echo "WARNING: conda was not found; using ${PYTHON_BIN} directly." >&2
     if [[ ! -x "${PYTHON_BIN}" ]]; then
         echo "ERROR: Python not found at ${PYTHON_BIN}" >&2
-        echo "Create the environment with /dcs04/hicks/data/Jan/sim_project/sim_app/env/create_tutorial_env.sh first." >&2
+        echo "Create the environment with /dcs04/hicks/data/Jan/sim_project/albis/env/create_tutorial_env.sh first." >&2
         exit 1
     fi
     export PATH="${ENV_PREFIX}/bin:${PATH}"

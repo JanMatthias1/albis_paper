@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-QC diagnostics for a real Xenium slice, matched to the sim_app cell-level
+QC diagnostics for a real Xenium slice, matched to the albis cell-level
 data for comparison.
 
 Loads a raw Xenium `outs/` bundle (cell_feature_matrix.h5 + cells.csv.gz),
@@ -10,7 +10,7 @@ low-quality cells and control-probe/codeword contamination. Flagged cells are
 dropped before saving; no normalization or log-transform is applied.
 
 Expected environment:
-    conda activate /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial
+    conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
 
 Example:
     python sim_paper/code/real_data_qc/xenium_qc.py --slice non_diseased_lung

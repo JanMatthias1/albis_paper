@@ -8,11 +8,11 @@
 #SBATCH --partition=shared
 #
 # Second replot pass: after switching plot_umap_before_after (pca_harmony.py) and
-# plot_umap_true_vs_predicted (clustering_leiden_louvain.py) from tight_layout/
+# plot_umap_true_vs_predicted (03_clustering_plots.py) from tight_layout/
 # bbox_inches="tight" to fixed PANEL_MARGINS via subplots_adjust, so the two panel
 # types share pixel-identical axes-box geometry, not just the same canvas size --
 # plus pretty_label formatting (domain_true -> Domain True, cluster_label ->
-# Cluster Label) now also applied in clustering_leiden_louvain.py. --plots-only
+# Cluster Label) now also applied in 03_clustering_plots.py. --plots-only
 # re-renders from the already-computed h5ad without rerunning PCA/Harmony/clustering.
 # Filenames for bin/cell's celltype_matched dirs now use the corrected --modality
 # (see the earlier --modality panel-script fix and file rename).
@@ -39,22 +39,22 @@ case "${SLURM_ARRAY_TASK_ID:-0}" in
         --modality "${MOD}" --input "${H5AD}" --output "${H5AD}" --plots-only
     ;;
   2)
-    "${PYTHON_BIN}" sim_paper/code/clustering/clustering_leiden_louvain.py \
+    "${PYTHON_BIN}" sim_paper/code/clustering/03_clustering_plots.py \
         --modality spot --algorithm leiden --pipeline pca_harmony --resolution 0.52390625 \
         --output-dir "${ROOT}/spot/leiden_pca_qc_celltype_matched" --plots-only
     ;;
   3)
-    "${PYTHON_BIN}" sim_paper/code/clustering/clustering_leiden_louvain.py \
+    "${PYTHON_BIN}" sim_paper/code/clustering/03_clustering_plots.py \
         --modality bin --algorithm leiden --pipeline pca_harmony --resolution 0.15015625 \
         --output-dir "${ROOT}/bin/leiden_pca_qc_celltype_matched" --plots-only
     ;;
   4)
-    "${PYTHON_BIN}" sim_paper/code/clustering/clustering_leiden_louvain.py \
+    "${PYTHON_BIN}" sim_paper/code/clustering/03_clustering_plots.py \
         --modality cell --algorithm leiden --pipeline pca_harmony --resolution 0.38375 \
         --output-dir "${ROOT}/cell/leiden_pca_qc_celltype_matched" --plots-only
     ;;
   5)
-    "${PYTHON_BIN}" sim_paper/code/clustering/clustering_leiden_louvain.py \
+    "${PYTHON_BIN}" sim_paper/code/clustering/03_clustering_plots.py \
         --modality cell --algorithm leiden --pipeline pca_harmony --resolution 0.5 \
         --output-dir "${ROOT}/cell/leiden_pca_qc_res0p5" --plots-only
     ;;

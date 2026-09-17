@@ -12,7 +12,7 @@
 # subsample -- so the "Before/After Harmony" panel is computed on the same
 # point set as the other Figure 3 panel it sits next to
 # (leiden_pca_qc_celltype_matched/umap_true_vs_predicted_*.png, which
-# clustering_leiden_louvain.py already computes on all observations, no
+# 03_clustering_plots.py already computes on all observations, no
 # subsampling). At 50k/716k (bin) and 50k/600k (cell) the two panels were
 # each a real, independently-fit UMAP embedding, similar overall shape but
 # not the same layout -- not a rendering artifact, just two different inputs.

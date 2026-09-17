@@ -74,6 +74,7 @@ if [[ ! -f "${SIM_RAW}" ]]; then
             --bin-size-um 16 \
             --base-gene-lognormal -2.5 0.7 \
             --batch-sigma 0.7 \
+            --sync-unaligned-seed \
             --out-tag "${SIM_TAG}"
     fi
     if [[ ! -f "${NOISY_DIR}/simulation_${MODALITY}_z_qc.h5ad" ]]; then

@@ -1,0 +1,2 @@
+[config] n_cells=600000 sphere_r_um=2050 log_mu=-2.3 theta=0.40 jitter=0.15 batch_sigma=1.5 tag=cell_packing_sweep_ncells600000
+[generate] cell_packing_sweep_ncells600000 not found, generating

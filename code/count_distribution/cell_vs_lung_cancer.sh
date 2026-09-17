@@ -28,11 +28,21 @@
 # longer scales the capture window with --sphere-r-um; with --capture-window-um
 # unset, cell crops to the real Xenium window (12 x 24 mm) via
 # xenium_capture_window_um. cell has no off-tissue "empty" observations (cells
-# are only placed within the tissue sphere, r=6000 < 12 mm), so this is
-# effectively a no-op for cell beyond the window crop -- all 4 panels stay
-# valid here. Sim data is (re)generated under data/noisy/<tag>/ then moved into
-# data/figure_2/<tag>/; pre-realwindow data is archived at
-# data/figure_2_oldwindow_20260831/.
+# are only placed within the tissue sphere), so this is effectively a no-op
+# for cell beyond the window crop -- all 4 panels stay valid here. Sim data is
+# (re)generated under data/noisy/<tag>/ then moved into data/figure_2/<tag>/;
+# pre-realwindow data is archived at data/figure_2_oldwindow_20260831/.
+#
+# 2026-09-15: --sphere-r-um/--n-cells now explicit (2050 / 24207) instead of
+# the script default (6000 / 600000), matching cross_modality_alignment/
+# cross_tech_stair.py's cell dataset -- that script needs cell's disc the
+# SAME physical size as bin16um/spot (all three are "the same tissue slice"
+# captured at different technologies), n_cells scaled down to preserve cell's
+# original ~0.16% 3D packing fraction (600000 * (2050/6000)**3) rather than
+# forced up to bin/spot's ~4%. This tag is shared by both consumers -- until
+# 2026-09-16 the flags lived only in a one-off manual rerun, never in this
+# script, so a from-scratch regen here would have silently reverted to the
+# old 6000um/600k config (which is exactly what happened -- see figure.md).
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/logs
@@ -55,10 +65,13 @@ if [[ ! -f "${SIM_RAW}" ]]; then
     if [[ ! -f "${NOISY_DIR}/simulation_${MODALITY}_z.h5ad" ]]; then
         "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
             --modality "${MODALITY}" \
+            --sphere-r-um 2050 \
+            --n-cells 24207 \
             --base-gene-lognormal -2.3 0.7 \
             --theta 0.40 \
             --theta-jitter 0.15 \
             --batch-sigma 1.5 \
+            --sync-unaligned-seed \
             --out-tag "${SIM_TAG}"
     fi
     if [[ ! -f "${NOISY_DIR}/simulation_${MODALITY}_z_qc.h5ad" ]]; then
