@@ -83,7 +83,7 @@ fi
     --modality "${MOD}" --packing-tag "cellbin_batch_slide_${MOD}_bs${BS}" \
     --input "${BANKSY_H5AD}" --output-dir "${RUN}/ari"
 
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/misc/composition_recovery.py \
+"${TUTORIAL_PYTHON}" sim_paper/code/clustering/composition_recovery.py \
     --h5ad "${RUN}/ari/simulation_${MOD}_z_ari_recovery.h5ad" --tag "${MOD}_bs${BS}" \
     --out-dir "${OUT_ROOT}/scores"
 

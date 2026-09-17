@@ -83,7 +83,7 @@ mkdir -p "${RUN}" "${OUT_ROOT}/scores"
     --modality "${BANKSY_MOD}" --packing-tag "pca_harmony_domain_check_${MOD}_${BATCH}" \
     --input "${BANKSY_H5AD}" --output-dir "${RUN}/ari"
 
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/misc/composition_recovery.py \
+"${TUTORIAL_PYTHON}" sim_paper/code/clustering/composition_recovery.py \
     --h5ad "${RUN}/ari/simulation_${BANKSY_MOD}_z_ari_recovery.h5ad" --tag "${MOD}_${BATCH}" \
     --out-dir "${OUT_ROOT}/scores"
 

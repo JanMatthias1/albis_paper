@@ -75,7 +75,7 @@ fi
     --modality spot --packing-tag "cellbin_batch_slide_spot_corrected_bs${BS}" \
     --input "${BANKSY_H5AD}" --output-dir "${RUN}/ari"
 
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/misc/composition_recovery.py \
+"${TUTORIAL_PYTHON}" sim_paper/code/clustering/composition_recovery.py \
     --h5ad "${RUN}/ari/simulation_spot_z_ari_recovery.h5ad" --tag "spot_bs${BS}" \
     --out-dir "${OUT_ROOT}/scores"
 

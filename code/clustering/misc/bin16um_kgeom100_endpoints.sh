@@ -54,7 +54,7 @@ fi
     --modality bin --packing-tag "cellbin_batch_slide_bin_${LABEL}" \
     --input "${BANKSY_H5AD}" --output-dir "${RUN}/ari"
 
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/misc/composition_recovery.py \
+"${TUTORIAL_PYTHON}" sim_paper/code/clustering/composition_recovery.py \
     --h5ad "${RUN}/ari/simulation_bin_z_ari_recovery.h5ad" --tag "bin_${LABEL}" \
     --out-dir "${OUT_ROOT}/scores"
 

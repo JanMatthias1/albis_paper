@@ -99,7 +99,7 @@ else
 fi
 
 echo "[3/3 composition] scoring (+ slice_id leakage ARI)"
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/misc/composition_recovery.py \
+"${TUTORIAL_PYTHON}" sim_paper/code/clustering/composition_recovery.py \
     --h5ad "${ARI_H5AD}" --tag "${MOD}_${BATCH}" \
     --out-dir "${SWEEP}/scores"
 

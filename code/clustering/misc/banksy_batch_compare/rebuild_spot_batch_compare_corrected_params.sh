@@ -69,7 +69,7 @@ mkdir -p "${RUN}" "${SWEEP}/scores"
     --modality spot --packing-tag "spot_corrected_${BATCH}" \
     --input "${BANKSY_H5AD}" --output-dir "${RUN}/ari"
 
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/misc/composition_recovery.py \
+"${TUTORIAL_PYTHON}" sim_paper/code/clustering/composition_recovery.py \
     --h5ad "${ARI_H5AD}" --tag "spot_${BATCH}" \
     --out-dir "${SWEEP}/scores"
 

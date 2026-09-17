@@ -106,7 +106,14 @@ print("Torch:", torch.__version__, "| CUDA:", torch.cuda.is_available(), torch.v
 # --------------------------------------------------------------------------- #
 # dataset table -- same Figure 2 tags 3D_stair.py / Figure 4C use            #
 # --------------------------------------------------------------------------- #
-FIG2 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2"
+# 2026-09-17: figure_2 was split into parallel smaller_sphere (r=2050) /
+# larger_sphere (r=6000) tracks; the tags below moved from bare
+# `data/figure_2/<tag>/` to `data/figure_2/smaller_sphere/data/<tag>/`, which
+# had silently broken this script (FileNotFoundError) since that move --
+# same fix as 3D_stair.py's (Figure 4C), see that script's dataset-table
+# comment for the full reorg context. Prior slice_5 output (Sep 16, predates
+# the reorg) archived to STAIR/cross_tech/slice_5_pre_reorg_20260917/.
+FIG2 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data"
 BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/cross_modality_alignment/STAIR/cross_tech"
 
 DATASETS = {

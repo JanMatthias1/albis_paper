@@ -73,8 +73,9 @@ print("Torch:", torch.__version__, "| CUDA:", torch.cuda.is_available(), torch.v
 # --------------------------------------------------------------------------- #
 # dataset table                                                              #
 # --------------------------------------------------------------------------- #
-FIG2 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2"
+FIG2 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data"
 SIMDATA = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/spatial_clustering/sim_data"
+SLIDE = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/cellbin_batch_sigma_slide"
 BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/spatial_clustering/STAGATE"
 
 # Figure 4B runs a 2x2: {weak | strong domain_type_mix} x {tuned | very-low
@@ -118,14 +119,25 @@ DATASETS = {
     ),
     # -- family 2: STRONG mix, TUNED batch. The main 3D-vs-2D domain-recovery
     # comparison.
+    #
+    # 2026-09-17: repointed at Figure 3's cellbin_batch_sigma_slide/ tree --
+    # these are now literally the SAME files as Figure 3's canonical batch_sigma
+    # points (bin16um bs0.7, cell bs1.5), not a separate copy under
+    # data/figure_4/spatial_clustering/sim_data/ (old paths archived to
+    # sim_data/_archive_20260917/). spot_strongmix now ALSO switches onto
+    # Figure 3's spot dataset (bs0.3, corrected dispersion log_mu=-2.0/
+    # theta=0.25/jitter=0.10) instead of the old retired log_mu=-2.5/theta=2.0/
+    # jitter=1.0 tag it used before -- user decision: Figure 3 is now the
+    # single source of truth for spot too, no more frozen duplicate. Any
+    # previously-run spot_strongmix STAGATE results predate this and are stale.
     "bin16um_strongmix": dict(
-        h5ad=f"{SIMDATA}/packing_pf0p04_bin16um_log_mu_-2.5_bsigma07_strongmix/simulation_bin_z_qc.h5ad",
+        h5ad=f"{SLIDE}/bin16um/bs0.7/simulation_bin_z_qc.h5ad",
     ),
     "spot_strongmix": dict(
-        h5ad=f"{SIMDATA}/packing_pf0p04_log_mu_-2.5_bsigma03_strongmix/simulation_spot_z_qc.h5ad",
+        h5ad=f"{SLIDE}/spot/bs0.3/simulation_spot_z_qc.h5ad",
     ),
     "cell_strongmix": dict(
-        h5ad=f"{SIMDATA}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma15_strongmix/simulation_cell_z_qc.h5ad",
+        h5ad=f"{SLIDE}/cell/bs1.5/simulation_cell_z_qc.h5ad",
         graph_model="knn", k_2d=6, k_z=3,  # see "cell" note
     ),
     # -- family 3: WEAK mix, VERY LOW batch (0.05). Batch control for family 1.
@@ -141,14 +153,18 @@ DATASETS = {
     ),
     # -- family 4: STRONG mix, VERY LOW batch (0.05). Pairs against family 2 to
     # test whether 3D's advantage is batch-noise suppression.
+    #
+    # 2026-09-17: repointed at Figure 3's cellbin_batch_sigma_slide/ tree, same
+    # reasoning as family 2 above -- bs0.05 is a real point on Figure 3's own
+    # grid for bin16um/cell (newly added) and already existed for spot.
     "bin16um_strongmix_lowbatch": dict(
-        h5ad=f"{SIMDATA}/packing_pf0p04_bin16um_log_mu_-2.5_bsigma005_strongmix/simulation_bin_z_qc.h5ad",
+        h5ad=f"{SLIDE}/bin16um/bs0.05/simulation_bin_z_qc.h5ad",
     ),
     "spot_strongmix_lowbatch": dict(
-        h5ad=f"{SIMDATA}/packing_pf0p04_log_mu_-2.5_bsigma005_strongmix/simulation_spot_z_qc.h5ad",
+        h5ad=f"{SLIDE}/spot/bs0.05/simulation_spot_z_qc.h5ad",
     ),
     "cell_strongmix_lowbatch": dict(
-        h5ad=f"{SIMDATA}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma005_strongmix/simulation_cell_z_qc.h5ad",
+        h5ad=f"{SLIDE}/cell/bs0.05/simulation_cell_z_qc.h5ad",
         graph_model="knn", k_2d=6, k_z=3,  # see "cell" note
     ),
 }

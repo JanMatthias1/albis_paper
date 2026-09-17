@@ -38,6 +38,7 @@ MOD="$(echo "${LINE}" | cut -f1)"
 BS="$(echo "${LINE}" | cut -f2)"
 SEED="$(echo "${LINE}" | cut -f3)"
 
+FOLDER="${MOD}"
 case "${MOD}" in
   cell)
     SPHERE_R_UM=6000
@@ -48,6 +49,10 @@ case "${MOD}" in
     SPHERE_R_UM=2050
     LAM=0.5; KG=100
     GEN_FLAGS=(--bin-size-um 16 --base-gene-lognormal -2.5 0.7 --strong-domain-mix)
+    # 2026-09-17: cellbin_batch_sigma_slide/ folder renamed "bin" -> "bin16um"
+    # in the strong_mix consolidation -- --modality is still "bin" (only
+    # cell/bin/spot are valid), but the ON-DISK folder is "bin16um".
+    FOLDER="bin16um"
     ;;
   spot)
     SPHERE_R_UM=2050
@@ -58,11 +63,11 @@ esac
 
 if [[ -n "${SEED}" ]]; then
     TAG="${MOD}_batch_slide_bs${BS}_seed${SEED}"
-    RUN="${OUT_ROOT}/${MOD}/bs${BS}_seed${SEED}"
+    RUN="${OUT_ROOT}/${FOLDER}/bs${BS}_seed${SEED}"
     SEED_FLAG=(--seed "${SEED}")
 else
     TAG="${MOD}_batch_slide_bs${BS}"
-    RUN="${OUT_ROOT}/${MOD}/bs${BS}"
+    RUN="${OUT_ROOT}/${FOLDER}/bs${BS}"
     SEED_FLAG=()
 fi
 SIM_RAW="sim_paper/data/noisy/${TAG}/simulation_${MOD}_z.h5ad"
@@ -99,8 +104,8 @@ fi
     --modality "${MOD}" --packing-tag "cellbin_batch_slide_${TAG}" \
     --input "${BANKSY_H5AD}" --output-dir "${RUN}/ari"
 
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/misc/composition_recovery.py \
-    --h5ad "${RUN}/ari/simulation_${MOD}_z_ari_recovery.h5ad" --tag "${TAG#${MOD}_batch_slide_}" \
+"${TUTORIAL_PYTHON}" sim_paper/code/clustering/composition_recovery.py \
+    --h5ad "${RUN}/ari/simulation_${MOD}_z_ari_recovery.h5ad" --tag "${FOLDER}_$(basename "${RUN}")" \
     --out-dir "${OUT_ROOT}/scores"
 
 echo "[done] task ${i}  ->  ${RUN}"

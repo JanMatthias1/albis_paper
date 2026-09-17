@@ -17,21 +17,23 @@ import matplotlib.pyplot as plt
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[2]
+# 2026-09-17: consolidated so EVERY point (including cell's bs0/bs1.5 and
+# bin16um's bs0/bs0.7, which used to live only under the separate
+# banksy_batch_compare/ and Figure 4 sim_data/ trees respectively) now has
+# its raw h5ad + banksy_matrix/ari directly under
+# data/figure_3/cellbin_batch_sigma_slide/<mod>/bs<value>/ -- one tree, no
+# more special-cased endpoint lookup. banksy_batch_compare/ is retired
+# (its cell/spot pieces were absorbed here or found stale, see
+# project_figure3_banksy_domain_sweep memory 2026-09-17).
 SLIDE_ROOT = SIM_PAPER_DIR / "data" / "figure_3" / "cellbin_batch_sigma_slide"
-COMPARE_ROOT = SIM_PAPER_DIR / "data" / "figure_3" / "banksy_batch_compare"
 
 MODALITIES = {
     "cell": {"label": "Cell (λ=0.5, k_geom=200)", "color": "C0", "canonical": 1.5},
-    "bin": {"label": "Bin 16µm (λ=0.5, k_geom=100)", "color": "C1", "canonical": 0.7},
+    # --modality passed to the pipeline is "bin" (only cell/bin/spot are
+    # valid), even though the folder is "bin16um" -- true_mod fixes the
+    # ari_summary_<true_mod>.json lookup below.
+    "bin16um": {"label": "Bin 16µm (λ=0.5, k_geom=100)", "color": "C1", "canonical": 0.7, "true_mod": "bin"},
     "spot": {"label": "Spot (λ=0.1, k_geom=8)", "color": "C3", "canonical": 0.3},
-}
-
-# cell's bs=0/1.5 endpoints were only ever built at the original
-# banksy_batch_compare paths (k_geom=200, unchanged) -- not duplicated under
-# cellbin_batch_sigma_slide/cell/.
-COMPARE_ENDPOINTS = {
-    "cell": {0.0: "prebatch", 1.5: "tuned"},
-    "spot": {0.0: "prebatch", 0.3: "tuned"},
 }
 
 
@@ -55,18 +57,6 @@ def discover_points(mod: str) -> list[tuple[float, float, float, bool]]:
             score_path = SLIDE_ROOT / "scores" / f"composition_recovery_{mod}_{run_dir.name}.json"
             if not ari_path.is_file() or not score_path.is_file():
                 continue
-            ari_data = json.loads(ari_path.read_text())
-            domain = next(r for r in ari_data if r["ground_truth"] == "domain_true")
-            leak = find_leak(score_path)
-            points[bs] = (domain["ari"], leak, abs(bs - MODALITIES[mod]["canonical"]) < 1e-9)
-
-    for bs, batch_label in COMPARE_ENDPOINTS.get(mod, {}).items():
-        if bs in points:
-            continue
-        run_dir = COMPARE_ROOT / mod / batch_label
-        ari_path = run_dir / "ari" / f"ari_summary_{mod}.json"
-        score_path = COMPARE_ROOT / "scores" / f"composition_recovery_{mod}_{batch_label}.json"
-        if ari_path.is_file() and score_path.is_file():
             ari_data = json.loads(ari_path.read_text())
             domain = next(r for r in ari_data if r["ground_truth"] == "domain_true")
             leak = find_leak(score_path)
