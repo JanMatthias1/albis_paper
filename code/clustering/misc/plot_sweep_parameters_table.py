@@ -29,8 +29,9 @@ COL_WIDTHS = [0.12, 0.11, 0.09, 0.15, 0.32, 0.21]
 WRAP_CHARS = [16, 14, 10, 18, 42, 26]
 
 ROWS = [
-    ["Cell", "λ=0.5\nk_geom=200", "1.5", "σ ≤ 0.2 (ARI 0.77–0.78)",
-     "Sharp cliff at σ≈0.2–0.3 → ARI 0.016, pure slice leakage", "~5–7x past the cliff"],
+    ["Cell", "λ=0.5\nk_geom=60", "1.5", "σ ≤ 0.1 (ARI 0.41–0.61)",
+     "Sharp cliff at σ≈0.1–0.2 → ARI ~0.02, pure slice leakage (k_geom re-tuned "
+     "2026-09-18; only 9 coarse points, cliff not finely bracketed)", "~15x past clean recovery"],
     ["Bin 16µm", "λ=0.5\nk_geom=100", "0.7", "σ ≤ 0.25 (ARI 0.63–0.80)",
      "Sharp cliff at σ≈0.25–0.3 → ARI 0.015, pure slice leakage", "Just past the cliff"],
     ["Spot\n(strongmix)", "λ=0.1\nk_geom=8", "0.3", "σ ≤ 0.12 (ARI 0.42–0.49)",

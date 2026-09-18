@@ -41,14 +41,24 @@
 # total_counts overshoots (~327 vs real ~90). See figure.md.
 # Pipeline: plain PCA+Harmony, NOT BANKSY -- BANKSY is neutral-to-destructive
 # for cell_type_true recovery at cell resolution in every test run so far.
-
+#
+# 2026-09-17: log_mu -2.3 -> -2.5 (tag now log_mu_-2.5_theta_0.40_jitter0.15_bsigma15),
+# following Figure 2's dispersion re-tune via an actual joint log_mu x theta
+# sweep vs both Xenium refs (code/data/misc/sweep_cell_logmu_theta_joint_xenium.sh,
+# job 35759008) -- cell had never gotten spot's joint-sweep treatment before,
+# just this single manual adjustment. Fixes the total_counts overshoot noted
+# above (ratio 1.38->1.04 vs lung_cancer); theta_hat/genes_per_cell shift
+# slightly further from real as the accepted tradeoff (see
+# project_figure4c_alignment_4modality memory for the full sweep table).
+# Old output archived to
+# figure_3/pca_harmony_single_cell/cell_pre_dispersion_retune_20260917/.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-SIM_TAG="log_mu_-2.3_theta_0.40_jitter0.15_bsigma15"
+SIM_TAG="log_mu_-2.5_theta_0.40_jitter0.15_bsigma15"
 MODALITY="cell"
 SIM_RAW="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
 SIM_QC="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
@@ -63,7 +73,9 @@ if [[ ! -f "${SIM_QC}" ]]; then
         echo "[generate] ${SIM_TAG} not found under data/figure_2/, generating (same config as Figure 2)"
         "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
             --modality "${MODALITY}" \
-            --base-gene-lognormal -2.3 0.7 --theta 0.40 --theta-jitter 0.15 --batch-sigma 1.5 \
+            --sphere-r-um 2050 --n-cells 24207 \
+            --base-gene-lognormal -2.5 0.7 --theta 0.40 --theta-jitter 0.15 --batch-sigma 1.5 \
+            --sync-unaligned-seed \
             --out-tag "${SIM_TAG}"
         echo "[qc] ${SIM_TAG}"
         "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" --packing-tag "${SIM_TAG}"

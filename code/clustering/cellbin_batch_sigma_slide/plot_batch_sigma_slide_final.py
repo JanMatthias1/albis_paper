@@ -28,7 +28,7 @@ SIM_PAPER_DIR = SCRIPT_DIR.parents[2]
 SLIDE_ROOT = SIM_PAPER_DIR / "data" / "figure_3" / "cellbin_batch_sigma_slide"
 
 MODALITIES = {
-    "cell": {"label": "Cell (λ=0.5, k_geom=200)", "color": "C0", "canonical": 1.5},
+    "cell": {"label": "Cell (λ=0.5, k_geom=60)", "color": "C0", "canonical": 1.5},
     # --modality passed to the pipeline is "bin" (only cell/bin/spot are
     # valid), even though the folder is "bin16um" -- true_mod fixes the
     # ari_summary_<true_mod>.json lookup below.

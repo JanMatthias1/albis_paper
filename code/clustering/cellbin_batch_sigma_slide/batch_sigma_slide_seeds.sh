@@ -41,9 +41,13 @@ SEED="$(echo "${LINE}" | cut -f3)"
 FOLDER="${MOD}"
 case "${MOD}" in
   cell)
-    SPHERE_R_UM=6000
-    LAM=0.5; KG=200
-    GEN_FLAGS=(--base-gene-lognormal -2.3 0.7 --theta 0.40 --theta-jitter 0.15 --strong-domain-mix)
+    # 2026-09-18: synced to generate_strong_mix_cell.sh's authoritative config
+    # (was stale at the OLD r=6000/log_mu=-2.3/k_geom=200 -- the exact combo
+    # found broken/collapsed at this dataset's scale; see
+    # project_figure3_banksy_domain_sweep memory 2026-09-18 for the full story).
+    SPHERE_R_UM=2050
+    LAM=0.5; KG=60
+    GEN_FLAGS=(--n-cells 24207 --base-gene-lognormal -2.5 0.7 --theta 0.40 --theta-jitter 0.15 --strong-domain-mix)
     ;;
   bin)
     SPHERE_R_UM=2050
@@ -55,9 +59,13 @@ case "${MOD}" in
     FOLDER="bin16um"
     ;;
   spot)
+    # 2026-09-18: synced to generate_strong_mix_spot.sh's authoritative
+    # dispersion (was stale at the bare generate_simulation_noisy.py defaults,
+    # log_mu=-2.5/theta=2.0/jitter=1.0 -- predates Figure 2's spot retune to
+    # log_mu=-2.0/theta=0.25/jitter=0.10, see [[reference_generate_noisy_theta_jitter_default]]).
     SPHERE_R_UM=2050
     LAM=0.1; KG=8
-    GEN_FLAGS=(--base-gene-lognormal -2.5 0.7 --theta 2.0 --theta-jitter 1.0 --strong-domain-mix)
+    GEN_FLAGS=(--base-gene-lognormal -2.0 0.7 --theta 0.25 --theta-jitter 0.10 --strong-domain-mix)
     ;;
 esac
 
