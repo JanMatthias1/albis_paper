@@ -119,7 +119,7 @@ BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/cross_m
 DATASETS = {
     "bin16um": f"{FIG2}/packing_pf0p04_bin16um_log_mu_-2.5_bsigma07/simulation_bin_z_qc.h5ad",
     "spot":    f"{FIG2}/packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad",
-    "cell":    f"{FIG2}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma15/simulation_cell_z.h5ad",
+    "cell":    f"{FIG2}/log_mu_-2.5_theta_0.40_jitter0.15_bsigma15/simulation_cell_z.h5ad",
 }
 TECHS = ["bin16um", "spot", "cell"]   # fixed slice_order STAIR sees
 REF_TECH = "bin16um"                  # rescale every other modality onto this disc

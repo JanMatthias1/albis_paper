@@ -16,7 +16,7 @@ Differences from the benchmark version:
     *misaligned* coords (spatial_unaligned -> spatial).
   * Known slice order only: batch_order stays sorted by slice_id, the STAIR
     z-reconstruction path (sort_slices / loc_predict_z) is left disabled.
-  * Three modalities driven from a dataset table (bin16um / spot / cell) rather
+  * Four modalities driven from a dataset table (bin8um / bin16um / spot / cell) rather
     than a filename-prefix switch.
 
 Output (per dataset) under
@@ -144,7 +144,7 @@ DATASETS = {
     ),
     # single-cell z-stack
     "cell": dict(
-        h5ad=f"{FIG2}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma15/simulation_cell_z.h5ad",
+        h5ad=f"{FIG2}/log_mu_-2.5_theta_0.40_jitter0.15_bsigma15/simulation_cell_z.h5ad",
         n_neigh_hom=8,
         c_neigh_het=0.90,
     ),
