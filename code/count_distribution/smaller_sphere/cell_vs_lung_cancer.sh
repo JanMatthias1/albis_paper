@@ -12,7 +12,7 @@
 #
 # Sim dataset: simulated single CELLS (no spatial aggregation), compared
 # against Xenium lung cancer tissue (392-gene targeted panel).
-# Current sim config (2026-08-27): log_mu=-2.3, theta=0.40, theta_jitter=0.15,
+# Current sim config (2026-09-17): log_mu=-2.5, theta=0.40, theta_jitter=0.15,
 # batch_sigma=1.5 -- see cell_vs_non_diseased_lung.sh for the full rationale
 # (same sim config, different real reference).
 
@@ -43,13 +43,31 @@
 # 2026-09-16 the flags lived only in a one-off manual rerun, never in this
 # script, so a from-scratch regen here would have silently reverted to the
 # old 6000um/600k config (which is exactly what happened -- see figure.md).
+#
+# 2026-09-17: log_mu -2.3 -> -2.5, dispersion re-tuned via an actual joint
+# log_mu x theta grid search against both Xenium refs (code/data/misc/
+# sweep_cell_logmu_theta_joint_xenium.sh, job 35759008), mirroring spot's
+# probe-sweep methodology -- cell had never gotten this treatment before,
+# just one manual 2026-08-27 adjustment (see FIGURE2_METHODOLOGY.md's "Known
+# open gaps": total_counts overshoot "accepted... revisit if priority").
+# Composite score (sum of |ln(sim/real ratio)| over theta_hat/
+# total_counts_median/matrix_zero_frac, both refs): -2.5/0.40 = 2.733 vs the
+# old -2.3/0.40 = 2.996 -- meaningfully better, mainly from total_counts
+# fidelity (ratio 1.04-1.52 vs 1.38-2.03). -2.5/0.50 scored marginally better
+# still (2.702) but -2.5/0.40 wins on total_counts specifically, the
+# previously-flagged soft spot -- picked over the outright-lowest point for
+# that reason. Old data archived to figure_2/misc/archive/
+# log_mu_-2.3_theta_0.40_jitter0.15_bsigma15_pre_dispersion_retune_20260917/.
+# This retune cascades to every other cell-based figure (Fig3 celltype panel,
+# Fig3/4B strong-mix, Fig4B STAGATE, Fig4C/E alignment) -- staged separately,
+# deliberately sequenced AFTER this Figure 2 rerun lands and is checked.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/smaller_sphere/logs
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-SIM_TAG="log_mu_-2.3_theta_0.40_jitter0.15_bsigma15"
+SIM_TAG="log_mu_-2.5_theta_0.40_jitter0.15_bsigma15"
 MODALITY="cell"
 REAL_LABEL="lung_cancer"
 SIM_RAW="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
@@ -67,7 +85,7 @@ if [[ ! -f "${SIM_RAW}" ]]; then
             --modality "${MODALITY}" \
             --sphere-r-um 2050 \
             --n-cells 24207 \
-            --base-gene-lognormal -2.3 0.7 \
+            --base-gene-lognormal -2.5 0.7 \
             --theta 0.40 \
             --theta-jitter 0.15 \
             --batch-sigma 1.5 \

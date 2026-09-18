@@ -122,11 +122,12 @@ def main() -> None:
 
     domain_data = load_domain_bs0()
     celltype_data = load_celltype_tuned()
-    sigma_labels = {m: f"σ={BATCH_SIGMA[m]}" for m in MODALITIES}
+    domain_sigma_labels = {m: "σ=0" for m in MODALITIES}
+    celltype_sigma_labels = {m: f"σ={BATCH_SIGMA[m]}" for m in MODALITIES}
 
     fig, axes = plt.subplots(1, 2, figsize=(9.5, 4.2))
-    plot_panel(axes[0], domain_data, COLOR_DOMAIN, "Spatial Domain Recovery\n(no batch effect, σ=0)")
-    plot_panel(axes[1], celltype_data, COLOR_CELLTYPE, "Cell-type Recovery\n(with batch effect)", value_suffix=sigma_labels)
+    plot_panel(axes[0], domain_data, COLOR_DOMAIN, "Spatial Domain Recovery", value_suffix=domain_sigma_labels)
+    plot_panel(axes[1], celltype_data, COLOR_CELLTYPE, "Cell-type Recovery", value_suffix=celltype_sigma_labels)
     fig.tight_layout()
 
     out_dir = FIG3_DIR / "ari_recovery_summary"

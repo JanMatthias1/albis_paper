@@ -71,6 +71,7 @@ import anndata as ad
 import numpy as np
 import scanpy as sc
 from scipy import sparse
+from scipy.spatial.distance import jensenshannon
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
@@ -79,6 +80,49 @@ SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
 # dataset role (primary vs compare), never plot order.
 PRIMARY_COLOR = "#2a78d6"  # blue
 COMPARE_COLOR = "#eb6834"  # orange
+
+# Sized for legibility once these PNGs are shrunk into a multi-panel print
+# figure -- default matplotlib sizes (title ~12, legend ~10) read fine full-size
+# on screen but wash out at print scale.
+TITLE_SIZE = 17
+LABEL_SIZE = 14
+TICK_SIZE = 12
+LEGEND_SIZE = 12
+ANNOT_SIZE = 13
+plt.rcParams.update({
+    "font.size": LABEL_SIZE,
+    "axes.titlesize": TITLE_SIZE,
+    "axes.titleweight": "bold",
+    "axes.labelsize": LABEL_SIZE,
+    "xtick.labelsize": TICK_SIZE,
+    "ytick.labelsize": TICK_SIZE,
+    "legend.fontsize": LEGEND_SIZE,
+    "figure.titlesize": TITLE_SIZE,
+    "figure.titleweight": "bold",
+})
+
+
+def compute_jsd(x1: np.ndarray, x2: np.ndarray, bins: np.ndarray) -> float:
+    """Jensen-Shannon divergence between the empirical distributions of x1 and x2,
+    estimated from histograms over shared bins and normalized to probability mass
+    functions. Symmetric, log base 2, bounded in [0, 1] (0 = identical, 1 =
+    non-overlapping support). scipy's jensenshannon returns the JS *distance*
+    (sqrt of the divergence), hence the squaring."""
+    p, _ = np.histogram(x1, bins=bins)
+    q, _ = np.histogram(x2, bins=bins)
+    p = p / p.sum()
+    q = q / q.sum()
+    return float(jensenshannon(p, q, base=2) ** 2)
+
+
+def annotate_jsd(ax, jsd: float, loc: str = "upper left") -> None:
+    x, ha = (0.03, "left") if "left" in loc else (0.97, "right")
+    y, va = (0.97, "top") if "upper" in loc else (0.03, "bottom")
+    ax.text(
+        x, y, f"JSD = {jsd:.3f}", transform=ax.transAxes, ha=ha, va=va,
+        fontsize=ANNOT_SIZE, fontweight="bold",
+        bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="0.6", alpha=0.85),
+    )
 
 
 def parse_args() -> argparse.Namespace:
@@ -188,7 +232,7 @@ def fit_common_dispersion(mean: np.ndarray, var: np.ndarray) -> float:
 
 def plot_mean_variance(mean: np.ndarray, var: np.ndarray, theta: float, modality: str, output_path: Path) -> None:
     keep = (mean > 0) & (var > 0)
-    fig, ax = plt.subplots(figsize=(6, 5))
+    fig, ax = plt.subplots(figsize=(6.5, 5.5))
     ax.scatter(mean[keep], var[keep], s=8, alpha=0.5, linewidths=0, label="genes")
 
     x = np.logspace(np.log10(mean[keep].min()), np.log10(mean[keep].max()), 200)
@@ -203,7 +247,7 @@ def plot_mean_variance(mean: np.ndarray, var: np.ndarray, theta: float, modality
     ax.set_title(f"{modality}: gene mean-variance")
     ax.legend(frameon=False)
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180)
+    fig.savefig(output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -214,7 +258,7 @@ def gene_zero_fraction(X, n_obs: int) -> np.ndarray:
 
 def plot_mean_dropout(mean: np.ndarray, zero_frac: np.ndarray, theta: float, modality: str, output_path: Path) -> None:
     keep = mean > 0
-    fig, ax = plt.subplots(figsize=(6, 5))
+    fig, ax = plt.subplots(figsize=(6.5, 5.5))
     ax.scatter(mean[keep], zero_frac[keep], s=8, alpha=0.5, linewidths=0, label="genes")
 
     x = np.logspace(np.log10(mean[keep].min()), np.log10(mean[keep].max()), 200)
@@ -228,7 +272,7 @@ def plot_mean_dropout(mean: np.ndarray, zero_frac: np.ndarray, theta: float, mod
     ax.set_title(f"{modality}: gene mean-dropout")
     ax.legend(frameon=False)
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180)
+    fig.savefig(output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -243,7 +287,7 @@ def plot_total_counts(total_counts: np.ndarray, modality: str, output_path: Path
     ax.set_ylabel("Number of cells")
     ax.set_title(f"{modality}: total counts per cell")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180)
+    fig.savefig(output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -262,7 +306,7 @@ def plot_genes_per_cell(n_genes: np.ndarray, modality: str, output_path: Path) -
     ax.set_ylabel("Number of cells")
     ax.set_title(f"{modality}: genes detected per cell")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180)
+    fig.savefig(output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -279,15 +323,16 @@ def plot_sparsity_summary(stats: dict[str, float], modality: str, output_path: P
     labels = ["Zero matrix\nentries", "Fully-empty\ncells"]
     values = [stats["matrix_zero_frac"] * 100, stats["empty_row_frac"] * 100]
 
-    fig, ax = plt.subplots(figsize=(4.5, 5))
+    fig, ax = plt.subplots(figsize=(5, 5.5))
     bars = ax.bar(labels, values, color="steelblue", width=0.5)
     for bar, v in zip(bars, values):
-        ax.annotate(f"{v:.1f}%", (bar.get_x() + bar.get_width() / 2, v), ha="center", va="bottom", fontsize=9)
+        ax.annotate(f"{v:.1f}%", (bar.get_x() + bar.get_width() / 2, v), ha="center", va="bottom",
+                    fontsize=ANNOT_SIZE, fontweight="bold")
     ax.set_ylabel("Percent (%)")
     ax.set_ylim(0, 105)
     ax.set_title(f"{modality}: sparsity summary")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180)
+    fig.savefig(output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -329,13 +374,13 @@ def plot_raw_norm_log(
     axes[0].set_ylabel("Count")
     fig.suptitle(f"{modality}: raw -> normalized -> log1p")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180)
+    fig.savefig(output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
 
 def plot_mean_variance_compare(datasets: list[dict], output_path: Path) -> None:
     """datasets: [{"label", "color", "mean", "var", "theta"}, ...] (primary first)."""
-    fig, ax = plt.subplots(figsize=(6.5, 5.5))
+    fig, ax = plt.subplots(figsize=(8, 6.5))
 
     all_mean = np.concatenate([d["mean"][(d["mean"] > 0) & (d["var"] > 0)] for d in datasets])
     x = np.logspace(np.log10(all_mean.min()), np.log10(all_mean.max()), 200)
@@ -353,15 +398,15 @@ def plot_mean_variance_compare(datasets: list[dict], output_path: Path) -> None:
     ax.set_xlabel("Mean count per gene")
     ax.set_ylabel("Variance per gene")
     ax.set_title("Gene mean-variance: simulated vs real")
-    ax.legend(frameon=False, fontsize=8)
+    ax.legend(frameon=False, loc="upper left", bbox_to_anchor=(1.01, 1.0), borderaxespad=0)
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180)
+    fig.savefig(output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
 
 def plot_mean_dropout_compare(datasets: list[dict], output_path: Path) -> None:
     """datasets: [{"label", "color", "mean", "zero_frac", "theta"}, ...] (primary first)."""
-    fig, ax = plt.subplots(figsize=(6.5, 5.5))
+    fig, ax = plt.subplots(figsize=(8, 6.5))
 
     all_mean = np.concatenate([d["mean"][d["mean"] > 0] for d in datasets])
     x = np.logspace(np.log10(all_mean.min()), np.log10(all_mean.max()), 200)
@@ -378,9 +423,9 @@ def plot_mean_dropout_compare(datasets: list[dict], output_path: Path) -> None:
     ax.set_xlabel("Mean count per gene")
     ax.set_ylabel("Fraction of zero cells")
     ax.set_title("Gene mean-dropout: simulated vs real")
-    ax.legend(frameon=False, fontsize=8)
+    ax.legend(frameon=False, loc="upper left", bbox_to_anchor=(1.01, 1.0), borderaxespad=0)
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180)
+    fig.savefig(output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -391,16 +436,17 @@ def plot_total_counts_compare(datasets: list[dict], output_path: Path) -> None:
     all_positive = np.concatenate(positive)
     bins = np.logspace(np.log10(all_positive.min()), np.log10(all_positive.max()), 60)
 
-    fig, ax = plt.subplots(figsize=(6.5, 5.5))
+    fig, ax = plt.subplots(figsize=(7, 6.5))
     for d, pos in zip(datasets, positive):
         ax.hist(pos, bins=bins, density=True, color=d["color"], alpha=0.5, label=d["label"])
     ax.set_xscale("log")
     ax.set_xlabel("Total counts per cell")
     ax.set_ylabel("Density (fraction of cells)")
     ax.set_title("Total counts per cell: simulated vs real")
-    ax.legend(frameon=False)
+    ax.legend(frameon=False, loc="upper right")
+    annotate_jsd(ax, compute_jsd(positive[0], positive[1], bins), loc="upper left")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180)
+    fig.savefig(output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -410,16 +456,17 @@ def plot_genes_per_cell_compare(datasets: list[dict], output_path: Path) -> None
     all_positive = np.concatenate(positive)
     bins = np.logspace(np.log10(all_positive.min()), np.log10(all_positive.max()), 60)
 
-    fig, ax = plt.subplots(figsize=(6.5, 5.5))
+    fig, ax = plt.subplots(figsize=(7, 6.5))
     for d, pos in zip(datasets, positive):
         ax.hist(pos, bins=bins, density=True, color=d["color"], alpha=0.5, label=d["label"])
     ax.set_xscale("log")
     ax.set_xlabel("Genes detected per cell")
     ax.set_ylabel("Density (fraction of cells)")
     ax.set_title("Genes detected per cell: simulated vs real")
-    ax.legend(frameon=False)
+    ax.legend(frameon=False, loc="upper right")
+    annotate_jsd(ax, compute_jsd(positive[0], positive[1], bins), loc="upper left")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180)
+    fig.savefig(output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -430,13 +477,14 @@ def plot_sparsity_summary_compare(datasets: list[dict], output_path: Path) -> No
     x = np.arange(len(metrics))
     width = 0.8 / len(datasets)
 
-    fig, ax = plt.subplots(figsize=(6, 5.5))
+    fig, ax = plt.subplots(figsize=(6.5, 6))
     for i, d in enumerate(datasets):
         values = [d["sparsity"][key] * 100 for key, _ in metrics]
         offset = (i - (len(datasets) - 1) / 2) * width
         bars = ax.bar(x + offset, values, width=width, color=d["color"], label=d["label"])
         for bar, v in zip(bars, values):
-            ax.annotate(f"{v:.1f}%", (bar.get_x() + bar.get_width() / 2, v), ha="center", va="bottom", fontsize=8)
+            ax.annotate(f"{v:.1f}%", (bar.get_x() + bar.get_width() / 2, v), ha="center", va="bottom",
+                        fontsize=ANNOT_SIZE, fontweight="bold")
 
     ax.set_xticks(x)
     ax.set_xticklabels([label for _, label in metrics])
@@ -445,7 +493,7 @@ def plot_sparsity_summary_compare(datasets: list[dict], output_path: Path) -> No
     ax.set_title("Sparsity summary: simulated vs real")
     ax.legend(frameon=False)
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180)
+    fig.savefig(output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -463,7 +511,7 @@ def plot_raw_norm_log_compare(
         log_vals = sample_values(tmp.X.data.copy(), sample_size, rng)
         staged.append({"label": d["label"], "color": d["color"], "raw": raw_vals, "norm": norm_vals, "log": log_vals})
 
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4.5))
+    fig, axes = plt.subplots(1, 3, figsize=(17, 6))
     stage_specs = [
         (axes[0], "raw", "Raw counts", True),
         (axes[1], "norm", f"Normalized (target_sum={target_sum:g})", True),
@@ -481,11 +529,12 @@ def plot_raw_norm_log_compare(
             ax.hist(vals, bins=bins, density=True, color=s["color"], alpha=0.5, label=s["label"])
         ax.set_title(title)
         ax.set_xlabel("Value (nonzero matrix entries)")
+        annotate_jsd(ax, compute_jsd(vals_by_dataset[0], vals_by_dataset[1], bins), loc="upper right")
     axes[0].set_ylabel("Density")
-    axes[0].legend(frameon=False, fontsize=8)
+    axes[0].legend(frameon=False, loc="upper left")
     fig.suptitle("Raw -> normalized -> log1p: simulated vs real")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180)
+    fig.savefig(output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
 

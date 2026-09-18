@@ -12,7 +12,7 @@
 #
 # Sim dataset: simulated single CELLS (no spatial aggregation), compared
 # against Xenium lung tissue (392-gene targeted panel).
-# Current sim config (2026-08-27): log_mu=-2.3, theta=0.40, theta_jitter=0.15,
+# Current sim config (2026-09-17): log_mu=-2.5, theta=0.40, theta_jitter=0.15,
 # batch_sigma=1.5 -- the theta=0.40 pre-compensates the batch-effect theta_hat
 # drop so the WITH-batch theta_hat (~0.083) lands nearer real (~0.16) than the
 # earlier theta=0.25 config (~0.056), and lifts cell_type_true ARI 0.47->0.64;
@@ -40,13 +40,18 @@
 # the script default (6000 / 600000), matching cross_modality_alignment/
 # cross_tech_stair.py's cell dataset -- see cell_vs_lung_cancer.sh (this
 # tag's primary generator) and figure.md 2026-09-16 for the full story.
+#
+# 2026-09-17: log_mu -2.3 -> -2.5, dispersion re-tuned via an actual joint
+# log_mu x theta grid search against both Xenium refs -- see
+# cell_vs_lung_cancer.sh for the full rationale (same sim config, this
+# script's own header duplicates the summary there).
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/smaller_sphere/logs
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-SIM_TAG="log_mu_-2.3_theta_0.40_jitter0.15_bsigma15"
+SIM_TAG="log_mu_-2.5_theta_0.40_jitter0.15_bsigma15"
 MODALITY="cell"
 REAL_LABEL="non_diseased_lung"
 SIM_RAW="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
@@ -64,7 +69,7 @@ if [[ ! -f "${SIM_RAW}" ]]; then
             --modality "${MODALITY}" \
             --sphere-r-um 2050 \
             --n-cells 24207 \
-            --base-gene-lognormal -2.3 0.7 \
+            --base-gene-lognormal -2.5 0.7 \
             --theta 0.40 \
             --theta-jitter 0.15 \
             --batch-sigma 1.5 \
