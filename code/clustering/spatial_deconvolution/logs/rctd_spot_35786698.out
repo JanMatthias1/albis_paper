@@ -1,0 +1,5 @@
+[load] reference (cell): /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/log_mu_-2.5_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad 
+Error in validObject(.Object) : 
+  invalid class “dgRMatrix” object: 'x' slot is not of type "double"
+Calls: to_sparse_genes_by_obs ... initialize -> callNextMethod -> .nextMethod -> validObject
+Execution halted

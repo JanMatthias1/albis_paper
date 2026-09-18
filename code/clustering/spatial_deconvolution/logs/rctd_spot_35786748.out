@@ -1,0 +1,164 @@
+[load] reference (cell): /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/log_mu_-2.5_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad 
+[reference] n_cells=24207 n_genes=556 per-type counts:
+cell_types
+type1 type2 type3 type4 type5 type6 type7 type8 
+ 3046  3093  3187  3160  3211  3053  2783  2674 
+Warning message:
+In check_UMI(nUMI, "Reference", require_2d = T, require_int = require_int,  :
+  Reference: some nUMI values are less than min_UMI = 100, and these cells will be removed. Optionally, you may lower the min_UMI parameter.
+
+[load] query (spot): /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad 
+[query] n_spots=10034 n_genes=556
+
+[RCTD] create.RCTD (doublet_mode=full, max_cores=8)
+Begin: process_cell_type_info
+process_cell_type_info: number of cells in reference: 22264
+process_cell_type_info: number of genes in reference: 556
+
+type1 type2 type3 type4 type5 type6 type7 type8 
+ 2792  2889  2947  2883  2934  2788  2590  2441 
+End: process_cell_type_info
+create.RCTD: getting regression differentially expressed genes: 
+get_de_genes: type1 found DE genes: 60
+get_de_genes: type2 found DE genes: 60
+get_de_genes: type3 found DE genes: 60
+get_de_genes: type4 found DE genes: 60
+get_de_genes: type5 found DE genes: 59
+get_de_genes: type6 found DE genes: 60
+get_de_genes: type7 found DE genes: 58
+get_de_genes: type8 found DE genes: 59
+get_de_genes: total DE genes: 476
+create.RCTD: getting platform effect normalization differentially expressed genes: 
+get_de_genes: type1 found DE genes: 60
+get_de_genes: type2 found DE genes: 60
+get_de_genes: type3 found DE genes: 61
+get_de_genes: type4 found DE genes: 61
+get_de_genes: type5 found DE genes: 59
+get_de_genes: type6 found DE genes: 60
+get_de_genes: type7 found DE genes: 59
+get_de_genes: type8 found DE genes: 61
+get_de_genes: total DE genes: 480
+fitBulk: decomposing bulk
+chooseSigma: using initial Q_mat with sigma =  1
+starting worker pid=1907852 on localhost:11986 at 09:54:26.768
+starting worker pid=1907867 on localhost:11986 at 09:54:26.938
+starting worker pid=1907882 on localhost:11986 at 09:54:27.109
+starting worker pid=1907897 on localhost:11986 at 09:54:27.279
+starting worker pid=1907912 on localhost:11986 at 09:54:27.450
+starting worker pid=1907927 on localhost:11986 at 09:54:27.622
+starting worker pid=1907942 on localhost:11986 at 09:54:27.793
+starting worker pid=1907957 on localhost:11986 at 09:54:27.965
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Likelihood value: 1064673.55530282
+Sigma value:  0.92
+starting worker pid=1907999 on localhost:11986 at 09:54:46.854
+starting worker pid=1908014 on localhost:11986 at 09:54:47.029
+starting worker pid=1908029 on localhost:11986 at 09:54:47.204
+starting worker pid=1908044 on localhost:11986 at 09:54:47.379
+starting worker pid=1908059 on localhost:11986 at 09:54:47.554
+starting worker pid=1908074 on localhost:11986 at 09:54:47.727
+starting worker pid=1908089 on localhost:11986 at 09:54:47.900
+starting worker pid=1908104 on localhost:11986 at 09:54:48.073
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Likelihood value: 1063173.21061531
+Sigma value:  0.9
+starting worker pid=1908884 on localhost:11986 at 09:55:06.375
+starting worker pid=1908900 on localhost:11986 at 09:55:06.560
+starting worker pid=1908915 on localhost:11986 at 09:55:06.734
+starting worker pid=1908930 on localhost:11986 at 09:55:06.908
+starting worker pid=1908945 on localhost:11986 at 09:55:07.086
+starting worker pid=1908960 on localhost:11986 at 09:55:07.262
+starting worker pid=1908975 on localhost:11986 at 09:55:07.434
+starting worker pid=1908990 on localhost:11986 at 09:55:07.608
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Likelihood value: 1063098.13417575
+Sigma value:  0.9
+starting worker pid=1909113 on localhost:11986 at 09:55:26.127
+starting worker pid=1909128 on localhost:11986 at 09:55:26.313
+starting worker pid=1909143 on localhost:11986 at 09:55:26.494
+starting worker pid=1909158 on localhost:11986 at 09:55:26.676
+starting worker pid=1909173 on localhost:11986 at 09:55:26.848
+starting worker pid=1909188 on localhost:11986 at 09:55:27.019
+starting worker pid=1909203 on localhost:11986 at 09:55:27.191
+starting worker pid=1909218 on localhost:11986 at 09:55:27.366
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+
+[score] 9889 / 10034 spots have an RCTD estimate (rest failed QC/min-UMI inside RCTD)
+
+=== RESULTS ===
+spots scored: 9889 / 10034 
+overall Pearson r (all spots x all cell types, pooled): 0.7298 
+overall RMSE: 0.0803 
+mean per-spot Pearson r: 0.7067 
+per-cell-type Pearson r:
+      cell_type pearson_r       rmse
+type1     type1 0.7414553 0.08076868
+type2     type2 0.7677036 0.07373966
+type3     type3 0.7710597 0.08604069
+type4     type4 0.7634488 0.07888185
+type5     type5 0.7706511 0.07829097
+type6     type6 0.7422598 0.07611817
+type7     type7 0.7384896 0.08062787
+type8     type8 0.7347787 0.08733831
+
+[done] outputs written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot 
