@@ -11,7 +11,7 @@ this script lets you re-run just the plotting step against an existing
 adata_results/Sim_3D_STAGATE_<dataset>.h5ad.
 
 Usage:
-    python plot_stagate_figures.py --dataset cell_strongmix --use-pre-batch
+    python plot_stagate_figures.py --dataset cell_strongmix_bs0_seed2025
 
 Output, under sim_paper/data/figure_4/spatial_clustering/STAGATE/<run_tag>/plots/ :
     domains_3d_true_vs_stagate.png
@@ -110,11 +110,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dataset", required=True,
                     help="base dataset name, e.g. cell_strongmix (matches 3D_stagate.py's --dataset)")
-    ap.add_argument("--use-pre-batch", action="store_true",
-                    help="read the <dataset>_prebatch/ run instead of <dataset>/")
     args = ap.parse_args()
 
-    run_tag = args.dataset + ("_prebatch" if args.use_pre_batch else "")
+    run_tag = args.dataset
     outdir = os.path.join(BASE_OUTDIR, run_tag)
     out_adata = os.path.join(outdir, "adata_results")
     out_plots = os.path.join(outdir, "plots")

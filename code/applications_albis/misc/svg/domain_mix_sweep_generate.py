@@ -147,7 +147,7 @@ def crosstab_enrichment(adata) -> dict:
 
 
 def qc_filter(adata):
-    X = adata.layers["counts"] if "counts" in adata.layers else adata.X
+    X = adata.X  # QC on the post-resampling counts used by the analysis.
     n_genes = np.asarray(X.getnnz(axis=1) if sparse.issparse(X) else np.count_nonzero(X, axis=1)).ravel()
     total_counts = np.asarray(X.sum(axis=1)).ravel()
     keep = (total_counts > 0) & (n_genes >= 3)

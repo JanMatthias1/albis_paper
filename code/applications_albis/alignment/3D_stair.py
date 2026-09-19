@@ -171,8 +171,15 @@ def prepare_input(adata):
     return adata
 
 
-def procrustes_rmse(X, Y, allow_scale=False, allow_reflection=True):
-    """RMSE of the best similarity/rigid map X -> Y (per-row euclidean)."""
+def procrustes_rmse(X, Y, allow_scale=False, allow_reflection=True, return_fitted=False):
+    """RMSE of the best similarity/rigid map X -> Y (per-row euclidean).
+
+    return_fitted=True additionally returns Xhat (X mapped into Y's frame by
+    the single fitted transform) -- callers needing PER-SLICE residuals under
+    that SAME fit (rather than a fresh, independent fit per slice, which
+    trivially erases inter-slice registration error) should fit once on the
+    full arrays with this flag, then index into Xhat/Y per slice themselves.
+    """
     X = np.asarray(X, dtype=float)
     Y = np.asarray(Y, dtype=float)
     Xc = X - X.mean(0)
@@ -186,7 +193,10 @@ def procrustes_rmse(X, Y, allow_scale=False, allow_reflection=True):
     s = (S.sum() / (Xc ** 2).sum()) if allow_scale else 1.0
     Xhat = s * Xc @ R + Y.mean(0)
     d = np.linalg.norm(Xhat - Y, axis=1)
-    return float(np.sqrt((d ** 2).mean())), float(np.median(d))
+    rmse, med = float(np.sqrt((d ** 2).mean())), float(np.median(d))
+    if return_fitted:
+        return rmse, med, Xhat
+    return rmse, med
 
 
 def alignment_metrics(adata):
@@ -200,12 +210,20 @@ def alignment_metrics(adata):
         rmse, med = procrustes_rmse(adata.obsm[key], true)
         out[f"{name}_rmse_um"] = rmse
         out[f"{name}_median_um"] = med
-    # per-slice centroid error after the joint fit (fine)
+    # Per-slice residual under the ONE joint fit (fine) -- fit once on the
+    # full arrays, then slice into the already-transformed points. Fitting
+    # independently per slice (the previous approach) lets each slice freely
+    # re-solve its own rotation/scale/translation, which trivially erases
+    # almost all inter-slice registration error and is why that version's
+    # numbers were near-zero and nearly identical across every dataset
+    # regardless of actual alignment quality (found 2026-09-18).
     per_slice = {}
-    for sid in sorted(adata.obs["slice_id"].unique(), key=float):
-        m = (adata.obs["slice_id"] == sid).values
-        rmse, _ = procrustes_rmse(adata.obsm["transform_fine"][m], true[m])
-        per_slice[str(sid)] = rmse
+    if "transform_fine" in adata.obsm:
+        _, _, fine_fitted = procrustes_rmse(adata.obsm["transform_fine"], true, return_fitted=True)
+        for sid in sorted(adata.obs["slice_id"].unique(), key=float):
+            m = (adata.obs["slice_id"] == sid).values
+            d = np.linalg.norm(fine_fitted[m] - true[m], axis=1)
+            per_slice[str(sid)] = float(np.sqrt((d ** 2).mean()))
     out["stair_fine_rmse_per_slice_um"] = per_slice
     return out
 

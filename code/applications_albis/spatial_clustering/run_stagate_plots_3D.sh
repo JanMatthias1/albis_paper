@@ -1,14 +1,21 @@
 #!/usr/bin/env bash
 # Figure 4B replot -- regenerate domains_3d_true_vs_stagate.png / umap_stagate3d*.png
-# for every existing STAGATE run, then the two cross-run summary figures.
-# Pure CPU: plot_stagate_figures.py / plot_stagate_summary.py /
-# plot_stagate_ari_strongmix_prebatch.py only read the already-written
-# adata_results/{h5ad,metrics.json} -- no GPU, no retraining. Use this after a
-# plotting-code change (as opposed to run_stagate_3D.sh, which retrains).
+# for every existing STAGATE run, then the fig4b summary figure.
+# Pure CPU: plot_stagate_figures.py / plot_stagate_fig4b.py only read the
+# already-written adata_results/{h5ad,metrics.json} -- no GPU, no retraining.
+# Use this after a plotting-code change (as opposed to run_stagate_3D.sh, which
+# retrains).
 #
-# Discovers run dirs from what's on disk under STAGATE_DIR (12 base combos +
-# any *_prebatch oracle runs) rather than hardcoding, so it stays in sync with
-# whatever 3D_stagate.py has actually produced.
+# 2026-09-18: plot_stagate_summary.py / plot_stagate_ari_strongmix_prebatch.py
+# archived to _archive_20260918_pre_bsseed_grid/ -- both read the old
+# <mod>_strongmix[_lowbatch|_prebatch] STAGATE output, which no longer exists
+# (superseded by the stagate_inputs.py bs<value>_seed<seed> grid; see
+# plot_stagate_fig4b.py for the current equivalent).
+#
+# Discovers run dirs from what's on disk under STAGATE_DIR (matching
+# <mod>_strongmix_bs<value>_seed<seed>, the current stagate_inputs.py grid)
+# rather than hardcoding, so it stays in sync with whatever 3D_stagate.py has
+# actually produced.
 #
 # Optional $1: a job id to gate every submission on (--dependency=afterok:<id>).
 #   "none" / unset = no dependency.
@@ -35,6 +42,7 @@ PARTITION="${PARTITION:-shared}"
 RUN_TAGS=()
 for d in "${STAGATE_DIR}"/*/; do
   tag="$(basename "${d}")"
+  [[ "${tag}" =~ ^(cell|bin16um|spot)_strongmix_bs[0-9.]+_seed(2025|101|202)$ ]] || continue
   [[ -f "${d}adata_results/metrics.json" ]] || continue
   RUN_TAGS+=("${tag}")
 done
@@ -47,9 +55,7 @@ echo "replotting ${#RUN_TAGS[@]} run(s): ${RUN_TAGS[*]}"
 
 JOB_IDS=()
 for tag in "${RUN_TAGS[@]}"; do
-  dataset="${tag%_prebatch}"
-  extra=()
-  [[ "${tag}" == *_prebatch ]] && extra=(--use-pre-batch)
+  dataset="${tag}"
 
   jid=$(sbatch --parsable \
     "${DEP_ARG[@]}" \
@@ -59,7 +65,7 @@ for tag in "${RUN_TAGS[@]}"; do
     --cpus-per-task=8 \
     --time=02:00:00 \
     --output="${LOGDIR}/plot_${tag}_%j.out" \
-    --wrap="bash -c 'source ${CONDA_SH} && conda activate ${STAGATE_ENV} && ${PYTHON_BIN} ${CODE_DIR}/plot_stagate_figures.py --dataset ${dataset} ${extra[*]}'")
+    --wrap="bash -c 'source ${CONDA_SH} && conda activate ${STAGATE_ENV} && ${PYTHON_BIN} ${CODE_DIR}/plot_stagate_figures.py --dataset ${dataset}'")
   echo "  ${tag} -> job ${jid}"
   JOB_IDS+=("${jid}")
 done
@@ -76,6 +82,6 @@ sbatch \
   --cpus-per-task=2 \
   --time=00:30:00 \
   --output="${LOGDIR}/summary_%j.out" \
-  --wrap="bash -c 'source ${CONDA_SH} && conda activate ${STAGATE_ENV} && ${PYTHON_BIN} ${CODE_DIR}/plot_stagate_summary.py && ${PYTHON_BIN} ${CODE_DIR}/plot_stagate_ari_strongmix_prebatch.py'"
+  --wrap="bash -c 'source ${CONDA_SH} && conda activate ${STAGATE_ENV} && ${PYTHON_BIN} ${CODE_DIR}/plot_stagate_fig4b.py'"
 
 echo "submitted ${#JOB_IDS[@]} replot jobs + 1 summary job (partition=${PARTITION})"

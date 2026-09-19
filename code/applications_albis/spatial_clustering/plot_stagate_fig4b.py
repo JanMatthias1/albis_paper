@@ -6,8 +6,8 @@ function of the per-section batch effect.
 Trimmed cut of plot_stagate_summary.py's grid: the strong domain-composition
 row only (one column per resolution), x-axis = batch condition
 
-    no batch effect   STAGATE run on the pre-batch counts
-                      (3D_stagate.py --use-pre-batch, layers['counts_pre_batch'])
+    no batch effect   STAGATE run on X generated with batch_sigma=0
+                      (Poisson count resampling retained)
     sigma = 0.05      per-section batch shift at SD 0.05
     tuned             per-resolution batch SD used elsewhere in the study
                       (bin16um 0.7 / spot 0.3 / cell 1.5)
@@ -23,6 +23,8 @@ Env: sim_paper/env/albis-tutorial (or any with pandas + matplotlib).
 import glob
 import json
 import os
+import re
+from stagate_inputs import DATASETS
 
 import matplotlib
 import numpy as np
@@ -58,11 +60,31 @@ plt.rcParams.update({
 
 
 def parse_dataset(name):
-    """<modality>[_strongmix][_lowbatch|_prebatch] -> (modality, mix, batch, sigma)."""
+    """<modality>[_strongmix][_lowbatch|_prebatch] -> (modality, mix, batch, sigma),
+    or the 2026-09-18 <modality>_strongmix_bs<value>_seed<seed> grid (see
+    stagate_inputs.py, sourced from cellbin_batch_sigma_slide/) -> same tuple,
+    keeping only the baseline seed 2025 point so seed-replicates (101/202)
+    don't create duplicate/ambiguous bars for the same batch condition."""
+    if name not in DATASETS:
+        return None  # Exclude historical oracle/weak-mix runs.
     modality = next((m for m in MODALITIES if name.startswith(m)), None)
     if modality is None:
         return None
     mix = "strong" if "strongmix" in name else "weak"
+
+    bs_seed = re.search(r"_bs([0-9.]+)_seed(\d+)$", name)
+    if bs_seed:
+        if int(bs_seed.group(2)) != 2025:
+            return None  # seed replicate, not this panel's headline point
+        bs = float(bs_seed.group(1))
+        if bs == 0:
+            batch, sigma = "none", 0.0
+        elif abs(bs - TUNED_SIGMA[modality]) < 1e-9:
+            batch, sigma = "tuned", bs
+        else:
+            batch, sigma = "0.05", 0.05
+        return modality, mix, batch, sigma
+
     if name.endswith("_prebatch"):
         batch, sigma = "none", 0.0
     elif "lowbatch" in name:
@@ -80,6 +102,8 @@ def load():
             continue
         modality, mix, batch, sigma = parsed
         m = json.load(open(mj))
+        if m.get("use_pre_batch") or m.get("input_layer") != "X":
+            continue
         rows.append(dict(
             dataset=mj.split(os.sep)[-3], modality=modality, mix=mix,
             batch=batch, batch_sigma=sigma,
@@ -87,6 +111,8 @@ def load():
             ari_domain_2d=m.get("stagate_2d", {}).get("ari_domain_true"),
             n_obs=m.get("n_obs"),
         ))
+    if not rows:
+        raise SystemExit("No current post-resampling X STAGATE results available yet.")
     df = pd.DataFrame(rows)
     df["_ord"] = df.batch.map(BATCH_ORDER)
     return df.sort_values(["modality", "mix", "_ord"]).reset_index(drop=True)

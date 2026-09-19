@@ -73,101 +73,9 @@ print("Torch:", torch.__version__, "| CUDA:", torch.cuda.is_available(), torch.v
 # --------------------------------------------------------------------------- #
 # dataset table                                                              #
 # --------------------------------------------------------------------------- #
-FIG2 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data"
-SIMDATA = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/spatial_clustering/sim_data"
-SLIDE = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/cellbin_batch_sigma_slide"
-BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/spatial_clustering/STAGATE"
+from stagate_inputs import DATASETS
 
-# Figure 4B runs a 2x2: {weak | strong domain_type_mix} x {tuned | very-low
-# batch_sigma}, on bin16um / spot / cell. Every config is the matching Figure 2
-# config; only --strong-domain-mix and --batch-sigma vary across the grid. All
-# realwindow + post-batch QC.
-#   tuned batch  = bin16um 0.7 / spot 0.3 / cell 1.5   (Figure 2 finalized values)
-#   low batch    = 0.05 everywhere
-# family 1 reuses data/figure_2/ in place; families 2/3/4 are Figure-4B-only and
-# live under data/figure_4/spatial_clustering/sim_data/ (generate_strongmix.sh
-# builds 2 + 4, generate_figure2_lowbatch.sh builds 3).
-#
-# NOTE (2026-09-06): the "spot" tag below is DELIBERATELY NOT the spot dataset
-# used by Figure 2 / Figure 3 / Figure 4C. Those moved to
-# `packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03` (2026-09-05
-# CytAssist probe-reference retune + 2026-09-06 `--theta-jitter 0.10`
-# two-cloud fix). Figure 4B (and 4A/SVG) stay on the older
-# `packing_pf0p04_log_mu_-2.5_bsigma03` spot config on purpose -- the 4B
-# result is about domain-mix coupling strength, not spot count-distribution
-# fidelity, and the strongmix/lowbatch families here have no jitter0.10
-# siblings. bin16um and cell already match the current shared tags.
-DATASETS = {
-    # -- family 1: WEAK mix, TUNED batch. Domain ARI ~0 by design; the
-    # cross-modality baseline. bin16um/cell also match Figure 4A/4C; "spot"
-    # does not -- see NOTE above.
-    "bin16um": dict(
-        h5ad=f"{FIG2}/packing_pf0p04_bin16um_log_mu_-2.5_bsigma07/simulation_bin_z_qc.h5ad",
-    ),
-    "spot": dict(
-        h5ad=f"{FIG2}/packing_pf0p04_log_mu_-2.5_bsigma03/simulation_spot_z_qc.h5ad",
-    ),
-    "cell": dict(
-        h5ad=f"{FIG2}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad",
-        # cell is ~25x the sphere volume of bin/spot with only 600k cells, so a
-        # fixed radius both under-connects (45um -> 4.8 in-plane nbrs/cell, vs
-        # 7.7 for bin/spot) and, because positions are jittered, gives very
-        # uneven degree. Use a KNN graph instead: exactly k nbrs/cell regardless
-        # of local density, edge count capped (~k_2d + 2*k_z per cell) so it
-        # stays on the 80GB A100.
-        graph_model="knn", k_2d=6, k_z=3,
-    ),
-    # -- family 2: STRONG mix, TUNED batch. The main 3D-vs-2D domain-recovery
-    # comparison.
-    #
-    # 2026-09-17: repointed at Figure 3's cellbin_batch_sigma_slide/ tree --
-    # these are now literally the SAME files as Figure 3's canonical batch_sigma
-    # points (bin16um bs0.7, cell bs1.5), not a separate copy under
-    # data/figure_4/spatial_clustering/sim_data/ (old paths archived to
-    # sim_data/_archive_20260917/). spot_strongmix now ALSO switches onto
-    # Figure 3's spot dataset (bs0.3, corrected dispersion log_mu=-2.0/
-    # theta=0.25/jitter=0.10) instead of the old retired log_mu=-2.5/theta=2.0/
-    # jitter=1.0 tag it used before -- user decision: Figure 3 is now the
-    # single source of truth for spot too, no more frozen duplicate. Any
-    # previously-run spot_strongmix STAGATE results predate this and are stale.
-    "bin16um_strongmix": dict(
-        h5ad=f"{SLIDE}/bin16um/bs0.7/simulation_bin_z_qc.h5ad",
-    ),
-    "spot_strongmix": dict(
-        h5ad=f"{SLIDE}/spot/bs0.3/simulation_spot_z_qc.h5ad",
-    ),
-    "cell_strongmix": dict(
-        h5ad=f"{SLIDE}/cell/bs1.5/simulation_cell_z_qc.h5ad",
-        graph_model="knn", k_2d=6, k_z=3,  # see "cell" note
-    ),
-    # -- family 3: WEAK mix, VERY LOW batch (0.05). Batch control for family 1.
-    "bin16um_lowbatch": dict(
-        h5ad=f"{SIMDATA}/packing_pf0p04_bin16um_log_mu_-2.5_bsigma005/simulation_bin_z_qc.h5ad",
-    ),
-    "spot_lowbatch": dict(
-        h5ad=f"{SIMDATA}/packing_pf0p04_log_mu_-2.5_bsigma005/simulation_spot_z_qc.h5ad",
-    ),
-    "cell_lowbatch": dict(
-        h5ad=f"{SIMDATA}/log_mu_-2.3_theta_0.40_jitter0.15_bsigma005/simulation_cell_z_qc.h5ad",
-        graph_model="knn", k_2d=6, k_z=3,  # see "cell" note
-    ),
-    # -- family 4: STRONG mix, VERY LOW batch (0.05). Pairs against family 2 to
-    # test whether 3D's advantage is batch-noise suppression.
-    #
-    # 2026-09-17: repointed at Figure 3's cellbin_batch_sigma_slide/ tree, same
-    # reasoning as family 2 above -- bs0.05 is a real point on Figure 3's own
-    # grid for bin16um/cell (newly added) and already existed for spot.
-    "bin16um_strongmix_lowbatch": dict(
-        h5ad=f"{SLIDE}/bin16um/bs0.05/simulation_bin_z_qc.h5ad",
-    ),
-    "spot_strongmix_lowbatch": dict(
-        h5ad=f"{SLIDE}/spot/bs0.05/simulation_spot_z_qc.h5ad",
-    ),
-    "cell_strongmix_lowbatch": dict(
-        h5ad=f"{SLIDE}/cell/bs0.05/simulation_cell_z_qc.h5ad",
-        graph_model="knn", k_2d=6, k_z=3,  # see "cell" note
-    ),
-}
+BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/spatial_clustering/STAGATE"
 
 N_DOMAINS = 6  # obs['domain_true'] has D0..D5
 N_TOP_GENES = 3000  # HVG cap; the ALBIS panel is 556 genes so this keeps them all
@@ -317,17 +225,13 @@ def main():
     ap.add_argument("--k-z", type=int, default=None, help="KNN: between-section neighbours each way (default 3)")
     ap.add_argument("--subsample", type=int, default=0,
                     help="randomly keep this many obs before building the graph (0 = all)")
-    ap.add_argument("--use-pre-batch", action="store_true",
-                    help="oracle run: swap X <- layers['counts_pre_batch'] (the clean "
-                         "pre-batch counts) to bound what STAGATE can recover with no "
-                         "batch noise; writes to <dataset>_prebatch/")
     args = ap.parse_args()
 
     spec = DATASETS[args.dataset]
     if not os.path.exists(spec["h5ad"]):
         raise FileNotFoundError(spec["h5ad"])
 
-    run_tag = args.dataset + ("_prebatch" if args.use_pre_batch else "")
+    run_tag = args.dataset
     outdir = os.path.join(BASE_OUTDIR, run_tag)
     out_adata = os.path.join(outdir, "adata_results")
     out_plots = os.path.join(outdir, "plots")
@@ -338,13 +242,7 @@ def main():
     adata = sc.read_h5ad(spec["h5ad"])
     print(f"[load] {adata.shape}")
 
-    if args.use_pre_batch:
-        if "counts_pre_batch" not in adata.layers:
-            raise KeyError("--use-pre-batch: layers['counts_pre_batch'] not in "
-                           f"{spec['h5ad']}")
-        adata.X = adata.layers["counts_pre_batch"].copy()
-        adata.layers["counts_post_batch"] = adata.layers.pop("counts_pre_batch")
-        print("[oracle] X <- counts_pre_batch (no batch effect)")
+    # Always use post-resampling X; sigma=0 retains Poisson sampling.
 
     if args.subsample and args.subsample < adata.n_obs:
         rng = np.random.default_rng(SEED)
@@ -416,7 +314,14 @@ def main():
     # ---- metrics ---------------------------------------------------------
     metrics = {
         "dataset": args.dataset,
-        "use_pre_batch": bool(args.use_pre_batch),
+        "input_h5ad": os.path.realpath(spec["h5ad"]),
+        "input_mtime_ns": os.stat(spec["h5ad"]).st_mtime_ns,
+        "training_seed": SEED,
+        "simulation_seed": spec["simulation_seed"],
+        "technology": spec["technology"],
+        "batch_sigma": spec["batch_sigma"],
+        "use_pre_batch": False,
+        "input_layer": "X",
         "n_obs": int(adata.n_obs),
         "n_vars": int(adata.n_vars),
         "n_epochs": args.n_epochs,
