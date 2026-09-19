@@ -1,156 +1,166 @@
 # Clustering workflow (Figure 3)
 
-Two conda envs are involved:
+Current workflow, updated 2026-09-18. Cell-type recovery and deconvolution
+reuse Figure 2 smaller-sphere data. Domain recovery and batch-effect sweeps
+use separate simulations generated with `--strong-domain-mix`.
 
-```bash
-# Everything except the BANKSY build step
-conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
-python -m pip install -r sim_paper/code/clustering/requirements.txt
+## Pipeline overview
 
-# BANKSY build step only (01_build_banksy_matrix.py) -- banksy_py pins an
-# older scanpy/numpy/anndata/pandas/scikit-learn/scipy stack, incompatible
-# with albis-tutorial. See sim_paper/env/create_banksy_env.sh.
-conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/sim-app-banksy
+`02_leiden_resolution_sweep.py` and `step03_cluster_and_plot.py` are
+**siblings**, not a chain -- both are called with the identical embedding
+`--input` (see any `*_celltype_panel.sh`); `step03` does not read `02`'s
+output h5ad, it only reuses the resolution *value* `02`'s binary search
+already found. `composition_recovery.py` is the domain-sweep branch's
+counterpart to `step03`'s plotting branch -- both sit at the same depth,
+consuming `02`'s resolution-matched output, just for different purposes
+(qualitative UMAP/heatmap panels vs. numeric ARI+leakage scoring). This is
+why `composition_recovery.py` is not named `step04_...`: it isn't downstream
+of `step03`, it's a fork alongside it.
+
+```
+00_qc_filter.py
+     |
+     +-- 01.2_pca_harmony.py       (plain)   --+
+     +-- 01_build_banksy_matrix.py (BANKSY)  --+--> obsm["X_pca_harmony"]
+                                                          |
+                    +-------------------------------------+-------------------------------------+
+                    |                                                                             |
+          02_leiden_resolution_sweep.py                                            step03_cluster_and_plot.py
+          (binary-searches resolution to hit                                       (fixed resolution -- the value
+           target k=6 domain_true / k=8                                             02 just found -- UMAP colored
+           cell_type_true; no plots)                                                by ground truth/cluster_label,
+                    |                                                                + contingency heatmap)
+                    v
+          composition_recovery.py
+          (scores 02's output vs. soft
+           ground-truth composition +
+           slice_id leakage; used only
+           by the BANKSY/domain-sweep
+           scripts, not the plain
+           cell-type panels)
+                    |
+                    v
+          ari_recovery_summary/plot_ari_recovery.py
+          ari_recovery_summary/plot_domain_vs_celltype.py
+          cellbin_batch_sigma_slide/plot_batch_sigma_slide_final.py
 ```
 
-All scripts here source `_env.sh` (albis-tutorial) or `_env_banksy.sh`
-(sim-app-banksy) for the conda-activation boilerplate.
+## Cell-type clustering and deconvolution
 
-## How to (re)build each `data/figure_3/` output
+Inputs: `sim_paper/data/figure_2/smaller_sphere/data/<tag>/`.
+All clustering panels use the QC-filtered h5ad, including cell.
 
-Quick reference: which script(s) to run, in order, for each data product.
+| Technology | Figure 2 tag |
+|---|---|
+| cell | `log_mu_-2.5_theta_0.40_jitter0.15_bsigma15` |
+| bin8um | `packing_pf0p04_log_mu_0.0_bsigma08` |
+| bin16um | `packing_pf0p04_bin16um_log_mu_-2.5_bsigma07` |
+| spot | `packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03` |
 
-**`pca_harmony_single_cell/`** -- one self-contained script per modality,
-covered in the next section:
+`pca_harmony_single_cell/{cell,bin,bin16um,spot}_celltype_panel.sh`
+run PCA → Harmony → resolution-matched Leiden against `cell_type_true`.
+Results live under `data/figure_3/pca_harmony_single_cell/<modality>/`
+(`bin` denotes bin8um here). Existing PCA outputs are reused; changing an
+input tag alone does not invalidate an existing result.
+
+`spatial_deconvolution/run_rctd_spot.sh` runs RCTD with the current Figure 2
+QC cell data as the labelled reference and QC spot data as the query.
+Results: `data/figure_3/spatial_deconvolution/RCTD/spot/`.
+
+## Domain recovery and batch-effect sweeps
+
+The current baseline generators are:
+
 ```bash
-sbatch sim_paper/code/clustering/pca_harmony_single_cell/cell_celltype_panel.sh
-sbatch sim_paper/code/clustering/pca_harmony_single_cell/bin_celltype_panel.sh
-sbatch sim_paper/code/clustering/pca_harmony_single_cell/bin16um_celltype_panel.sh
-sbatch sim_paper/code/clustering/pca_harmony_single_cell/spot_celltype_panel.sh
+sbatch sim_paper/code/clustering/strong_mix/generate_strong_mix_cell.sh
+sbatch sim_paper/code/clustering/strong_mix/generate_strong_mix_bin16um.sh
+sbatch sim_paper/code/clustering/strong_mix/generate_strong_mix_spot.sh
 ```
 
-**`banksy_batch_compare/`** (data dir; the code lives at `misc/banksy_batch_compare/`,
-not its own top-level folder) -- build, then patch spot with corrected
-dispersion (depends on `cellbin_batch_sigma_slide/` below having already
-built spot's corrected-dispersion data), then add the qualitative plots:
-```bash
-sbatch sim_paper/code/clustering/misc/banksy_batch_compare/banksy_batch_compare.sh
-# then, once cellbin_batch_sigma_slide/spot_batch_sigma_slide_corrected.sh (below) has landed --
-# overwrites spot/{prebatch,tuned} only, current canonical spot data:
-sbatch sim_paper/code/clustering/misc/banksy_batch_compare/rebuild_spot_batch_compare_corrected_params.sh
-sbatch sim_paper/code/clustering/misc/banksy_batch_compare/run_banksy_batch_compare_umap.sh
-sbatch sim_paper/code/clustering/misc/banksy_batch_compare/run_banksy_batch_compare_true_vs_pred.sh
-```
-Note bin's official prebatch/tuned pair does NOT live here (this runs bin at
-the stale k_geom=200) -- it's built by `cellbin_batch_sigma_slide/` instead,
-see below and `plot_banksy_batch_compare_3mod.py`'s header.
+Each runs generation → QC → BANKSY + Harmony → matched Leiden/ARI →
+composition_recovery (including slice-batch leakage diagnostics).
+All three use sphere radius 2050 µm. Cell uses 24,207 cells and the current
+Figure 2 dispersion; spot also uses its current Figure 2 dispersion.
 
-**`cellbin_batch_sigma_slide/`** -- 2026-09-16: pared down to just the
-seed-replication + plotting + UMAP/Harmony-diagnostic code (by decision --
-the original lambda/k_geom-tuning and base-grid generation scripts that
-first built this directory moved to `misc/`, see below; the data they built
-is untouched on disk, this folder just no longer carries the from-scratch
-recipe for it). What's here now:
+| Technology | BANKSY lambda | k_geom | Canonical batch_sigma |
+|---|---:|---:|---:|
+| cell | 0.5 | 60 | 1.5 |
+| bin16um | 0.5 | 100 | 0.7 |
+| spot | 0.1 | 8 | 0.3 |
+
+Generators write raw/QC inputs under `data/noisy/<technology>_strong_mix_bs<value>/`.
+BANKSY matrices, ARI results and scores go under
+`data/figure_3/cellbin_batch_sigma_slide/`, with per-point folders
+`<cell|bin16um|spot>/bs<value>/`. Some older baseline raw/QC files were moved
+into those result folders; the generators do not automatically reuse those
+moved files. Do not assume rerunning a generator uses the same on-disk input
+as a downstream consumer without checking its path.
+
+Cell baseline grid: 0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.5.
+Bin16um generator grid: 0, 0.25, 0.30, 0.35, 0.40, 0.45, 0.7;
+its existing 0.05 baseline is also included in seed replication and plotting.
+Spot baseline grid: 0, 0.05, 0.1, 0.12, 0.13, 0.14, 0.15, 0.18, 0.2,
+0.22, 0.25, 0.26, 0.27, 0.28, 0.29, 0.3; seed work extends it to 0.4 and 0.6.
+
+`misc/banksy_batch_compare/` and `misc/legacy/` contain historical workflows;
+they are not prerequisites for the current baseline generators or plots.
+The strong-mix simulations are also intended for STAGATE. Its path audit
+is deferred: cell strong-mix paths currently expect raw/QC files in the
+Figure 3 results tree, while regenerated cell files are under `data/noisy/`.
+No STAGATE changes are part of this update.
+
+## Seed replication and plotting
+
+Baseline seed is 2025; additional simulation seeds are 101 and 202.
+These change the simulation draw, not just the clustering initialization.
+The seed script matches the baseline generation/BANKSY settings above.
+
 ```bash
-# seed-replication (2 extra seeds/point across all 3 modalities + 2 new spot points beyond canonical):
+python sim_paper/code/clustering/cellbin_batch_sigma_slide/gen_batch_sigma_slide_seed_tasks.py
+# Full array for a fresh run (do not duplicate an already submitted array):
 sbatch sim_paper/code/clustering/cellbin_batch_sigma_slide/batch_sigma_slide_seeds.sh
-# UMAP / before-after-Harmony diagnostics:
-sbatch sim_paper/code/clustering/cellbin_batch_sigma_slide/run_batch_sigma_slide_umap.sh
-sbatch sim_paper/code/clustering/cellbin_batch_sigma_slide/cell_umap_gap.sh
 ```
-`gen_batch_sigma_slide_seed_tasks.py` (deterministic task-list generator) and
-`batch_sigma_slide_seed_tasks.tsv` (its output) sit alongside
-`batch_sigma_slide_seeds.sh` and feed it directly.
 
-If you need to rebuild the base grid (not the seed replicates) from scratch --
-e.g. the data was deleted -- the original generation chain is now in `misc/`:
-`cellbin_batch_sigma_slide.sh` -> `bin16um_kgeom100_endpoints.sh` (depends on
-`banksy_batch_compare.sh`'s QC'd bin h5ad above) -> `batch_sigma_slide_fine.sh`
--> `spot_batch_sigma_slide_corrected.sh` (current canonical spot/, run last --
-it rebuilds all 16 spot points and supersedes the spot ones the earlier steps
-built). `misc/spot_batch_sigma_slide_weakmix.sh` (-> `spot_weakmix/`) is a
-separate validation sibling, not required for the main curve either way.
-Gotcha either way: cell's `bs0`/`bs1.5` and spot's `bs0`/`bs0.3` canonical
-points are NOT built by any of this -- `plot_batch_sigma_slide_final.py`
-pulls those from `banksy_batch_compare/` instead (build that dir first).
+The generated TSV contains 72 tasks: cell 18, bin16um 16, spot 38.
+Indices 0–67 preserve the original task mapping. Indices 68–71 append cell
+0.05 seed101/seed202 and bin16um 0.05 seed101/seed202. Spot 0.4/0.6 include
+baseline generation as well as the two extra seeds. Seed simulation files
+live under `data/noisy/<cell|bin|spot>_batch_slide_bs<value>_seed<seed>/`;
+results live under `cellbin_batch_sigma_slide/<cell|bin16um|spot>/bs<value>_seed<seed>/`.
 
-**These two directories cross-depend on each other** (see the dependency
-notes above) -- neither is fully reproducible standalone.
-
-Then, the manuscript plot itself:
 ```bash
 python sim_paper/code/clustering/cellbin_batch_sigma_slide/plot_batch_sigma_slide_final.py
 ```
 
-**`ari_recovery_summary/`** -- pure aggregator, no generation step; just
-discovers whatever's already on disk under `pca_harmony_single_cell/` (for
-`cell_type_true`) and `data/clustering_<tag>/` (for `domain_true` -- not one
-of the four dirs above, see "Output layout" below):
-```bash
-python sim_paper/code/clustering/ari_recovery_summary/plot_ari_recovery.py
-```
+The plot reads domain ARI JSON files from baseline and seed folders,
+groups numerically equivalent batch values (e.g. 0.30 and 0.3), and plots
+the available-seed mean ± sample standard deviation. Points with fewer
+than three completed seeds are labelled `n=1` or `n=2`; a single seed has
+no SD bar. Duplicate entries for the same batch value and seed raise an
+error rather than being counted twice. Missing composition-score files do
+not exclude a completed ARI result.
 
-## Reproduce Figure 3: run one panel script per modality x task
+Outputs in `data/figure_3/cellbin_batch_sigma_slide/`:
+- `batch_sigma_slide_domain_ari_final.png`
+- `batch_sigma_slide_domain_ari_final.csv`: mean, SD, count, included seeds,
+  and missing seeds for each technology/batch value.
 
-**Cell-type**: the fastest path is one self-contained script per modality,
-under `pca_harmony_single_cell/`:
+Regenerate the plot after jobs complete; an interim plot is not a complete
+three-seed result. The original array is job `35788619` (68 tasks; pending
+at the last audit). Additional control tasks are submitted separately to
+avoid duplicating that work; see the run log below.
 
-```bash
-sbatch sim_paper/code/clustering/pca_harmony_single_cell/spot_celltype_panel.sh
-sbatch sim_paper/code/clustering/pca_harmony_single_cell/bin_celltype_panel.sh
-sbatch sim_paper/code/clustering/pca_harmony_single_cell/bin16um_celltype_panel.sh
-sbatch sim_paper/code/clustering/pca_harmony_single_cell/cell_celltype_panel.sh
-```
+## Summary plots and environments
 
-These read the exact same sim `.h5ad` files as Figure 2 (`data/figure_2/<tag>/`,
-tags carrying the per-modality `batch_sigma`: cell 1.5, bin8 0.8, bin16 0.7,
-spot 0.3).
+`ari_recovery_summary/plot_ari_recovery.py` summarizes Figure 2 cell-type
+recovery. `ari_recovery_summary/plot_domain_vs_celltype.py` compares strong-mix
+baseline domain ARI at batch_sigma=0 against canonical Figure 2 cell-type
+ARI for cell, bin16um and spot. That comparison is separate from the
+seed-aggregated batch-effect curve.
 
-**Domain**: NOT one self-contained script per modality in current practice --
-see "How to (re)build each `data/figure_3/` output" above for the actual
-`banksy_batch_compare/` + `cellbin_batch_sigma_slide/` chain that feeds the
-manuscript panel. `legacy/spot_domain_panel.sh`, `legacy/bin_domain_panel.sh`,
-`legacy/cell_domain_panel.sh` are an older, self-contained-per-modality
-attempt at the same thing (generate its own strong-`domain_type_mix` dataset
--> BANKSY -> ARI -> Leiden, writing to `data/clustering_<tag>/`, not
-`data/figure_3/`) -- still runnable, but superseded in practice: the current
-manuscript panel (`plot_domain_vs_celltype_recovery.py`) does not read from
-their output. Moved to `legacy/` 2026-09-16 to make that clear.
-
-Each is idempotent end-to-end: generates the sim dataset if it isn't already
-on disk, QC-filters it, clusters it (plain PCA+Harmony for the cell-type
-panels, BANKSY+PCA+Harmony for the domain panels -- see "Why two pipelines"
-below), computes resolution-matched ARI against ground truth, and produces
-the qualitative ground-truth-vs-predicted UMAP + contingency-heatmap plots.
-Rerunning a script after its output already exists skips straight to
-whichever step is missing -- but note this checks for the *final* artifact
-of each step, not every plot inside it: if you change a step's plotting code
-without changing its output data, rerunning the panel script won't
-regenerate that step's plots (its h5ad/json output already exists, so the
-whole step is skipped). Force a re-plot with the underlying script's
-`--plots-only` flag (`01.2_pca_harmony.py`, `step03_cluster_and_plot.py`)
-against the existing output instead.
-
-Each script's header documents its exact sim config (`batch_sigma`,
-weak-vs-strong `domain_type_mix`, packing fraction) and why -- see the script
-itself, and figure.md, for the reasoning.
-
-### Why two pipelines
-
-Cell-type recovery and domain recovery are split by design, each on the
-dataset built for its own question:
-
-- **Cell-type panels** (`*_celltype_panel.sh`): plain PCA -> Harmony ->
-  Leiden, on the weak/manuscript-baseline `domain_type_mix`. This already
-  recovers `cell_type_true` well once `batch_sigma` is tuned per modality.
-- **Domain panels** (`legacy/*_domain_panel.sh`, superseded -- see above):
-  BANKSY -> PCA -> Harmony ->
-  Leiden, on the strengthened `domain_type_mix` (`STRONG_DOMAIN_TYPE_MIX`,
-  needed because the manuscript-baseline mix makes several domains
-  compositionally indistinguishable -- see figure.md, 2026-08-25). BANKSY is
-  never used for cell-typing; plain PCA+Harmony is never used for domain
-  recovery on the strong-mix dataset (Harmony's slice-batch-correction
-  collapses cell-type recovery when combined with the strong mix).
+Scripts source `_env.sh` (albis-tutorial) or `_env_banksy.sh`
+(sim-app-banksy). BANKSY has its own environment because its dependencies
+differ from the main analysis stack. RCTD uses `sim_paper/env/rctd`.
 
 ## Steps, if you need to run them individually
 
@@ -215,7 +225,7 @@ dataset built for its own question:
    drop the `domain_true`/BANKSY half (it only ever read
    `data/clustering_<tag>/<modality>/banksy_ari_recovery/`, populated
    exclusively by `legacy/*_domain_panel.sh`, last built 2026-08-25) -- for
-   domain-vs-celltype comparison see `misc/plot_domain_vs_celltype_recovery.py`
+   domain-vs-celltype comparison see `ari_recovery_summary/plot_domain_vs_celltype.py`
    instead, which reads current data.
    ```bash
    python sim_paper/code/clustering/ari_recovery_summary/plot_ari_recovery.py
@@ -232,151 +242,32 @@ instructions. Still useful if you want to hand-run a custom one-off sweep the
 way that work did -- see figure.md's "Reproduce" code blocks for worked
 examples.
 
-## Output layout
 
-**Cell-type panels** write under `data/figure_3/pca_harmony_single_cell/<modality>/`:
+## Run log
 
-```
-data/figure_3/pca_harmony_single_cell/
-  <spot|bin|cell>/
-    pca_harmony_qc/
-      simulation_<modality>_z_pca_harmony_qc.h5ad
-      plots/   # pca_before/after_harmony_by_*.png, umap_pca_harmony_before_after_by_*.png, pc_pairs/
-    ari_recovery_qc/
-      ari_summary_<modality>.json
-    leiden_pca_qc_celltype_matched/
-      simulation_<modality>_z_leiden_pca_res<tag>.h5ad
-      plots/   # umap_by_*.png, umap_true_vs_predicted_*.png, contingency_*.png
-```
+- 2026-09-18: preserved original array `35788619` (indices 0–67). Submitted
+  additional array `35789455` (indices 68–71): cell and bin16um at
+  batch_sigma=0.05, seeds 101 and 202.
+- Verified original TSV rows are unchanged, all 72 tasks are unique, and
+  numeric batch grouping, mean/sample SD and incomplete-seed handling work.
+  Rendered the updated plot and CSV on existing baseline results; all
+  currently available points have n=1. Rerun plotting after the arrays finish.
 
-**`legacy/*_domain_panel.sh` output is not under `data/figure_3/`** and is
-superseded in practice (see "Reproduce Figure 3" above for the actual
-manuscript-panel data path, `banksy_batch_compare/` + `cellbin_batch_sigma_slide/`).
-Kept for reference: each modality's domain-panel dataset carries its own tag
-(differs because `batch_sigma`/`domain_type_mix` differ per modality) and
-lives at `data/clustering_<tag>/<modality>/`, mirroring the same three-step
-layout (`banksy_pca_harmony_qc/`, `banksy_ari_recovery/`,
-`leiden_pca_banksy_domain_matched/`) under a different root:
+- 2026-09-18: standardized zero-batch definition to post-resampling X at
+  batch_sigma=0 (all systematic multipliers equal one, Poisson variation
+  retained). Cell/spot and seed replicates already follow this definition.
+  Archived bin16um bs0 and its score under
+  `bin16um/bs0_pre_poisson_baseline_20260918/`; regeneration + BANKSY job
+  `35789683_0` replaces its historical pre-batch-layer baseline.
 
-| modality | domain-panel tag |
-|---|---|
-| bin | `packing_pf0p04_bsigma05_strongdomainmix` |
-| cell | `log_mu_-2.5_theta_0.25_strongdomainmix` |
-| spot | `packing_pf0p04_bsigma015_strongdomainmix` |
+## Count-matrix policy (2026-09-18)
 
-Check the modality's `legacy/*_domain_panel.sh` header for its current
-`SIM_TAG` -- these predate the retune, so treat the table above as a
-snapshot, not a guarantee.
-
-`banksy_batch_compare/` and `cellbin_batch_sigma_slide/` -- the data sources
-the current manuscript domain panel actually uses -- live correctly under
-`data/figure_3/`, per "How to (re)build each `data/figure_3/` output" above.
-
-## `misc/`
-
-One-off exploration/tuning scripts, kept for provenance, not wired into any
-canonical panel script. As of 2026-09-16 the scripts that actually produce
-`data/figure_3/{pca_harmony_single_cell,ari_recovery_summary,cellbin_batch_sigma_slide}/`
-moved out to their own top-level folders (see "How to (re)build each
-`data/figure_3/` output" above); `banksy_batch_compare/` code stayed under
-`misc/banksy_batch_compare/` (not its own top-level folder -- see that
-section above for why and its commands). What's left flat in `misc/`:
-
-- `batch_sigma_sweep.sh`, `batch_sigma_opt_round2.sh`, `tune_banksy_bin_kgeom.sh`,
-  `tune_banksy_cell.sh`, `replot_celltype_panels_v2.sh`, `replot_pca_harmony_qc.sh`
-  -- 2026-08-27 initial `batch_sigma`/BANKSY tuning, superseded by later work above.
-- `banksy_lambda_kgeom_sweep_16um.sh` + `summary_banksy_lambda_kgeom.py` --
-  2026-09-08/09 lambda x k_geom re-tune (winner: bin16um k_geom=100, feeds
-  `cellbin_batch_sigma_slide/`).
-- `cellbin_batch_sigma_slide.sh`, `bin16um_kgeom100_endpoints.sh`,
-  `batch_sigma_slide_fine.sh`, `spot_batch_sigma_slide_corrected.sh`,
-  `spot_batch_sigma_slide_weakmix.sh` -- moved from `cellbin_batch_sigma_slide/`
-  2026-09-16 by decision: the base-grid generation chain that originally
-  built the batch_sigma-slide data, kept here for from-scratch reproducibility
-  but not needed day-to-day now that the data exists and the seed-replication
-  work is the active thread -- see `cellbin_batch_sigma_slide/`'s section
-  above for the full rebuild order.
-- `pca_harmony_domain_check.sh`, `domain_check_diagnostics.sh`,
-  `domain_check_diagnostics_pending.sh`, `plot_domain_recovery_realmix_prebatch.py`,
-  `plot_banksy_domain_panel.py` -- 2026-09-14 domain-check on the real
-  (weak-mix) Figure 2/3 data, a sanity check off the strong-mix testbed used
-  everywhere else. Writes to `data/figure_3/pca_harmony_domain_figure2_data/`,
-  not one of the four dirs above.
-- **`plot_domain_vs_celltype_recovery.py`** -- the manuscript panel comparing
-  BANKSY domain recovery vs. plain Harmony+Leiden cell-type recovery; stays
-  here because it reads across three dirs (`misc/banksy_batch_compare/` +
-  `cellbin_batch_sigma_slide/bin/` for domain, `pca_harmony_single_cell/` for
-  cell-type), so it doesn't belong to any single one of them.
-- `domain_celltype_composition.py`, `plot_composition_recovery.py` -- moved
-  from the top level 2026-09-16, superseded: both explicitly called "stale"/
-  "superseded" in figure.md (2026-08-27/09-06 entries) once the ARI-based
-  domain-vs-celltype framing above was adopted; their outputs are archived at
-  `data/figure_3/_archive_20260914/`.
-- `composition_recovery.py` -- also moved here from the top level 2026-09-16
-  (still essential: every sweep script's `--h5ad` call feeds the
-  `slice_id_leakage_ari` check). Trimmed twice the same day: first the
-  no-args mode it used to also support (scoring all 4 canonical modalities,
-  writing the combined `composition_recovery_summary.csv`/`.png` the two
-  scripts above read -- `score_modality()`, `make_plot()`,
-  `--modalities`/`--no-plot`, `FIG3`/`MODS`, all gone; `--h5ad`/`--out-dir`
-  now required), then the composition/local_knn/oracle/context metrics
-  (mean JSD/L1/Pearson r, composition R2, kNN concordance, KMeans-on-truth
-  oracle, effective-categories-per-obs) -- also part of the same abandoned
-  framing, unread by anything active except `misc/summary_banksy_lambda_kgeom.py`
-  (dormant, for an already-decided sweep -- it'll break loudly if rerun).
-  Down to hard-label ARI/V-measure + `slice_id_leakage_ari` only, verified
-  byte-identical on those fields against the pre-trim version.
-- The visible **leak-sign removal** (2026-09-16, by decision): `slice_id_leakage_ari`
-  used to get a dagger annotation on `misc/banksy_batch_compare/plot_banksy_batch_compare_3mod.py`'s
-  bars (`ari > threshold` -> `†` + a figure caption) -- both removed, bars now
-  plain values. `cellbin_batch_sigma_slide/plot_batch_sigma_slide_final.py`
-  loaded the same value but only ever `print()`ed it (never drew it) --
-  that dead load/print removed too. The underlying computation stays in
-  `composition_recovery.py` (still read by the console summaries and
-  `summary_banksy_lambda_kgeom.py`'s table).
-- **Bugs found and fixed while testing the above** (2026-09-16): moving
-  `plot_banksy_batch_compare_3mod.py`, `plot_banksy_batch_compare_umap.py`,
-  and `plot_banksy_batch_compare_true_vs_pred.py` into
-  `misc/banksy_batch_compare/` earlier the same day left their
-  `SIM_PAPER_DIR`/`CLUSTERING_DIR` path constants one level too shallow
-  (computed for their old, shallower location) -- silently broken since,
-  never run end-to-end after that move. Fixed (`.parents[N]` incremented by
-  1) and verified by actually running each. Separately, renaming
-  `clustering_leiden_louvain.py` to `03_clustering_leiden_louvain.py` (see
-  below) broke 3 files that `from clustering_leiden_louvain import ...` --
-  Python can't import a digit-prefixed module name that way -- fixed by
-  dropping the numeric prefix for that file instead (see step 5 above).
-  2026-09-17: revisited, since the resulting no-prefix name
-  (`clustering_plots.py`) obscured that it's actually the 3rd pipeline step --
-  renamed to `step03_cluster_and_plot.py`, a valid import target (`step03...`
-  doesn't start with a digit) that still carries the step number.
-- `run_build_banksy_matrix.sh`, `replot_subsample_umap.py` -- moved from the
-  top level 2026-09-16, orphaned: `01_build_banksy_matrix.py` is called
-  directly (not via this wrapper) by every current BANKSY script, and
-  `replot_subsample_umap.py`'s output dir has never been generated. Neither
-  is referenced in figure.md's reproduce commands.
-- `plot_banksy_batch_compare.py` -- moved from `misc/banksy_batch_compare/`
-  2026-09-16, redundant: a strict subset of `plot_banksy_batch_compare_3mod.py`
-  (same cell+spot logic, same JSON paths, just missing bin) -- use the 3-mod
-  version, this one has no unique output.
-
-`misc/banksy_batch_compare/run_banksy_batch_compare_umap.sh`/`plot_banksy_batch_compare_umap.py`,
-`run_banksy_batch_compare_true_vs_pred.sh`/`plot_banksy_batch_compare_true_vs_pred.py`,
-and `cellbin_batch_sigma_slide/run_batch_sigma_slide_umap.sh`/`cell_umap_gap.sh`/
-`spot_batch_sigma_slide_weakmix.sh` are real qualitative/validation work (not
-duplicates), just not on the critical path to either manuscript panel PNG
-(neither reads UMAP diagnostics or the weakmix curve) -- left in place
-2026-09-16 by decision, not an oversight.
-
-Full dated narrative for all of the above is in figure.md / the
-`figure3_banksy_domain_sweep` memory if you need it -- not duplicated here.
-
-The gene-space Harmony pipeline (`gene_harmony_umap.py` + its `run_*.sh`
-wrappers) was deleted 2026-08-27 -- `01.2_pca_harmony.py` replaced it and nothing
-regenerated its output. `step03_cluster_and_plot.py`'s corresponding
-`--pipeline gene_harmony` branch (dead: called into the deleted script) was
-stripped 2026-09-16; `--pipeline` stays as a single-choice `pca_harmony` flag
-since every caller passes it explicitly. Its own `run_*.sh` step wrappers
-(`run_qc_filter.sh`, `run_pca_harmony.sh`, `run_clustering_leiden.sh`,
-`run_ari_vs_ground_truth.sh`) moved to `misc/` 2026-09-16 -- see "Steps, if
-you need to run them individually" above for why.
+Active BANKSY and Figure 4 analyses start from the input h5ad `.X`,
+including sigma=0 with Poisson resampling. BANKSY and STAGATE no longer
+accept `--use-pre-batch`; old oracle wrappers under `misc/` are historical
+and will fail on that obsolete flag rather than silently switching layers.
+Pre-batch layers remain stored as simulation provenance, not analysis inputs.
+The Figure 4 plotting launcher now selects the current strong-mix seed grid
+and the main panel excludes pre-batch/oracle metrics and historical runs.
+The panel still displays seed 2025 only; this audit does not change its
+seed-summary design. Archived standalone plotting scripts remain historical.

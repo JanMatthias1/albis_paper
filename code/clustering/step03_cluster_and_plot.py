@@ -31,6 +31,27 @@ import pandas as pd
 import scanpy as sc
 
 
+# Same type scale as code/count_distribution/count_distribution.py (Figure 2's
+# plotting script) and 01.2_pca_harmony.py -- sized for legibility once shrunk
+# into a multi-panel print figure, not just on-screen.
+plt.rcParams.update({
+    "font.size": 14,
+    "axes.titlesize": 17,
+    "axes.titleweight": "bold",
+    "axes.labelsize": 14,
+    "xtick.labelsize": 12,
+    "ytick.labelsize": 12,
+    "legend.fontsize": 12,
+    "figure.titlesize": 17,
+    "figure.titleweight": "bold",
+})
+# Legend swatches + title, bumped up from matplotlib's tiny defaults (6/unset)
+# per explicit request (2026-09-18) after seeing umap_true_vs_predicted_domain_true.png
+# -- the category dot and the "Domain True"/"Cell Type True" legend title were
+# reading small next to the new bold panel titles above.
+LEGEND_MARKERSIZE = 10
+LEGEND_TITLE_SIZE = 13
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
 CLUSTERING_ROOT = SIM_PAPER_DIR / "data" / "clustering"
@@ -45,7 +66,14 @@ DEFAULT_OUTPUT_DIR = CLUSTERING_ROOT
 # made the two panel types drift apart before).
 PANEL_FIGSIZE = (12, 6)
 PANEL_DPI = 180
-PANEL_MARGINS = dict(left=0.06, right=0.98, top=0.85, bottom=0.20, wspace=0.25)
+# bottom bumped 0.20 -> 0.25 (2026-09-18, alongside the legend markersize/title
+# bump below) -- an 8-category legend now wraps to 2 rows (see ncol cap in
+# plot_umap_true_vs_predicted) and the old 0.20 strip was too short to fit
+# title + 2 rows without the bottom row running off the canvas edge (verified
+# by rendering cell's 8-type legend before/after this change). Keep in sync
+# with 01.2_pca_harmony.py's PANEL_MARGINS -- both must match exactly for the
+# two side-by-side UMAP panel types to share the same axes-box geometry.
+PANEL_MARGINS = dict(left=0.06, right=0.98, top=0.85, bottom=0.25, wspace=0.25)
 VALID_MODALITIES = ("spot", "bin", "cell")
 VALID_ALGORITHMS = ("leiden", "louvain")
 VALID_PIPELINES = ("pca_harmony",)
@@ -103,6 +131,19 @@ def pretty_label(key: str) -> str:
     return key.replace("_", " ").title()
 
 
+def fixed_margin_legend_ncol(categories, max_wide: int = 10) -> int:
+    """Column count for plot_umap_true_vs_predicted's bottom-anchored legend,
+    which sits inside PANEL_MARGINS' fixed strip with no tight_layout/
+    bbox_inches to rescue a horizontal overflow. Short labels (cluster_label
+    "0".."7") fit a full wide row even at 8 categories -- verified by
+    rendering (2026-09-18), same fix as 01.2_pca_harmony.py's identically-
+    named helper. Longer labels (cell_type_true "type1".."type8") overflow
+    past the axis edge at the same count, so those still wrap to a narrower
+    4-column row."""
+    max_label_len = max(len(str(c)) for c in categories)
+    return min(len(categories), max_wide if max_label_len <= 2 else 4)
+
+
 def color_values(obs: pd.DataFrame, key: str):
     values = obs[key]
     if pd.api.types.is_numeric_dtype(values):
@@ -140,7 +181,7 @@ def plot_umap(adata, color_key: str, output_path: Path) -> None:
                 marker="o",
                 color="w",
                 markerfacecolor=scatter.cmap(scatter.norm(i)),
-                markersize=6,
+                markersize=LEGEND_MARKERSIZE,
                 label=label,
             )
             for i, label in enumerate(categories)
@@ -148,6 +189,7 @@ def plot_umap(adata, color_key: str, output_path: Path) -> None:
         ax.legend(
             handles=handles,
             title=pretty_label(color_key),
+            title_fontsize=LEGEND_TITLE_SIZE,
             bbox_to_anchor=(1.02, 1),
             loc="upper left",
             frameon=False,
@@ -180,10 +222,15 @@ def plot_umap_true_vs_predicted(adata, true_key: str, pred_key: str, output_path
         ax.set_ylim(ylim)
         if categories is not None:
             handles = [
-                plt.Line2D([0], [0], marker="o", color="w", markerfacecolor=scatter.cmap(scatter.norm(i)), markersize=6, label=label)
+                plt.Line2D([0], [0], marker="o", color="w", markerfacecolor=scatter.cmap(scatter.norm(i)), markersize=LEGEND_MARKERSIZE, label=label)
                 for i, label in enumerate(categories)
             ]
-            ax.legend(handles=handles, title=pretty_label(key), bbox_to_anchor=(0.5, -0.15), loc="upper center", ncol=min(len(categories), 8), frameon=False, fontsize=7)
+            # fontsize kept modest (not LEGEND_TITLE_SIZE-scale) -- this legend sits
+            # inside PANEL_MARGINS' fixed bottom strip (no tight_layout/bbox_inches to
+            # rescue an overflow); ncol via fixed_margin_legend_ncol so short labels
+            # (cluster_label "0".."7") still get one wide row while long labels
+            # (cell_type_true "type1".."type8") wrap narrower -- see that helper.
+            ax.legend(handles=handles, title=pretty_label(key), title_fontsize=11, bbox_to_anchor=(0.5, -0.15), loc="upper center", ncol=fixed_margin_legend_ncol(categories), frameon=False, fontsize=9)
 
     # Fixed (not tight_layout-computed) margins, identical to 01.2_pca_harmony.py's
     # plot_umap_before_after, so the two side-by-side UMAP panel types produce

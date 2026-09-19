@@ -54,6 +54,12 @@ DOMAIN_TRUE_MOD = {"cell": "cell", "bin16um": "bin", "spot": "spot"}
 # the no-batch point's folder name isn't spelled consistently across
 # modalities (cell/bin16um's generator formats 0 as "0", spot's as "0.0")
 DOMAIN_BS0_DIR = {"cell": "bs0", "bin16um": "bs0", "spot": "bs0.0"}
+# bin16um/bs0/ was mid-regen ("poisson baseline" fix) as of 2026-09-18 --
+# temporarily pointed at bs0_pre_poisson_baseline_20260918/ (the archived
+# pre-regen ari=0.799) while job 35789683_0 (generate_strong_mix_bin16um.sh)
+# was still queued. Reverted back to "bs0" here since this script is only
+# meant to run once that job has landed fresh ari/ output (see
+# replot_bin16um_bs0.sh, chained on that job via --dependency=afterok).
 # folder under pca_harmony_single_cell/, and that panel's summary-file modality
 PLAIN_DIR = {"cell": "cell", "bin16um": "bin16um", "spot": "spot"}
 PLAIN_TRUE_MOD = {"cell": "cell", "bin16um": "bin", "spot": "spot"}
@@ -62,11 +68,22 @@ BATCH_SIGMA = {"cell": 1.5, "bin16um": 0.7, "spot": 0.3}
 
 COLOR_DOMAIN = "#2a78d6"    # dataviz palette slot 1, blue
 COLOR_CELLTYPE = "#eb6834"  # dataviz palette slot 2, orange
-INK_PRIMARY = "#0b0b0b"
-INK_SECONDARY = "#52514e"
-INK_MUTED = "#898781"
+INK_PRIMARY = "#000000"
+INK_SECONDARY = "#000000"
+INK_MUTED = "#3d3d3d"
 GRIDLINE = "#e1e0d9"
 BASELINE = "#c3c2b7"
+
+# Same type scale as code/count_distribution/count_distribution.py (Figure 2's
+# plotting script) -- sized for legibility once shrunk into a multi-panel
+# print figure, not just on-screen. Reused verbatim rather than re-derived so
+# every figure in the paper reads at the same visual weight.
+TITLE_SIZE = 17
+SUPTITLE_SIZE = 19
+LABEL_SIZE = 14
+TICK_SIZE = 12
+ANNOT_SIZE = 13
+CAPTION_SIZE = 11.5
 
 
 def load_domain_bs0() -> dict[str, float]:
@@ -95,11 +112,12 @@ def style_axis(ax) -> None:
     ax.spines["bottom"].set_color(BASELINE)
     ax.yaxis.grid(True, color=GRIDLINE, linewidth=0.9, zorder=0)
     ax.set_axisbelow(True)
-    ax.tick_params(axis="both", colors=INK_MUTED, labelsize=10)
+    ax.tick_params(axis="both", colors=INK_MUTED, labelsize=TICK_SIZE)
     ax.axhline(0, color=BASELINE, linewidth=1.0, zorder=1)
 
 
-def plot_panel(ax, data: dict[str, float], color: str, title: str, value_suffix: dict[str, str] | None = None) -> None:
+def plot_panel(ax, data: dict[str, float], color: str, title: str,
+                value_suffix: dict[str, str] | None = None) -> None:
     x = np.arange(len(MODALITIES))
     values = [data[m] for m in MODALITIES]
     bars = ax.bar(x, values, 0.5, color=color, edgecolor="white", linewidth=0.6, zorder=2)
@@ -107,11 +125,12 @@ def plot_panel(ax, data: dict[str, float], color: str, title: str, value_suffix:
         labels = [f"{v:.3f}\n{value_suffix[m]}" for v, m in zip(values, MODALITIES)]
     else:
         labels = [f"{v:.3f}" for v in values]
-    ax.bar_label(bars, labels=labels, fontsize=9, padding=3, color=INK_SECONDARY, linespacing=1.6)
+    ax.bar_label(bars, labels=labels, fontsize=ANNOT_SIZE, padding=3, color=INK_SECONDARY,
+                 fontweight="bold", linespacing=1.6)
     ax.set_xticks(x)
-    ax.set_xticklabels([MODALITY_DISPLAY[m] for m in MODALITIES], fontsize=11, color=INK_PRIMARY)
-    ax.set_ylabel("Adjusted Rand Index", fontsize=10.5, color=INK_SECONDARY)
-    ax.set_title(title, fontsize=13, color=INK_PRIMARY, pad=12)
+    ax.set_xticklabels([MODALITY_DISPLAY[m] for m in MODALITIES], fontsize=LABEL_SIZE, color=INK_PRIMARY)
+    ax.set_ylabel("Adjusted Rand Index", fontsize=LABEL_SIZE, color=INK_SECONDARY)
+    ax.set_title(title, fontsize=TITLE_SIZE, fontweight="bold", color=INK_PRIMARY, pad=14)
     ax.set_ylim(-0.05, 1.08)
     style_axis(ax)
 
@@ -119,21 +138,52 @@ def plot_panel(ax, data: dict[str, float], color: str, title: str, value_suffix:
 def main() -> None:
     plt.rcParams["font.family"] = "sans-serif"
     plt.rcParams["font.sans-serif"] = ["DejaVu Sans", "Arial", "Helvetica"]
+    plt.rcParams.update({
+        "font.size": LABEL_SIZE,
+        "axes.titlesize": TITLE_SIZE,
+        "axes.titleweight": "bold",
+        "axes.labelsize": LABEL_SIZE,
+        "xtick.labelsize": TICK_SIZE,
+        "ytick.labelsize": TICK_SIZE,
+    })
 
     domain_data = load_domain_bs0()
     celltype_data = load_celltype_tuned()
     domain_sigma_labels = {m: "σ=0" for m in MODALITIES}
     celltype_sigma_labels = {m: f"σ={BATCH_SIGMA[m]}" for m in MODALITIES}
 
-    fig, axes = plt.subplots(1, 2, figsize=(9.5, 4.2))
+    fig, axes = plt.subplots(1, 2, figsize=(10.5, 5.4))
+    # Headline: the one-sentence finding this panel exists to show, same role
+    # as Figure 2's bold figure.suptitle -- a reader who only skims the panel
+    # titles/bars below should still leave with the actual punchline: domain
+    # structure holds up across resolutions, cell-type identity collapses once
+    # real batch effects + spatial aggregation are both in play.
+    fig.suptitle(
+        "Spatial domain structure survives aggregation; cell-type identity does not",
+        fontsize=SUPTITLE_SIZE, fontweight="bold", color=INK_PRIMARY, y=1.01,
+    )
     plot_panel(axes[0], domain_data, COLOR_DOMAIN, "Spatial Domain Recovery", value_suffix=domain_sigma_labels)
     plot_panel(axes[1], celltype_data, COLOR_CELLTYPE, "Cell-type Recovery", value_suffix=celltype_sigma_labels)
-    fig.tight_layout()
+    # Caption: spells out what "ceiling" / "real pipeline" mean and why the
+    # two panels use different data/batch conditions on purpose -- without
+    # this the sigma annotations on the bars are the only hint, and a reader
+    # could easily mistake the two panels for a fair apples-to-apples domain-
+    # vs-cell-type comparison rather than two different, deliberately chosen
+    # measurement regimes (see this script's module docstring for the full
+    # rationale).
+    fig.text(
+        0.5, -0.04,
+        "Left: strong domain-mix data with no batch effect (BANKSY+Harmony) — an upper bound on\n"
+        "recoverable domain signal. Right: each modality's own canonical weak-mix data with its\n"
+        "tuned batch effect (plain PCA→Harmony→Leiden) — the pipeline as run for the rest of the paper.",
+        ha="center", va="top", fontsize=CAPTION_SIZE, color=INK_MUTED,
+    )
+    fig.tight_layout(rect=(0, 0.04, 1, 1))
 
     out_dir = FIG3_DIR / "ari_recovery_summary"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / "domain_vs_celltype_recovery.png"
-    fig.savefig(out_path, dpi=300, facecolor="white")
+    fig.savefig(out_path, dpi=300, facecolor="white", bbox_inches="tight")
     plt.close(fig)
     print(f"[save] {out_path}")
 

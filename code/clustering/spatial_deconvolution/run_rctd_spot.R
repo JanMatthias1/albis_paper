@@ -45,9 +45,18 @@ suppressPackageStartupMessages({
   library(ggplot2)
 })
 
-CELL_H5AD <- "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/log_mu_-2.5_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad"
+# CELL_H5AD/OUT_DIR are overridable via env vars so an independent-seed (or
+# any other) reference comparison can reuse this script unmodified -- unset,
+# both default to the canonical run (cell tag seed=2025, matching Figure 2/3/4).
+CELL_H5AD <- Sys.getenv(
+  "RCTD_CELL_H5AD",
+  "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/log_mu_-2.5_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad"
+)
 SPOT_H5AD <- "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad"
-OUT_DIR <- "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot"
+OUT_DIR <- Sys.getenv(
+  "RCTD_OUT_DIR",
+  "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot"
+)
 DOUBLET_MODE <- "full"
 N_CELL_TYPES <- 8
 MAX_CORES <- as.integer(Sys.getenv("SLURM_CPUS_PER_TASK", "4"))
@@ -152,6 +161,15 @@ cat("\n[score] ", length(common), " / ", ncol(query_counts),
     " spots have an RCTD estimate (rest failed QC/min-UMI inside RCTD)\n", sep = "")
 est <- weights[common, , drop = FALSE]
 truth <- true_frac[common, , drop = FALSE]
+
+# Wide-format estimated fractions, read by plot_rctd_results.py for the
+# spatial-zoom/error-boxplot figures (previously produced as a manual
+# one-off export, not by this script -- added here so a fresh run is
+# reproducible without that undocumented step).
+write.csv(
+  data.frame(spot_id = common, est, check.names = FALSE),
+  file.path(OUT_DIR, "estimated_fractions_wide.csv"), row.names = FALSE
+)
 
 safe_cor <- function(a, b) if (sd(a) == 0 || sd(b) == 0) NA_real_ else cor(a, b)
 

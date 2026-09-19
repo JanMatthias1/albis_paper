@@ -39,6 +39,7 @@ support and the data doesn't need).
 """
 
 import os
+import sys
 
 import matplotlib
 
@@ -53,7 +54,13 @@ import pandas as pd
 import anndata as ad
 
 SPOT_H5AD = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad"
-OUT_DIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot"
+# The query (spot) h5ad above is shared by every RCTD run regardless of
+# which reference seed produced it (run_rctd_spot.R hardcodes the same
+# SPOT_H5AD for the canonical run and all run_rctd_spot_independent_seed.sh
+# array tasks) -- only OUT_DIR (which reference/estimates to read and where
+# to write the plots) varies, so it's the one thing made overridable here.
+OUT_DIR = sys.argv[1] if len(sys.argv) > 1 else \
+    "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot"
 CELL_TYPES = [f"type{i}" for i in range(1, 9)]
 
 # This project's established cell_type_true identity colors -- tab20 applied

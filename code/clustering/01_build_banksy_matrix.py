@@ -96,11 +96,6 @@ def parse_args() -> argparse.Namespace:
         "--plot-colors", nargs="+", default=["slice_id", "domain_true", "cell_type_true"],
         help="obs columns to color the diagnostic PCA/UMAP plots by.",
     )
-    parser.add_argument(
-        "--use-pre-batch", action="store_true",
-        help="oracle run: swap X <- layers['counts_pre_batch'] (no per-slice batch effect) "
-             "before staggering/normalising. Mirrors 3D_stagate.py's --use-pre-batch.",
-    )
     args = parser.parse_args()
 
     root = SIM_PAPER_DIR / "data" / "noisy" / args.packing_tag
@@ -184,12 +179,7 @@ def main() -> None:
     adata = sc.read_h5ad(args.input)
     print(f"[load] AnnData shape: {adata.n_obs} x {adata.n_vars}")
 
-    if args.use_pre_batch:
-        if "counts_pre_batch" not in adata.layers:
-            raise SystemExit("--use-pre-batch: layers['counts_pre_batch'] not in this h5ad")
-        adata.X = adata.layers["counts_pre_batch"].copy()
-        del adata.layers["counts_pre_batch"]
-        print("[oracle] X <- counts_pre_batch (no per-slice batch effect)")
+    # Use post-resampling X at every batch sigma, including zero.
 
     # ── stagger spatial coordinates PER SLICE ────────────────────────────────
     # Every slice reuses the same local x/y coordinate range (they're all the

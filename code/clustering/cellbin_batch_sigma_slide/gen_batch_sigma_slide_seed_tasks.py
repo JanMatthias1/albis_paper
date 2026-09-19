@@ -26,10 +26,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-# Existing points already on disk at data/figure_3/cellbin_batch_sigma_slide/<mod>/bs<bs>/
-# (cell's 0 and 1.5 live at data/figure_3/banksy_batch_compare/cell/{prebatch,tuned}
-# instead, per plot_batch_sigma_slide_final.py's COMPARE_ENDPOINTS -- still valid
-# canonical/prebatch baselines, just built under the older sweep's directory layout).
+# Original grid; preserve row order for already submitted array jobs.
 EXISTING_BS = {
     "cell": [0, 0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.5],
     "bin": [0, 0.25, 0.30, 0.35, 0.40, 0.45, 0.7],
@@ -60,6 +57,10 @@ def build_tasks() -> list[tuple[str, float, str]]:
             tasks.append((mod, bs, ""))  # baseline, no --seed flag
             for seed in EXTRA_SEEDS:
                 tasks.append((mod, bs, str(seed)))
+    # Append controls so existing array indices 0-67 remain unchanged.
+    for mod in ("cell", "bin"):
+        for seed in EXTRA_SEEDS:
+            tasks.append((mod, 0.05, str(seed)))
     return tasks
 
 

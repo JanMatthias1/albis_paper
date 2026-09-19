@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=batch_slide_seeds
 #SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs/batch_slide_seeds_%A_%a.out
-#SBATCH --array=0-67%8
+#SBATCH --array=0-71%8
 #SBATCH --time=18:00:00
 #SBATCH --mem=320G
 #SBATCH --cpus-per-task=8

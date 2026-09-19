@@ -31,6 +31,28 @@ import scanpy as sc
 from pc_pairs import plot_pc_pairs, sampled_indices
 
 
+# Same type scale as code/count_distribution/count_distribution.py (Figure 2's
+# plotting script) -- sized for legibility once shrunk into a multi-panel
+# print figure, not just on-screen. Reused verbatim so every Figure 2/3 panel
+# reads at the same visual weight; only affects plot_two_dims/plot_umap_before_after
+# (the two functions --plots-only regenerates), not pc_pairs' dense small-multiples
+# grid (deliberately left at its own smaller scale, see pc_pairs.py).
+plt.rcParams.update({
+    "font.size": 14,
+    "axes.titlesize": 17,
+    "axes.titleweight": "bold",
+    "axes.labelsize": 14,
+    "xtick.labelsize": 12,
+    "ytick.labelsize": 12,
+    "legend.fontsize": 12,
+    "figure.titlesize": 17,
+    "figure.titleweight": "bold",
+})
+# Legend swatches + title, bumped up from matplotlib's tiny defaults (6/unset)
+# per explicit request (2026-09-18) -- same constants as step03_cluster_and_plot.py.
+LEGEND_MARKERSIZE = 10
+LEGEND_TITLE_SIZE = 13
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
 DEFAULT_INPUT = SIM_PAPER_DIR / "data" / "simulation_spot_z.h5ad"
@@ -46,7 +68,9 @@ VALID_MODALITIES = ("spot", "bin", "cell")
 # two panel types drift apart before).
 PANEL_FIGSIZE = (12, 6)
 PANEL_DPI = 180
-PANEL_MARGINS = dict(left=0.06, right=0.98, top=0.85, bottom=0.20, wspace=0.25)
+# Keep in sync with step03_cluster_and_plot.py's PANEL_MARGINS (see its
+# comment for why bottom is 0.25, not the original 0.20).
+PANEL_MARGINS = dict(left=0.06, right=0.98, top=0.85, bottom=0.25, wspace=0.25)
 
 
 def parse_args() -> argparse.Namespace:
@@ -128,6 +152,19 @@ def run_harmony(adata, batch_key: str, basis: str, adjusted_basis: str) -> None:
     )
 
 
+def fixed_margin_legend_ncol(categories, max_wide: int = 10) -> int:
+    """Column count for plot_umap_before_after's bottom-anchored legend, which
+    sits inside PANEL_MARGINS' fixed strip with no tight_layout/bbox_inches to
+    rescue a horizontal overflow. Short labels (slice_id "0".."9", cluster
+    labels "0".."7") fit a full wide row even at 10 categories -- verified by
+    rendering (2026-09-18), and the user explicitly asked to keep slice_id's
+    one-row layout, not to flat-cap every legend the same way. Longer labels
+    (cell_type_true "type1".."type8") overflow past the axis edge at the same
+    count, so those still wrap to a narrower 4-column row."""
+    max_label_len = max(len(str(c)) for c in categories)
+    return min(len(categories), max_wide if max_label_len <= 2 else 4)
+
+
 def pretty_label(key: str) -> str:
     """Display-friendly version of an obs column name, e.g. 'slice_id' -> 'Slice Id'."""
     return key.replace("_", " ").title()
@@ -178,7 +215,7 @@ def plot_two_dims(adata, embedding_key: str, color_key: str, output_path: Path) 
                 marker="o",
                 color="w",
                 markerfacecolor=scatter.cmap(scatter.norm(i)),
-                markersize=6,
+                markersize=LEGEND_MARKERSIZE,
                 label=label,
             )
             for i, label in enumerate(categories)
@@ -187,6 +224,7 @@ def plot_two_dims(adata, embedding_key: str, color_key: str, output_path: Path) 
         fig.legend(
             handles=handles,
             title=color_key,
+            title_fontsize=LEGEND_TITLE_SIZE,
             loc="upper center",
             bbox_to_anchor=(0.5, 0.0),
             ncol=ncol,
@@ -272,21 +310,27 @@ def plot_umap_before_after(
                 marker="o",
                 color="w",
                 markerfacecolor=scatters[-1].cmap(scatters[-1].norm(i)),
-                markersize=6,
+                markersize=LEGEND_MARKERSIZE,
                 label=label,
             )
             for i, label in enumerate(categories)
         ]
-        ncol = min(len(categories), 10)
+        ncol = fixed_margin_legend_ncol(categories)
         fig.legend(
             handles=handles,
             title=pretty_label(color_key),
+            # kept a notch below LEGEND_TITLE_SIZE (unlike the other 3 legends in
+            # this file/step03_cluster_and_plot.py) -- this legend sits inside
+            # PANEL_MARGINS' fixed bottom strip like step03's plot_umap_true_vs_predicted,
+            # so verified visually after bumping rather than assuming it fits.
+            title_fontsize=11,
             loc="upper center",
-            # y=0.14, inside the bottom margin PANEL_MARGINS reserves (axes bottom
-            # edge at y=0.20) instead of extending below the fixed canvas -- with no
-            # bbox_inches="tight" to rescue an off-canvas legend anymore, it would
+            # y=0.19, inside the bottom margin PANEL_MARGINS reserves (axes bottom
+            # edge at y=0.25 -- bumped from 0.20 alongside this legend's ncol fix,
+            # to fit a wrapped 2-row legend) instead of extending below the fixed
+            # canvas -- with no bbox_inches="tight" to rescue an off-canvas legend anymore, it would
             # otherwise render invisible instead of just untrimmed.
-            bbox_to_anchor=(0.5, 0.14),
+            bbox_to_anchor=(0.5, 0.19),
             ncol=ncol,
             frameon=False,
         )
