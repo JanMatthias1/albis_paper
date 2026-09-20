@@ -39,6 +39,11 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from manuscript_style import MODALITY_LOOKUP, apply_style
+apply_style()
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[2]
 FIG3_DIR = SIM_PAPER_DIR / "data" / "figure_3"
@@ -46,7 +51,7 @@ SLIDE_ROOT = FIG3_DIR / "cellbin_batch_sigma_slide"
 PLAIN_ROOT = FIG3_DIR / "pca_harmony_single_cell"
 
 MODALITIES = ["cell", "bin16um", "spot"]
-MODALITY_DISPLAY = {"cell": "Cell", "bin16um": "Bin (16µm)", "spot": "Spot"}
+MODALITY_DISPLAY = {"cell": "Cell", "bin16um": "Bin (16 µm)", "spot": "Spot"}
 # folder under cellbin_batch_sigma_slide/, and the modality name baked into
 # that folder's ari_summary_<...>.json filename (bin16um's pipeline was run
 # with --modality bin, so its file is ari_summary_bin.json, not _bin16um.json)
@@ -66,12 +71,10 @@ PLAIN_TRUE_MOD = {"cell": "cell", "bin16um": "bin", "spot": "spot"}
 # each modality's own tuned per-slice batch_sigma (see batch_sigma_slide_domain_ari_final.png)
 BATCH_SIGMA = {"cell": 1.5, "bin16um": 0.7, "spot": 0.3}
 
-COLOR_DOMAIN = "#2a78d6"    # dataviz palette slot 1, blue
-COLOR_CELLTYPE = "#eb6834"  # dataviz palette slot 2, orange
 INK_PRIMARY = "#000000"
 INK_SECONDARY = "#000000"
 INK_MUTED = "#3d3d3d"
-GRIDLINE = "#e1e0d9"
+GRIDLINE = "#DDDDDD"
 BASELINE = "#c3c2b7"
 
 # Same type scale as code/count_distribution/count_distribution.py (Figure 2's
@@ -79,11 +82,9 @@ BASELINE = "#c3c2b7"
 # print figure, not just on-screen. Reused verbatim rather than re-derived so
 # every figure in the paper reads at the same visual weight.
 TITLE_SIZE = 17
-SUPTITLE_SIZE = 19
-LABEL_SIZE = 14
+LABEL_SIZE = 16
 TICK_SIZE = 12
 ANNOT_SIZE = 13
-CAPTION_SIZE = 11.5
 
 
 def load_domain_bs0() -> dict[str, float]:
@@ -116,11 +117,11 @@ def style_axis(ax) -> None:
     ax.axhline(0, color=BASELINE, linewidth=1.0, zorder=1)
 
 
-def plot_panel(ax, data: dict[str, float], color: str, title: str,
+def plot_panel(ax, data: dict[str, float], title: str,
                 value_suffix: dict[str, str] | None = None) -> None:
     x = np.arange(len(MODALITIES))
     values = [data[m] for m in MODALITIES]
-    bars = ax.bar(x, values, 0.5, color=color, edgecolor="white", linewidth=0.6, zorder=2)
+    bars = ax.bar(x, values, 0.5, color=[MODALITY_LOOKUP[m] for m in MODALITIES], edgecolor="white", linewidth=0.6, zorder=2)
     if value_suffix:
         labels = [f"{v:.3f}\n{value_suffix[m]}" for v, m in zip(values, MODALITIES)]
     else:
@@ -153,32 +154,9 @@ def main() -> None:
     celltype_sigma_labels = {m: f"σ={BATCH_SIGMA[m]}" for m in MODALITIES}
 
     fig, axes = plt.subplots(1, 2, figsize=(10.5, 5.4))
-    # Headline: the one-sentence finding this panel exists to show, same role
-    # as Figure 2's bold figure.suptitle -- a reader who only skims the panel
-    # titles/bars below should still leave with the actual punchline: domain
-    # structure holds up across resolutions, cell-type identity collapses once
-    # real batch effects + spatial aggregation are both in play.
-    fig.suptitle(
-        "Spatial domain structure survives aggregation; cell-type identity does not",
-        fontsize=SUPTITLE_SIZE, fontweight="bold", color=INK_PRIMARY, y=1.01,
-    )
-    plot_panel(axes[0], domain_data, COLOR_DOMAIN, "Spatial Domain Recovery", value_suffix=domain_sigma_labels)
-    plot_panel(axes[1], celltype_data, COLOR_CELLTYPE, "Cell-type Recovery", value_suffix=celltype_sigma_labels)
-    # Caption: spells out what "ceiling" / "real pipeline" mean and why the
-    # two panels use different data/batch conditions on purpose -- without
-    # this the sigma annotations on the bars are the only hint, and a reader
-    # could easily mistake the two panels for a fair apples-to-apples domain-
-    # vs-cell-type comparison rather than two different, deliberately chosen
-    # measurement regimes (see this script's module docstring for the full
-    # rationale).
-    fig.text(
-        0.5, -0.04,
-        "Left: strong domain-mix data with no batch effect (BANKSY+Harmony) — an upper bound on\n"
-        "recoverable domain signal. Right: each modality's own canonical weak-mix data with its\n"
-        "tuned batch effect (plain PCA→Harmony→Leiden) — the pipeline as run for the rest of the paper.",
-        ha="center", va="top", fontsize=CAPTION_SIZE, color=INK_MUTED,
-    )
-    fig.tight_layout(rect=(0, 0.04, 1, 1))
+    plot_panel(axes[0], domain_data, "Spatial Domain Recovery", value_suffix=domain_sigma_labels)
+    plot_panel(axes[1], celltype_data, "Cell-type Recovery", value_suffix=celltype_sigma_labels)
+    fig.tight_layout()
 
     out_dir = FIG3_DIR / "ari_recovery_summary"
     out_dir.mkdir(parents=True, exist_ok=True)

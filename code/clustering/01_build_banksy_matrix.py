@@ -114,44 +114,29 @@ def parse_args() -> argparse.Namespace:
 # ── plotting helpers ──────────────────────────────────────────────────────
 
 def make_color_lookup(labels, cmap=None):
-    """Deterministic, collision-free label -> RGBA mapping, scales past 20 categories."""
-    label_list = sorted(pd.unique(labels))
-    n = len(label_list)
-
-    if cmap is not None:
-        cm = plt.get_cmap(cmap)
-        if hasattr(cm, "colors") and len(cm.colors) >= n:
-            return dict(zip(label_list, list(cm.colors)[:n]))
-
-    if n <= 10:
-        colors = list(plt.get_cmap("tab10").colors)[:n]
-    elif n <= 20:
-        colors = list(plt.get_cmap("tab20").colors)[:n]
-    elif n <= 60:
-        colors = (
-            list(plt.get_cmap("tab20").colors)
-            + list(plt.get_cmap("tab20b").colors)
-            + list(plt.get_cmap("tab20c").colors)
-        )[:n]
-    else:
-        colors = [mcolors.hsv_to_rgb([i / n, 0.65, 0.95]) for i in range(n)]
-
-    return dict(zip(label_list, colors))
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from manuscript_style import category_color, category_order
+    key = labels.name or "slice_id"
+    return {label: category_color(label, key) for label in category_order(labels)}
 
 
 def scatter_by_label(ax, coords, labels_series, title, cmap=None, axis_labels=("dim 1", "dim 2")):
-    lookup = make_color_lookup(labels_series, cmap=cmap)
-    label_list = list(lookup.keys())
-    point_colors = labels_series.map(lookup).tolist()
-
-    ax.scatter(coords[:, 0], coords[:, 1], c=point_colors, s=0.3, linewidths=0, alpha=0.4, rasterized=True)
-
-    n = len(label_list)
-    handles = [mpatches.Patch(color=lookup[s], label=s) for s in label_list]
-    ax.legend(handles=handles, fontsize=5, loc="best", frameon=False, ncol=max(1, math.ceil(n / 20)))
-    ax.set_title(title, fontsize=9)
-    ax.set_xlabel(axis_labels[0])
-    ax.set_ylabel(axis_labels[1])
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from manuscript_style import apply_style, scatter_colors, legend_handles, pretty_label
+    apply_style()
+    key = labels_series.name or "slice_id"
+    kwargs, labels, colors = scatter_colors(labels_series.to_frame(name=key), key)
+    ax.scatter(coords[:, 0], coords[:, 1], **kwargs, s=0.3, linewidths=0,
+               alpha=0.4, rasterized=True)
+    ax.legend(handles=legend_handles(labels, colors), title=pretty_label(key),
+              fontsize=12, title_fontsize=13, loc="upper center",
+              bbox_to_anchor=(0.5, -0.18), frameon=False, ncol=min(len(labels), 4))
+    ax.set_title(title, fontsize=17, fontweight="bold")
+    ax.set_xlabel(axis_labels[0], fontsize=16)
+    ax.set_ylabel(axis_labels[1], fontsize=16)
+    ax.tick_params(labelsize=12)
 
 
 def save_embedding_plot(embedding, obs, col, title, path, cmap="tab20", axis_labels=("dim 1", "dim 2")):
@@ -161,7 +146,7 @@ def save_embedding_plot(embedding, obs, col, title, path, cmap="tab20", axis_lab
     fig, ax = plt.subplots(figsize=(8, 6))
     scatter_by_label(ax, embedding, obs[col].astype(str), title, cmap=cmap, axis_labels=axis_labels)
     fig.tight_layout()
-    fig.savefig(path, dpi=150, bbox_inches="tight")
+    fig.savefig(path, dpi=300, bbox_inches="tight")
     plt.close(fig)
     print(f"  [plot] saved {path.name}")
 

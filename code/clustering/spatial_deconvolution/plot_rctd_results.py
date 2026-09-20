@@ -1,41 +1,9 @@
 #!/usr/bin/env python
-"""
-Figure 3 -- RCTD spot deconvolution, presentation plots.
+"""Plot saved RCTD estimates using the manuscript cell-type palette.
 
-Reads run_rctd_spot.R/.sh's output (data/figure_3/spatial_deconvolution/RCTD/spot/)
-and produces two figures:
-
-  rctd_spatial_zoom.png   -- one representative slice (slice_id=5, the
-      project's usual "representative near-equatorial interior section"),
-      cropped to a sub-region so individual spots are visible as actual
-      spot-radius circles (not a dense blur). Rows = cell type, columns =
-      [true fraction, RCTD estimated fraction]. Each row is colored on its
-      own 0-1 sequential ramp built from that cell type's own identity hue
-      (CELLTYPE_COLORS below), matching the tab20-derived palette already
-      used for cell_type_true across every Figure 3 UMAP (verified directly
-      off data/figure_3/pca_harmony_single_cell/cell/leiden_pca_qc_celltype_matched/
-      plots/umap_true_vs_predicted_cell_type_true.png's legend swatches,
-      2026-09-18) -- so a reader who already knows "type3 = light green"
-      from those UMAPs recognizes the same identity here, rather than
-      learning a second, unrelated color code for the same 8 categories.
-      Since hue now differs per row, each row gets its own compact
-      colorbar (a single shared bar can't represent 8 different hues).
-
-  rctd_error_boxplot.png -- per-cell-type quantification: box plot of
-      per-spot absolute error |estimated - true| (the standard
-      distributional error metric), one box per cell type, with that
-      type's overall Pearson r (from per_celltype_metrics.csv, already
-      computed by run_rctd_spot.R) annotated above each box. RMSE is the
-      root-mean-square of the same per-spot errors the box shows; PCC is
-      an aggregate across all spots and has no natural per-spot
-      distribution, hence the annotation rather than a second box.
-
-Color: sequential blue (one hue, light->dark) for magnitude (fraction),
-per the project's dataviz convention -- never a rainbow for a continuous
-quantity. The 8 error boxes share one neutral color (cell type is already
-encoded by x-position + label; coloring each box a different hue would add
-an 8-way categorical rainbow the palette's own all-pairs cap doesn't
-support and the data doesn't need).
+Spatial fractions use per-type sequential ramps. Error violins use the
+same type identity colors as the cell-type UMAPs; no RCTD fitting occurs.
+An optional positional argument selects the existing RCTD output directory.
 """
 
 import os
@@ -63,22 +31,11 @@ OUT_DIR = sys.argv[1] if len(sys.argv) > 1 else \
     "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot"
 CELL_TYPES = [f"type{i}" for i in range(1, 9)]
 
-# This project's established cell_type_true identity colors -- tab20 applied
-# to the 8 alphabetically-sorted category codes, exactly as
-# code/clustering/01.2_pca_harmony.py's color_values()/plot_umap_before_after()
-# (and step03_cluster_and_plot.py's plot_umap_true_vs_predicted) already do
-# for every Figure 3 cell-type UMAP. Confirmed against the actual rendered
-# legend, not just re-derived from the tab20 formula.
-CELLTYPE_COLORS = {
-    "type1": "#1f77b4",  # blue
-    "type2": "#ff7f0e",  # orange
-    "type3": "#98df8a",  # light green
-    "type4": "#9467bd",  # purple
-    "type5": "#c49c94",  # tan
-    "type6": "#7f7f7f",  # gray
-    "type7": "#dbdb8d",  # olive
-    "type8": "#9edae5",  # light cyan
-}
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from manuscript_style import CELLTYPE_COLORS as MANUSCRIPT_CELLTYPE_COLORS, apply_style
+apply_style()
+CELLTYPE_COLORS = {f"type{i}": MANUSCRIPT_CELLTYPE_COLORS[f"Cell Type {i}"] for i in range(1, 9)}
 
 
 def sequential_cmap_for(hex_color, light_frac=0.85, dark_frac=0.35):
@@ -97,9 +54,9 @@ SEQ_CMAP = matplotlib.colors.LinearSegmentedColormap.from_list(
     "seq_blue", ["#cde2fb", "#6da7ec", "#2a78d6", "#0d366b"]
 )
 BOX_COLOR = "#6da7ec"   # sequential step 300 -- neutral, not a per-type hue
-BOX_EDGE = "#184f95"    # sequential step 600
+BOX_EDGE = "#4A4A4A"    # sequential step 600
 ANNOT_COLOR = "#eb6834"  # categorical slot 2 (orange) -- visually distinct "this is a different metric" cue
-GRID_COLOR = "#e1e0d9"
+GRID_COLOR = "#DDDDDD"
 MUTED = "#898781"
 
 SLICE_ID = "5"
@@ -160,9 +117,11 @@ def plot_spatial_zoom(true_frac, est_frac, spatial, meta, spot_radius_um,
     n_cols = pairs_per_row * 2
 
     fig, axes = plt.subplots(
-        n_rows, n_cols, figsize=(2.5 * n_cols, 2.05 * n_rows),
-        constrained_layout=True, squeeze=False,
+        n_rows, n_cols, figsize=(3.3 * n_cols, 2.7 * n_rows),
+        layout="compressed", squeeze=False,
     )
+    # Compress unused horizontal space around the fixed-aspect spatial panels.
+    fig.set_constrained_layout_pads(h_pad=0.12, w_pad=0.25, wspace=0.01)
     norm = Normalize(vmin=0, vmax=1)
 
     for idx, ct in enumerate(cell_types):
@@ -184,21 +143,21 @@ def plot_spatial_zoom(true_frac, est_frac, spatial, meta, spot_radius_um,
             for spine in ax.spines.values():
                 spine.set_color(GRID_COLOR)
             if row == 0:
-                ax.set_title(label, fontsize=11, color="#0b0b0b")
+                ax.set_title(label, fontsize=17, color="#0b0b0b")
             if col == col_true:
-                ct_label = f"Cell Type\n{ct.replace('type', '')}"
-                ax.text(-0.18, 0.5, ct_label, transform=ax.transAxes, fontsize=11,
+                ct_label = f"Cell\nType {ct.replace('type', '')}"
+                ax.text(-0.23, 0.5, ct_label, transform=ax.transAxes, fontsize=16,
                         color=CELLTYPE_COLORS[ct], fontweight="bold",
-                        ha="right", va="center", linespacing=1.3)
+                        ha="center", va="center", multialignment="center", linespacing=1.3)
 
         # Per-type colorbar -- hue differs by type, so one shared bar can't
         # represent every identity color in the figure.
         sm = ScalarMappable(norm=norm, cmap=row_cmap)
         fig.colorbar(sm, ax=axes[row, col_est], fraction=0.12, pad=0.03, aspect=8)
 
-    fig.suptitle(f"RCTD deconvolution, slice {SLICE_ID} ({n} spots)", fontsize=11, fontweight="bold")
+    fig.suptitle(f"RCTD deconvolution, slice {SLICE_ID}", fontsize=17, fontweight="bold")
     out = os.path.join(OUT_DIR, out_name)
-    fig.savefig(out, dpi=180)
+    fig.savefig(out, dpi=300)
     plt.close(fig)
     print("wrote", out)
 
@@ -208,10 +167,13 @@ def plot_error_boxplot(true_frac, est_frac):
     per-spot points, one per cell type, colored with that type's own
     identity color (CELLTYPE_COLORS) -- same palette as the spatial zoom
     figures, so this plot reads as the same 8 categories rather than an
-    unrelated color code. r (Pearson correlation, an aggregate that has no
-    per-spot distribution) is still annotated above each violin."""
+    unrelated color code. r and RMSE (aggregates that have no per-spot
+    distribution of their own -- RMSE is exactly the sqrt(mean(x^2)) of the
+    per-spot absolute errors plotted below it) are annotated above each
+    violin."""
     per_type = pd.read_csv(os.path.join(OUT_DIR, "per_celltype_metrics.csv"))
     pcc = dict(zip(per_type["cell_type"], per_type["pearson_r"]))
+    type_rmse = dict(zip(per_type["cell_type"], per_type["rmse"]))
 
     abs_err = (est_frac[CELL_TYPES] - true_frac[CELL_TYPES]).abs()
     data = [abs_err[ct].to_numpy() for ct in CELL_TYPES]
@@ -235,23 +197,28 @@ def plot_error_boxplot(true_frac, est_frac):
         ct = CELL_TYPES[i]
         body.set_facecolor(CELLTYPE_COLORS[ct])
         body.set_edgecolor(CELLTYPE_COLORS[ct])
-        body.set_alpha(0.45)
+        body.set_alpha(0.6)
         body.set_zorder(3)
 
     bp = ax.boxplot(
         data, positions=positions, widths=0.12,
         patch_artist=True, showfliers=False, zorder=4,
-        medianprops=dict(color="#0b0b0b", linewidth=1.6),
-        boxprops=dict(facecolor="white", edgecolor="#0b0b0b", linewidth=1.0),
-        whiskerprops=dict(color="#0b0b0b", linewidth=1.0),
-        capprops=dict(color="#0b0b0b", linewidth=1.0),
+        medianprops=dict(color="#2F2F2F", linewidth=1.2),
+        boxprops=dict(facecolor="white", edgecolor=BOX_EDGE, linewidth=1.0),
+        whiskerprops=dict(color=BOX_EDGE, linewidth=1.0),
+        capprops=dict(color=BOX_EDGE, linewidth=1.0),
     )
     # Headroom now scales off the (compressed) violin cap, not the raw data
     # max, so the annotation row sits in clean whitespace above every violin.
+    # Two stacked lines now (r, RMSE) need more headroom than the single-line
+    # version did.
     annot_y = pctile_cap * 1.1
     for i, ct in enumerate(CELL_TYPES):
-        ax.annotate(f"r = {pcc[ct]:.2f}", xy=(i, annot_y), ha="center",
-                    fontsize=9, color="#0b0b0b", fontweight="bold")
+        ax.annotate(f"r = {pcc[ct]:.2f}", xy=(i, annot_y),
+                    xytext=(0, 17), textcoords="offset points", ha="center",
+                    va="bottom", fontsize=11, color=BOX_EDGE, fontweight="normal")
+        ax.annotate(f"RMSE = {type_rmse[ct]:.3f}", xy=(i, annot_y),
+                    ha="center", va="bottom", fontsize=9.5, color=BOX_EDGE)
 
     ax.set_xticks(positions)
     ax.set_xticklabels(
@@ -260,9 +227,9 @@ def plot_error_boxplot(true_frac, est_frac):
     for tick, ct in zip(ax.get_xticklabels(), CELL_TYPES):
         tick.set_color(CELLTYPE_COLORS[ct])
         tick.set_fontweight("bold")
-    ax.set_ylabel("per-spot absolute error  |estimated - true fraction|")
+    ax.set_ylabel("Spot absolute error")
     ax.set_title("RCTD deconvolution accuracy by cell type", fontweight="bold")
-    ax.set_ylim(0, pctile_cap * 1.25)
+    ax.set_ylim(0, pctile_cap * 1.4)
     ax.grid(axis="y", color=GRID_COLOR, linewidth=0.8, zorder=0)
     ax.set_axisbelow(True)
     for spine in ("top", "right"):
@@ -272,7 +239,7 @@ def plot_error_boxplot(true_frac, est_frac):
 
     fig.tight_layout()
     out = os.path.join(OUT_DIR, "rctd_error_boxplot.png")
-    fig.savefig(out, dpi=180)
+    fig.savefig(out, dpi=300)
     plt.close(fig)
     print("wrote", out)
 

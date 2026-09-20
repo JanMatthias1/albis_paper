@@ -16,23 +16,12 @@ import numpy as np
 import pandas as pd
 
 
-def make_color_lookup(labels: pd.Series) -> dict[str, tuple[float, float, float]]:
-    label_list = sorted(pd.unique(labels.astype(str)))
-    n_labels = len(label_list)
-    if n_labels <= 10:
-        colors = list(plt.get_cmap("tab10").colors)[:n_labels]
-    elif n_labels <= 20:
-        colors = list(plt.get_cmap("tab20").colors)[:n_labels]
-    elif n_labels <= 60:
-        colors = (
-            list(plt.get_cmap("tab20").colors)
-            + list(plt.get_cmap("tab20b").colors)
-            + list(plt.get_cmap("tab20c").colors)
-        )[:n_labels]
-    else:
-        colors = [mcolors.hsv_to_rgb([i / n_labels, 0.65, 0.95]) for i in range(n_labels)]
-
-    return dict(zip(label_list, colors))
+def make_color_lookup(labels: pd.Series):
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from manuscript_style import category_color, category_order
+    key = labels.name or "slice_id"
+    return {label: category_color(label, key) for label in category_order(labels)}
 
 
 def sampled_indices(n_obs: int, max_points: int, no_sample: bool, random_state: int) -> np.ndarray:
@@ -98,11 +87,13 @@ def plot_pc_pair_grid(
         handles = [mpatches.Patch(color=color, label=category) for category, color in lookup.items()]
         fig.legend(
             handles=handles,
-            fontsize=6,
-            loc="center left",
-            bbox_to_anchor=(1.0, 0.5),
+            fontsize=12,
+            title="Slice ID" if color_key == "slice_id" else color_key,
+            title_fontsize=13,
+            loc="upper center",
+            bbox_to_anchor=(0.5, 0.0),
             frameon=False,
-            ncol=max(1, math.ceil(len(lookup) / 25)),
+            ncol=min(len(lookup), 10),
         )
     else:
         legend_note = f" | legend suppressed: {len(lookup)} levels"
@@ -112,9 +103,9 @@ def plot_pc_pair_grid(
 
     fig.suptitle(
         f"{label} PC pairs by {color_key} | N={coords.shape[0]:,}{legend_note}",
-        fontsize=11,
+        fontsize=17,
     )
-    fig.tight_layout(rect=[0, 0, 0.92, 0.97])
+    fig.tight_layout(rect=[0, 0, 1, 0.97])
     fig.savefig(output_path, dpi=dpi, bbox_inches="tight")
     plt.close(fig)
 

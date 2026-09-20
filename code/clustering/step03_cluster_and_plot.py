@@ -20,37 +20,27 @@ Example:
 from __future__ import annotations
 
 import argparse
+import sys
+import json
 from pathlib import Path
 
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.transforms import Bbox
 import numpy as np
 import pandas as pd
 import scanpy as sc
 
 
-# Same type scale as code/count_distribution/count_distribution.py (Figure 2's
-# plotting script) and 01.2_pca_harmony.py -- sized for legibility once shrunk
-# into a multi-panel print figure, not just on-screen.
-plt.rcParams.update({
-    "font.size": 14,
-    "axes.titlesize": 17,
-    "axes.titleweight": "bold",
-    "axes.labelsize": 14,
-    "xtick.labelsize": 12,
-    "ytick.labelsize": 12,
-    "legend.fontsize": 12,
-    "figure.titlesize": 17,
-    "figure.titleweight": "bold",
-})
-# Legend swatches + title, bumped up from matplotlib's tiny defaults (6/unset)
-# per explicit request (2026-09-18) after seeing umap_true_vs_predicted_domain_true.png
-# -- the category dot and the "Domain True"/"Cell Type True" legend title were
-# reading small next to the new bold panel titles above.
-LEGEND_MARKERSIZE = 10
-LEGEND_TITLE_SIZE = 13
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from manuscript_style import (
+    apply_style, scatter_colors, legend_handles, pretty_label,
+    LEGEND_MARKERSIZE, LEGEND_TITLE_SIZE, PANEL_FIGSIZE, PANEL_MARGINS, PANEL_EXPORT_BOTTOM,
+    matched_labels,
+)
+apply_style()
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
@@ -58,22 +48,7 @@ CLUSTERING_ROOT = SIM_PAPER_DIR / "data" / "clustering"
 DEFAULT_INPUT = CLUSTERING_ROOT / "spot" / "pca_harmony" / "simulation_spot_z_pca_harmony.h5ad"
 DEFAULT_OUTPUT_DIR = CLUSTERING_ROOT
 
-# Shared with 01.2_pca_harmony.py's plot_umap_before_after so the two side-by-side UMAP
-# comparison panels in Figure 3 come out at the same aspect ratio AND the same
-# axes-box geometry within that canvas (see that function for why
-# bbox_inches="tight"/tight_layout aren't used here -- both make the final
-# layout depend on each plot's own title/legend content, which is exactly what
-# made the two panel types drift apart before).
-PANEL_FIGSIZE = (12, 6)
-PANEL_DPI = 180
-# bottom bumped 0.20 -> 0.25 (2026-09-18, alongside the legend markersize/title
-# bump below) -- an 8-category legend now wraps to 2 rows (see ncol cap in
-# plot_umap_true_vs_predicted) and the old 0.20 strip was too short to fit
-# title + 2 rows without the bottom row running off the canvas edge (verified
-# by rendering cell's 8-type legend before/after this change). Keep in sync
-# with 01.2_pca_harmony.py's PANEL_MARGINS -- both must match exactly for the
-# two side-by-side UMAP panel types to share the same axes-box geometry.
-PANEL_MARGINS = dict(left=0.06, right=0.98, top=0.85, bottom=0.25, wspace=0.25)
+PANEL_DPI = 300
 VALID_MODALITIES = ("spot", "bin", "cell")
 VALID_ALGORITHMS = ("leiden", "louvain")
 VALID_PIPELINES = ("pca_harmony",)
@@ -126,11 +101,6 @@ def resolution_tag(resolution: float) -> str:
     return str(resolution).replace(".", "p").replace("-", "m")
 
 
-def pretty_label(key: str) -> str:
-    """Display-friendly version of an obs column name, e.g. 'domain_true' -> 'Domain True'."""
-    return key.replace("_", " ").title()
-
-
 def fixed_margin_legend_ncol(categories, max_wide: int = 10) -> int:
     """Column count for plot_umap_true_vs_predicted's bottom-anchored legend,
     which sits inside PANEL_MARGINS' fixed strip with no tight_layout/
@@ -155,16 +125,16 @@ def color_values(obs: pd.DataFrame, key: str):
 
 def plot_umap(adata, color_key: str, output_path: Path) -> None:
     coords = np.asarray(adata.obsm["X_umap"])
-    colors, categories = color_values(adata.obs, color_key)
+    color_args, categories, swatches = scatter_colors(adata.obs, color_key,
+        "cell_type_true" if color_key == "cluster_label" and "cell_type_true" in adata.obs else None)
 
     fig, ax = plt.subplots(figsize=(6, 5))
     scatter = ax.scatter(
         coords[:, 0],
         coords[:, 1],
-        c=colors,
+        **color_args,
         s=5,
         linewidths=0,
-        cmap="tab20" if categories is not None else "viridis",
         alpha=0.85,
     )
     ax.set_xlabel("UMAP 1")
@@ -174,29 +144,19 @@ def plot_umap(adata, color_key: str, output_path: Path) -> None:
     if categories is None:
         fig.colorbar(scatter, ax=ax, fraction=0.046, pad=0.04, label=pretty_label(color_key))
     else:
-        handles = [
-            plt.Line2D(
-                [0],
-                [0],
-                marker="o",
-                color="w",
-                markerfacecolor=scatter.cmap(scatter.norm(i)),
-                markersize=LEGEND_MARKERSIZE,
-                label=label,
-            )
-            for i, label in enumerate(categories)
-        ]
+        handles = legend_handles(categories, swatches)
         ax.legend(
             handles=handles,
             title=pretty_label(color_key),
             title_fontsize=LEGEND_TITLE_SIZE,
-            bbox_to_anchor=(1.02, 1),
-            loc="upper left",
+            bbox_to_anchor=(0.5, -0.18),
+            loc="upper center",
+            ncol=2 if max(map(len, categories)) > 5 else min(len(categories), 4),
             frameon=False,
         )
 
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    fig.savefig(output_path, dpi=300, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -209,35 +169,39 @@ def plot_umap_true_vs_predicted(adata, true_key: str, pred_key: str, output_path
     ylim = (coords[:, 1].min() - 1, coords[:, 1].max() + 1)
 
     fig, axes = plt.subplots(1, 2, figsize=PANEL_FIGSIZE)
+    legends = []
     for ax, key, title in (
         (axes[0], true_key, f"Ground truth: {pretty_label(true_key)}"),
         (axes[1], pred_key, f"Predicted: {pretty_label(pred_key)}"),
     ):
-        colors, categories = color_values(adata.obs, key)
-        scatter = ax.scatter(coords[:, 0], coords[:, 1], c=colors, s=5, linewidths=0, cmap="tab20", alpha=0.85)
+        color_args, categories, swatches = scatter_colors(
+            adata.obs, key, true_key if key == pred_key else None)
+        ax.scatter(coords[:, 0], coords[:, 1], **color_args, s=5, linewidths=0, alpha=0.85)
         ax.set_xlabel("UMAP 1")
         ax.set_ylabel("UMAP 2")
         ax.set_title(title)
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
         if categories is not None:
-            handles = [
-                plt.Line2D([0], [0], marker="o", color="w", markerfacecolor=scatter.cmap(scatter.norm(i)), markersize=LEGEND_MARKERSIZE, label=label)
-                for i, label in enumerate(categories)
-            ]
-            # fontsize kept modest (not LEGEND_TITLE_SIZE-scale) -- this legend sits
-            # inside PANEL_MARGINS' fixed bottom strip (no tight_layout/bbox_inches to
-            # rescue an overflow); ncol via fixed_margin_legend_ncol so short labels
-            # (cluster_label "0".."7") still get one wide row while long labels
-            # (cell_type_true "type1".."type8") wrap narrower -- see that helper.
-            ax.legend(handles=handles, title=pretty_label(key), title_fontsize=11, bbox_to_anchor=(0.5, -0.15), loc="upper center", ncol=fixed_margin_legend_ncol(categories), frameon=False, fontsize=9)
+            legend = ax.legend(handles=legend_handles(categories, swatches), title=pretty_label(key),
+                      title_fontsize=LEGEND_TITLE_SIZE, bbox_to_anchor=(0.5, -0.17),
+                      loc="upper center", ncol=max(1, (len(categories) + 1) // 2),
+                      frameon=False, fontsize=12, columnspacing=0.7,
+                      handlelength=1.0, handletextpad=0.3)
+            legends.append(legend)
+    # Record the display-only correspondence; cluster IDs and scores are unchanged.
+    output_path.with_suffix(".colors.json").write_text(json.dumps({
+        "ground_truth": true_key, "predicted": pred_key,
+        "matching": matched_labels(adata.obs, pred_key, true_key),
+        "unmatched_color": "#B9C0C7",
+    }, indent=2))
 
-    # Fixed (not tight_layout-computed) margins, identical to 01.2_pca_harmony.py's
-    # plot_umap_before_after, so the two side-by-side UMAP panel types produce
-    # pixel-identical axes boxes -- not just the same canvas size -- regardless of
-    # each plot's own title/legend content (see PANEL_MARGINS).
+    # A shared crop keeps both the canvas and axes identical across paired
+    # UMAPs, independent of whether the legend has one or two rows.
     fig.subplots_adjust(**PANEL_MARGINS)
-    fig.savefig(output_path, dpi=PANEL_DPI)
+    crop = Bbox.from_extents(0, PANEL_EXPORT_BOTTOM,
+                             fig.get_figwidth(), fig.get_figheight())
+    fig.savefig(output_path, dpi=PANEL_DPI, bbox_inches=crop)
     plt.close(fig)
 
 
@@ -261,10 +225,10 @@ def plot_contingency_heatmap(adata, true_key: str, pred_key: str, output_path: P
     ax.set_yticklabels(frac.index)
     ax.set_xlabel(f"Predicted cluster ({pretty_label(pred_key)})")
     ax.set_ylabel(f"Ground truth ({pretty_label(true_key)})")
-    ax.set_title(f"Fraction of each {pretty_label(true_key)} category per predicted cluster")
+    ax.set_title(f"{pretty_label(true_key)} vs. predicted cluster")
     fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="fraction of row")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    fig.savefig(output_path, dpi=300, bbox_inches="tight")
     plt.close(fig)
 
 

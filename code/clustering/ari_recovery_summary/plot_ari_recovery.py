@@ -33,11 +33,16 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from manuscript_style import MODALITY_LOOKUP, apply_style
+apply_style()
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[2]
 
 MODALITY_ORDER = ["cell", "bin", "bin16um", "spot"]
-MODALITY_DISPLAY = {"cell": "Cell", "bin": "Bin (8µm)", "bin16um": "Bin (16µm)", "spot": "Spot"}
+MODALITY_DISPLAY = {"cell": "Cell", "bin": "Bin (8 µm)", "bin16um": "Bin (16 µm)", "spot": "Spot"}
 # label -> (dir under data/figure_3/pca_harmony_single_cell/, modality name in the
 # summary filename). bin16um's cell-type panel lives in its own bin16um/ dir but
 # 02_leiden_resolution_sweep.py was run with --modality bin, so the file is ari_summary_bin.json.
@@ -84,8 +89,8 @@ def plot_one(ax, data_by_pipeline: dict[str, dict[str, float]], title: str) -> N
     for i, pipeline in enumerate(pipelines):
         values = [data_by_pipeline[pipeline].get(m, np.nan) for m in MODALITY_ORDER]
         offset = (i - (n_pipelines - 1) / 2) * width
-        bars = ax.bar(x + offset, values, width, label=pipeline)
-        ax.bar_label(bars, fmt="%.3f", fontsize=8, padding=2)
+        bars = ax.bar(x + offset, values, width, label=pipeline, color=[MODALITY_LOOKUP[m] for m in MODALITY_ORDER])
+        ax.bar_label(bars, fmt="%.3f", fontsize=12, padding=2)
 
     ax.set_xticks(x)
     ax.set_xticklabels([MODALITY_DISPLAY[m] for m in MODALITY_ORDER])
@@ -111,10 +116,10 @@ def main() -> None:
 
     fig, ax = plt.subplots(figsize=(6, 4.5))
     plot_one(ax, data, GROUND_TRUTH_LABEL)
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=2, frameon=False)
+    ax.text(0.5, -0.18, PIPELINE_LABEL, transform=ax.transAxes, ha="center", fontsize=12)
     fig.tight_layout()
     out_path = args.output_dir / f"ari_recovery_{GROUND_TRUTH}.png"
-    fig.savefig(out_path, dpi=200, bbox_inches="tight")
+    fig.savefig(out_path, dpi=300, bbox_inches="tight")
     plt.close(fig)
     print(f"[save] {out_path}")
 

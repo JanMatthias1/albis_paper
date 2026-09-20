@@ -17,12 +17,15 @@ Example:
 from __future__ import annotations
 
 import argparse
+import sys
+import json
 from pathlib import Path
 
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.transforms import Bbox
 import harmonypy as hm
 import numpy as np
 import pandas as pd
@@ -31,27 +34,13 @@ import scanpy as sc
 from pc_pairs import plot_pc_pairs, sampled_indices
 
 
-# Same type scale as code/count_distribution/count_distribution.py (Figure 2's
-# plotting script) -- sized for legibility once shrunk into a multi-panel
-# print figure, not just on-screen. Reused verbatim so every Figure 2/3 panel
-# reads at the same visual weight; only affects plot_two_dims/plot_umap_before_after
-# (the two functions --plots-only regenerates), not pc_pairs' dense small-multiples
-# grid (deliberately left at its own smaller scale, see pc_pairs.py).
-plt.rcParams.update({
-    "font.size": 14,
-    "axes.titlesize": 17,
-    "axes.titleweight": "bold",
-    "axes.labelsize": 14,
-    "xtick.labelsize": 12,
-    "ytick.labelsize": 12,
-    "legend.fontsize": 12,
-    "figure.titlesize": 17,
-    "figure.titleweight": "bold",
-})
-# Legend swatches + title, bumped up from matplotlib's tiny defaults (6/unset)
-# per explicit request (2026-09-18) -- same constants as step03_cluster_and_plot.py.
-LEGEND_MARKERSIZE = 10
-LEGEND_TITLE_SIZE = 13
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from manuscript_style import (
+    apply_style, scatter_colors, legend_handles, pretty_label,
+    LEGEND_MARKERSIZE, LEGEND_TITLE_SIZE, PANEL_FIGSIZE, PANEL_MARGINS, PANEL_EXPORT_BOTTOM,
+    matched_labels,
+)
+apply_style()
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
@@ -60,17 +49,7 @@ CLUSTERING_ROOT = SIM_PAPER_DIR / "data" / "clustering"
 DEFAULT_OUTPUT = CLUSTERING_ROOT / "spot" / "pca_harmony" / "simulation_spot_z_pca_harmony.h5ad"
 VALID_MODALITIES = ("spot", "bin", "cell")
 
-# Shared with step03_cluster_and_plot.py's plot_umap_true_vs_predicted so the two
-# side-by-side UMAP comparison panels come out at the same aspect ratio AND the
-# same axes-box geometry within that canvas (see plot_umap_before_after for why
-# bbox_inches="tight"/tight_layout aren't used here -- both make the final layout
-# depend on each plot's own title/legend content, which is exactly what made the
-# two panel types drift apart before).
-PANEL_FIGSIZE = (12, 6)
-PANEL_DPI = 180
-# Keep in sync with step03_cluster_and_plot.py's PANEL_MARGINS (see its
-# comment for why bottom is 0.25, not the original 0.20).
-PANEL_MARGINS = dict(left=0.06, right=0.98, top=0.85, bottom=0.25, wspace=0.25)
+PANEL_DPI = 300
 
 
 def parse_args() -> argparse.Namespace:
@@ -165,11 +144,6 @@ def fixed_margin_legend_ncol(categories, max_wide: int = 10) -> int:
     return min(len(categories), max_wide if max_label_len <= 2 else 4)
 
 
-def pretty_label(key: str) -> str:
-    """Display-friendly version of an obs column name, e.g. 'slice_id' -> 'Slice Id'."""
-    return key.replace("_", " ").title()
-
-
 def color_values(obs: pd.DataFrame, key: str, max_categories: int = 20):
     """Numeric ID-like columns (e.g. slice_id) have few distinct values and should be
     treated as discrete categories, not a continuous colorbar -- only fall back to
@@ -189,41 +163,30 @@ def color_values(obs: pd.DataFrame, key: str, max_categories: int = 20):
 
 def plot_two_dims(adata, embedding_key: str, color_key: str, output_path: Path) -> None:
     coords = np.asarray(adata.obsm[embedding_key])
-    colors, categories = color_values(adata.obs, color_key)
+    color_args, categories, swatches = scatter_colors(adata.obs, color_key,
+        "cell_type_true" if color_key == "cluster_label" and "cell_type_true" in adata.obs else None)
 
     fig, ax = plt.subplots(figsize=(6, 5))
     scatter = ax.scatter(
         coords[:, 0],
         coords[:, 1],
-        c=colors,
+        **color_args,
         s=5,
         linewidths=0,
-        cmap="tab20" if categories is not None else "viridis",
         alpha=0.85,
     )
-    ax.set_xlabel(f"{embedding_key} 1")
-    ax.set_ylabel(f"{embedding_key} 2")
-    ax.set_title(f"{embedding_key}: {color_key}")
+    ax.set_xlabel("PC 1")
+    ax.set_ylabel("PC 2")
+    ax.set_title("Before Harmony" if "pre_harmony" in embedding_key else "After Harmony")
 
     if categories is None:
         fig.colorbar(scatter, ax=ax, fraction=0.046, pad=0.04, label=color_key)
     else:
-        handles = [
-            plt.Line2D(
-                [0],
-                [0],
-                marker="o",
-                color="w",
-                markerfacecolor=scatter.cmap(scatter.norm(i)),
-                markersize=LEGEND_MARKERSIZE,
-                label=label,
-            )
-            for i, label in enumerate(categories)
-        ]
-        ncol = min(len(categories), 10)
+        handles = legend_handles(categories, swatches)
+        ncol = min(len(categories), 4)
         fig.legend(
             handles=handles,
-            title=color_key,
+            title=pretty_label(color_key),
             title_fontsize=LEGEND_TITLE_SIZE,
             loc="upper center",
             bbox_to_anchor=(0.5, 0.0),
@@ -232,7 +195,7 @@ def plot_two_dims(adata, embedding_key: str, color_key: str, output_path: Path) 
         )
 
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    fig.savefig(output_path, dpi=300, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -276,7 +239,8 @@ def plot_umap_before_after(
     point_size: float,
     alpha: float,
 ) -> None:
-    colors, categories = color_values(adata.obs, color_key)
+    color_args, categories, swatches = scatter_colors(adata.obs, color_key,
+        "cell_type_true" if color_key == "cluster_label" and "cell_type_true" in adata.obs else None)
     pre = np.asarray(adata.obsm["X_umap_pca_pre_harmony"])
     post = np.asarray(adata.obsm["X_umap_pca_post_harmony"])
 
@@ -289,63 +253,38 @@ def plot_umap_before_after(
         scatter = ax.scatter(
             coords[:, 0],
             coords[:, 1],
-            c=colors,
+            **color_args,
             s=point_size,
             linewidths=0,
-            cmap="tab20" if categories is not None else "viridis",
-            alpha=alpha,
+                alpha=alpha,
         )
         scatters.append(scatter)
         ax.set_xlabel("UMAP 1")
         ax.set_ylabel("UMAP 2")
         ax.set_title(title)
 
+    legend = None
     if categories is None:
         fig.colorbar(scatters[-1], ax=axes, fraction=0.046, pad=0.04, label=pretty_label(color_key))
     else:
-        handles = [
-            plt.Line2D(
-                [0],
-                [0],
-                marker="o",
-                color="w",
-                markerfacecolor=scatters[-1].cmap(scatters[-1].norm(i)),
-                markersize=LEGEND_MARKERSIZE,
-                label=label,
-            )
-            for i, label in enumerate(categories)
-        ]
-        ncol = fixed_margin_legend_ncol(categories)
-        fig.legend(
+        handles = legend_handles(categories, swatches)
+        ncol = min(len(categories), 10 if color_key == "slice_id" else 4)
+        legend = fig.legend(
             handles=handles,
             title=pretty_label(color_key),
-            # kept a notch below LEGEND_TITLE_SIZE (unlike the other 3 legends in
-            # this file/step03_cluster_and_plot.py) -- this legend sits inside
-            # PANEL_MARGINS' fixed bottom strip like step03's plot_umap_true_vs_predicted,
-            # so verified visually after bumping rather than assuming it fits.
-            title_fontsize=11,
+            title_fontsize=16 if color_key == "slice_id" else LEGEND_TITLE_SIZE,
             loc="upper center",
-            # y=0.19, inside the bottom margin PANEL_MARGINS reserves (axes bottom
-            # edge at y=0.25 -- bumped from 0.20 alongside this legend's ncol fix,
-            # to fit a wrapped 2-row legend) instead of extending below the fixed
-            # canvas -- with no bbox_inches="tight" to rescue an off-canvas legend anymore, it would
-            # otherwise render invisible instead of just untrimmed.
-            bbox_to_anchor=(0.5, 0.19),
+            bbox_to_anchor=(0.5, 0.25 if color_key == "slice_id" else 0.22),
             ncol=ncol,
             frameon=False,
         )
 
-    fig.suptitle(f"PCA UMAP before vs after Harmony by {pretty_label(color_key)}", fontweight="bold")
-    # Fixed figsize + fixed subplots_adjust margins + no bbox_inches="tight" here (unlike the
-    # other plot_* functions in this file) so the saved canvas AND the axes box within it are
-    # always exactly PANEL_FIGSIZE * PANEL_DPI / PANEL_MARGINS, matching
-    # step03_cluster_and_plot.py's plot_umap_true_vs_predicted pixel-for-pixel -- both are
-    # side-by-side UMAP comparison panels shown together in Figure 3 and need to look the same
-    # size, not just have the same outer canvas. tight_layout/"tight" cropping both make the
-    # final layout depend on each plot's own legend/title content, which is why the two used to
-    # drift apart.
+    # A shared crop keeps both the canvas and axes identical across paired
+    # UMAPs, independent of whether the legend has one or two rows.
     fig.subplots_adjust(**PANEL_MARGINS)
-    fig.savefig(output_path, dpi=PANEL_DPI)
+    crop = Bbox.from_extents(0, PANEL_EXPORT_BOTTOM,
+                             fig.get_figwidth(), fig.get_figheight())
+    fig.savefig(output_path, dpi=PANEL_DPI, bbox_inches=crop)
     plt.close(fig)
 
 
@@ -422,23 +361,27 @@ def main() -> None:
         )
     umap_adata = adata[obs_idx].copy() if len(obs_idx) < adata.n_obs else adata
 
-    print("[umap] Computing UMAP before Harmony from PCA")
-    compute_umap(
-        umap_adata,
-        "X_pca_pre_harmony",
-        "X_umap_pca_pre_harmony",
-        args.n_neighbors,
-        args.random_state,
-    )
+    umap_keys = ("X_umap_pca_pre_harmony", "X_umap_pca_post_harmony")
+    if args.plots_only and all(key in umap_adata.obsm for key in umap_keys):
+        print("[plots-only] Reusing saved before/after UMAP coordinates")
+    else:
+        print("[umap] Computing UMAP before Harmony from PCA")
+        compute_umap(
+            umap_adata,
+            "X_pca_pre_harmony",
+            "X_umap_pca_pre_harmony",
+            args.n_neighbors,
+            args.random_state,
+        )
 
-    print("[umap] Computing UMAP after Harmony from PCA")
-    compute_umap(
-        umap_adata,
-        "X_pca_post_harmony",
-        "X_umap_pca_post_harmony",
-        args.n_neighbors,
-        args.random_state,
-    )
+        print("[umap] Computing UMAP after Harmony from PCA")
+        compute_umap(
+            umap_adata,
+            "X_pca_post_harmony",
+            "X_umap_pca_post_harmony",
+            args.n_neighbors,
+            args.random_state,
+        )
 
     print(f"[plot] Saving before/after UMAP plots under {plot_dir}")
     save_umap_plots(umap_adata, plot_dir, args.plot_colors, args.point_size, args.alpha)

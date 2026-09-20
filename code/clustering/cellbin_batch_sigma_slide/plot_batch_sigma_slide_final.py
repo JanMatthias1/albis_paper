@@ -18,6 +18,11 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from manuscript_style import MODALITY_LOOKUP, apply_style
+apply_style()
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[2]
 # Clustering results live here; raw simulations may live under data/noisy/.
@@ -27,25 +32,24 @@ SLIDE_ROOT = SIM_PAPER_DIR / "data" / "figure_3" / "cellbin_batch_sigma_slide"
 # plot and its write-up share one color identity rather than two unrelated
 # palettes for the same three series.
 MODALITIES = {
-    "cell": {"label": "Cell (λ=0.5, k_geom=60)", "color": "#2a78d6", "canonical": 1.5},
+    "cell": {"label": "Cell (λ=0.5, k_geom=60)", "color": MODALITY_LOOKUP["cell"], "canonical": 1.5},
     # --modality passed to the pipeline is "bin" (only cell/bin/spot are
     # valid), even though the folder is "bin16um" -- true_mod fixes the
     # ari_summary_<true_mod>.json lookup below.
-    "bin16um": {"label": "Bin 16µm (λ=0.5, k_geom=100)", "color": "#d97a1f", "canonical": 0.7, "true_mod": "bin"},
-    "spot": {"label": "Spot (λ=0.1, k_geom=8)", "color": "#c93f34", "canonical": 0.3},
+    "bin16um": {"label": "Bin (16 µm) (λ=0.5, k_geom=100)", "color": MODALITY_LOOKUP["bin16um"], "canonical": 0.7, "true_mod": "bin"},
+    "spot": {"label": "Spot (λ=0.1, k_geom=8)", "color": MODALITY_LOOKUP["spot"], "canonical": 0.3},
 }
 
-INK = "#14181f"
-INK_SOFT = "#454c58"
-INK_MUTED = "#7c8494"
-GRIDLINE = "#e1e4ea"
+INK = "#000000"
+INK_SOFT = "#000000"
+INK_MUTED = "#000000"
+GRIDLINE = "#DDDDDD"
 BASELINE = "#c8cdd8"
 
 TITLE_SIZE = 17
-LABEL_SIZE = 14
+LABEL_SIZE = 16
 TICK_SIZE = 12
-LEGEND_SIZE = 11.5
-CAPTION_SIZE = 10.5
+LEGEND_SIZE = 12
 
 plt.rcParams.update({
     "font.family": "sans-serif",
@@ -137,7 +141,7 @@ def main() -> None:
                     linewidth=1.3, alpha=0.45, zorder=1)
 
     ax.set_xlabel("Batch effect magnitude (batch_sigma)", labelpad=10)
-    ax.set_ylabel("Domain ARI (BANKSY + Harmony)", labelpad=10)
+    ax.set_ylabel("Domain ARI", labelpad=10)
     ax.set_title("Domain recovery vs. batch effect magnitude", color=INK, pad=14)
     ax.axhline(0, color=BASELINE, linewidth=1.0, zorder=1)
     ax.set_ylim(-0.03, 0.85)
@@ -147,15 +151,10 @@ def main() -> None:
         ax.spines[side].set_color(BASELINE)
     ax.tick_params(length=0)
     ax.legend(loc="upper right", frameon=False)
-    fig.text(0.5, -0.015,
-              "Mean ± sample SD across 3 independent seeds per point (n<3 labelled). "
-              "Dotted lines: each modality's canonical batch_sigma. "
-              "Error-bar lower whiskers clipped at ARI = 0.",
-              ha="center", fontsize=CAPTION_SIZE, color=INK_MUTED)
     fig.tight_layout()
 
     out_path = SLIDE_ROOT / "batch_sigma_slide_domain_ari_final.png"
-    fig.savefig(out_path, dpi=220, bbox_inches="tight", facecolor="white")
+    fig.savefig(out_path, dpi=300, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     print(f"[save] {out_path}")
 
