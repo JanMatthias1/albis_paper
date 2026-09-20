@@ -44,9 +44,11 @@ from matplotlib.lines import Line2D
 FIG4C_STAIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/alignment/STAIR"
 OUTDIR_DEFAULT = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/cross_modality_alignment/plots"
 COL_LABELS = ["Unaligned", "Independently STAIR-aligned\n(no cross-tech training)", "Ground truth"]
-TECH_COLORS = {"bin16um": "#4878d0", "spot": "#ee854a", "cell": "#6acc64"}
-PASTEL = ["#4878d0", "#ee854a", "#6acc64", "#d65f5f", "#956cb4",
-          "#8c613c", "#dc7ec0", "#797979", "#d5bb67", "#82c6e2"]
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from manuscript_style import MODALITY_LOOKUP, category_color
+TECH_COLORS = {key: MODALITY_LOOKUP[key] for key in ('bin16um', 'spot', 'cell')}
 TECHS = ["bin16um", "spot", "cell"]
 REF_TECH = "bin16um"
 
@@ -113,7 +115,7 @@ def plot_overlay(tech_adatas, color_by, order, outdir, slice_id):
     else:
         all_vals = pd.concat([tech_adatas[t].obs[color_by].astype(str) for t in TECHS])
         cats = sorted(all_vals.unique())
-        lut = {c: mcolors.to_rgba(PASTEL[i % len(PASTEL)]) for i, c in enumerate(cats)}
+        lut = {c: mcolors.to_rgba(category_color(c, color_by)) for c in cats}
 
     fig, axes = plt.subplots(1, 3, figsize=(12, 4.3), squeeze=False)
     for c in range(3):

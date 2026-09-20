@@ -148,6 +148,24 @@ DATASETS = {
         n_neigh_hom=8,
         c_neigh_het=0.90,
     ),
+    # 2026-09-19: single-cell z-stack at cell's NATIVE geometry (sphere_r_um
+    # 6000, 600,000 cells, real Xenium 12x24mm capture window) rather than
+    # the smaller_sphere r=2050 shrink used for cross-modality consistency
+    # elsewhere. Per-slice density is 7-35x higher than the r=2050 "cell"
+    # entry above (16.7k-88.8k cells/slice vs ~2.4k) -- testing whether
+    # cell's weak cross-slice MNN domain-agreement in plot_figure4c.py
+    # (18.8% vs bin16um/spot's 52-54%) is a density/geometry artifact of the
+    # shrink rather than a cell-resolution-inherent limitation. Reuses
+    # data/figure_2/larger_sphere/data/cell_native_r6000/ (already generated,
+    # see project_figure2_smaller_larger_sphere memory) -- note this predates
+    # the 2026-09-17 cell dispersion retune (log_mu -2.3 here, not the
+    # current -2.5), so this is a geometry-only comparison, not an
+    # apples-to-apples rerun of the current cell config at a different size.
+    "cell_r6000": dict(
+        h5ad="/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/larger_sphere/data/cell_native_r6000/simulation_cell_z_qc.h5ad",
+        n_neigh_hom=8,
+        c_neigh_het=0.90,
+    ),
 }
 
 N_DOMAINS = 6  # obs['domain_true'] has D0..D5

@@ -35,6 +35,9 @@ for d in "${DATASETS[@]}"; do
   MEM="150G"
   TIME="48:00:00"
   [[ "${d}" == "bin8um" ]] && MEM="250G" && TIME="24:00:00"
+  # 2026-09-19: cell_r6000 is 600k obs -- between bin16um (350k, 150G default
+  # is fine) and bin8um (1.3M, needs 250G) -- bump proportionally, untested.
+  [[ "${d}" == "cell_r6000" ]] && MEM="200G" && TIME="24:00:00"
 
   sbatch \
   "${DEP_ARG[@]}" \

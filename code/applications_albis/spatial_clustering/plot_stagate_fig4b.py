@@ -3,7 +3,9 @@
 Figure 4B -- STAGATE spatial-domain recovery, 2D vs 3D spatial graph, as a
 function of the per-section batch effect.
 
-Trimmed cut of plot_stagate_summary.py's grid: the strong domain-composition
+Mean ± sample SD across simulation seeds 101, 202, and 2025, with
+individual seed markers. Actual numeric batch sigma is used on the x-axis.
+The selected grid contains: the strong domain-composition
 row only (one column per resolution), x-axis = batch condition
 
     no batch effect   STAGATE run on X generated with batch_sigma=0
@@ -24,6 +26,7 @@ import glob
 import json
 import os
 import re
+from pathlib import Path
 from stagate_inputs import DATASETS
 
 import matplotlib
@@ -44,9 +47,9 @@ BATCH_ORDER = {"none": 0, "0.05": 1, "tuned": 2}
 # baseline (2D-only graph) = a true neutral gray -- achromatic vs. hued is
 # unambiguous under any color-vision deficiency, so identity never rides on
 # hue discrimination alone. Ink tokens (never the series color) carry text.
-C_3D, C_2D = "#2a78d6", "#9aa1a8"
+C_3D, C_2D = "#4C8FD5", "#B9C0C7"
 INK, INK_SECONDARY = "#0b0b0b", "#52514e"
-GRID, BASELINE = "#e1e0d9", "#c3c2b7"
+GRID, BASELINE = "#DDDDDD", "#c3c2b7"
 
 plt.rcParams.update({
     "font.family": "sans-serif",
@@ -60,11 +63,7 @@ plt.rcParams.update({
 
 
 def parse_dataset(name):
-    """<modality>[_strongmix][_lowbatch|_prebatch] -> (modality, mix, batch, sigma),
-    or the 2026-09-18 <modality>_strongmix_bs<value>_seed<seed> grid (see
-    stagate_inputs.py, sourced from cellbin_batch_sigma_slide/) -> same tuple,
-    keeping only the baseline seed 2025 point so seed-replicates (101/202)
-    don't create duplicate/ambiguous bars for the same batch condition."""
+    """Select current strong-mix runs across all three simulation seeds."""
     if name not in DATASETS:
         return None  # Exclude historical oracle/weak-mix runs.
     modality = next((m for m in MODALITIES if name.startswith(m)), None)
@@ -74,8 +73,6 @@ def parse_dataset(name):
 
     bs_seed = re.search(r"_bs([0-9.]+)_seed(\d+)$", name)
     if bs_seed:
-        if int(bs_seed.group(2)) != 2025:
-            return None  # seed replicate, not this panel's headline point
         bs = float(bs_seed.group(1))
         if bs == 0:
             batch, sigma = "none", 0.0
@@ -107,6 +104,7 @@ def load():
         rows.append(dict(
             dataset=mj.split(os.sep)[-3], modality=modality, mix=mix,
             batch=batch, batch_sigma=sigma,
+            seed=int(re.search(r"_seed(\d+)$", mj.split(os.sep)[-3]).group(1)),
             ari_domain_3d=m.get("stagate_3d", {}).get("ari_domain_true"),
             ari_domain_2d=m.get("stagate_2d", {}).get("ari_domain_true"),
             n_obs=m.get("n_obs"),
@@ -118,64 +116,62 @@ def load():
     return df.sort_values(["modality", "mix", "_ord"]).reset_index(drop=True)
 
 
-def _xtick(row):
-    if row.batch == "none":
-        return "no batch\neffect"
-    if row.batch == "0.05":
-        return "$\\sigma$ = 0.05"
-    return f"tuned\n$\\sigma$ = {row.batch_sigma:g}"
+SEEDS = {101: 'o', 202: 's', 2025: '^'}
 
 
-def plot(strong, out_png):
-    """strong: the mix == 'strong' rows only, one per (modality, batch)."""
-    SURFACE = "#ffffff"
-    fig, axes = plt.subplots(1, len(MODALITIES), figsize=(12.8, 4.6),
-                             sharey=True, facecolor=SURFACE)
+def summarize(strong):
+    expected = {(mod, sigma) for mod in MODALITIES for sigma in (0., .05, TUNED_SIGMA[mod])}
+    actual = set(strong.groupby(['modality','batch_sigma']).groups)
+    if actual != expected:
+        raise ValueError(f'Missing or unexpected conditions: {actual ^ expected}')
+    for key, group in strong.groupby(['modality','batch_sigma']):
+        if len(group) != 3 or set(group.seed) != set(SEEDS):
+            raise ValueError(f'Expected exactly seeds 101, 202, 2025: {key}')
+    long = strong.melt(id_vars=['modality','batch_sigma','seed'],
+                       value_vars=['ari_domain_2d','ari_domain_3d'],
+                       var_name='method', value_name='ari')
+    if not np.isfinite(long.ari).all():
+        raise ValueError('Missing or nonfinite ARI')
+    return long.groupby(['modality','batch_sigma','method']).ari.agg(
+        mean='mean', sd='std', n='count').reset_index()
 
-    for i, (ax, modality) in enumerate(zip(axes, MODALITIES)):
-        ax.set_facecolor(SURFACE)
-        sub = strong[strong.modality == modality].sort_values("_ord")
-        x = np.arange(len(sub))
-        w = 0.32
-        gap = 0.02
 
-        ax.grid(axis="y", color=GRID, lw=0.8, zorder=1)
+def plot(strong, summary, out_png):
+    from matplotlib.lines import Line2D
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5.8), sharey=True)
+    methods = [('ari_domain_2d', C_2D, 'STAGATE-2D'),
+               ('ari_domain_3d', C_3D, 'STAGATE-3D')]
+    for ax, modality in zip(axes, MODALITIES):
+        sub = strong[strong.modality == modality]
+        for col, color, label in methods:
+            stats = summary[(summary.modality == modality) & (summary.method == col)].sort_values('batch_sigma')
+            ax.errorbar(stats.batch_sigma, stats['mean'], yerr=stats.sd,
+                        color=color, linewidth=2, capsize=4, elinewidth=1.3, zorder=2)
+            for seed, marker in SEEDS.items():
+                points = sub[sub.seed == seed]
+                ax.scatter(points.batch_sigma, points[col], marker=marker,
+                           s=45, color=color, edgecolors='#4A4A4A', linewidths=.5,zorder=3)
+        ax.set_title(MOD_DISPLAY[modality], fontsize=17, fontweight='bold',pad=12)
+        ax.set_xlabel('Batch effect magnitude (σ)', fontsize=16)
+        ax.tick_params(labelsize=12)
+        ax.set_ylim(min(-.04, float((summary['mean']-summary.sd).min())-.025),
+                    max(.8, float((summary['mean']+summary.sd).max())+.04))
+        ax.grid(axis='y', color=GRID, linewidth=.8)
         ax.set_axisbelow(True)
-
-        for offset, col, colour, label in [
-            (-w / 2 - gap / 2, "ari_domain_3d", C_3D, "STAGATE-3D (aligned z-stack)"),
-            (+w / 2 + gap / 2, "ari_domain_2d", C_2D, "STAGATE-2D (per-section)"),
-        ]:
-            bars = ax.bar(x + offset, sub[col], w, label=label, color=colour,
-                          edgecolor="none", zorder=3)
-            ax.bar_label(bars, fmt="%.2f", fontsize=8.5, padding=3,
-                        color=INK_SECONDARY)
-
-        ax.set_xticks(x)
-        ax.set_xticklabels([_xtick(r) for _, r in sub.iterrows()], fontsize=9.5)
-        ax.set_ylim(0, 0.8)
-        ax.set_title(MOD_DISPLAY[modality], fontsize=12, fontweight="bold",
-                    color=INK, pad=10)
-        ax.tick_params(axis="both", length=0)
-        for side in ("top", "right", "left"):
-            ax.spines[side].set_visible(False)
-        ax.spines["bottom"].set_color(BASELINE)
-        ax.spines["bottom"].set_linewidth(1.0)
-        if i > 0:
-            ax.tick_params(axis="y", labelleft=False)
-
-    axes[0].set_ylabel("Spatial-domain ARI (mclust vs. true domains)",
-                       fontsize=9.5, color=INK_SECONDARY)
-
-    handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper right", bbox_to_anchor=(0.99, 1.0),
-              ncol=2, fontsize=9.5, frameon=False, handlelength=1.2,
-              handleheight=1.2, columnspacing=1.4)
-
-    fig.tight_layout(rect=[0, 0, 1, 0.88])
-    fig.savefig(out_png, dpi=300, facecolor=SURFACE, bbox_inches="tight")
+        ax.spines[['top','right']].set_visible(False)
+        ax.margins(x=.06)
+    axes[0].set_ylabel('Domain ARI',fontsize=16)
+    fig.legend(handles=[Line2D([],[],color=c,lw=2,label=label) for _,c,label in methods],
+               loc='upper center',bbox_to_anchor=(.32,1),ncol=2,frameon=False,fontsize=12)
+    fig.legend(handles=[Line2D([],[],color='#4A4A4A',marker=marker,linestyle='',
+                              markersize=7,label=str(seed)) for seed,marker in SEEDS.items()],
+               title='Simulation seed',title_fontsize=13,loc='upper center',
+               bbox_to_anchor=(.78,1),ncol=3,frameon=False,fontsize=12)
+    fig.tight_layout(rect=[0,0,1,.84])
+    fig.savefig(out_png,dpi=300,facecolor='white')
+    fig.savefig(Path(out_png).with_suffix('.pdf'),dpi=300,facecolor='white')
     plt.close(fig)
-    print("wrote", out_png)
+    print('wrote',out_png)
 
 
 def main():
@@ -188,10 +184,10 @@ def main():
     print(strong[["modality", "batch", "batch_sigma",
                   "ari_domain_3d", "ari_domain_2d"]].to_string(index=False))
 
-    weak_max = df.loc[df.mix == "weak", ["ari_domain_3d", "ari_domain_2d"]].max().max()
-    print(f"\nweak domain-composition: max domain ARI across all conditions = {weak_max:.3f}")
-
-    plot(strong, os.path.join(STAGATE_DIR, "stagate_fig4b_batch.png"))
+    summary = summarize(strong)
+    summary.to_csv(os.path.join(STAGATE_DIR, 'stagate_fig4b_seed_summary.csv'),index=False)
+    print(summary.to_string(index=False))
+    plot(strong, summary, os.path.join(STAGATE_DIR, 'stagate_fig4b_batch.png'))
 
 
 if __name__ == "__main__":

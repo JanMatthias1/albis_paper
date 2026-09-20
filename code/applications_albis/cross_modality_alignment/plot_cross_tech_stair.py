@@ -34,9 +34,11 @@ from matplotlib.lines import Line2D
 
 BASE = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/cross_modality_alignment"
 COL_LABELS = ["Unaligned", "STAIR aligned", "Ground truth"]
-TECH_COLORS = {"bin16um": "#4878d0", "spot": "#ee854a", "cell": "#6acc64"}
-PASTEL = ["#4878d0", "#ee854a", "#6acc64", "#d65f5f", "#956cb4",
-          "#8c613c", "#dc7ec0", "#797979", "#d5bb67", "#82c6e2"]
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from manuscript_style import MODALITY_LOOKUP, category_color
+TECH_COLORS = {key: MODALITY_LOOKUP[key] for key in ('bin16um', 'spot', 'cell')}
 
 
 def procrustes_fit(X, Y):
@@ -67,7 +69,7 @@ def color_vec(adata, color_by):
         lut = {c: mcolors.to_rgba(TECH_COLORS[c]) for c in cats}
     else:
         cats = list(pd.Categorical(adata.obs[color_by]).categories)
-        lut = {c: mcolors.to_rgba(PASTEL[i % len(PASTEL)]) for i, c in enumerate(cats)}
+        lut = {c: mcolors.to_rgba(category_color(c, color_by)) for c in cats}
     colors = adata.obs[color_by].astype(str).map({str(k): v for k, v in lut.items()}).values
     return np.vstack(colors), cats, lut
 
@@ -124,7 +126,7 @@ def plot_overlay_2d(adata, color_by, do_procrustes, outdir, slice_id):
                       label=str(c)) for c in cats]
     fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.0),
                borderaxespad=0.2, ncol=min(len(cats), 10), frameon=False,
-               title=color_by)
+               title="Domain True" if color_by == "domain_true" else color_by)
     fig.patch.set_facecolor("white")
     fig.tight_layout(rect=[0, 0.035, 1, 0.94])
     outpath = os.path.join(outdir, f"figure4e_overlay_2d_{color_by}_slice_{slice_id}.png")
@@ -141,7 +143,7 @@ def plot_rmse(metrics, outdir, slice_id):
                stair_init=metrics.get("stair_init_rmse_um", np.nan),
                stair_fine=metrics.get("stair_fine_rmse_um", np.nan))
     df = pd.DataFrame([row], index=[f"slice_{slice_id}"])
-    ax = df.plot.bar(figsize=(5, 4), color=["#797979", "#8c9eea", "#4878d0"])
+    ax = df.plot.bar(figsize=(5, 4), color=["#B9C0C7", "#7393B3", "#4C8FD5"])
     ax.set_ylabel("joint-Procrustes RMSE to truth (um)")
     ax.set_xlabel("")
     ax.set_title("Figure 4E -- cross-tech alignment error\nbefore vs after STAIR")

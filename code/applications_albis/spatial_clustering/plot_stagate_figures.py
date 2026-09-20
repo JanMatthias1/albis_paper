@@ -33,74 +33,81 @@ from matplotlib.lines import Line2D  # noqa: E402
 BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/spatial_clustering/STAGATE"
 
 
-# --------------------------------------------------------------------------- #
-# plotting                                                                   #
-# --------------------------------------------------------------------------- #
-def plot_3d_panels(adata, z, outdir):
-    # Each column gets its own color LUT, built from its own label set --
-    # domain_true is "D0".."D5"/"unassigned" but mclust_3d/mclust_2d are R
-    # mclust's own cluster IDs ("1".."6", no relation to domain_true's
-    # naming), so a single shared LUT keyed on domain_true's labels left
-    # every mclust point unmatched and grey.
-    cols = [("domain_true", "True Domains"),
-            ("mclust_3d", "STAGATE-3D"),
-            ("mclust_2d", "STAGATE-2D")]
-    fig = plt.figure(figsize=(13, 4.5))
-    domain_lut = None
-    for i, (key, title) in enumerate(cols):
-        ax = fig.add_subplot(1, 3, i + 1, projection="3d")
-        vals = adata.obs[key].astype(str).values
-        labels = sorted(np.unique(vals))
-        lut = {lab: plt.cm.tab10(j % 10) for j, lab in enumerate(labels)}
-        if key == "domain_true":
-            domain_lut = lut
-        for lab in labels:
-            m = vals == lab
-            ax.scatter(adata.obsm["spatial"][m, 0], adata.obsm["spatial"][m, 1],
-                       z[m], s=0.5, marker="o", label=lab,
-                       color=lut[lab])
-        ax.set_title(title)
-        ax.set_xticklabels([]); ax.set_yticklabels([]); ax.set_zticklabels([])
-        ax.elev = 15; ax.azim = -60
-        ax.grid(False)
-        ax.set_axis_off()
-        if key != "domain_true":
-            # mclust cluster IDs aren't aligned to domain_true's identity, so
-            # each STAGATE panel needs its own small legend rather than
-            # sharing the bottom domain_true one.
-            handles = [Line2D([0], [0], marker="o", ls="", mfc=lut[lab], mec="none", label=lab)
-                       for lab in labels]
-            ax.legend(handles=handles, loc="upper right", fontsize=6, frameon=False,
-                      title=key, title_fontsize=6, markerscale=1.5)
-    handles = [Line2D([0], [0], marker="o", ls="", mfc=domain_lut[lab], mec="none", label=lab)
-               for lab in sorted(domain_lut)]
-    fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.0),
-               borderaxespad=0.2, ncol=min(len(handles), 10), frameon=False,
-               title="domain_true")
-    fig.subplots_adjust(left=0.02, right=0.98, wspace=0.05)
-    fig.tight_layout(rect=[0, 0.08, 1, 1])
-    fig.savefig(os.path.join(outdir, "domains_3d_true_vs_stagate.png"), dpi=200)
+import sys
+from pathlib import Path
+from matplotlib.transforms import Bbox
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from manuscript_style import (apply_style, scatter_colors, matched_labels,
+    PANEL_FIGSIZE, PANEL_MARGINS, PANEL_EXPORT_BOTTOM)
+import json
+apply_style()
+
+
+def panel_figure(n, projection=None):
+    # Match Figure 3 axes in physical inches, including the three-panel view.
+    width, height = PANEL_FIGSIZE
+    panel_width = width * (PANEL_MARGINS['right'] - PANEL_MARGINS['left']) / (2 + PANEL_MARGINS['wspace'])
+    gap = panel_width * PANEL_MARGINS['wspace']
+    total_width = width + (n - 2) * (panel_width + gap)
+    fig = plt.figure(figsize=(total_width, height))
+    axes = [fig.add_axes([(width * PANEL_MARGINS['left'] + i * (panel_width + gap)) / total_width,
+                         PANEL_MARGINS['bottom'], panel_width / total_width,
+                         PANEL_MARGINS['top'] - PANEL_MARGINS['bottom']], projection=projection)
+            for i in range(n)]
+    return fig, axes
+
+
+def draw_panel(ax, adata, key, title, coords):
+    args, labels, colors = scatter_colors(adata.obs, key,
+        'domain_true' if key.startswith('mclust_') else None)
+    ax.scatter(*coords.T, **args, s=4, linewidths=0, alpha=.85)
+    ax.set_title(title)
+    handles = [Line2D([0], [0], marker='o', linestyle='', color=color,
+                     markersize=12, label=label) for label, color in zip(labels, colors)]
+    heading = 'Cluster label' if key.startswith('mclust_') else ('Slice ID' if key == 'slice_id' else 'Domain True')
+    ax.legend(handles=handles, title=heading, loc='upper center',
+              bbox_to_anchor=(.5, -.17), ncol=max(1, (len(labels)+1)//2),
+              frameon=False, fontsize=12, title_fontsize=13, columnspacing=.7,
+              handlelength=1, handletextpad=.3)
+
+
+def save_panel(fig, outdir, name):
+    crop = Bbox.from_extents(0, PANEL_EXPORT_BOTTOM, fig.get_figwidth(), fig.get_figheight())
+    fig.savefig(os.path.join(outdir, name), dpi=300, bbox_inches=crop)
     plt.close(fig)
 
 
+def plot_3d_panels(adata, z, outdir):
+    fig, axes = panel_figure(3, '3d')
+    coords = np.column_stack([adata.obsm['spatial'][:, :2], z])
+    for ax, key, title in zip(axes, ['domain_true','mclust_3d','mclust_2d'],
+                             ['Domain True','STAGATE-3D','STAGATE-2D']):
+        draw_panel(ax, adata, key, title, coords)
+        ax.view_init(elev=12, azim=-60)
+        ax.set_box_aspect(None, zoom=1.65)
+        ax.set_axis_off()
+    save_panel(fig, outdir, 'domains_3d_true_vs_stagate.png')
+    Path(outdir, 'domain_colors.json').write_text(json.dumps({
+        key: matched_labels(adata.obs, key, 'domain_true')
+        for key in ['mclust_3d','mclust_2d']}, indent=2))
+
+
 def plot_umap(adata, outdir):
-    try:
-        sc.pp.neighbors(adata, use_rep="STAGATE")
-        sc.tl.umap(adata)
-
-        fig = sc.pl.umap(adata, color=["domain_true", "mclust_3d"],
-                         title=["Domain True", "STAGATE 3D Domains"],
-                         show=False, return_fig=True)
-        fig.savefig(os.path.join(outdir, "umap_stagate3d.png"), dpi=200, bbox_inches="tight")
-        plt.close(fig)
-
-        fig = sc.pl.umap(adata, color=["domain_true", "mclust_3d", "slice_id"],
-                         title=["Domain True", "STAGATE 3D Domains", "Slice ID"],
-                         show=False, return_fig=True)
-        fig.savefig(os.path.join(outdir, "umap_stagate3d_by_slice.png"), dpi=200, bbox_inches="tight")
-        plt.close(fig)
-    except Exception as e:  # noqa: BLE001
-        print("[warn] UMAP plot skipped:", e)
+    # Preserve the saved layout; computing a new embedding is unnecessary for styling.
+    if 'X_umap' not in adata.obsm:
+        sc.pp.neighbors(adata, use_rep='STAGATE', random_state=0)
+        sc.tl.umap(adata, random_state=0)
+    coords = np.asarray(adata.obsm['X_umap'])
+    for keys, titles, name in [
+        (['domain_true','mclust_3d'], ['Domain True','STAGATE-3D'], 'umap_stagate3d.png'),
+        (['domain_true','mclust_3d','slice_id'], ['Domain True','STAGATE-3D','Slice ID'], 'umap_stagate3d_by_slice.png')]:
+        fig, axes = panel_figure(len(keys))
+        for ax, key, title in zip(axes, keys, titles):
+            draw_panel(ax, adata, key, title, coords)
+            ax.set_xlabel('UMAP 1'); ax.set_ylabel('UMAP 2')
+            ax.set_xlim(coords[:,0].min()-1, coords[:,0].max()+1)
+            ax.set_ylim(coords[:,1].min()-1, coords[:,1].max()+1)
+        save_panel(fig, outdir, name)
 
 
 # --------------------------------------------------------------------------- #
@@ -120,7 +127,12 @@ def main():
 
     h5ad_path = os.path.join(out_adata, f"Sim_3D_STAGATE_{args.dataset}.h5ad")
     print(f"[load] {h5ad_path}")
-    adata = ad.read_h5ad(h5ad_path)
+    import h5py
+    from anndata._io.specs import read_elem
+    with h5py.File(h5ad_path) as f:
+        adata = ad.AnnData(obs=read_elem(f['obs']),
+                          obsm={key: read_elem(f['obsm'][key]) for key in
+                                ('spatial', 'spatial_3d', 'STAGATE', 'X_umap') if key in f['obsm']})
     print(f"[load] {adata.shape}")
 
     z = (np.asarray(adata.obsm["spatial_3d"])[:, 2]

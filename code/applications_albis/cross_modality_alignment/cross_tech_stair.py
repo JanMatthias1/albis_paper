@@ -289,12 +289,19 @@ def parse_args():
                     help="within-technology spatial neighbour count for the HGAT (shared across all 3 modalities)")
     ap.add_argument("--c-neigh-het", type=float, default=0.90,
                     help="cross-technology (heterogeneous) MNN edge cutoff for the HGAT")
+    ap.add_argument('--input-root', default=None,
+                    help='Dedicated generated data directory containing bin16um/, spot/, cell/.')
+    ap.add_argument('--output-base', default=BASE_OUTDIR)
     return ap.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
 
+    if args.input_root:
+        DATASETS = {t: os.path.join(args.input_root, t,
+                    f"simulation_{'bin' if t == 'bin16um' else t}_z_qc.h5ad")
+                    for t in TECHS}
     tech_adatas = {}
     for tech, path in DATASETS.items():
         if not os.path.exists(path):
@@ -302,7 +309,7 @@ if __name__ == "__main__":
         tech_adatas[tech] = load_slice(tech, path, args.slice)
         print(f"{tech}: {tech_adatas[tech].shape} at slice_id={args.slice}")
 
-    outdir = os.path.join(BASE_OUTDIR, f"slice_{args.slice}")
+    outdir = os.path.join(args.output_base, f"slice_{args.slice}")
     output_adata = os.path.join(outdir, "adata_results")
     output_embeddings = os.path.join(outdir, "embeddings")
     output_align = os.path.join(outdir, "align")

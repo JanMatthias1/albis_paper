@@ -1,4 +1,10 @@
 #!/bin/bash
+# ARCHIVED 2026-09-20: superseded by code/clustering/strong_mix/generate_strong_mix_{cell,bin16um,spot}.sh
+# + stagate_inputs.py's DATASETS dict (3D_stagate.py's --dataset choices no longer
+# include this script's tags, so it's unreachable). Kept for history only --
+# its cell config (log_mu=-2.3, default sphere_r_um=6000/n_cells=600000) is
+# STALE, predating the 2026-09-17 dispersion retune and diameter match to
+# Figure 2 (log_mu=-2.5, sphere_r_um=2050, n_cells=24207). Do not rerun.
 #SBATCH --job-name=stagate_strongmix
 #SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/applications_albis/spatial_clustering/logs_stagate_3D/strongmix_%A_%a.out
 #SBATCH --array=0-5

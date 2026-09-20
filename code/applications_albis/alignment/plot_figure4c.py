@@ -44,14 +44,13 @@ from sklearn.neighbors import NearestNeighbors
 BASE = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/alignment"
 ALL_DATASETS = ["bin16um", "spot", "cell"]
 FIG4 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4"
-DATASET_CHOICES = ALL_DATASETS + ["bin16um_realwindow", "spot_realwindow"]
+DATASET_CHOICES = ALL_DATASETS + ["bin16um_realwindow", "spot_realwindow", "cell_r6000"]
 COL_LABELS = ["Unaligned", "STAIR aligned", "Ground truth"]
 
-# soft but saturated qualitative palette for domain / cell-type coloring
-# (seaborn "muted" -- pastel-toned but with enough saturation to stay visible
-# under alpha-blended overplotting)
-PASTEL = ["#4878d0", "#ee854a", "#6acc64", "#d65f5f", "#956cb4",
-          "#8c613c", "#dc7ec0", "#797979", "#d5bb67", "#82c6e2"]
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from manuscript_style import category_color, category_order
 
 
 def procrustes_fit(X, Y):
@@ -78,13 +77,8 @@ def load(dataset):
 
 
 def color_vec(adata, color_by):
-    if color_by == "slice_id":
-        cats = sorted(adata.obs["slice_id"].unique(), key=float)
-        cmap = plt.get_cmap("tab10")
-        lut = {c: cmap(i % 10) for i, c in enumerate(cats)}
-    else:
-        cats = list(pd.Categorical(adata.obs[color_by]).categories)
-        lut = {c: mcolors.to_rgba(PASTEL[i % len(PASTEL)]) for i, c in enumerate(cats)}
+    cats = category_order(adata.obs[color_by].astype(str))
+    lut = {c: mcolors.to_rgba(category_color(c, color_by)) for c in cats}
     colors = adata.obs[color_by].astype(str).map({str(k): v for k, v in lut.items()}).values
     return np.vstack(colors), cats, lut
 
@@ -129,7 +123,8 @@ def plot_overlay_2d(data, color_by, do_procrustes, outdir, tag):
                           label=str(c)) for c in cats]
         fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.0),
                    borderaxespad=0.2, ncol=min(len(cats), 10), frameon=False,
-                   title=color_by)
+                   title={"domain_true": "Domain True", "cell_type_true": "Cell Type",
+                          "slice_id": "Slice ID"}.get(color_by, color_by))
         fig.patch.set_facecolor("white")
         fig.tight_layout(rect=[0, 0.035, 1, 0.94])
         outpath = os.path.join(outdir, f"figure4c_overlay_2d_{tag}_{ds}.png")
@@ -157,7 +152,8 @@ def plot_sphere_3d(data, color_by, do_procrustes, outdir, tag):
                           label=str(c)) for c in cats]
         fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.0),
                    borderaxespad=0.2, ncol=min(len(cats), 10), frameon=False,
-                   title=color_by)
+                   title={"domain_true": "Domain True", "cell_type_true": "Cell Type",
+                          "slice_id": "Slice ID"}.get(color_by, color_by))
         fig.patch.set_facecolor("white")
         fig.subplots_adjust(left=0.01, right=0.99, top=0.92, bottom=0.08, wspace=0.0)
         outpath = os.path.join(outdir, f"figure4c_sphere_3d_{tag}_{ds}.png")

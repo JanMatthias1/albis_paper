@@ -32,7 +32,11 @@ from matplotlib.patches import Circle
 
 BASE = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/cross_modality_alignment"
 TECHS = ["bin16um", "spot", "cell"]
-TECH_COLORS = {"bin16um": "#4878d0", "spot": "#ee854a", "cell": "#6acc64"}
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from manuscript_style import MODALITY_LOOKUP, category_color
+TECH_COLORS = {key: MODALITY_LOOKUP[key] for key in ('bin16um', 'spot', 'cell')}
 COL_LABELS = ["Unaligned", "STAIR aligned", "Ground truth"]
 
 
