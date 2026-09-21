@@ -269,5 +269,20 @@ and will fail on that obsolete flag rather than silently switching layers.
 Pre-batch layers remain stored as simulation provenance, not analysis inputs.
 The Figure 4 plotting launcher now selects the current strong-mix seed grid
 and the main panel excludes pre-batch/oracle metrics and historical runs.
-The panel still displays seed 2025 only; this audit does not change its
-seed-summary design. Archived standalone plotting scripts remain historical.
+The STAGATE panel now displays means ± sample SD across seeds 101, 202,
+and 2025, with individual seed markers and actual batch sigma on the x-axis.
+Archived standalone plotting scripts remain historical.
+
+## Current manuscript plotting audit (2026-09-19)
+
+The STAGATE input audit described above as deferred has since been completed;
+see `../applications_albis/spatial_clustering/README.md`. The Figure 3 batch
+summary CSV now provides the seed coverage for each plotted condition; historical
+n=1 run-log entries are snapshots, not current status.
+
+Selected RCTD panels use `spatial_deconvolution/RCTD/spot_seed_avg/`: estimated
+fractions averaged across reference seeds 271828, 314159, 999999 before computing
+r and RMSE. Spatial zoom displays four types in section 5; the error distribution
+covers all eight types. Violin inputs are capped at the pooled 99th percentile
+for display; metric calculations and boxplot inputs use the uncapped errors.
+The caption should state this display cap if the violin panel is retained.

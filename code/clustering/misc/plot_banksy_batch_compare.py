@@ -1,5 +1,20 @@
 #!/usr/bin/env python
 """
+RETIRED 2026-09-20 -- data/figure_3/banksy_batch_compare/ no longer exists on
+disk (gone by some point after the 2026-09-15 declutter, found during a
+2026-09-20 repo integrity audit -- see project_figure3_banksy_domain_sweep
+memory). Without the fix below, this script used to auto-skip modalities
+whose directory was missing (line ~34's `MODALITIES = [m for m in
+ALL_MODALITIES if (ROOT / m).is_dir()]`) -- with the whole ROOT gone, that
+degrades to an EMPTY modality list and `main()` would silently write a
+blank/zero-bar plot with no error, rather than failing loudly. A guard was
+added in `main()` to raise instead. Superseded by
+code/clustering/ari_recovery_summary/plot_domain_vs_celltype.py ->
+data/figure_3/ari_recovery_summary/domain_vs_celltype_recovery.png, which
+reads straight from cellbin_batch_sigma_slide/ and is the current manuscript
+panel -- use that instead of trying to resurrect this one.
+
+Original docstring, for history:
 Spatial-domain recovery (ARI) vs. per-slice batch effect: BANKSY at a fixed
 (lambda=0.5, k_geom=200 -- the lambda_kgeom_sweep winner on near-batch-free
 data) run at prebatch vs. tuned batch_sigma, across cell / bin16um / spot.
@@ -83,6 +98,13 @@ def plot_level(ax, data_by_mod: dict[str, dict[str, dict]], title: str) -> None:
 
 
 def main() -> None:
+    if not MODALITIES:
+        raise RuntimeError(
+            f"{ROOT} does not exist or contains none of {ALL_MODALITIES} -- this "
+            "script is retired, see its module docstring for the current "
+            "replacement (ari_recovery_summary/plot_domain_vs_celltype.py). "
+            "Refusing to silently write a blank plot."
+        )
     data = load()
     out_dir = ROOT / "plots"
     out_dir.mkdir(parents=True, exist_ok=True)

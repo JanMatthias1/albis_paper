@@ -1,11 +1,27 @@
 #!/usr/bin/env python
 """
-Same combined ARI bar chart as plot_banksy_batch_compare.py, but with bin
-added back in. Bin's official prebatch/tuned pair doesn't live under
-banksy_batch_compare/ (see that script's header) -- it's at
-cellbin_batch_sigma_slide/bin/{bs0,bs0.7}/ (k_geom=100, the current config).
-This script reads cell/spot from banksy_batch_compare/ and bin from
-cellbin_batch_sigma_slide/, then plots all three together.
+RETIRED 2026-09-20 -- do not run, kept for provenance only.
+
+banksy_batch_compare/ (this script's cell/spot data source) no longer exists
+on disk -- gone by some point after the 2026-09-15 declutter, most likely
+swept into a later legitimate reorg (see project_figure3_banksy_domain_sweep
+memory's "banksy_batch_compare/cell data actually missing" note, found during
+a 2026-09-20 repo integrity audit). Its `bin/` path reference below is also
+stale -- that directory was later renamed `bin16um/`.
+
+Superseded by code/clustering/ari_recovery_summary/plot_domain_vs_celltype.py
+-> data/figure_3/ari_recovery_summary/domain_vs_celltype_recovery.png, which
+reads all three modalities straight from cellbin_batch_sigma_slide/ (no
+banksy_batch_compare/ dependency) and is the actual current manuscript panel.
+See data/figure_3/README.md's "Start here" table.
+
+Original docstring, for history: "Same combined ARI bar chart as
+plot_banksy_batch_compare.py, but with bin added back in. Bin's official
+prebatch/tuned pair doesn't live under banksy_batch_compare/ (see that
+script's header) -- it's at cellbin_batch_sigma_slide/bin/{bs0,bs0.7}/
+(k_geom=100, the current config). This script reads cell/spot from
+banksy_batch_compare/ and bin from cellbin_batch_sigma_slide/, then plots
+all three together."
 """
 
 from __future__ import annotations
