@@ -67,6 +67,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 import anndata as ad
 import numpy as np
 import scanpy as sc
@@ -81,11 +82,13 @@ SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
 PRIMARY_COLOR = "#2a78d6"  # blue
 COMPARE_COLOR = "#eb6834"  # orange
 
+# Restored from typography_refresh_20260919/count_distribution_before.py,
+# with the final refresh axis/base font size (16 pt), verified against saved plots.
 # Sized for legibility once these PNGs are shrunk into a multi-panel print
 # figure -- default matplotlib sizes (title ~12, legend ~10) read fine full-size
 # on screen but wash out at print scale.
 TITLE_SIZE = 17
-LABEL_SIZE = 14
+LABEL_SIZE = 16
 TICK_SIZE = 12
 LEGEND_SIZE = 12
 ANNOT_SIZE = 13
@@ -113,6 +116,15 @@ def compute_jsd(x1: np.ndarray, x2: np.ndarray, bins: np.ndarray) -> float:
     p = p / p.sum()
     q = q / q.sum()
     return float(jensenshannon(p, q, base=2) ** 2)
+
+
+def display_label(raw: str) -> str:
+    """Human-readable form of a --modality/--compare-label value for plot text, e.g.
+    "breast_cancer_visium_hd" -> "Breast Cancer Visium HD". The raw string itself is left
+    untouched everywhere else (JSON summary keys, prints, file paths)."""
+    acronyms = {"hd"}
+    words = [w.upper() if w.lower() in acronyms else w[0].upper() + w[1:] for w in raw.split("_") if w]
+    return " ".join(words)
 
 
 def annotate_jsd(ax, jsd: float, loc: str = "upper left") -> None:
@@ -379,45 +391,45 @@ def plot_raw_norm_log(
 
 
 def plot_mean_variance_compare(datasets: list[dict], output_path: Path) -> None:
-    """datasets: [{"label", "color", "mean", "var", "theta"}, ...] (primary first)."""
+    """datasets: [{"label", "display_label", "color", "mean", "var", "theta"}, ...] (primary first)."""
     fig, ax = plt.subplots(figsize=(8, 6.5))
 
     all_mean = np.concatenate([d["mean"][(d["mean"] > 0) & (d["var"] > 0)] for d in datasets])
     x = np.logspace(np.log10(all_mean.min()), np.log10(all_mean.max()), 200)
-    ax.plot(x, x, "--", color="#898781", label="Poisson (var = mean)", zorder=1)
+    ax.plot(x, x, "k--", label="Poisson (var = mean)", zorder=1)
 
     for d in datasets:
         keep = (d["mean"] > 0) & (d["var"] > 0)
-        ax.scatter(d["mean"][keep], d["var"][keep], s=8, alpha=0.4, linewidths=0, color=d["color"], label=d["label"])
+        ax.scatter(d["mean"][keep], d["var"][keep], s=8, alpha=0.4, linewidths=0, color=d["color"], label=d["display_label"])
         if np.isfinite(d["theta"]):
             ax.plot(x, x + x**2 / d["theta"], "-", color=d["color"], linewidth=1.5,
-                     label=rf"{d['label']} NB fit ($\hat\theta$={d['theta']:.1f})")
+                     label=rf"{d['display_label']} NB fit ($\hat\theta$={d['theta']:.1f})")
 
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlabel("Mean count per gene")
     ax.set_ylabel("Variance per gene")
     ax.set_title("Gene mean-variance: simulated vs real")
-    ax.legend(frameon=False, loc="upper left", bbox_to_anchor=(1.01, 1.0), borderaxespad=0)
+    ax.legend(frameon=False, loc="upper left")
     fig.tight_layout()
     fig.savefig(output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
 
 def plot_mean_dropout_compare(datasets: list[dict], output_path: Path) -> None:
-    """datasets: [{"label", "color", "mean", "zero_frac", "theta"}, ...] (primary first)."""
+    """datasets: [{"label", "display_label", "color", "mean", "zero_frac", "theta"}, ...] (primary first)."""
     fig, ax = plt.subplots(figsize=(8, 6.5))
 
     all_mean = np.concatenate([d["mean"][d["mean"] > 0] for d in datasets])
     x = np.logspace(np.log10(all_mean.min()), np.log10(all_mean.max()), 200)
-    ax.plot(x, np.exp(-x), "--", color="#898781", label="Poisson-predicted", zorder=1)
+    ax.plot(x, np.exp(-x), "k--", label="Poisson-predicted", zorder=1)
 
     for d in datasets:
         keep = d["mean"] > 0
-        ax.scatter(d["mean"][keep], d["zero_frac"][keep], s=8, alpha=0.4, linewidths=0, color=d["color"], label=d["label"])
+        ax.scatter(d["mean"][keep], d["zero_frac"][keep], s=8, alpha=0.4, linewidths=0, color=d["color"], label=d["display_label"])
         if np.isfinite(d["theta"]):
             ax.plot(x, (d["theta"] / (d["theta"] + x)) ** d["theta"], "-", color=d["color"], linewidth=1.5,
-                     label=rf"{d['label']} NB-predicted ($\hat\theta$={d['theta']:.1f})")
+                     label=rf"{d['display_label']} NB-predicted ($\hat\theta$={d['theta']:.1f})")
 
     ax.set_xscale("log")
     ax.set_xlabel("Mean count per gene")
@@ -430,20 +442,21 @@ def plot_mean_dropout_compare(datasets: list[dict], output_path: Path) -> None:
 
 
 def plot_total_counts_compare(datasets: list[dict], output_path: Path) -> None:
-    """datasets: [{"label", "color", "total_counts"}, ...] (primary first). Density-normalized
-    so datasets with very different cell counts are still comparable by shape."""
+    """datasets: [{"label", "display_label", "color", "total_counts"}, ...] (primary first).
+    Density-normalized so datasets with very different cell counts are still comparable by
+    shape. No legend is drawn here -- see plot_dataset_legend for a standalone legend image
+    to insert by hand instead."""
     positive = [d["total_counts"][d["total_counts"] > 0] for d in datasets]
     all_positive = np.concatenate(positive)
     bins = np.logspace(np.log10(all_positive.min()), np.log10(all_positive.max()), 60)
 
     fig, ax = plt.subplots(figsize=(7, 6.5))
     for d, pos in zip(datasets, positive):
-        ax.hist(pos, bins=bins, density=True, color=d["color"], alpha=0.5, label=d["label"])
+        ax.hist(pos, bins=bins, density=True, color=d["color"], alpha=0.5, label=d["display_label"])
     ax.set_xscale("log")
     ax.set_xlabel("Total counts per cell")
     ax.set_ylabel("Density (fraction of cells)")
     ax.set_title("Total counts per cell: simulated vs real")
-    ax.legend(frameon=False, loc="upper right")
     annotate_jsd(ax, compute_jsd(positive[0], positive[1], bins), loc="upper left")
     fig.tight_layout()
     fig.savefig(output_path, dpi=180, bbox_inches="tight")
@@ -451,14 +464,14 @@ def plot_total_counts_compare(datasets: list[dict], output_path: Path) -> None:
 
 
 def plot_genes_per_cell_compare(datasets: list[dict], output_path: Path) -> None:
-    """datasets: [{"label", "color", "n_genes"}, ...] (primary first)."""
+    """datasets: [{"label", "display_label", "color", "n_genes"}, ...] (primary first)."""
     positive = [d["n_genes"][d["n_genes"] > 0] for d in datasets]
     all_positive = np.concatenate(positive)
     bins = np.logspace(np.log10(all_positive.min()), np.log10(all_positive.max()), 60)
 
     fig, ax = plt.subplots(figsize=(7, 6.5))
     for d, pos in zip(datasets, positive):
-        ax.hist(pos, bins=bins, density=True, color=d["color"], alpha=0.5, label=d["label"])
+        ax.hist(pos, bins=bins, density=True, color=d["color"], alpha=0.5, label=d["display_label"])
     ax.set_xscale("log")
     ax.set_xlabel("Genes detected per cell")
     ax.set_ylabel("Density (fraction of cells)")
@@ -471,8 +484,8 @@ def plot_genes_per_cell_compare(datasets: list[dict], output_path: Path) -> None
 
 
 def plot_sparsity_summary_compare(datasets: list[dict], output_path: Path) -> None:
-    """datasets: [{"label", "color", "sparsity"}, ...] (primary first), sparsity is the dict
-    returned by compute_sparsity_stats."""
+    """datasets: [{"label", "display_label", "color", "sparsity"}, ...] (primary first), sparsity
+    is the dict returned by compute_sparsity_stats."""
     metrics = [("matrix_zero_frac", "Zero matrix\nentries"), ("empty_row_frac", "Fully-empty\ncells")]
     x = np.arange(len(metrics))
     width = 0.8 / len(datasets)
@@ -481,7 +494,7 @@ def plot_sparsity_summary_compare(datasets: list[dict], output_path: Path) -> No
     for i, d in enumerate(datasets):
         values = [d["sparsity"][key] * 100 for key, _ in metrics]
         offset = (i - (len(datasets) - 1) / 2) * width
-        bars = ax.bar(x + offset, values, width=width, color=d["color"], label=d["label"])
+        bars = ax.bar(x + offset, values, width=width, color=d["color"], label=d["display_label"])
         for bar, v in zip(bars, values):
             ax.annotate(f"{v:.1f}%", (bar.get_x() + bar.get_width() / 2, v), ha="center", va="bottom",
                         fontsize=ANNOT_SIZE, fontweight="bold")
@@ -497,10 +510,23 @@ def plot_sparsity_summary_compare(datasets: list[dict], output_path: Path) -> No
     plt.close(fig)
 
 
+def plot_dataset_legend(datasets: list[dict], output_path: Path) -> None:
+    """Standalone legend image (dataset display-name -> color patch), for hand-insertion into
+    total_counts_compare.png and raw_norm_log_compare.png, whose inline legends are omitted to
+    avoid crowding those panels. datasets: [{"display_label", "color"}, ...] (primary first)."""
+    handles = [Patch(facecolor=d["color"], alpha=0.5, label=d["display_label"]) for d in datasets]
+    fig, ax = plt.subplots(figsize=(3.5, 0.6 + 0.45 * len(handles)))
+    ax.axis("off")
+    ax.legend(handles=handles, loc="center", frameon=False)
+    fig.savefig(output_path, dpi=180, bbox_inches="tight", pad_inches=0.02, transparent=True)
+    plt.close(fig)
+
+
 def plot_raw_norm_log_compare(
     datasets: list[dict], target_sum: float, sample_size: int, rng: np.random.Generator, output_path: Path
 ) -> None:
-    """datasets: [{"label", "color", "X"}, ...] (primary first)."""
+    """datasets: [{"label", "display_label", "color", "X"}, ...] (primary first). No legend is
+    drawn here -- see plot_dataset_legend for a standalone legend image to insert by hand instead."""
     staged = []
     for d in datasets:
         tmp = ad.AnnData(X=d["X"].copy())
@@ -509,12 +535,12 @@ def plot_raw_norm_log_compare(
         norm_vals = sample_values(tmp.X.data.copy(), sample_size, rng)
         sc.pp.log1p(tmp)
         log_vals = sample_values(tmp.X.data.copy(), sample_size, rng)
-        staged.append({"label": d["label"], "color": d["color"], "raw": raw_vals, "norm": norm_vals, "log": log_vals})
+        staged.append({"display_label": d["display_label"], "color": d["color"], "raw": raw_vals, "norm": norm_vals, "log": log_vals})
 
     fig, axes = plt.subplots(1, 3, figsize=(17, 6))
     stage_specs = [
         (axes[0], "raw", "Raw counts", True),
-        (axes[1], "norm", f"Normalized (target_sum={target_sum:g})", True),
+        (axes[1], "norm", "Normalized", True),
         (axes[2], "log", "log1p(normalized)", False),
     ]
     for ax, key, title, log_x in stage_specs:
@@ -526,13 +552,11 @@ def plot_raw_norm_log_compare(
         else:
             bins = np.linspace(all_vals.min(), all_vals.max(), 60)
         for s, vals in zip(staged, vals_by_dataset):
-            ax.hist(vals, bins=bins, density=True, color=s["color"], alpha=0.5, label=s["label"])
+            ax.hist(vals, bins=bins, density=True, color=s["color"], alpha=0.5, label=s["display_label"])
         ax.set_title(title)
         ax.set_xlabel("Value (nonzero matrix entries)")
         annotate_jsd(ax, compute_jsd(vals_by_dataset[0], vals_by_dataset[1], bins), loc="upper right")
     axes[0].set_ylabel("Density")
-    axes[0].legend(frameon=False, loc="upper left")
-    fig.suptitle("Raw -> normalized -> log1p: simulated vs real")
     fig.tight_layout()
     fig.savefig(output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
@@ -593,8 +617,8 @@ def run_compare(args: argparse.Namespace, rng: np.random.Generator) -> None:
               f"({primary.n_vars} genes) are already the same size")
 
     specs = [
-        {"label": args.modality, "color": PRIMARY_COLOR, "adata": primary},
-        {"label": args.compare_label, "color": COMPARE_COLOR, "adata": compare},
+        {"label": args.modality, "display_label": display_label(args.modality), "color": PRIMARY_COLOR, "adata": primary},
+        {"label": args.compare_label, "display_label": display_label(args.compare_label), "color": COMPARE_COLOR, "adata": compare},
     ]
     for spec in specs:
         adata = spec["adata"]
@@ -618,9 +642,10 @@ def run_compare(args: argparse.Namespace, rng: np.random.Generator) -> None:
     plot_genes_per_cell_compare(specs, args.output_dir / "genes_per_cell_compare.png")
     plot_sparsity_summary_compare(specs, args.output_dir / "sparsity_summary_compare.png")
     plot_raw_norm_log_compare(
-        [{"label": s["label"], "color": s["color"], "X": s["adata"].X} for s in specs],
+        [{"display_label": s["display_label"], "color": s["color"], "X": s["adata"].X} for s in specs],
         args.target_sum, args.sample_size, rng, args.output_dir / "raw_norm_log_compare.png",
     )
+    plot_dataset_legend(specs, args.output_dir / "dataset_legend.png")
     print(f"[save] Comparison plots written to {args.output_dir}")
 
     # Numeric summary alongside the plots -- lets a sweep across many configs be scored
