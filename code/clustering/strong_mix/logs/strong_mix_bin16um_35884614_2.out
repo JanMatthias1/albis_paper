@@ -1,0 +1,172 @@
+[task 2] bin16um batch_sigma=0.30 lambda=0.5 k_geom=100
+Python: /dcs04/hicks/data/Jan/sim_project/sim_paper/env/sim-app-banksy/bin/python
+albis module: /dcs04/hicks/data/Jan/sim_project/albis/albis/__init__.py
+albis version: 0.1.0
+
+Generating bin data for slice axis Z with theta=2.0, theta_jitter=0.6, noise_scale=1.3, batch_sigma=0.3, base_gene_lognormal=(-2.5, 0.7), n_cells=600000, cell_r_mean=7.5, allow_cell_overlap=False, sphere_r_um=2050.0, capture_window_um=(6500.0, 6500.0), core_fuzz_width_um=102.5, max_shift=1025.0, bin_size_um=16.0, sync_unaligned_seed=True, seed=2025
+/dcs04/hicks/data/Jan/sim_project/albis/albis/simulation_sphere.py:1513: FutureWarning: X.dtype being converted to np.float32 from int32. In the next version of anndata (0.9) conversion will not be automatic. Pass dtype explicitly to avoid this warning. Pass `AnnData(X, dtype=X.dtype, ...)` to get the future behavour.
+  adata_cell_true = ad.AnnData(X=X_cell_true, obs=cell_obs, var=var)
+/dcs04/hicks/data/Jan/sim_project/albis/albis/simulation_sphere.py:1517: FutureWarning: X.dtype being converted to np.float32 from int32. In the next version of anndata (0.9) conversion will not be automatic. Pass dtype explicitly to avoid this warning. Pass `AnnData(X, dtype=X.dtype, ...)` to get the future behavour.
+  adata_cell_obs = ad.AnnData(X=X_cell_obs, obs=cell_obs, var=var)
+/dcs04/hicks/data/Jan/sim_project/albis/albis/simulation_sphere.py:1948: FutureWarning: X.dtype being converted to np.float32 from int32. In the next version of anndata (0.9) conversion will not be automatic. Pass dtype explicitly to avoid this warning. Pass `AnnData(X, dtype=X.dtype, ...)` to get the future behavour.
+  adb = ad.AnnData(X=Xb, obs=obs_b, var=var)
+
+Generated AnnData:
+AnnData object with n_obs × n_vars = 1656490 × 556
+    obs: 'slice_axis', 'slice_id', 'bin_size_um', 'window_center0', 'window_center1', 'window_size0', 'window_size1', 'plane_dim0', 'plane_dim1', 'cell_type_true', 'domain_true', 'is_empty'
+    var: 'gene_class', 'is_noise', 'is_shared_marker'
+    uns: 'batch_effect_factors', 'rigid_perturb_inplane', 'output', 'sim_params'
+    obsm: 'spatial', 'cell_type_frac_true', 'domain_frac_true', 'spatial_3d', 'spatial_unaligned', 'spatial_3d_unaligned'
+    layers: 'counts_pre_batch'
+
+[nb] empirical theta_hat = 0.13 (real data fits ~0.15-0.16 via count_distribution.py --compare-input; lower --theta further if this is still much higher)
+
+Summary:
+{
+  "n_obs": 1656490,
+  "n_vars": 556,
+  "total_counts": 55807588,
+  "nonzero_counts": 26876871,
+  "platform": "bin",
+  "slice_axis": "Z",
+  "n_slices": 10,
+  "slice_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "obs_columns": [
+    "slice_axis",
+    "slice_id",
+    "bin_size_um",
+    "window_center0",
+    "window_center1",
+    "window_size0",
+    "window_size1",
+    "plane_dim0",
+    "plane_dim1",
+    "cell_type_true",
+    "domain_true",
+    "is_empty"
+  ],
+  "var_columns": [
+    "gene_class",
+    "is_noise",
+    "is_shared_marker"
+  ],
+  "layers": [
+    "counts_pre_batch"
+  ],
+  "obsm_keys": [
+    "spatial",
+    "cell_type_frac_true",
+    "domain_frac_true",
+    "spatial_3d",
+    "spatial_unaligned",
+    "spatial_3d_unaligned"
+  ],
+  "uns_keys": [
+    "batch_effect_factors",
+    "rigid_perturb_inplane",
+    "output",
+    "sim_params"
+  ],
+  "truth_annotations": [
+    "layers['counts_pre_batch']",
+    "obs['cell_type_true']",
+    "obs['domain_true']",
+    "obsm['cell_type_frac_true']",
+    "obsm['domain_frac_true']"
+  ]
+}
+
+Saved summary -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0.30/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_strongmix_bsigma03_summary.json
+
+Generating diagnostic plots...
+Plotting a deterministic subset of 100,000 / 1,656,490 observations.
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0.30/plots/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_strongmix_bsigma03/01_aligned_domain_true.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0.30/plots/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_strongmix_bsigma03/02_aligned_cell_type_true.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0.30/plots/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_strongmix_bsigma03/03_unaligned_slice_id.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0.30/plots/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_strongmix_bsigma03/04_qc_count_distributions.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0.30/plots/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_strongmix_bsigma03/05_bins_per_slice.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0.30/plots/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_strongmix_bsigma03/06_domain_composition_per_slice.png
+
+All diagnostic plots saved under sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0.30/plots/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_strongmix_bsigma03
+
+Saved dataset -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0.30/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_strongmix_bsigma03.h5ad
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0.30/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_strongmix_bsigma03.h5ad
+[load] AnnData shape: 1656490 x 556
+[qc] fully-empty (total_counts == 0): 1283928 (77.51%)
+[qc] near-empty (0 < total_counts, n_genes < 3): 6433 (0.39%)
+[qc] dropped 1290361 observations (77.90%); 366129 remain
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0.30/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_strongmix_bsigma03_qc_summary.json
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0.30/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_strongmix_bsigma03_qc.h5ad
+[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0.30/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_strongmix_bsigma03_qc.h5ad
+[load] AnnData shape: 366129 x 556
+[stagger] offsetting each slice's x coordinate so slices don't overlap
+  slice 0: offset x by 0.0
+  slice 1: offset x by 20400.0
+  slice 2: offset x by 40800.0
+  slice 3: offset x by 61200.0
+  slice 4: offset x by 81600.0
+  slice 5: offset x by 102000.0
+  slice 6: offset x by 122400.0
+  slice 7: offset x by 142800.0
+  slice 8: offset x by 163200.0
+  slice 9: offset x by 183600.0
+
+[normalize] normalize_total (no log1p -- BANKSY expects normalized, non-log counts here)
+[hvg] skipped -- using all 556 genes (matches 01.2_pca_harmony.py's convention)
+
+[banksy] k_geom=100 max_m=1 lambda=0.5 decay=scaled_gaussian
+
+Median distance to closest cell = 16.0
+
+---- Ran median_dist_to_nearest_neighbour in 0.66 s ----
+
+---- Ran generate_spatial_distance_graph in 6.74 s ----
+
+---- Ran row_normalize in 0.78 s ----
+
+---- Ran generate_spatial_weights_fixed_nbrs in 11.29 s ----
+
+---- Ran generate_spatial_distance_graph in 12.62 s ----
+
+---- Ran theta_from_spatial_graph in 3.25 s ----
+
+---- Ran row_normalize in 0.79 s ----
+
+---- Ran generate_spatial_weights_fixed_nbrs in 21.94 s ----
+
+Runtime Sep-23-2026-13-50
+
+556 genes to be analysed:
+Gene List:
+Index(['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10',
+       ...
+       'G547', 'G548', 'G549', 'G550', 'G551', 'G552', 'G553', 'G554', 'G555',
+       'G556'],
+      dtype='object', length=556)
+
+Check if X contains only finite (non-NAN) values
+Decay Type: scaled_gaussian
+Weights Object: {'weights': {0: <366129x366129 sparse matrix of type '<class 'numpy.float64'>'
+	with 36612900 stored elements in Compressed Sparse Row format>, 1: <366129x366129 sparse matrix of type '<class 'numpy.complex128'>'
+	with 73225800 stored elements in Compressed Sparse Row format>}}
+
+Nbr matrix | Mean: 17.99 | Std: 19.91
+Size of Nbr | Shape: (366129, 556)
+Top 3 entries of Nbr Mat:
+
+[[68.17603855 14.50614403 14.12177069]
+ [71.88167457  9.01461135 14.28965919]
+ [79.12199657 11.94103719 13.97150027]]

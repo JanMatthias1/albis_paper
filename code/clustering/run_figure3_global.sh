@@ -42,10 +42,9 @@ STAGES="${STAGES:-celltype rctd banksy summary}"
 EXCLUDE="${EXCLUDE-compute-158}"
 mkdir -p "${LOGS}"
 
-N_DRY=0
 sb() {  # sbatch --parsable, or print-only under DRY_RUN=1 (returns a fake job ID)
     if [[ -n "${DRY_RUN:-}" ]]; then
-        N_DRY=$((N_DRY + 1)); echo "  sbatch $*" >&2; echo "DRY${N_DRY}"
+        echo "  sbatch $*" >&2; echo "DRY${RANDOM}"
     else
         sbatch --parsable "$@"
     fi
@@ -72,7 +71,7 @@ if has rctd; then
     avg=$("${SB[@]}" --dependency=afterok:"${seeds}" --job-name=rctd_seed_avg \
         --output="${CODE}/spatial_deconvolution/logs/rctd_seed_avg_%j.out" \
         --time=01:00:00 --mem=16G --cpus-per-task=1 --partition=shared \
-        --wrap="source ${CODE}/_env.sh && export MPLCONFIGDIR=/tmp/fig3-mpl-\${USER} && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/average_rctd_seeds.py")
+        --wrap="source ${CODE}/_env.sh && export MPLCONFIGDIR=/tmp/fig3-mpl-\${USER} && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/average_rctd_seeds.py && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/plot_rctd_results.py /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot_seed_avg")
     echo "[rctd] 3-seed average: ${avg} (after ${seeds})"; ALL+=("${avg}")
 fi
 
@@ -93,6 +92,6 @@ if has summary; then
     j=$("${SB[@]}" "${DEP[@]}" --job-name=figure3_summary \
         --output="${LOGS}/figure3_summary_%j.out" \
         --time=02:00:00 --mem=64G --cpus-per-task=2 --partition=shared \
-        --wrap="source ${CODE}/_env.sh && \"\${PYTHON_BIN}\" ${CODE}/strong_mix/check_matches_figure2.py; bash ${CODE}/plot_figure3_summaries.sh")
+        --wrap="source ${CODE}/_env.sh && \"\${PYTHON_BIN}\" ${CODE}/strong_mix/check_matches_figure2.py && bash ${CODE}/plot_figure3_summaries.sh")
     echo "[summary] checker + plots: ${j}${DEP:+ (after all of the above)}"
 fi

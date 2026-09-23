@@ -11,7 +11,7 @@ Expected environment:
     python -m pip install -r sim_paper/code/clustering/requirements.txt
 
 Example:
-    python sim_paper/code/clustering/pca_harmony.py
+    python sim_paper/code/clustering/01.2_pca_harmony.py
 """
 
 from __future__ import annotations
