@@ -1,0 +1,174 @@
+[load] reference (cell): /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/log_mu_-2.5_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad 
+[reference] n_cells=24207 n_genes=556 per-type counts:
+cell_types
+type1 type2 type3 type4 type5 type6 type7 type8 
+ 3046  3093  3187  3160  3211  3053  2783  2674 
+Warning message:
+In check_UMI(nUMI, "Reference", require_2d = T, require_int = require_int,  :
+  Reference: some nUMI values are less than min_UMI = 100, and these cells will be removed. Optionally, you may lower the min_UMI parameter.
+
+[load] query (spot): /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_bsigma03/simulation_spot_z_qc.h5ad 
+[query] n_spots=10026 n_genes=556
+
+[RCTD] create.RCTD (doublet_mode=full, max_cores=8)
+Begin: process_cell_type_info
+process_cell_type_info: number of cells in reference: 22264
+process_cell_type_info: number of genes in reference: 556
+
+type1 type2 type3 type4 type5 type6 type7 type8 
+ 2792  2889  2947  2883  2934  2788  2590  2441 
+End: process_cell_type_info
+create.RCTD: getting regression differentially expressed genes: 
+get_de_genes: type1 found DE genes: 60
+get_de_genes: type2 found DE genes: 60
+get_de_genes: type3 found DE genes: 60
+get_de_genes: type4 found DE genes: 60
+get_de_genes: type5 found DE genes: 59
+get_de_genes: type6 found DE genes: 60
+get_de_genes: type7 found DE genes: 58
+get_de_genes: type8 found DE genes: 59
+get_de_genes: total DE genes: 476
+create.RCTD: getting platform effect normalization differentially expressed genes: 
+get_de_genes: type1 found DE genes: 60
+get_de_genes: type2 found DE genes: 60
+get_de_genes: type3 found DE genes: 61
+get_de_genes: type4 found DE genes: 61
+get_de_genes: type5 found DE genes: 59
+get_de_genes: type6 found DE genes: 60
+get_de_genes: type7 found DE genes: 59
+get_de_genes: type8 found DE genes: 61
+get_de_genes: total DE genes: 480
+fitBulk: decomposing bulk
+chooseSigma: using initial Q_mat with sigma =  1
+starting worker pid=2227096 on localhost:11194 at 11:34:13.222
+starting worker pid=2227112 on localhost:11194 at 11:34:13.694
+starting worker pid=2227127 on localhost:11194 at 11:34:14.199
+starting worker pid=2227142 on localhost:11194 at 11:34:14.776
+starting worker pid=2227157 on localhost:11194 at 11:34:15.418
+starting worker pid=2227173 on localhost:11194 at 11:34:15.895
+starting worker pid=2227188 on localhost:11194 at 11:34:16.364
+starting worker pid=2227203 on localhost:11194 at 11:34:16.826
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Likelihood value: 1008979.58517467
+Sigma value:  0.92
+starting worker pid=2227275 on localhost:11194 at 11:34:56.114
+starting worker pid=2227290 on localhost:11194 at 11:34:56.620
+starting worker pid=2227305 on localhost:11194 at 11:34:57.468
+starting worker pid=2227322 on localhost:11194 at 11:34:57.901
+starting worker pid=2227338 on localhost:11194 at 11:34:58.352
+starting worker pid=2227354 on localhost:11194 at 11:34:58.833
+starting worker pid=2227370 on localhost:11194 at 11:34:59.309
+starting worker pid=2227386 on localhost:11194 at 11:34:59.806
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Likelihood value: 1007648.69178158
+Sigma value:  0.9
+starting worker pid=2227445 on localhost:11194 at 11:35:37.754
+starting worker pid=2227461 on localhost:11194 at 11:35:38.274
+starting worker pid=2227476 on localhost:11194 at 11:35:38.696
+starting worker pid=2227492 on localhost:11194 at 11:35:39.168
+starting worker pid=2227508 on localhost:11194 at 11:35:39.656
+starting worker pid=2227524 on localhost:11194 at 11:35:40.097
+starting worker pid=2227540 on localhost:11194 at 11:35:40.588
+starting worker pid=2227556 on localhost:11194 at 11:35:41.086
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Likelihood value: 1007587.29255646
+Sigma value:  0.9
+starting worker pid=2227677 on localhost:11194 at 11:36:18.291
+starting worker pid=2227693 on localhost:11194 at 11:36:18.714
+starting worker pid=2227709 on localhost:11194 at 11:36:19.183
+starting worker pid=2227725 on localhost:11194 at 11:36:19.689
+starting worker pid=2227746 on localhost:11194 at 11:36:20.155
+starting worker pid=2227771 on localhost:11194 at 11:36:20.665
+starting worker pid=2227787 on localhost:11194 at 11:36:21.299
+starting worker pid=2227803 on localhost:11194 at 11:36:21.785
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+
+[score] 9840 / 10026 spots have an RCTD estimate (rest failed QC/min-UMI inside RCTD)
+
+=== RESULTS ===
+spots scored: 9840 / 10026 
+overall Pearson r (all spots x all cell types, pooled): 0.7134 
+overall RMSE: 0.0841 
+mean per-spot Pearson r: 0.6937 
+per-cell-type Pearson r:
+      cell_type pearson_r       rmse
+type1     type1 0.7304926 0.08442972
+type2     type2 0.7431466 0.07929062
+type3     type3 0.7170167 0.08682997
+type4     type4 0.7261236 0.08895707
+type5     type5 0.7370271 0.08335640
+type6     type6 0.7177459 0.08032486
+type7     type7 0.7309854 0.08498333
+type8     type8 0.7139183 0.08431999
+
+[done] outputs written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot 
+[load] 9840 spots with an RCTD estimate
+[spatial zoom -> rctd_spatial_zoom.png] slice 5, cropped to x/y in [0,1200]x[0,1200]: 144 spots, 8 cell types, 1 pair(s)/row
+wrote /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot/rctd_spatial_zoom.png
+[spatial zoom -> rctd_spatial_zoom_4x4.png] slice 5, cropped to x/y in [0,1200]x[0,1200]: 144 spots, 8 cell types, 2 pair(s)/row
+wrote /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot/rctd_spatial_zoom_4x4.png
+[spatial zoom -> rctd_spatial_zoom_main.png] slice 5, cropped to x/y in [0,1200]x[0,1200]: 144 spots, 2 cell types, 1 pair(s)/row
+wrote /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot/rctd_spatial_zoom_main.png
+[spatial zoom -> rctd_spatial_zoom_4types.png] slice 5, cropped to x/y in [0,1200]x[0,1200]: 144 spots, 4 cell types, 2 pair(s)/row
+wrote /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot/rctd_spatial_zoom_4types.png
+wrote /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot/rctd_error_boxplot.png

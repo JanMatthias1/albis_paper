@@ -1,0 +1,5 @@
+[pca_harmony] running
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_0.0_jitter0.6_bsigma08/simulation_bin_z_qc.h5ad
+slurmstepd: error: *** JOB 35884497 ON compute-165 CANCELLED AT 2026-09-23T13:37:42 ***

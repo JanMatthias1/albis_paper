@@ -47,7 +47,7 @@ RCTD_DIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_de
 SEEDS = ["271828", "314159", "999999"]
 SEED_DIRS = [os.path.join(RCTD_DIR, f"spot_seed{s}") for s in SEEDS]
 OUT_DIR = os.path.join(RCTD_DIR, "spot_seed_avg")
-SPOT_H5AD = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad"
+SPOT_H5AD = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_bsigma03/simulation_spot_z_qc.h5ad"
 CELL_TYPES = [f"type{i}" for i in range(1, 9)]
 
 os.makedirs(OUT_DIR, exist_ok=True)
@@ -116,9 +116,13 @@ def compute_and_write_metrics(est, truth):
 
     overall_cor = safe_cor(est_arr.ravel(), truth_arr.ravel())
     overall_rmse = float(np.sqrt(np.mean((est_arr - truth_arr) ** 2)))
+    # Read from the seed runs (same query for all) instead of a hardcoded
+    # count -- was 10034, which silently went stale on the 2026-09-23 spot retune.
+    seed_totals = {json.load(open(os.path.join(d, "metrics_summary.json")))["n_spots_total"] for d in SEED_DIRS}
+    assert len(seed_totals) == 1, f"seed runs disagree on n_spots_total: {seed_totals}"
     summary = {
         "n_spots_scored": int(est_arr.shape[0]),
-        "n_spots_total": 10034,  # same query as every other RCTD run in this dir
+        "n_spots_total": seed_totals.pop(),
         "doublet_mode": "full",
         "n_seeds_averaged": len(SEEDS),
         "seeds_averaged": SEEDS,

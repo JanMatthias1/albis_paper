@@ -1,0 +1,62 @@
+[task 3] bin16um batch_sigma=0.35 lambda=0.5 k_geom=100
+[load] sim_paper/data/noisy/bin16um_strong_mix_bs0.35/simulation_bin_z_qc.h5ad
+[load] AnnData shape: 366054 x 556
+[stagger] offsetting each slice's x coordinate so slices don't overlap
+  slice 0: offset x by 0.0
+  slice 1: offset x by 20400.0
+  slice 2: offset x by 40800.0
+  slice 3: offset x by 61200.0
+  slice 4: offset x by 81600.0
+  slice 5: offset x by 102000.0
+  slice 6: offset x by 122400.0
+  slice 7: offset x by 142800.0
+  slice 8: offset x by 163200.0
+  slice 9: offset x by 183600.0
+
+[normalize] normalize_total (no log1p -- BANKSY expects normalized, non-log counts here)
+[hvg] skipped -- using all 556 genes (matches 01.2_pca_harmony.py's convention)
+
+[banksy] k_geom=100 max_m=1 lambda=0.5 decay=scaled_gaussian
+
+Median distance to closest cell = 16.0
+
+---- Ran median_dist_to_nearest_neighbour in 1.62 s ----
+
+---- Ran generate_spatial_distance_graph in 12.76 s ----
+
+---- Ran row_normalize in 1.16 s ----
+
+---- Ran generate_spatial_weights_fixed_nbrs in 22.46 s ----
+
+---- Ran generate_spatial_distance_graph in 18.47 s ----
+
+---- Ran theta_from_spatial_graph in 5.78 s ----
+
+---- Ran row_normalize in 1.05 s ----
+
+---- Ran generate_spatial_weights_fixed_nbrs in 33.64 s ----
+
+Runtime Sep-23-2026-13-11
+
+556 genes to be analysed:
+Gene List:
+Index(['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10',
+       ...
+       'G547', 'G548', 'G549', 'G550', 'G551', 'G552', 'G553', 'G554', 'G555',
+       'G556'],
+      dtype='object', length=556)
+
+Check if X contains only finite (non-NAN) values
+Decay Type: scaled_gaussian
+Weights Object: {'weights': {0: <366054x366054 sparse matrix of type '<class 'numpy.float64'>'
+	with 36605400 stored elements in Compressed Sparse Row format>, 1: <366054x366054 sparse matrix of type '<class 'numpy.complex128'>'
+	with 73210800 stored elements in Compressed Sparse Row format>}}
+
+Nbr matrix | Mean: 17.99 | Std: 20.06
+Size of Nbr | Shape: (366054, 556)
+Top 3 entries of Nbr Mat:
+
+[[41.16933813 14.005277   11.60644816]
+ [45.92759386 13.43126676 12.19593109]
+ [52.9354341  14.85342955 13.80718966]]
+slurmstepd: error: *** JOB 35884266 ON compute-165 CANCELLED AT 2026-09-23T13:13:43 ***

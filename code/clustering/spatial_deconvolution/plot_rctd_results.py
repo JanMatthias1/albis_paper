@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 import anndata as ad
 
-SPOT_H5AD = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad"
+SPOT_H5AD = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_bsigma03/simulation_spot_z_qc.h5ad"
 # The query (spot) h5ad above is shared by every RCTD run regardless of
 # which reference seed produced it (run_rctd_spot.R hardcodes the same
 # SPOT_H5AD for the canonical run and all run_rctd_spot_independent_seed.sh

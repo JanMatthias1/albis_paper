@@ -237,6 +237,13 @@ def main() -> None:
 
     # ── PCA + UMAP (pre-Harmony) ─────────────────────────────────────────────
     print(f"\n[pca] pre-Harmony PCA{'' if args.skip_umap else ' + UMAP'}")
+    # banksy_utils calls sklearn PCA(n_components=...) with no random_state; at
+    # BANKSY-matrix sizes sklearn's 'auto' solver picks the randomized SVD, which
+    # then draws from numpy's global RNG. Unseeded, the same input gave cell
+    # strong-mix bs0 domain ARI 0.61 in one run and 0.48 in another (2026-09-23).
+    # Seeding the global RNG here makes the PCA -- and everything downstream --
+    # reproducible.
+    np.random.seed(args.random_state)
     pca_umap(banksy_dict, pca_dims=[args.n_pcs], add_umap=not args.skip_umap, plt_remaining_var=True)
 
     pc_key = f"reduced_pc_{args.n_pcs}"

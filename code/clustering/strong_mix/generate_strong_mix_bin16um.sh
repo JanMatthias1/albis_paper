@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=strong_mix_bin16um
 #SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/strong_mix/logs/strong_mix_bin16um_%A_%a.out
-#SBATCH --array=0-6%4
+#SBATCH --array=0-7%4
 #SBATCH --time=18:00:00
 #SBATCH --mem=320G
 #SBATCH --cpus-per-task=8
@@ -21,6 +21,19 @@
 # Full pipeline per point: generate (strong-domain-mix) -> QC ->
 # BANKSY+Harmony -> 02_leiden_resolution_sweep.py -> composition_recovery.py
 # (ARI + slice_id leakage).
+# 2026-09-23: generate flags matched to the retuned Figure 2 config so the
+# normal- and strong-mix datasets differ ONLY by --strong-domain-mix
+# (bin16um: --theta 2.0 --theta-jitter 0.6; spot: --base-gene-lognormal
+# -2.25 1.0 + --domain-size-factors 0.35 0.6 1.0 1.0 1.6 2.8; all: --sync-unaligned-seed, which only changes
+# obsm['spatial_unaligned'] -- verified byte-identical counts/spatial/labels).
+# Old figure_3/ and data/noisy/*_strong_mix_*/*_batch_slide_* inputs archived to
+# data/figure_3_archive_20260923/ and data/noisy/_archive_figure3_20260923/,
+# so every skip-if-exists step below regenerates from scratch.
+# 2026-09-23 (later): ONE TREE PER POINT -- raw/QC h5ad are written straight
+# into the point folder ${RUN} (next to banksy_matrix/ and ari/) via
+# --output-dir, instead of data/noisy/<tag>/ + hand-made symlinks. Existing
+# inputs were moved there from data/noisy/ (verified: Figure 2 config +
+# --strong-domain-mix, strong_mix/check_matches_figure2.py).
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/strong_mix/logs
@@ -34,22 +47,31 @@ OUT_ROOT="sim_paper/data/figure_3/cellbin_batch_sigma_slide"
 LAM=0.5
 KG=100
 
-BATCH_SIGMAS=(0 0.25 0.30 0.35 0.40 0.45 0.7)
+# 0.05 appended 2026-09-23 (index 7): its baseline used to exist only as a
+# hand-built folder; the seed script already expects bs0.05 + seeds 101/202.
+BATCH_SIGMAS=(0 0.25 0.30 0.35 0.40 0.45 0.7 0.05)
 BS="${BATCH_SIGMAS[${SLURM_ARRAY_TASK_ID:-0}]}"
 TAG="bin16um_strong_mix_bs${BS}"
 
-SIM_RAW="sim_paper/data/noisy/${TAG}/simulation_bin_z.h5ad"
-SIM_QC="sim_paper/data/noisy/${TAG}/simulation_bin_z_qc.h5ad"
 RUN="${OUT_ROOT}/bin16um/bs${BS}"
+# The data files are named, Figure 2 style, by the parameters they were
+# generated with: <Fig2 tag body>_strongmix_bsigma<batch_sigma, no dot>
+# [_seed<seed>] (default seed 2025 not written), e.g.
+# log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma05_seed101.h5ad / ..._qc.h5ad.
+# The skip-if-exists checks use that name, so a parameter change regenerates.
+DATA_TAG="packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_strongmix_bsigma$(printf '%g' "${BS}" | tr -d .)"
+SIM_RAW="${RUN}/${DATA_TAG}.h5ad"
+SIM_QC="${RUN}/${DATA_TAG}_qc.h5ad"
+mkdir -p "${RUN}"
 
 echo "[task ${SLURM_ARRAY_TASK_ID:-0}] bin16um batch_sigma=${BS} lambda=${LAM} k_geom=${KG}"
 
 if [[ ! -f "${SIM_RAW}" ]]; then
     "${BANKSY_PYTHON}" sim_paper/code/data/generate_simulation_noisy.py \
         --modality bin --sphere-r-um 2050 --bin-size-um 16 \
-        --base-gene-lognormal -2.5 0.7 \
-        --strong-domain-mix --batch-sigma "${BS}" \
-        --out-tag "${TAG}"
+        --base-gene-lognormal -2.5 0.7 --theta 2.0 --theta-jitter 0.6 \
+        --strong-domain-mix --batch-sigma "${BS}" --sync-unaligned-seed \
+        --output-dir "${RUN}" --output-stem "${DATA_TAG}"
 fi
 if [[ ! -f "${SIM_QC}" ]]; then
     "${TUTORIAL_PYTHON}" sim_paper/code/clustering/00_qc_filter.py \

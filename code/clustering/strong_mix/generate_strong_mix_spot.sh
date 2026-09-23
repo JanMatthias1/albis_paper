@@ -18,6 +18,19 @@
 # Full pipeline per point: generate (strong-domain-mix) -> QC ->
 # BANKSY+Harmony -> 02_leiden_resolution_sweep.py -> composition_recovery.py
 # (ARI + slice_id leakage).
+# 2026-09-23: generate flags matched to the retuned Figure 2 config so the
+# normal- and strong-mix datasets differ ONLY by --strong-domain-mix
+# (bin16um: --theta 2.0 --theta-jitter 0.6; spot: --base-gene-lognormal
+# -2.25 1.0 + --domain-size-factors 0.35 0.6 1.0 1.0 1.6 2.8; all: --sync-unaligned-seed, which only changes
+# obsm['spatial_unaligned'] -- verified byte-identical counts/spatial/labels).
+# Old figure_3/ and data/noisy/*_strong_mix_*/*_batch_slide_* inputs archived to
+# data/figure_3_archive_20260923/ and data/noisy/_archive_figure3_20260923/,
+# so every skip-if-exists step below regenerates from scratch.
+# 2026-09-23 (later): ONE TREE PER POINT -- raw/QC h5ad are written straight
+# into the point folder ${RUN} (next to banksy_matrix/ and ari/) via
+# --output-dir, instead of data/noisy/<tag>/ + hand-made symlinks. Existing
+# inputs were moved there from data/noisy/ (verified: Figure 2 config +
+# --strong-domain-mix, strong_mix/check_matches_figure2.py).
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/strong_mix/logs
@@ -35,18 +48,26 @@ BATCH_SIGMAS=(0.0 0.05 0.1 0.12 0.13 0.14 0.15 0.18 0.2 0.22 0.25 0.26 0.27 0.28
 BS="${BATCH_SIGMAS[${SLURM_ARRAY_TASK_ID:-0}]}"
 TAG="spot_strong_mix_bs${BS}"
 
-SIM_RAW="sim_paper/data/noisy/${TAG}/simulation_spot_z.h5ad"
-SIM_QC="sim_paper/data/noisy/${TAG}/simulation_spot_z_qc.h5ad"
 RUN="${OUT_ROOT}/spot/bs${BS}"
+# The data files are named, Figure 2 style, by the parameters they were
+# generated with: <Fig2 tag body>_strongmix_bsigma<batch_sigma, no dot>
+# [_seed<seed>] (default seed 2025 not written), e.g.
+# log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma05_seed101.h5ad / ..._qc.h5ad.
+# The skip-if-exists checks use that name, so a parameter change regenerates.
+DATA_TAG="packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma$(printf '%g' "${BS}" | tr -d .)"
+SIM_RAW="${RUN}/${DATA_TAG}.h5ad"
+SIM_QC="${RUN}/${DATA_TAG}_qc.h5ad"
+mkdir -p "${RUN}"
 
 echo "[task ${SLURM_ARRAY_TASK_ID:-0}] spot batch_sigma=${BS} lambda=${LAM} k_geom=${KG}"
 
 if [[ ! -f "${SIM_RAW}" ]]; then
     "${BANKSY_PYTHON}" sim_paper/code/data/generate_simulation_noisy.py \
         --modality spot --sphere-r-um 2050 \
-        --base-gene-lognormal -2.0 0.7 --theta 0.25 --theta-jitter 0.10 \
-        --strong-domain-mix --batch-sigma "${BS}" \
-        --out-tag "${TAG}"
+        --base-gene-lognormal -2.25 1.0 --theta 0.25 --theta-jitter 0.10 \
+        --domain-size-factors 0.35 0.6 1.0 1.0 1.6 2.8 \
+        --strong-domain-mix --batch-sigma "${BS}" --sync-unaligned-seed \
+        --output-dir "${RUN}" --output-stem "${DATA_TAG}"
 fi
 if [[ ! -f "${SIM_QC}" ]]; then
     "${TUTORIAL_PYTHON}" sim_paper/code/clustering/00_qc_filter.py \

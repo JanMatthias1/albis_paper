@@ -29,7 +29,7 @@
 #   reference (cell): data/figure_2/smaller_sphere/data/
 #                      log_mu_-2.5_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad
 #   query (spot):      data/figure_2/smaller_sphere/data/
-#                      packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad
+#                      packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_bsigma03/simulation_spot_z_qc.h5ad
 #
 # Output, under data/figure_3/spatial_deconvolution/RCTD/spot/:
 #   rctd_results.rds        the full myRCTD object (weights, singlet scores, etc.)
@@ -52,7 +52,7 @@ CELL_H5AD <- Sys.getenv(
   "RCTD_CELL_H5AD",
   "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/log_mu_-2.5_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad"
 )
-SPOT_H5AD <- "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad"
+SPOT_H5AD <- "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_bsigma03/simulation_spot_z_qc.h5ad"
 OUT_DIR <- Sys.getenv(
   "RCTD_OUT_DIR",
   "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot"

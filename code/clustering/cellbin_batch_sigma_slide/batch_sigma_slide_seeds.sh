@@ -19,6 +19,19 @@
 #
 # Requires FRESH simulations per task (the batch shift is baked into counts
 # at generation time, same as the original sweeps).
+# 2026-09-23: generate flags matched to the retuned Figure 2 config so the
+# normal- and strong-mix datasets differ ONLY by --strong-domain-mix
+# (bin16um: --theta 2.0 --theta-jitter 0.6; spot: --base-gene-lognormal
+# -2.25 1.0 + --domain-size-factors 0.35 0.6 1.0 1.0 1.6 2.8; all: --sync-unaligned-seed, which only changes
+# obsm['spatial_unaligned'] -- verified byte-identical counts/spatial/labels).
+# Old figure_3/ and data/noisy/*_strong_mix_*/*_batch_slide_* inputs archived to
+# data/figure_3_archive_20260923/ and data/noisy/_archive_figure3_20260923/,
+# so every skip-if-exists step below regenerates from scratch.
+# 2026-09-23 (later): ONE TREE PER POINT -- raw/QC h5ad are written straight
+# into the point folder ${RUN} (next to banksy_matrix/ and ari/) via
+# --output-dir, instead of data/noisy/<tag>/ + hand-made symlinks. Existing
+# inputs were moved there from data/noisy/ (verified: Figure 2 config +
+# --strong-domain-mix, strong_mix/check_matches_figure2.py).
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
@@ -47,12 +60,14 @@ case "${MOD}" in
     # project_figure3_banksy_domain_sweep memory 2026-09-18 for the full story).
     SPHERE_R_UM=2050
     LAM=0.5; KG=60
-    GEN_FLAGS=(--n-cells 24207 --base-gene-lognormal -2.5 0.7 --theta 0.40 --theta-jitter 0.15 --strong-domain-mix)
+    TAG_BODY="log_mu_-2.5_theta_0.40_jitter0.15"
+    GEN_FLAGS=(--n-cells 24207 --base-gene-lognormal -2.5 0.7 --theta 0.40 --theta-jitter 0.15 --strong-domain-mix --sync-unaligned-seed)
     ;;
   bin)
     SPHERE_R_UM=2050
     LAM=0.5; KG=100
-    GEN_FLAGS=(--bin-size-um 16 --base-gene-lognormal -2.5 0.7 --strong-domain-mix)
+    TAG_BODY="packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6"
+    GEN_FLAGS=(--bin-size-um 16 --base-gene-lognormal -2.5 0.7 --theta 2.0 --theta-jitter 0.6 --strong-domain-mix --sync-unaligned-seed)
     # 2026-09-17: cellbin_batch_sigma_slide/ folder renamed "bin" -> "bin16um"
     # in the strong_mix consolidation -- --modality is still "bin" (only
     # cell/bin/spot are valid), but the ON-DISK folder is "bin16um".
@@ -65,7 +80,8 @@ case "${MOD}" in
     # log_mu=-2.0/theta=0.25/jitter=0.10, see [[reference_generate_noisy_theta_jitter_default]]).
     SPHERE_R_UM=2050
     LAM=0.1; KG=8
-    GEN_FLAGS=(--base-gene-lognormal -2.0 0.7 --theta 0.25 --theta-jitter 0.10 --strong-domain-mix)
+    TAG_BODY="packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf"
+    GEN_FLAGS=(--base-gene-lognormal -2.25 1.0 --theta 0.25 --theta-jitter 0.10 --domain-size-factors 0.35 0.6 1.0 1.0 1.6 2.8 --strong-domain-mix --sync-unaligned-seed)
     ;;
 esac
 
@@ -78,8 +94,15 @@ else
     RUN="${OUT_ROOT}/${FOLDER}/bs${BS}"
     SEED_FLAG=()
 fi
-SIM_RAW="sim_paper/data/noisy/${TAG}/simulation_${MOD}_z.h5ad"
-SIM_QC="sim_paper/data/noisy/${TAG}/simulation_${MOD}_z_qc.h5ad"
+# The data files are named, Figure 2 style, by the parameters they were
+# generated with: <Fig2 tag body>_strongmix_bsigma<batch_sigma, no dot>
+# [_seed<seed>] (default seed 2025 not written), e.g.
+# log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma05_seed101.h5ad / ..._qc.h5ad.
+# The skip-if-exists checks use that name, so a parameter change regenerates.
+DATA_TAG="${TAG_BODY}_strongmix_bsigma$(printf '%g' "${BS}" | tr -d .)${SEED:+_seed${SEED}}"
+SIM_RAW="${RUN}/${DATA_TAG}.h5ad"
+SIM_QC="${RUN}/${DATA_TAG}_qc.h5ad"
+mkdir -p "${RUN}"
 
 echo "[task ${i}] modality=${MOD} batch_sigma=${BS} seed=${SEED:-<default>} lambda=${LAM} k_geom=${KG} -> ${RUN}"
 
@@ -90,7 +113,7 @@ if [[ ! -f "${SIM_RAW}" ]]; then
         "${GEN_FLAGS[@]}" \
         --batch-sigma "${BS}" \
         "${SEED_FLAG[@]}" \
-        --out-tag "${TAG}"
+        --output-dir "${RUN}" --output-stem "${DATA_TAG}"
 fi
 if [[ ! -f "${SIM_QC}" ]]; then
     echo "[qc] ${TAG}"

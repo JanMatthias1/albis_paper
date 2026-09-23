@@ -1,0 +1,2 @@
+[task 3] spot batch_sigma=0.12 lambda=0.1 k_geom=8
+slurmstepd: error: *** JOB 35884520 ON compute-144 CANCELLED AT 2026-09-23T13:37:42 ***

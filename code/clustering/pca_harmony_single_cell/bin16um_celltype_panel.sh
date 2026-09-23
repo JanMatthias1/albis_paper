@@ -37,13 +37,19 @@
 # Pipeline: plain PCA+Harmony, NOT BANKSY -- same rationale as the 8um bin
 # panel (BANKSY collapses bin's cell_type_true ARI; see bin_celltype_panel.sh).
 
+# 2026-09-23: moved to the retuned Figure 2 tag (bin: --theta-jitter 1.0 -> 0.6;
+# spot: --base-gene-lognormal -2.25 1.0 + --domain-size-factors 0.35 0.6 1.0 1.0 1.6 2.8; see
+# data/figure_2/smaller_sphere/test/README.md). Fallback generate flags now
+# match the Figure 2 pairing scripts exactly (incl. --sync-unaligned-seed).
+# The old figure_3/ tree was archived whole to data/figure_3_archive_20260923/,
+# so the skip-if-exists PCA step below recomputes from the new data.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-SIM_TAG="packing_pf0p04_bin16um_log_mu_-2.5_bsigma07"
+SIM_TAG="packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_bsigma07"
 MODALITY="bin"
 SIM_RAW="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
 SIM_QC="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
@@ -60,7 +66,8 @@ if [[ ! -f "${SIM_QC}" ]]; then
         echo "[generate] ${SIM_TAG} not found under data/figure_2/, generating (same config as Figure 2)"
         "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
             --modality "${MODALITY}" --sphere-r-um 2050 --bin-size-um 16 \
-            --base-gene-lognormal -2.5 0.7 --batch-sigma 0.7 \
+            --base-gene-lognormal -2.5 0.7 --theta 2.0 --theta-jitter 0.6 --batch-sigma 0.7 \
+            --sync-unaligned-seed \
             --out-tag "${SIM_TAG}"
         echo "[qc] ${SIM_TAG}"
         "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
