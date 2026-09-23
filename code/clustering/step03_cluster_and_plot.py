@@ -184,10 +184,9 @@ def plot_umap_true_vs_predicted(adata, true_key: str, pred_key: str, output_path
         ax.set_ylim(ylim)
         if categories is not None:
             legend = ax.legend(handles=legend_handles(categories, swatches), title=pretty_label(key),
-                      title_fontsize=LEGEND_TITLE_SIZE, bbox_to_anchor=(0.5, -0.17),
-                      loc="upper center", ncol=max(1, (len(categories) + 1) // 2),
-                      frameon=False, fontsize=12, columnspacing=0.7,
-                      handlelength=1.0, handletextpad=0.3)
+                      title_fontsize=LEGEND_TITLE_SIZE, bbox_to_anchor=(0.5, -0.25),
+                      loc="upper center", ncol=4 if len(categories) <= 6 else 2, frameon=False, fontsize=12,
+                      columnspacing=1.0, handlelength=2.0, handletextpad=0.4)
             legends.append(legend)
     # Record the display-only correspondence; cluster IDs and scores are unchanged.
     output_path.with_suffix(".colors.json").write_text(json.dumps({
@@ -196,8 +195,7 @@ def plot_umap_true_vs_predicted(adata, true_key: str, pred_key: str, output_path
         "unmatched_color": "#B9C0C7",
     }, indent=2))
 
-    # A shared crop keeps both the canvas and axes identical across paired
-    # UMAPs, independent of whether the legend has one or two rows.
+    # Preserve the full canvas for the explicit cluster-to-truth legend.
     fig.subplots_adjust(**PANEL_MARGINS)
     crop = Bbox.from_extents(0, PANEL_EXPORT_BOTTOM,
                              fig.get_figwidth(), fig.get_figheight())

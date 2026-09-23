@@ -71,4 +71,9 @@ fi
     --h5ad "${RUN}/ari/simulation_spot_z_ari_recovery.h5ad" --tag "spot_bs${BS}" \
     --out-dir "${OUT_ROOT}/scores"
 
+# Render the manuscript panels from the completed embeddings and labels.
+"${TUTORIAL_PYTHON}" sim_paper/code/clustering/plot_banksy_results.py \
+    --input "${BANKSY_H5AD}" \
+    --cluster-input "${RUN}/ari/simulation_spot_z_ari_recovery.h5ad"
+
 echo "[done] task ${SLURM_ARRAY_TASK_ID:-0} -> ${RUN}"

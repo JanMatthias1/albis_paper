@@ -25,9 +25,12 @@ i="${SLURM_ARRAY_TASK_ID:-0}"
 MOD="${MODS[$i]}"
 LABEL="${LABELS[$i]}"
 
-H5AD="${SLIDE_ROOT}/${MOD}/${LABEL}/banksy_matrix/simulation_${MOD}_z_banksy_pca_harmony_qc.h5ad"
+FOLDER="${MOD}"
+if [[ "$MOD" == bin ]]; then FOLDER=bin16um; fi
+
+H5AD="${SLIDE_ROOT}/${FOLDER}/${LABEL}/banksy_matrix/simulation_${MOD}_z_banksy_pca_harmony_qc.h5ad"
 
 echo "[task ${i}] modality=${MOD} label=${LABEL}"
-"${PYTHON_BIN}" sim_paper/code/clustering/misc/banksy_batch_compare/plot_banksy_batch_compare_umap.py \
-    --modality "${MOD}" --input "${H5AD}" --label "${LABEL}"
+"${PYTHON_BIN}" sim_paper/code/clustering/plot_banksy_results.py \
+    --input "${H5AD}"
 echo "[done] task ${i}"

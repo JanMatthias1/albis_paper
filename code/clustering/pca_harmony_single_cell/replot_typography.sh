@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Re-render Figure 3's pca_harmony_single_cell plots (PCA/UMAP before-after-
 # Harmony, ground-truth-vs-predicted UMAP, contingency heatmaps) with Figure
-# 2's typography (bold 17pt titles / 14pt labels / 12pt ticks+legend, see
+# 2's typography (bold 17pt titles / 16pt labels / 12pt ticks+legend, see
 # 01.2_pca_harmony.py's and step03_cluster_and_plot.py's new rcParams block)
 # -- no data/embedding recompute, --plots-only on both scripts reloads the
 # existing pca_harmony_qc.h5ad / leiden res*.h5ad files directly. Requested

@@ -272,15 +272,14 @@ def plot_umap_before_after(
         legend = fig.legend(
             handles=handles,
             title=pretty_label(color_key),
-            title_fontsize=16 if color_key == "slice_id" else LEGEND_TITLE_SIZE,
+            title_fontsize=LEGEND_TITLE_SIZE,
             loc="upper center",
-            bbox_to_anchor=(0.5, 0.25 if color_key == "slice_id" else 0.22),
+            bbox_to_anchor=(0.5, 0.22),
             ncol=ncol,
             frameon=False,
         )
 
-    # A shared crop keeps both the canvas and axes identical across paired
-    # UMAPs, independent of whether the legend has one or two rows.
+    # Shared canvas and margins reproduce the saved Figure 3 layout.
     fig.subplots_adjust(**PANEL_MARGINS)
     crop = Bbox.from_extents(0, PANEL_EXPORT_BOTTOM,
                              fig.get_figwidth(), fig.get_figheight())
@@ -386,10 +385,6 @@ def main() -> None:
     print(f"[plot] Saving before/after UMAP plots under {plot_dir}")
     save_umap_plots(umap_adata, plot_dir, args.plot_colors, args.point_size, args.alpha)
 
-    if args.plots_only:
-        print("[plots-only] Done, not touching the existing PCA/Harmony output file")
-        return
-
     print(f"[pc_pairs] Plotting PC pairs by {args.batch_key} under {plot_dir / 'pc_pairs'}")
     plot_pc_pairs(
         adata,
@@ -398,6 +393,10 @@ def main() -> None:
         output_dir=plot_dir / "pc_pairs",
         color_key=args.batch_key,
     )
+
+    if args.plots_only:
+        print("[plots-only] Done, not touching the existing PCA/Harmony output file")
+        return
 
     adata.uns["clustering_pca_harmony"] = {
         "batch_key": args.batch_key,

@@ -116,4 +116,9 @@ fi
     --h5ad "${RUN}/ari/simulation_${MOD}_z_ari_recovery.h5ad" --tag "${FOLDER}_$(basename "${RUN}")" \
     --out-dir "${OUT_ROOT}/scores"
 
+# Render the manuscript panels from the completed embeddings and labels.
+"${TUTORIAL_PYTHON}" sim_paper/code/clustering/plot_banksy_results.py \
+    --input "${BANKSY_H5AD}" \
+    --cluster-input "${RUN}/ari/simulation_${MOD}_z_ari_recovery.h5ad"
+
 echo "[done] task ${i}  ->  ${RUN}"

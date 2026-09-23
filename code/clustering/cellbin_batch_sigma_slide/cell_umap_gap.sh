@@ -27,6 +27,6 @@ LABEL="${LABELS[$i]}"
 H5AD="sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/${LABEL}/banksy_matrix/simulation_cell_z_banksy_pca_harmony_qc.h5ad"
 
 echo "[task ${i}] label=${LABEL}"
-"${PYTHON_BIN}" sim_paper/code/clustering/misc/banksy_batch_compare/plot_banksy_batch_compare_umap.py \
-    --modality cell --input "${H5AD}" --label "${LABEL}"
+"${PYTHON_BIN}" sim_paper/code/clustering/plot_banksy_results.py \
+    --input "${H5AD}"
 echo "[done] task ${i}"

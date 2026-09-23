@@ -38,3 +38,8 @@ export RETICULATE_PYTHON="${RCTD_ENV}/bin/python"
     /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/run_rctd_spot.R
 
 echo "[done] RCTD (independent-seed reference) -> ${RCTD_OUT_DIR}"
+
+# Produce the manuscript panels after fitting; no manual style-refresh step.
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/bin/python \
+    /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/plot_rctd_results.py \
+    "${RCTD_OUT_DIR:-/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot}"
