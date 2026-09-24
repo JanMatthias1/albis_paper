@@ -1,9 +1,9 @@
-[task 2] spot batch_sigma=0.1 lambda=0.1 k_geom=8
+[task 15] spot batch_sigma=0.3 lambda=0.1 k_geom=8
 Python: /dcs04/hicks/data/Jan/sim_project/sim_paper/env/sim-app-banksy/bin/python
 albis module: /dcs04/hicks/data/Jan/sim_project/albis/albis/__init__.py
 albis version: 0.1.0
 
-Generating spot data for slice axis Z with theta=0.25, theta_jitter=0.1, noise_scale=1.3, batch_sigma=0.1, base_gene_lognormal=(-2.25, 1.0), n_cells=600000, cell_r_mean=7.5, allow_cell_overlap=False, sphere_r_um=2050.0, capture_window_um=(6500.0, 6500.0), core_fuzz_width_um=102.5, max_shift=1025.0, bin_size_um=8.0, sync_unaligned_seed=True, seed=2025
+Generating spot data for slice axis Z with theta=0.25, theta_jitter=0.1, noise_scale=1.3, batch_sigma=0.3, base_gene_lognormal=(-2.25, 1.0), n_cells=600000, cell_r_mean=7.5, allow_cell_overlap=False, sphere_r_um=2050.0, capture_window_um=(6500.0, 6500.0), core_fuzz_width_um=102.5, max_shift=1025.0, bin_size_um=8.0, sync_unaligned_seed=True, seed=2025
 /dcs04/hicks/data/Jan/sim_project/albis/albis/simulation_sphere.py:1513: FutureWarning: X.dtype being converted to np.float32 from int32. In the next version of anndata (0.9) conversion will not be automatic. Pass dtype explicitly to avoid this warning. Pass `AnnData(X, dtype=X.dtype, ...)` to get the future behavour.
   adata_cell_true = ad.AnnData(X=X_cell_true, obs=cell_obs, var=var)
 /dcs04/hicks/data/Jan/sim_project/albis/albis/simulation_sphere.py:1517: FutureWarning: X.dtype being converted to np.float32 from int32. In the next version of anndata (0.9) conversion will not be automatic. Pass dtype explicitly to avoid this warning. Pass `AnnData(X, dtype=X.dtype, ...)` to get the future behavour.
@@ -25,8 +25,8 @@ Summary:
 {
   "n_obs": 43560,
   "n_vars": 556,
-  "total_counts": 27233804,
-  "nonzero_counts": 3351917,
+  "total_counts": 28355136,
+  "nonzero_counts": 3336103,
   "platform": "spot",
   "slice_axis": "Z",
   "n_slices": 10,
@@ -88,29 +88,29 @@ Summary:
   ]
 }
 
-Saved summary -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma01_summary.json
+Saved summary -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma03_summary.json
 
 Generating diagnostic plots...
-  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma01/01_aligned_domain_true.png
-  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma01/02_aligned_cell_type_true.png
-  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma01/03_unaligned_slice_id.png
-  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma01/04_qc_count_distributions.png
-  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma01/05_spots_per_slice.png
-  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma01/06_domain_composition_per_slice.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma03/01_aligned_domain_true.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma03/02_aligned_cell_type_true.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma03/03_unaligned_slice_id.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma03/04_qc_count_distributions.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma03/05_spots_per_slice.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma03/06_domain_composition_per_slice.png
 
-All diagnostic plots saved under sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma01
+All diagnostic plots saved under sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma03
 
-Saved dataset -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma01.h5ad
+Saved dataset -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma03.h5ad
 /dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   from pkg_resources import get_distribution, DistributionNotFound
-[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma01.h5ad
+[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma03.h5ad
 [load] AnnData shape: 43560 x 556
-[qc] fully-empty (total_counts == 0): 33515 (76.94%)
-[qc] near-empty (0 < total_counts, n_genes < 3): 19 (0.04%)
+[qc] fully-empty (total_counts == 0): 33510 (76.93%)
+[qc] near-empty (0 < total_counts, n_genes < 3): 24 (0.06%)
 [qc] dropped 33534 observations (76.98%); 10026 remain
-[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma01_qc_summary.json
-[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma01_qc.h5ad
-[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma01_qc.h5ad
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma03_qc_summary.json
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma03_qc.h5ad
+[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma03_qc.h5ad
 [load] AnnData shape: 10026 x 556
 [stagger] offsetting each slice's x coordinate so slices don't overlap
   slice 0: offset x by 0.0
@@ -131,21 +131,21 @@ Saved dataset -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/pa
 
 Median distance to closest cell = 100.0
 
----- Ran median_dist_to_nearest_neighbour in 0.06 s ----
+---- Ran median_dist_to_nearest_neighbour in 0.02 s ----
 
----- Ran generate_spatial_distance_graph in 0.08 s ----
+---- Ran generate_spatial_distance_graph in 0.03 s ----
 
----- Ran row_normalize in 0.12 s ----
+---- Ran row_normalize in 0.02 s ----
 
----- Ran generate_spatial_weights_fixed_nbrs in 0.87 s ----
+---- Ran generate_spatial_weights_fixed_nbrs in 0.19 s ----
 
----- Ran generate_spatial_distance_graph in 0.11 s ----
+---- Ran generate_spatial_distance_graph in 0.04 s ----
 
----- Ran theta_from_spatial_graph in 0.22 s ----
+---- Ran theta_from_spatial_graph in 0.05 s ----
 
----- Ran row_normalize in 0.12 s ----
+---- Ran row_normalize in 0.03 s ----
 
----- Ran generate_spatial_weights_fixed_nbrs in 1.15 s ----
+---- Ran generate_spatial_weights_fixed_nbrs in 0.28 s ----
 
 Runtime Sep-23-2026-13-58
 
@@ -163,21 +163,21 @@ Weights Object: {'weights': {0: <10026x10026 sparse matrix of type '<class 'nump
 	with 80208 stored elements in Compressed Sparse Row format>, 1: <10026x10026 sparse matrix of type '<class 'numpy.complex128'>'
 	with 160416 stored elements in Compressed Sparse Row format>}}
 
-Nbr matrix | Mean: 17.99 | Std: 29.58
+Nbr matrix | Mean: 17.99 | Std: 31.11
 Size of Nbr | Shape: (10026, 556)
 Top 3 entries of Nbr Mat:
 
-[[ 7.80123395  5.00344339  7.80123395]
- [10.64109684 41.29257745 10.64109684]
- [ 7.79352262 20.81144141  7.95867738]]
+[[ 0.          2.82166768  4.32544816]
+ [ 0.         45.48279396  7.40012796]
+ [ 0.         23.24508989  5.95204503]]
 
-AGF matrix | Mean: 4.69 | Std: 9.26
+AGF matrix | Mean: 4.67 | Std: 9.45
 Size of AGF mat (m = 1) | Shape: (10026, 556)
 Top entries of AGF:
-[[ 1.65455755  3.10690484  2.61539842]
- [ 3.87229197 23.36597091  2.35782881]
- [ 4.04003174  7.41553228  1.39023904]]
-Ran 'Create BANKSY Matrix' in 0.03 mins
+[[ 7.73223751  2.17327411  1.83254609]
+ [ 0.67303043 27.03996128  2.00018846]
+ [ 0.          7.03133294  2.46891401]]
+Ran 'Create BANKSY Matrix' in 0.01 mins
 
 Cell by gene matrix has shape (10026, 556)
 
@@ -200,55 +200,57 @@ Setting the total number of PC = 30
 Original shape of matrix: (10026, 1668)
 Reduced shape of matrix: (10026, 30)
 ------------------------------------------------------------
-min_value = -67.9735107421875, mean = -1.826306217367346e-08, max = 86.2956771850586
+min_value = -50.49679183959961, mean = -1.0146145967837583e-07, max = 75.50071716308594
 
   [plot] saved pca_preharmony_by_slice_id.png
   [plot] saved pca_preharmony_by_domain_true.png
   [plot] saved pca_preharmony_by_cell_type_true.png
 
 [harmony] batch_key=slice_id
-2026-09-23 13:58:51,345 - harmonypy - INFO - Running Harmony
-2026-09-23 13:58:51,345 - harmonypy - INFO -   Parameters:
-2026-09-23 13:58:51,345 - harmonypy - INFO -     max_iter_harmony: 10
-2026-09-23 13:58:51,345 - harmonypy - INFO -     max_iter_kmeans: 4
-2026-09-23 13:58:51,345 - harmonypy - INFO -     epsilon_cluster: 0.001
-2026-09-23 13:58:51,345 - harmonypy - INFO -     epsilon_harmony: 0.01
-2026-09-23 13:58:51,345 - harmonypy - INFO -     nclust: 100
-2026-09-23 13:58:51,345 - harmonypy - INFO -     block_size: 0.05
-2026-09-23 13:58:51,345 - harmonypy - INFO -     lamb: dynamic (alpha=0.2)
-2026-09-23 13:58:51,346 - harmonypy - INFO -     theta: [2. 2. 2. 2. 2. 2. 2. 2. 2. 2.]
-2026-09-23 13:58:51,346 - harmonypy - INFO -     sigma: [0.1 0.1 0.1 0.1 0.1]...
-2026-09-23 13:58:51,346 - harmonypy - INFO -     verbose: True
-2026-09-23 13:58:51,346 - harmonypy - INFO -     random_state: 0
-2026-09-23 13:58:51,346 - harmonypy - INFO -   Data: 30 PCs × 10026 cells
-2026-09-23 13:58:51,347 - harmonypy - INFO -   Batch variables: ['slice_id']
-2026-09-23 13:58:51,387 - harmonypy - INFO - Computing initial centroids...
-2026-09-23 13:58:52,109 - harmonypy - INFO - Initialization complete.
-2026-09-23 13:58:52,109 - harmonypy - INFO - Iteration 1 of 10
-2026-09-23 13:58:52,630 - harmonypy - INFO - Converged after 1 iteration
+2026-09-23 13:58:57,505 - harmonypy - INFO - Running Harmony
+2026-09-23 13:58:57,505 - harmonypy - INFO -   Parameters:
+2026-09-23 13:58:57,505 - harmonypy - INFO -     max_iter_harmony: 10
+2026-09-23 13:58:57,505 - harmonypy - INFO -     max_iter_kmeans: 4
+2026-09-23 13:58:57,505 - harmonypy - INFO -     epsilon_cluster: 0.001
+2026-09-23 13:58:57,505 - harmonypy - INFO -     epsilon_harmony: 0.01
+2026-09-23 13:58:57,505 - harmonypy - INFO -     nclust: 100
+2026-09-23 13:58:57,505 - harmonypy - INFO -     block_size: 0.05
+2026-09-23 13:58:57,505 - harmonypy - INFO -     lamb: dynamic (alpha=0.2)
+2026-09-23 13:58:57,506 - harmonypy - INFO -     theta: [2. 2. 2. 2. 2. 2. 2. 2. 2. 2.]
+2026-09-23 13:58:57,506 - harmonypy - INFO -     sigma: [0.1 0.1 0.1 0.1 0.1]...
+2026-09-23 13:58:57,506 - harmonypy - INFO -     verbose: True
+2026-09-23 13:58:57,506 - harmonypy - INFO -     random_state: 0
+2026-09-23 13:58:57,506 - harmonypy - INFO -   Data: 30 PCs × 10026 cells
+2026-09-23 13:58:57,506 - harmonypy - INFO -   Batch variables: ['slice_id']
+2026-09-23 13:58:57,511 - harmonypy - INFO - Computing initial centroids...
+2026-09-23 13:58:57,716 - harmonypy - INFO - Initialization complete.
+2026-09-23 13:58:57,716 - harmonypy - INFO - Iteration 1 of 10
+2026-09-23 13:58:57,852 - harmonypy - INFO - Iteration 2 of 10
+2026-09-23 13:58:57,993 - harmonypy - INFO - Converged after 2 iterations
   [plot] saved pca_postharmony_by_slice_id.png
   [plot] saved pca_postharmony_by_domain_true.png
   [plot] saved pca_postharmony_by_cell_type_true.png
 
-[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/banksy_matrix/simulation_spot_z_banksy_pca_harmony_qc.h5ad
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/banksy_matrix/simulation_spot_z_banksy_pca_harmony_qc.h5ad
 [save] done
 /dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   from pkg_resources import get_distribution, DistributionNotFound
-[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/banksy_matrix/simulation_spot_z_banksy_pca_harmony_qc.h5ad
+[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/banksy_matrix/simulation_spot_z_banksy_pca_harmony_qc.h5ad
 [load] AnnData shape: 10026 x 1668
 [neighbors] n_pcs=30 n_neighbors=15
 [ari] domain_true: target_k=6
-[ari] domain_true: resolution=0.4538 achieved_k=6 (target 6)  ARI=0.4186
+[ari] domain_true: resolution=0.1969 achieved_k=6 (target 6)  ARI=0.2671
 [ari] cell_type_true: target_k=8
-[ari] cell_type_true: resolution=0.5706 achieved_k=8 (target 8)  ARI=0.3313
-[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/ari/ari_summary_spot.json
-[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/ari/simulation_spot_z_ari_recovery.h5ad
-[score] spot_bs0.1  <-  sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.1/ari/simulation_spot_z_ari_recovery.h5ad
-  [spot_bs0.1/cell_type] ARI=0.331 V=0.422  (leak 0.01)
-  [spot_bs0.1/domain] ARI=0.419 V=0.450  (leak 0.01)
+[ari] cell_type_true: resolution=0.2086 achieved_k=8 (target 8)  ARI=0.2203
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/ari/ari_summary_spot.json
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/ari/simulation_spot_z_ari_recovery.h5ad
+[score] spot_bs0.3  <-  sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/ari/simulation_spot_z_ari_recovery.h5ad
+  [spot_bs0.3/cell_type] ARI=0.220 V=0.311  (leak 0.02)
+  [spot_bs0.3/domain] ARI=0.267 V=0.344  (leak 0.03)
   modality  n_obs     level      ari  v_measure  slice_id_leakage_ari
-spot_bs0.1  10026 cell_type 0.331321   0.422276              0.010561
-spot_bs0.1  10026    domain 0.418603   0.450205              0.006522
+spot_bs0.3  10026 cell_type 0.220310   0.311217               0.02293
+spot_bs0.3  10026    domain 0.267105   0.344032               0.02609
 /dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   from pkg_resources import get_distribution, DistributionNotFound
-slurmstepd: error: *** JOB 35884631 ON compute-114 CANCELLED AT 2026-09-23T14:05:07 ***
+[save] BANKSY plots: sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/ari/plots
+[done] task 15 -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3

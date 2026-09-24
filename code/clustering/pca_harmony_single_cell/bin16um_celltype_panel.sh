@@ -38,7 +38,7 @@
 # panel (BANKSY collapses bin's cell_type_true ARI; see bin_celltype_panel.sh).
 
 # 2026-09-23: moved to the retuned Figure 2 tag (bin: --theta-jitter 1.0 -> 0.6;
-# spot: --base-gene-lognormal -2.25 1.0 + --domain-size-factors 0.35 0.6 1.0 1.0 1.6 2.8; see
+# spot: --base-gene-lognormal -2.25 1.0, no per-domain depth factors; see
 # data/figure_2/smaller_sphere/test/README.md). Fallback generate flags now
 # match the Figure 2 pairing scripts exactly (incl. --sync-unaligned-seed).
 # The old figure_3/ tree was archived whole to data/figure_3_archive_20260923/,

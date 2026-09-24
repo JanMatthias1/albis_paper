@@ -63,9 +63,18 @@ Results live under `data/figure_3/pca_harmony_single_cell/<modality>/`
 (`bin` denotes bin8um here). Existing PCA outputs are reused; changing an
 input tag alone does not invalidate an existing result.
 
-`spatial_deconvolution/run_rctd_spot.sh` runs RCTD with the current Figure 2
-QC cell data as the labelled reference and QC spot data as the query.
-Results: `data/figure_3/spatial_deconvolution/RCTD/spot/`.
+`spatial_deconvolution/weak_domain/run_rctd_spot.sh` runs RCTD with the current
+Figure 2 QC cell data as the labelled reference and QC spot data as the query
+(Figure 2's weak/realistic domain mix); the independent-seed reference scripts
+live there too. `spatial_deconvolution/strong_domain/run_rctd_spot_strong_domain.sh`
+runs the same RCTD on the strong-domain-mix data (spot bs0.3 query; cell bs1.5
+references at seeds 2025/101/202, all from `cellbin_batch_sigma_slide/`), so it
+needs the strong-mix and seed-replication jobs done first.
+`average_rctd_seeds.py --config {weak_mix,strong_mix}` averages each
+configuration's 3 references. Results: `data/figure_3/spatial_deconvolution/RCTD/`
+`weak_mix{,_seed*,_seed_avg}/` and `strong_mix{,_seed101,_seed202,_seed_avg}/`.
+Plotting (`plot_rctd_results.py`, `average_rctd_seeds.py`) stays at the top of
+`spatial_deconvolution/`.
 
 ## Domain recovery and batch-effect sweeps
 
@@ -280,8 +289,8 @@ see `../applications_albis/spatial_clustering/README.md`. The Figure 3 batch
 summary CSV now provides the seed coverage for each plotted condition; historical
 n=1 run-log entries are snapshots, not current status.
 
-Selected RCTD panels use `spatial_deconvolution/RCTD/spot_seed_avg/`: estimated
-fractions averaged across reference seeds 271828, 314159, 999999 before computing
+Selected RCTD panels use `spatial_deconvolution/RCTD/weak_mix_seed_avg/` (strong-mix counterpart: `strong_mix_seed_avg/`): estimated
+fractions averaged across reference seeds 2025 (canonical), 999999, 314159 before computing
 r and RMSE. Spatial zoom displays four types in section 5; the error distribution
 covers all eight types. Violin inputs are capped at the pooled 99th percentile
 for display; metric calculations and boxplot inputs use the uncapped errors.

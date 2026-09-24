@@ -251,3 +251,5 @@ spot_bs0.05  10027 cell_type 0.319561   0.413328              0.010605
 spot_bs0.05  10027    domain 0.463453   0.483209              0.009817
 /dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   from pkg_resources import get_distribution, DistributionNotFound
+[save] BANKSY plots: sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.05/ari/plots
+[done] task 1 -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.05

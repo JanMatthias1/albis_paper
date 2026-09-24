@@ -241,3 +241,18 @@ min_value = -9.163628578186035, mean = -1.1514850939420285e-07, max = 10.4749965
 [load] AnnData shape: 366039 x 1668
 [neighbors] n_pcs=30 n_neighbors=15
 [ari] domain_true: target_k=6
+[ari] domain_true: resolution=0.1502 achieved_k=6 (target 6)  ARI=0.7962
+[ari] cell_type_true: target_k=8
+[ari] cell_type_true: resolution=0.1969 achieved_k=8 (target 8)  ARI=0.1013
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0/ari/ari_summary_bin.json
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0/ari/simulation_bin_z_ari_recovery.h5ad
+[score] bin16um_bs0  <-  sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0/ari/simulation_bin_z_ari_recovery.h5ad
+  [bin16um_bs0/cell_type] ARI=0.101 V=0.132  (leak 0.02)
+  [bin16um_bs0/domain] ARI=0.796 V=0.772  (leak 0.02)
+   modality  n_obs     level      ari  v_measure  slice_id_leakage_ari
+bin16um_bs0 366039 cell_type 0.101270   0.131769              0.016717
+bin16um_bs0 366039    domain 0.796155   0.771930              0.015336
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[save] BANKSY plots: sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0/ari/plots
+[done] task 0 -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/bin16um/bs0

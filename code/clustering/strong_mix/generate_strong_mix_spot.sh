@@ -21,7 +21,7 @@
 # 2026-09-23: generate flags matched to the retuned Figure 2 config so the
 # normal- and strong-mix datasets differ ONLY by --strong-domain-mix
 # (bin16um: --theta 2.0 --theta-jitter 0.6; spot: --base-gene-lognormal
-# -2.25 1.0 + --domain-size-factors 0.35 0.6 1.0 1.0 1.6 2.8; all: --sync-unaligned-seed, which only changes
+# -2.25 1.0, no per-domain depth factors; all: --sync-unaligned-seed, which only changes
 # obsm['spatial_unaligned'] -- verified byte-identical counts/spatial/labels).
 # Old figure_3/ and data/noisy/*_strong_mix_*/*_batch_slide_* inputs archived to
 # data/figure_3_archive_20260923/ and data/noisy/_archive_figure3_20260923/,
@@ -31,6 +31,9 @@
 # --output-dir, instead of data/noisy/<tag>/ + hand-made symlinks. Existing
 # inputs were moved there from data/noisy/ (verified: Figure 2 config +
 # --strong-domain-mix, strong_mix/check_matches_figure2.py).
+# 2026-09-23 (latest): spot --domain-size-factors DROPPED by user decision
+# (per-domain depth, spot-only, made domains partly identifiable from depth);
+# spot now = Figure 2 packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/strong_mix/logs
@@ -54,7 +57,7 @@ RUN="${OUT_ROOT}/spot/bs${BS}"
 # [_seed<seed>] (default seed 2025 not written), e.g.
 # log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma05_seed101.h5ad / ..._qc.h5ad.
 # The skip-if-exists checks use that name, so a parameter change regenerates.
-DATA_TAG="packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma$(printf '%g' "${BS}" | tr -d .)"
+DATA_TAG="packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_strongmix_bsigma$(printf '%g' "${BS}" | tr -d .)"
 SIM_RAW="${RUN}/${DATA_TAG}.h5ad"
 SIM_QC="${RUN}/${DATA_TAG}_qc.h5ad"
 mkdir -p "${RUN}"
@@ -65,7 +68,6 @@ if [[ ! -f "${SIM_RAW}" ]]; then
     "${BANKSY_PYTHON}" sim_paper/code/data/generate_simulation_noisy.py \
         --modality spot --sphere-r-um 2050 \
         --base-gene-lognormal -2.25 1.0 --theta 0.25 --theta-jitter 0.10 \
-        --domain-size-factors 0.35 0.6 1.0 1.0 1.6 2.8 \
         --strong-domain-mix --batch-sigma "${BS}" --sync-unaligned-seed \
         --output-dir "${RUN}" --output-stem "${DATA_TAG}"
 fi

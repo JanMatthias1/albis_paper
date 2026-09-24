@@ -12,10 +12,15 @@
 #             reads the Figure 2 datasets in data/figure_2/smaller_sphere/data/
 #             -> data/figure_3/pca_harmony_single_cell/<modality>/
 #   rctd      spatial_deconvolution/: canonical RCTD (Figure 2 cell reference +
-#             Figure 2 spot query), 3 independent-seed cell references (generated
+#             Figure 2 spot query), 2 independent-seed cell references (generated
 #             into data/figure_2/smaller_sphere/data/*_rctdref_seed*/ if absent),
-#             RCTD per seed, then the 3-seed average
-#             -> data/figure_3/spatial_deconvolution/RCTD/
+#             RCTD per seed, then the 3-reference average (canonical + 2 seeds) (spatial_deconvolution/
+#             weak_domain/) -> RCTD/weak_mix{,_seed*,_seed_avg}/; plus, when
+#             banksy is also submitted, RCTD on the strong-mix spot bs0.3 query
+#             with the strong-mix cell bs1.5 references at seeds 2025/101/202
+#             (strong_domain/), then their average
+#             -> RCTD/strong_mix{,_seed101,_seed202,_seed_avg}/
+#             (all under data/figure_3/spatial_deconvolution/RCTD/)
 #   banksy    strong_mix/generate_strong_mix_{cell,bin16um,spot}.sh (baseline
 #             seed 2025) + cellbin_batch_sigma_slide/batch_sigma_slide_seeds.sh
 #             (seeds 101/202; 72 tasks). Each task GENERATES its own data (Figure 2
@@ -62,26 +67,45 @@ if has celltype; then
 fi
 
 if has rctd; then
-    j=$("${SB[@]}" "${CODE}/spatial_deconvolution/run_rctd_spot.sh")
+    j=$("${SB[@]}" "${CODE}/spatial_deconvolution/weak_domain/run_rctd_spot.sh")
     echo "[rctd] canonical: ${j}"; ALL+=("${j}")
-    ref=$("${SB[@]}" "${CODE}/spatial_deconvolution/generate_rctd_reference_independent_seed.sh")
+    ref=$("${SB[@]}" "${CODE}/spatial_deconvolution/weak_domain/generate_rctd_reference_independent_seed.sh")
     echo "[rctd] reference seeds: ${ref}"
-    seeds=$("${SB[@]}" --dependency=afterok:"${ref}" "${CODE}/spatial_deconvolution/run_rctd_spot_independent_seed.sh")
+    seeds=$("${SB[@]}" --dependency=afterok:"${ref}" "${CODE}/spatial_deconvolution/weak_domain/run_rctd_spot_independent_seed.sh")
     echo "[rctd] per-seed RCTD: ${seeds} (after ${ref})"
-    avg=$("${SB[@]}" --dependency=afterok:"${seeds}" --job-name=rctd_seed_avg \
+    canon="${j}"
+    avg=$("${SB[@]}" --dependency=afterok:"${canon}":"${seeds}" --job-name=rctd_seed_avg \
         --output="${CODE}/spatial_deconvolution/logs/rctd_seed_avg_%j.out" \
         --time=01:00:00 --mem=16G --cpus-per-task=1 --partition=shared \
-        --wrap="source ${CODE}/_env.sh && export MPLCONFIGDIR=/tmp/fig3-mpl-\${USER} && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/average_rctd_seeds.py && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/plot_rctd_results.py /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot_seed_avg")
-    echo "[rctd] 3-seed average: ${avg} (after ${seeds})"; ALL+=("${avg}")
+        --wrap="source ${CODE}/_env.sh && export MPLCONFIGDIR=/tmp/fig3-mpl-\${USER} && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/average_rctd_seeds.py --config weak_mix && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/plot_rctd_results.py /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/weak_mix_seed_avg")
+    echo "[rctd] weak mix 3-reference average: ${avg} (after ${canon}, ${seeds})"; ALL+=("${avg}")
 fi
 
 if has banksy; then
+    declare -A MIX
     for m in cell bin16um spot; do
         j=$("${SB[@]}" "${CODE}/strong_mix/generate_strong_mix_${m}.sh")
-        echo "[banksy] strong-mix ${m}: ${j}"; ALL+=("${j}")
+        echo "[banksy] strong-mix ${m}: ${j}"; ALL+=("${j}"); MIX[${m}]="${j}"
     done
     j=$("${SB[@]}" "${CODE}/cellbin_batch_sigma_slide/batch_sigma_slide_seeds.sh")
-    echo "[banksy] seeds (72 tasks): ${j}"; ALL+=("${j}")
+    echo "[banksy] seeds (72 tasks): ${j}"; ALL+=("${j}"); MIX[seeds]="${j}"
+    if has rctd; then
+        # afterany: the RCTD inputs are single tasks of those arrays, so one
+        # unrelated failed task shouldn't block it; each RCTD task exits with
+        # an error itself if its inputs are missing (and then the average
+        # below, afterok, doesn't run).
+        s=$("${SB[@]}" --dependency=afterany:"${MIX[cell]}":"${MIX[spot]}":"${MIX[seeds]}" \
+            "${CODE}/spatial_deconvolution/strong_domain/run_rctd_spot_strong_domain.sh")
+        echo "[rctd] strong mix, 3 references: ${s} (after ${MIX[cell]}, ${MIX[spot]}, ${MIX[seeds]})"
+        # ${s} is one 3-task array (task 0 = canonical seed 2025, tasks 1-2 =
+        # seeds 101/202), so afterok on it already waits for the canonical run
+        # too -- unlike weak mix, where canonical is a separate job.
+        avg=$("${SB[@]}" --dependency=afterok:"${s}" --job-name=rctd_strong_avg \
+            --output="${CODE}/spatial_deconvolution/logs/rctd_strong_avg_%j.out" \
+            --time=01:00:00 --mem=16G --cpus-per-task=1 --partition=shared \
+            --wrap="source ${CODE}/_env.sh && export MPLCONFIGDIR=/tmp/fig3-mpl-\${USER} && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/average_rctd_seeds.py --config strong_mix && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/plot_rctd_results.py /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/strong_mix_seed_avg")
+        echo "[rctd] strong mix 3-reference average: ${avg} (after ${s})"; ALL+=("${avg}")
+    fi
 fi
 
 if has summary; then

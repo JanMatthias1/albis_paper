@@ -16,47 +16,40 @@
 # from the domain panel (bin_domain_panel.sh) by design, see
 # cell_celltype_panel.sh for why the two panels don't share one dataset.
 #
-# 2026-08-26: switched to the EXACT SAME dataset as Figure 2's
-# figure_2/bin_vs_breast_cancer_visium_hd comparison
-# (packing_pf0p04_log_mu_0.0_bsigma08) instead of this panel's own
-# previously-separate packing_pf0p04_bsigma05 tag -- the only difference
-# between the two was log_mu (0.7 default here vs. Figure 2's real-data-
-# tuned 0.0); batch_sigma=0.5 already matched. Per user decision, Figure 3's
-# cell-typing panels now read Figure 2's data directly (SIM_RAW/SIM_QC point
-# at data/figure_2/<tag>/, not a separate data/noisy/<tag>/ copy) so both
-# figures are guaranteed to describe the same simulated bin dataset. If that
-# file isn't there yet, the fallback below generates+QCs it with the
-# identical config Figure 2 uses, then moves it into data/figure_2/ itself
-# (same move-based pattern as
-# code/count_distribution/bin_vs_breast_cancer_visium_hd_with_batch_tuned.sh,
-# avoiding the data/noisy-vs-data/figure_2 path mismatch documented in
-# figure.md 2026-08-26).
+# Reads Figure 2's canonical bin8um dataset directly (SIM_RAW/SIM_QC point at
+# data/figure_2/smaller_sphere/data/<tag>/, not a separate data/noisy/ copy;
+# user decision 2026-08-26) so both figures describe the same simulated data.
+# If it isn't there yet, the fallback below generates+QCs it with the
+# identical config Figure 2 uses, then moves it into data/figure_2/ itself.
 #
-# batch_sigma=0.5 (NOT the manuscript default 0.22): at 0.22, bin's small
-# 8um aggregation footprint retains so much real signal that batch effect
-# never visibly separates slices even before Harmony runs -- no meaningful
-# before/after correction story to demonstrate. 0.5 gives a striking
-# "flower petal" separation pre-Harmony and a near-complete merge after
-# (0.33 was too weak, 0.8 pushed too far and left a visible residual
-# cluster uncorrected). See figure.md, 2026-08-25, batch_sigma bracket.
+# Current dataset (since 2026-09-23): bin16um's exact config with only
+# --bin-size-um 8 (same tissue as bin16um), so batch_sigma is bin16um's 0.7.
+# History: the earlier bin8um datasets used their own batch_sigma (0.5,
+# bracketed 2026-08-25 for a visible pre/post-Harmony contrast; later 0.8
+# with log_mu 0.0) -- both archived, neither applies to this dataset.
 # Pipeline: plain PCA+Harmony, NOT BANKSY -- BANKSY collapses bin's
 # cell_type_true ARI (0.28 plain -> 0.004 BANKSY on the domain-panel
 # dataset); every BANKSY parameter tried so far (k_geom, nbr_weight_decay,
 # max_m) has failed to stabilize it for bin.
 
 # 2026-09-23: moved to the retuned Figure 2 tag (bin: --theta-jitter 1.0 -> 0.6;
-# spot: --base-gene-lognormal -2.25 1.0 + --domain-size-factors 0.35 0.6 1.0 1.0 1.6 2.8; see
+# spot: --base-gene-lognormal -2.25 1.0, no per-domain depth factors; see
 # data/figure_2/smaller_sphere/test/README.md). Fallback generate flags now
 # match the Figure 2 pairing scripts exactly (incl. --sync-unaligned-seed).
 # The old figure_3/ tree was archived whole to data/figure_3_archive_20260923/,
 # so the skip-if-exists PCA step below recomputes from the new data.
+# 2026-09-23 (later): Figure 2's canonical bin8um is now the same-tissue-as-16um
+# dataset (bin16um's exact config, only --bin-size-um 8; see
+# code/count_distribution/smaller_sphere/bin8um_same_tissue_as_16um.sh). The
+# old log_mu=0.0 / batch_sigma 0.8 tag was archived, and this panel's
+# fallback would otherwise have silently regenerated it.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-SIM_TAG="packing_pf0p04_log_mu_0.0_jitter0.6_bsigma08"
+SIM_TAG="packing_pf0p04_bin8um_from16umcfg_log_mu_-2.5_jitter0.6_bsigma07"
 MODALITY="bin"
 SIM_RAW="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
 SIM_QC="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
@@ -71,7 +64,7 @@ if [[ ! -f "${SIM_QC}" ]]; then
         echo "[generate] ${SIM_TAG} not found under data/figure_2/, generating (same config as Figure 2)"
         "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
             --modality "${MODALITY}" --sphere-r-um 2050 \
-            --base-gene-lognormal 0.0 0.7 --theta 2.0 --theta-jitter 0.6 --batch-sigma 0.8 \
+            --bin-size-um 8 --base-gene-lognormal -2.5 0.7 --theta 2.0 --theta-jitter 0.6 --batch-sigma 0.7 \
             --sync-unaligned-seed \
             --out-tag "${SIM_TAG}"
         echo "[qc] ${SIM_TAG}"

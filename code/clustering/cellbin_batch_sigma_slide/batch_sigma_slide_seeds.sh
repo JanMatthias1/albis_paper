@@ -22,7 +22,7 @@
 # 2026-09-23: generate flags matched to the retuned Figure 2 config so the
 # normal- and strong-mix datasets differ ONLY by --strong-domain-mix
 # (bin16um: --theta 2.0 --theta-jitter 0.6; spot: --base-gene-lognormal
-# -2.25 1.0 + --domain-size-factors 0.35 0.6 1.0 1.0 1.6 2.8; all: --sync-unaligned-seed, which only changes
+# -2.25 1.0, no per-domain depth factors; all: --sync-unaligned-seed, which only changes
 # obsm['spatial_unaligned'] -- verified byte-identical counts/spatial/labels).
 # Old figure_3/ and data/noisy/*_strong_mix_*/*_batch_slide_* inputs archived to
 # data/figure_3_archive_20260923/ and data/noisy/_archive_figure3_20260923/,
@@ -32,6 +32,9 @@
 # --output-dir, instead of data/noisy/<tag>/ + hand-made symlinks. Existing
 # inputs were moved there from data/noisy/ (verified: Figure 2 config +
 # --strong-domain-mix, strong_mix/check_matches_figure2.py).
+# 2026-09-23 (latest): spot --domain-size-factors DROPPED by user decision
+# (per-domain depth, spot-only, made domains partly identifiable from depth);
+# spot now = Figure 2 packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
@@ -80,8 +83,8 @@ case "${MOD}" in
     # log_mu=-2.0/theta=0.25/jitter=0.10, see [[reference_generate_noisy_theta_jitter_default]]).
     SPHERE_R_UM=2050
     LAM=0.1; KG=8
-    TAG_BODY="packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf"
-    GEN_FLAGS=(--base-gene-lognormal -2.25 1.0 --theta 0.25 --theta-jitter 0.10 --domain-size-factors 0.35 0.6 1.0 1.0 1.6 2.8 --strong-domain-mix --sync-unaligned-seed)
+    TAG_BODY="packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10"
+    GEN_FLAGS=(--base-gene-lognormal -2.25 1.0 --theta 0.25 --theta-jitter 0.10 --strong-domain-mix --sync-unaligned-seed)
     ;;
 esac
 

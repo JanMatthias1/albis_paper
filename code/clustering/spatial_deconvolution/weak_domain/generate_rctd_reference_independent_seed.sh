@@ -1,16 +1,18 @@
 #!/bin/bash
 #SBATCH --job-name=rctd_ref_seed
 #SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/logs/rctd_ref_seed_%A_%a.out
-#SBATCH --array=0-2
+#SBATCH --array=0-1
 #SBATCH --time=02:00:00
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# 3-way seed-replication array (indices 0-2 -> SEEDS below), matching this
-# project's established "3 total independent draws" convention for robustness
-# checks (see cellbin_batch_sigma_slide/batch_sigma_slide_seeds.sh) rather
-# than relying on a single independent-seed comparison point.
+# 2-way seed-replication array (indices 0-1 -> SEEDS below). With the
+# canonical seed-2025 reference that makes 3 draws, the project's "3 total
+# draws" convention, and mirrors the strong-mix design (2025 + seeds 101/202,
+# ../strong_domain/). Seed 271828 was a third independent seed until
+# 2026-09-23; dropped by user decision (last in the list, not by result),
+# data archived to data/figure_2/misc/archive/rctdref_seed271828_dropped_20260923/.
 #
 # Independently-seeded single-cell reference for the RCTD spot-deconvolution
 # benchmark (run_rctd_spot.R). Not a replacement for Figure 2/3/4's shared
@@ -52,7 +54,7 @@ mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_dec
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-SEEDS=(999999 314159 271828)
+SEEDS=(999999 314159)
 SEED="${SEEDS[${SLURM_ARRAY_TASK_ID:-0}]}"
 TAG="log_mu_-2.5_theta_0.40_jitter0.15_bsigma15_rctdref_seed${SEED}"
 SIM_RAW="sim_paper/data/figure_2/smaller_sphere/data/${TAG}/simulation_cell_z.h5ad"

@@ -1,9 +1,9 @@
-[task 9] spot batch_sigma=0.22 lambda=0.1 k_geom=8
+[task 14] spot batch_sigma=0.29 lambda=0.1 k_geom=8
 Python: /dcs04/hicks/data/Jan/sim_project/sim_paper/env/sim-app-banksy/bin/python
 albis module: /dcs04/hicks/data/Jan/sim_project/albis/albis/__init__.py
 albis version: 0.1.0
 
-Generating spot data for slice axis Z with theta=0.25, theta_jitter=0.1, noise_scale=1.3, batch_sigma=0.22, base_gene_lognormal=(-2.25, 1.0), n_cells=600000, cell_r_mean=7.5, allow_cell_overlap=False, sphere_r_um=2050.0, capture_window_um=(6500.0, 6500.0), core_fuzz_width_um=102.5, max_shift=1025.0, bin_size_um=8.0, sync_unaligned_seed=True, seed=2025
+Generating spot data for slice axis Z with theta=0.25, theta_jitter=0.1, noise_scale=1.3, batch_sigma=0.29, base_gene_lognormal=(-2.25, 1.0), n_cells=600000, cell_r_mean=7.5, allow_cell_overlap=False, sphere_r_um=2050.0, capture_window_um=(6500.0, 6500.0), core_fuzz_width_um=102.5, max_shift=1025.0, bin_size_um=8.0, sync_unaligned_seed=True, seed=2025
 /dcs04/hicks/data/Jan/sim_project/albis/albis/simulation_sphere.py:1513: FutureWarning: X.dtype being converted to np.float32 from int32. In the next version of anndata (0.9) conversion will not be automatic. Pass dtype explicitly to avoid this warning. Pass `AnnData(X, dtype=X.dtype, ...)` to get the future behavour.
   adata_cell_true = ad.AnnData(X=X_cell_true, obs=cell_obs, var=var)
 /dcs04/hicks/data/Jan/sim_project/albis/albis/simulation_sphere.py:1517: FutureWarning: X.dtype being converted to np.float32 from int32. In the next version of anndata (0.9) conversion will not be automatic. Pass dtype explicitly to avoid this warning. Pass `AnnData(X, dtype=X.dtype, ...)` to get the future behavour.
@@ -25,8 +25,8 @@ Summary:
 {
   "n_obs": 43560,
   "n_vars": 556,
-  "total_counts": 27632368,
-  "nonzero_counts": 3348012,
+  "total_counts": 28248868,
+  "nonzero_counts": 3336780,
   "platform": "spot",
   "slice_axis": "Z",
   "n_slices": 10,
@@ -88,29 +88,29 @@ Summary:
   ]
 }
 
-Saved summary -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma022_summary.json
+Saved summary -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma029_summary.json
 
 Generating diagnostic plots...
-  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma022/01_aligned_domain_true.png
-  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma022/02_aligned_cell_type_true.png
-  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma022/03_unaligned_slice_id.png
-  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma022/04_qc_count_distributions.png
-  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma022/05_spots_per_slice.png
-  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma022/06_domain_composition_per_slice.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma029/01_aligned_domain_true.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma029/02_aligned_cell_type_true.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma029/03_unaligned_slice_id.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma029/04_qc_count_distributions.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma029/05_spots_per_slice.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma029/06_domain_composition_per_slice.png
 
-All diagnostic plots saved under sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma022
+All diagnostic plots saved under sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/plots/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma029
 
-Saved dataset -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma022.h5ad
+Saved dataset -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma029.h5ad
 /dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   from pkg_resources import get_distribution, DistributionNotFound
-[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma022.h5ad
+[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma029.h5ad
 [load] AnnData shape: 43560 x 556
-[qc] fully-empty (total_counts == 0): 33509 (76.93%)
-[qc] near-empty (0 < total_counts, n_genes < 3): 27 (0.06%)
+[qc] fully-empty (total_counts == 0): 33514 (76.94%)
+[qc] near-empty (0 < total_counts, n_genes < 3): 22 (0.05%)
 [qc] dropped 33536 observations (76.99%); 10024 remain
-[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma022_qc_summary.json
-[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma022_qc.h5ad
-[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma022_qc.h5ad
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma029_qc_summary.json
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma029_qc.h5ad
+[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_strongmix_bsigma029_qc.h5ad
 [load] AnnData shape: 10024 x 556
 [stagger] offsetting each slice's x coordinate so slices don't overlap
   slice 0: offset x by 0.0
@@ -135,9 +135,9 @@ Median distance to closest cell = 100.0
 
 ---- Ran generate_spatial_distance_graph in 0.06 s ----
 
----- Ran row_normalize in 0.09 s ----
+---- Ran row_normalize in 0.08 s ----
 
----- Ran generate_spatial_weights_fixed_nbrs in 0.78 s ----
+---- Ran generate_spatial_weights_fixed_nbrs in 0.54 s ----
 
 ---- Ran generate_spatial_distance_graph in 0.09 s ----
 
@@ -145,9 +145,9 @@ Median distance to closest cell = 100.0
 
 ---- Ran row_normalize in 0.09 s ----
 
----- Ran generate_spatial_weights_fixed_nbrs in 0.97 s ----
+---- Ran generate_spatial_weights_fixed_nbrs in 0.77 s ----
 
-Runtime Sep-23-2026-13-59
+Runtime Sep-23-2026-14-02
 
 556 genes to be analysed:
 Gene List:
@@ -163,21 +163,21 @@ Weights Object: {'weights': {0: <10024x10024 sparse matrix of type '<class 'nump
 	with 80192 stored elements in Compressed Sparse Row format>, 1: <10024x10024 sparse matrix of type '<class 'numpy.complex128'>'
 	with 160384 stored elements in Compressed Sparse Row format>}}
 
-Nbr matrix | Mean: 17.99 | Std: 29.78
+Nbr matrix | Mean: 17.99 | Std: 30.65
 Size of Nbr | Shape: (10024, 556)
 Top 3 entries of Nbr Mat:
 
-[[11.6720749   5.85130861  1.14865588]
- [15.92102995 50.23150207  2.75291421]
- [10.94302835 34.72787938  4.41131757]]
+[[ 0.          2.46173604  1.12848321]
+ [ 0.         45.1972689   0.96151351]
+ [ 2.85627687 20.63969686  0.        ]]
 
-AGF matrix | Mean: 4.68 | Std: 9.25
+AGF matrix | Mean: 4.67 | Std: 9.43
 Size of AGF mat (m = 1) | Shape: (10024, 556)
 Top entries of AGF:
-[[ 1.42562979  4.02178588  0.83794898]
- [ 4.96289242 26.22174125  1.51384288]
- [ 5.80717977  7.79881408  6.04547415]]
-Ran 'Create BANKSY Matrix' in 0.03 mins
+[[ 8.23042672  2.2659515   0.42511988]
+ [ 1.75658865 26.20712322  0.61950588]
+ [ 1.90299681  8.5227605   0.61104323]]
+Ran 'Create BANKSY Matrix' in 0.02 mins
 
 Cell by gene matrix has shape (10024, 556)
 
@@ -200,63 +200,62 @@ Setting the total number of PC = 30
 Original shape of matrix: (10024, 1668)
 Reduced shape of matrix: (10024, 30)
 ------------------------------------------------------------
-min_value = -53.935096740722656, mean = -1.603410915151926e-08, max = 85.11906433105469
+min_value = -56.902286529541016, mean = -4.069416448260199e-08, max = 123.31432342529297
 
   [plot] saved pca_preharmony_by_slice_id.png
   [plot] saved pca_preharmony_by_domain_true.png
   [plot] saved pca_preharmony_by_cell_type_true.png
 
 [harmony] batch_key=slice_id
-2026-09-23 13:59:37,505 - harmonypy - INFO - Running Harmony
-2026-09-23 13:59:37,505 - harmonypy - INFO -   Parameters:
-2026-09-23 13:59:37,505 - harmonypy - INFO -     max_iter_harmony: 10
-2026-09-23 13:59:37,505 - harmonypy - INFO -     max_iter_kmeans: 4
-2026-09-23 13:59:37,505 - harmonypy - INFO -     epsilon_cluster: 0.001
-2026-09-23 13:59:37,505 - harmonypy - INFO -     epsilon_harmony: 0.01
-2026-09-23 13:59:37,505 - harmonypy - INFO -     nclust: 100
-2026-09-23 13:59:37,505 - harmonypy - INFO -     block_size: 0.05
-2026-09-23 13:59:37,505 - harmonypy - INFO -     lamb: dynamic (alpha=0.2)
-2026-09-23 13:59:37,506 - harmonypy - INFO -     theta: [2. 2. 2. 2. 2. 2. 2. 2. 2. 2.]
-2026-09-23 13:59:37,506 - harmonypy - INFO -     sigma: [0.1 0.1 0.1 0.1 0.1]...
-2026-09-23 13:59:37,506 - harmonypy - INFO -     verbose: True
-2026-09-23 13:59:37,506 - harmonypy - INFO -     random_state: 0
-2026-09-23 13:59:37,506 - harmonypy - INFO -   Data: 30 PCs × 10024 cells
-2026-09-23 13:59:37,506 - harmonypy - INFO -   Batch variables: ['slice_id']
-2026-09-23 13:59:37,522 - harmonypy - INFO - Computing initial centroids...
-2026-09-23 13:59:38,023 - harmonypy - INFO - Initialization complete.
-2026-09-23 13:59:38,023 - harmonypy - INFO - Iteration 1 of 10
-2026-09-23 13:59:38,456 - harmonypy - INFO - Iteration 2 of 10
-2026-09-23 13:59:38,911 - harmonypy - INFO - Iteration 3 of 10
-2026-09-23 13:59:39,357 - harmonypy - INFO - Iteration 4 of 10
-2026-09-23 13:59:39,804 - harmonypy - INFO - Iteration 5 of 10
-2026-09-23 13:59:40,262 - harmonypy - INFO - Iteration 6 of 10
-2026-09-23 13:59:40,713 - harmonypy - INFO - Iteration 7 of 10
-2026-09-23 13:59:41,162 - harmonypy - INFO - Iteration 8 of 10
-2026-09-23 13:59:41,614 - harmonypy - INFO - Iteration 9 of 10
-2026-09-23 13:59:42,065 - harmonypy - INFO - Converged after 9 iterations
+2026-09-23 14:02:46,661 - harmonypy - INFO - Running Harmony
+2026-09-23 14:02:46,661 - harmonypy - INFO -   Parameters:
+2026-09-23 14:02:46,661 - harmonypy - INFO -     max_iter_harmony: 10
+2026-09-23 14:02:46,661 - harmonypy - INFO -     max_iter_kmeans: 4
+2026-09-23 14:02:46,661 - harmonypy - INFO -     epsilon_cluster: 0.001
+2026-09-23 14:02:46,661 - harmonypy - INFO -     epsilon_harmony: 0.01
+2026-09-23 14:02:46,662 - harmonypy - INFO -     nclust: 100
+2026-09-23 14:02:46,662 - harmonypy - INFO -     block_size: 0.05
+2026-09-23 14:02:46,662 - harmonypy - INFO -     lamb: dynamic (alpha=0.2)
+2026-09-23 14:02:46,662 - harmonypy - INFO -     theta: [2. 2. 2. 2. 2. 2. 2. 2. 2. 2.]
+2026-09-23 14:02:46,662 - harmonypy - INFO -     sigma: [0.1 0.1 0.1 0.1 0.1]...
+2026-09-23 14:02:46,662 - harmonypy - INFO -     verbose: True
+2026-09-23 14:02:46,662 - harmonypy - INFO -     random_state: 0
+2026-09-23 14:02:46,662 - harmonypy - INFO -   Data: 30 PCs × 10024 cells
+2026-09-23 14:02:46,662 - harmonypy - INFO -   Batch variables: ['slice_id']
+2026-09-23 14:02:46,671 - harmonypy - INFO - Computing initial centroids...
+2026-09-23 14:02:47,216 - harmonypy - INFO - Initialization complete.
+2026-09-23 14:02:47,217 - harmonypy - INFO - Iteration 1 of 10
+2026-09-23 14:02:47,593 - harmonypy - INFO - Iteration 2 of 10
+2026-09-23 14:02:48,019 - harmonypy - INFO - Iteration 3 of 10
+2026-09-23 14:02:48,454 - harmonypy - INFO - Iteration 4 of 10
+2026-09-23 14:02:48,860 - harmonypy - INFO - Iteration 5 of 10
+2026-09-23 14:02:49,297 - harmonypy - INFO - Iteration 6 of 10
+2026-09-23 14:02:49,718 - harmonypy - INFO - Iteration 7 of 10
+2026-09-23 14:02:50,159 - harmonypy - INFO - Iteration 8 of 10
+2026-09-23 14:02:50,576 - harmonypy - INFO - Converged after 8 iterations
   [plot] saved pca_postharmony_by_slice_id.png
   [plot] saved pca_postharmony_by_domain_true.png
   [plot] saved pca_postharmony_by_cell_type_true.png
 
-[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/banksy_matrix/simulation_spot_z_banksy_pca_harmony_qc.h5ad
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/banksy_matrix/simulation_spot_z_banksy_pca_harmony_qc.h5ad
 [save] done
 /dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   from pkg_resources import get_distribution, DistributionNotFound
-[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/banksy_matrix/simulation_spot_z_banksy_pca_harmony_qc.h5ad
+[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/banksy_matrix/simulation_spot_z_banksy_pca_harmony_qc.h5ad
 [load] AnnData shape: 10024 x 1668
 [neighbors] n_pcs=30 n_neighbors=15
 [ari] domain_true: target_k=6
-[ari] domain_true: resolution=0.0217 achieved_k=6 (target 6)  ARI=0.0004
+[ari] domain_true: resolution=0.0494 achieved_k=6 (target 6)  ARI=0.0010
 [ari] cell_type_true: target_k=8
-[ari] cell_type_true: resolution=0.0567 achieved_k=8 (target 8)  ARI=0.0026
-[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/ari/ari_summary_spot.json
-[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/ari/simulation_spot_z_ari_recovery.h5ad
-[score] spot_bs0.22  <-  sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.22/ari/simulation_spot_z_ari_recovery.h5ad
-  [spot_bs0.22/cell_type] ARI=0.003 V=0.018  (leak 0.00)
-  [spot_bs0.22/domain] ARI=0.000 V=0.012  (leak 0.00)
+[ari] cell_type_true: resolution=0.0564 achieved_k=8 (target 8)  ARI=0.0018
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/ari/ari_summary_spot.json
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/ari/simulation_spot_z_ari_recovery.h5ad
+[score] spot_bs0.29  <-  sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.29/ari/simulation_spot_z_ari_recovery.h5ad
+  [spot_bs0.29/cell_type] ARI=0.002 V=0.023  (leak 0.00)
+  [spot_bs0.29/domain] ARI=0.001 V=0.020  (leak 0.00)
    modality  n_obs     level      ari  v_measure  slice_id_leakage_ari
-spot_bs0.22  10024 cell_type 0.002552   0.018245              0.003265
-spot_bs0.22  10024    domain 0.000430   0.012180              0.001042
+spot_bs0.29  10024 cell_type 0.001751   0.022686              0.002967
+spot_bs0.29  10024    domain 0.001017   0.019851              0.002409
 /dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   from pkg_resources import get_distribution, DistributionNotFound
-slurmstepd: error: *** JOB 35884668 ON compute-093 CANCELLED AT 2026-09-23T14:05:07 ***
+slurmstepd: error: *** JOB 35884758 ON compute-146 CANCELLED AT 2026-09-23T14:05:07 ***

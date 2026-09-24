@@ -24,7 +24,7 @@
 # 2026-09-23: generate flags matched to the retuned Figure 2 config so the
 # normal- and strong-mix datasets differ ONLY by --strong-domain-mix
 # (bin16um: --theta 2.0 --theta-jitter 0.6; spot: --base-gene-lognormal
-# -2.25 1.0 + --domain-size-factors 0.35 0.6 1.0 1.0 1.6 2.8; all: --sync-unaligned-seed, which only changes
+# -2.25 1.0, no per-domain depth factors; all: --sync-unaligned-seed, which only changes
 # obsm['spatial_unaligned'] -- verified byte-identical counts/spatial/labels).
 # Old figure_3/ and data/noisy/*_strong_mix_*/*_batch_slide_* inputs archived to
 # data/figure_3_archive_20260923/ and data/noisy/_archive_figure3_20260923/,

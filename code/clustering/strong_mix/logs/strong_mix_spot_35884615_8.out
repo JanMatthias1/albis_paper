@@ -238,3 +238,24 @@ min_value = -46.625606536865234, mean = 3.9894249681537985e-08, max = 93.3600158
 
 [save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.2/banksy_matrix/simulation_spot_z_banksy_pca_harmony_qc.h5ad
 [save] done
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.2/banksy_matrix/simulation_spot_z_banksy_pca_harmony_qc.h5ad
+[load] AnnData shape: 10021 x 1668
+[neighbors] n_pcs=30 n_neighbors=15
+[ari] domain_true: target_k=6
+[ari] domain_true: resolution=0.0319 achieved_k=6 (target 6)  ARI=0.0005
+[ari] cell_type_true: target_k=8
+[ari] cell_type_true: resolution=0.0567 achieved_k=8 (target 8)  ARI=0.0014
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.2/ari/ari_summary_spot.json
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.2/ari/simulation_spot_z_ari_recovery.h5ad
+[score] spot_bs0.2  <-  sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.2/ari/simulation_spot_z_ari_recovery.h5ad
+  [spot_bs0.2/cell_type] ARI=0.001 V=0.017  (leak 0.00)
+  [spot_bs0.2/domain] ARI=0.000 V=0.013  (leak 0.00)
+  modality  n_obs     level      ari  v_measure  slice_id_leakage_ari
+spot_bs0.2  10021 cell_type 0.001420   0.016889              0.001340
+spot_bs0.2  10021    domain 0.000494   0.012547              0.000887
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[save] BANKSY plots: sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.2/ari/plots
+[done] task 8 -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.2

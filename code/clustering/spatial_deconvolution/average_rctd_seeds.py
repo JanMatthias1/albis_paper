@@ -6,8 +6,10 @@ Usage: python average_rctd_seeds.py --config {weak_mix,strong_mix}
 
 Averages the per-spot, per-cell-type estimated fractions across 3 RCTD runs
 that share one query and differ only in the reference draw:
-  weak_mix:   RCTD/weak_mix_seed{271828,314159,999999}/ (Figure 2 cell
-              references, weak_domain/run_rctd_spot_independent_seed.sh)
+  weak_mix:   RCTD/weak_mix/ + RCTD/weak_mix_seed{999999,314159}/ (Figure 2
+              cell references at seed 2025 / independent seeds, from
+              weak_domain/run_rctd_spot{,_independent_seed}.sh; seed 271828
+              dropped 2026-09-23 so weak and strong share one design)
   strong_mix: RCTD/strong_mix/ + RCTD/strong_mix_seed{101,202}/ (strong-mix
               cell bs1.5 references at seed 2025/101/202, from
               strong_domain/run_rctd_spot_strong_domain.sh; 2025 shares the
@@ -53,7 +55,7 @@ import anndata as ad
 
 RCTD_DIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD"
 CONFIGS = {  # config -> {reference seed: run dir under RCTD_DIR}
-    "weak_mix": {s: f"weak_mix_seed{s}" for s in ["271828", "314159", "999999"]},
+    "weak_mix": {"2025": "weak_mix", "999999": "weak_mix_seed999999", "314159": "weak_mix_seed314159"},
     "strong_mix": {"2025": "strong_mix", "101": "strong_mix_seed101", "202": "strong_mix_seed202"},
 }
 CELL_TYPES = [f"type{i}" for i in range(1, 9)]

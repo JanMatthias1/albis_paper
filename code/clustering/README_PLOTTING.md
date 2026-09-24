@@ -16,15 +16,16 @@ bottom UMAP legends with explicit cluster-to-truth mappings. No script from
   BANKSY/Harmony, resolution selection and scores, followed automatically by
   `plot_banksy_results.py` for PCA, before/after UMAP, matched-cluster UMAP and
   contingency plots. Plotting adds display-embedding runtime to each job.
-- `spatial_deconvolution/run_rctd_spot*.sh`: fitting followed automatically by
+- `spatial_deconvolution/{weak_domain,strong_domain}/run_rctd_spot*.sh`: fitting followed automatically by
   `plot_rctd_results.py` for spatial zooms and the error panel. Independent-seed
   fitting requires the separately generated reference datasets, as before.
 - After the analysis jobs finish, run `bash plot_figure3_summaries.sh` for the
   cross-modality ARI bars and batch-strength curve. Summary scripts retain their
   existing missing-result behavior; a complete curve requires all intended jobs.
-- For the averaged RCTD result, run `spatial_deconvolution/average_rctd_seeds.py`,
-  then `spatial_deconvolution/plot_rctd_results.py` with the `spot_seed_avg`
-  directory as its positional argument.
+- For the averaged RCTD results, run `spatial_deconvolution/average_rctd_seeds.py
+  --config weak_mix` (and `--config strong_mix`), then
+  `spatial_deconvolution/plot_rctd_results.py` with the `weak_mix_seed_avg`
+  (`strong_mix_seed_avg`) directory as its positional argument.
 
 Submit the analysis shell scripts through Slurm; they can be expensive.
 The summary launcher is a local plotting-only command.

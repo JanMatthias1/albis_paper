@@ -21,7 +21,7 @@ FIG2 = DATA / "figure_2" / "smaller_sphere" / "data"
 CANON = {
     "cell": FIG2 / "log_mu_-2.5_theta_0.40_jitter0.15_bsigma15" / "simulation_cell_z.h5ad",
     "bin16um": FIG2 / "packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_bsigma07" / "simulation_bin_z.h5ad",
-    "spot": FIG2 / "packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_bsigma03" / "simulation_spot_z.h5ad",
+    "spot": FIG2 / "packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03" / "simulation_spot_z.h5ad",
 }
 SLIDE = DATA / "figure_3" / "cellbin_batch_sigma_slide"
 STEM = {"cell": "cell", "bin16um": "bin", "spot": "spot"}
