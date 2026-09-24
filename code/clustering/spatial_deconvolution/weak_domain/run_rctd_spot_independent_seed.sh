@@ -5,8 +5,8 @@
 # reference/query sharing a template via the nominal (but, per that script's
 # header, likely already-decorrelated) shared seed=2025.
 #
-# Writes to a SEPARATE output dir (RCTD/spot_independent_seed/) so the
-# canonical RCTD/spot/ results are untouched -- compare metrics_summary.json
+# Writes to a SEPARATE output dir (RCTD/weak_mix_seed<seed>/) so the
+# canonical RCTD/weak_mix/ results are untouched -- compare metrics_summary.json
 # between the two directly.
 #
 # Array over the same 3 seeds as generate_rctd_reference_independent_seed.sh
@@ -27,7 +27,7 @@ mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_dec
 SEEDS=(999999 314159 271828)
 SEED="${SEEDS[${SLURM_ARRAY_TASK_ID:-0}]}"
 export RCTD_CELL_H5AD="/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/log_mu_-2.5_theta_0.40_jitter0.15_bsigma15_rctdref_seed${SEED}/simulation_cell_z_qc.h5ad"
-export RCTD_OUT_DIR="/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot_seed${SEED}"
+export RCTD_OUT_DIR="/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/weak_mix_seed${SEED}"
 
 RCTD_ENV="/dcs04/hicks/data/Jan/sim_project/sim_paper/env/rctd"
 export LD_LIBRARY_PATH="${RCTD_ENV}/lib:${LD_LIBRARY_PATH:-}"
@@ -35,11 +35,11 @@ export R_HOME="${RCTD_ENV}/lib/R"
 export RETICULATE_PYTHON="${RCTD_ENV}/bin/python"
 
 "${RCTD_ENV}/bin/Rscript" \
-    /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/run_rctd_spot.R
+    /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/weak_domain/run_rctd_spot.R
 
 echo "[done] RCTD (independent-seed reference) -> ${RCTD_OUT_DIR}"
 
 # Produce the manuscript panels after fitting; no manual style-refresh step.
 /dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/bin/python \
     /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/plot_rctd_results.py \
-    "${RCTD_OUT_DIR:-/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot}"
+    "${RCTD_OUT_DIR:-/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/weak_mix}"

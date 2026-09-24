@@ -18,9 +18,9 @@ export R_HOME="${RCTD_ENV}/lib/R"
 export RETICULATE_PYTHON="${RCTD_ENV}/bin/python"
 
 "${RCTD_ENV}/bin/Rscript" \
-    /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/run_rctd_spot.R
+    /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/weak_domain/run_rctd_spot.R
 
 # Produce the manuscript panels after fitting; no manual style-refresh step.
 /dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/bin/python \
     /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/plot_rctd_results.py \
-    "${RCTD_OUT_DIR:-/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot}"
+    "${RCTD_OUT_DIR:-/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/weak_mix}"

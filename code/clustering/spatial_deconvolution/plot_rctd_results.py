@@ -21,14 +21,20 @@ import numpy as np
 import pandas as pd
 import anndata as ad
 
-SPOT_H5AD = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_bsigma03/simulation_spot_z_qc.h5ad"
-# The query (spot) h5ad above is shared by every RCTD run regardless of
-# which reference seed produced it (run_rctd_spot.R hardcodes the same
-# SPOT_H5AD for the canonical run and all run_rctd_spot_independent_seed.sh
-# array tasks) -- only OUT_DIR (which reference/estimates to read and where
-# to write the plots) varies, so it's the one thing made overridable here.
 OUT_DIR = sys.argv[1] if len(sys.argv) > 1 else \
-    "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot"
+    "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/weak_mix"
+# The spot truth to score against MUST be the query RCTD was fitted on (spot_ids
+# map back by row position). run_rctd_spot.R and average_rctd_seeds.py record
+# it in metrics_summary.json ("spot_h5ad"), so it's read from there; outputs
+# from before 2026-09-23 lack it and fall back to the Figure 2 (weak-mix) spot.
+def _fitted_spot_h5ad():
+    try:
+        import json
+        return json.load(open(os.path.join(OUT_DIR, "metrics_summary.json"))).get("spot_h5ad")
+    except OSError:
+        return None
+SPOT_H5AD = _fitted_spot_h5ad() or \
+    "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad"
 CELL_TYPES = [f"type{i}" for i in range(1, 9)]
 
 from pathlib import Path

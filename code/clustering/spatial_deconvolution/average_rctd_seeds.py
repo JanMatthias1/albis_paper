@@ -1,10 +1,19 @@
 #!/usr/bin/env python
 """
-Figure 3 -- RCTD spot deconvolution, 3-seed average.
+Figure 3 -- RCTD spot deconvolution, 3-reference average.
 
-Averages the per-spot, per-cell-type estimated fractions across the 3
-independent-reference-seed RCTD runs (RCTD/spot_seed{271828,314159,999999}/,
-from run_rctd_spot_independent_seed.sh) into a single combined estimate, then
+Usage: python average_rctd_seeds.py --config {weak_mix,strong_mix}
+
+Averages the per-spot, per-cell-type estimated fractions across 3 RCTD runs
+that share one query and differ only in the reference draw:
+  weak_mix:   RCTD/weak_mix_seed{271828,314159,999999}/ (Figure 2 cell
+              references, weak_domain/run_rctd_spot_independent_seed.sh)
+  strong_mix: RCTD/strong_mix/ + RCTD/strong_mix_seed{101,202}/ (strong-mix
+              cell bs1.5 references at seed 2025/101/202, from
+              strong_domain/run_rctd_spot_strong_domain.sh; 2025 shares the
+              query's seed -- chosen 2026-09-23, since weak-mix replication
+              showed seed sharing didn't matter)
+into a single combined estimate, then
 recomputes the same metrics run_rctd_spot.R computes (per-spot/per-cell-type
 Pearson r + RMSE, overall summary) against that average -- a single reference
 draw is noisy (canonical r=0.73 vs the 3 seeds' individual 0.68/0.67/0.72),
@@ -12,13 +21,11 @@ and averaging estimates across independent reference draws is the standard
 way to get a less noisy point estimate of RCTD's true performance on this
 query, the same way the seeds themselves were used to bound it.
 
-All 3 seed runs scored the exact same 9889 spot_ids (verified directly,
-2026-09-18) -- query (spot) and its QC/min-UMI-driven dropouts are identical
-across runs, only the reference differs -- so the average is a clean
-elementwise mean, no alignment/intersection needed.
+The runs being averaged share the query, so they score the same spot_ids
+(asserted below, along with the query path each run recorded) -- the average
+is a clean elementwise mean, no alignment/intersection needed.
 
-Output, under RCTD/spot_seed_avg/ (parallel to the individual spot_seed*/
-dirs and the canonical spot/):
+Output, under RCTD/<config>_seed_avg/:
   estimated_fractions_wide.csv  mean of the 3 seeds' est. fractions, same
                                  wide format as run_rctd_spot.R's output
   per_spot_metrics.csv, per_celltype_metrics.csv, metrics_summary.json
@@ -32,6 +39,7 @@ zoom / error boxplot figures (it only needs estimated_fractions_wide.csv +
 per_celltype_metrics.csv, both written here).
 """
 
+import argparse
 import json
 import os
 
@@ -44,11 +52,22 @@ import pandas as pd
 import anndata as ad
 
 RCTD_DIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD"
-SEEDS = ["271828", "314159", "999999"]
-SEED_DIRS = [os.path.join(RCTD_DIR, f"spot_seed{s}") for s in SEEDS]
-OUT_DIR = os.path.join(RCTD_DIR, "spot_seed_avg")
-SPOT_H5AD = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_bsigma03/simulation_spot_z_qc.h5ad"
+CONFIGS = {  # config -> {reference seed: run dir under RCTD_DIR}
+    "weak_mix": {s: f"weak_mix_seed{s}" for s in ["271828", "314159", "999999"]},
+    "strong_mix": {"2025": "strong_mix", "101": "strong_mix_seed101", "202": "strong_mix_seed202"},
+}
 CELL_TYPES = [f"type{i}" for i in range(1, 9)]
+
+_ap = argparse.ArgumentParser()
+_ap.add_argument("--config", required=True, choices=list(CONFIGS))
+CONFIG = _ap.parse_args().config
+SEEDS = list(CONFIGS[CONFIG])
+SEED_DIRS = [os.path.join(RCTD_DIR, d) for d in CONFIGS[CONFIG].values()]
+OUT_DIR = os.path.join(RCTD_DIR, f"{CONFIG}_seed_avg")
+# The query every run was fitted on (run_rctd_spot.R records it); they must agree.
+_queries = {json.load(open(os.path.join(d, "metrics_summary.json")))["spot_h5ad"] for d in SEED_DIRS}
+assert len(_queries) == 1, f"runs were fitted on different queries: {_queries}"
+SPOT_H5AD = _queries.pop()
 
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -121,6 +140,7 @@ def compute_and_write_metrics(est, truth):
     seed_totals = {json.load(open(os.path.join(d, "metrics_summary.json")))["n_spots_total"] for d in SEED_DIRS}
     assert len(seed_totals) == 1, f"seed runs disagree on n_spots_total: {seed_totals}"
     summary = {
+        "spot_h5ad": SPOT_H5AD,
         "n_spots_scored": int(est_arr.shape[0]),
         "n_spots_total": seed_totals.pop(),
         "doublet_mode": "full",
@@ -134,7 +154,7 @@ def compute_and_write_metrics(est, truth):
     with open(os.path.join(OUT_DIR, "metrics_summary.json"), "w") as f:
         json.dump(summary, f, indent=2)
 
-    print("\n=== 3-SEED AVERAGE RESULTS ===")
+    print(f"\n=== {CONFIG} 3-REFERENCE AVERAGE RESULTS ===")
     print(json.dumps(summary, indent=2))
     print(per_type_df.to_string(index=False))
     return per_type_df

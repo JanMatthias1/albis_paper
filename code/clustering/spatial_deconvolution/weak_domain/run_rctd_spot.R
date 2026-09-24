@@ -29,9 +29,9 @@
 #   reference (cell): data/figure_2/smaller_sphere/data/
 #                      log_mu_-2.5_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad
 #   query (spot):      data/figure_2/smaller_sphere/data/
-#                      packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_bsigma03/simulation_spot_z_qc.h5ad
+#                      packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad
 #
-# Output, under data/figure_3/spatial_deconvolution/RCTD/spot/:
+# Output, under data/figure_3/spatial_deconvolution/RCTD/weak_mix/ (default; RCTD_OUT_DIR overrides):
 #   rctd_results.rds        the full myRCTD object (weights, singlet scores, etc.)
 #   per_spot_metrics.csv    per-spot Pearson correlation + RMSE (est vs. true fractions)
 #   per_celltype_metrics.csv  per-cell-type correlation across all spots
@@ -45,17 +45,22 @@ suppressPackageStartupMessages({
   library(ggplot2)
 })
 
-# CELL_H5AD/OUT_DIR are overridable via env vars so an independent-seed (or
-# any other) reference comparison can reuse this script unmodified -- unset,
-# both default to the canonical run (cell tag seed=2025, matching Figure 2/3/4).
+# CELL_H5AD/SPOT_H5AD/OUT_DIR are overridable via env vars so an
+# independent-seed reference or the strong-domain-mix run
+# (../strong_domain/run_rctd_spot_strong_domain.sh) can reuse this script
+# unmodified -- unset, all default to the canonical weak-domain run (Figure 2
+# cell tag seed=2025 + Figure 2 spot, matching Figure 2/3/4).
 CELL_H5AD <- Sys.getenv(
   "RCTD_CELL_H5AD",
   "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/log_mu_-2.5_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad"
 )
-SPOT_H5AD <- "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_dsf_bsigma03/simulation_spot_z_qc.h5ad"
+SPOT_H5AD <- Sys.getenv(
+  "RCTD_SPOT_H5AD",
+  "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad"
+)
 OUT_DIR <- Sys.getenv(
   "RCTD_OUT_DIR",
-  "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/spot"
+  "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/weak_mix"
 )
 DOUBLET_MODE <- "full"
 N_CELL_TYPES <- 8
@@ -194,6 +199,8 @@ write.csv(per_type_df, file.path(OUT_DIR, "per_celltype_metrics.csv"), row.names
 overall_cor <- safe_cor(as.vector(est), as.vector(truth))
 overall_rmse <- sqrt(mean((est - truth)^2))
 summary_list <- list(
+  cell_h5ad = CELL_H5AD,
+  spot_h5ad = SPOT_H5AD,
   n_spots_scored = length(common),
   n_spots_total = ncol(query_counts),
   doublet_mode = DOUBLET_MODE,
