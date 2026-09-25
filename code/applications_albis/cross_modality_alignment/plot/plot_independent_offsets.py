@@ -1,12 +1,14 @@
 """Render only the dedicated cross-modality independent-offset experiment."""
 from pathlib import Path
 import argparse
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # shared reference_metrics.py
 import plot_cross_tech_stair as overlay
 import plot_slice5_3d_domain as spatial
 import plot_slice5_tech_breakdown as breakdown
 from reference_metrics import run as evaluate_reference
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--base', type=Path, default=Path(__file__).resolve().parents[3]/'data/figure_4/cross_modality_alignment/independent_offsets')
+parser.add_argument('--base', type=Path, default=Path(__file__).resolve().parents[4]/'data/figure_4/cross_modality_alignment/independent_offsets')
 base = parser.parse_args().base
 for module in (overlay,spatial,breakdown):
     module.BASE=str(base)

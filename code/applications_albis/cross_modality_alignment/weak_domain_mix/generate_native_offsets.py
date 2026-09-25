@@ -23,7 +23,7 @@ from importlib.metadata import version
 import numpy as np
 from scipy import sparse
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[5]
 REPO = ROOT / "albis"
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(REPO))

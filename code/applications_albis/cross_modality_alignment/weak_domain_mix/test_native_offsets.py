@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 import sys
 sys.dont_write_bytecode = True
-sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "albis"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[5] / "albis"))
 import numpy as np
 import albis as ab
 from albis.simulation_sphere import random_rigid_inplane_2d

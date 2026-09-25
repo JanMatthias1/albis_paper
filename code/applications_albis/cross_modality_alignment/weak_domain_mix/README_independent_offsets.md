@@ -164,6 +164,17 @@ RMSE (unaligned → STAIR fine): spot 5535.8 → 276.8 µm, cell 6036.1 → 259.
 equal-weight combined 5791.4 → 268.4 µm. The regenerated stacked comparison is
 `independent_offsets_shift3x/plots/slice5_sphere_3d_domain_true.png`.
 
+**Superseded 2026-09-20 (see "Completed replacement" above).** Job 35816305 used the
+post-hoc `prepare_stronger_shifts.py` coordinate rescale, not a native ALBIS
+regeneration. That data has since been archived to
+`independent_offsets_shift3x_before_native_20260920T162259708032Z/` and replaced at
+this same `independent_offsets_shift3x/` path by the native regeneration (jobs
+35816469–471). The RMSE numbers above no longer describe what is at that path.
+Current canonical numbers, from
+`independent_offsets_shift3x/plots/reference_metrics_bin16um_slice_5.json`:
+**spot 85.4 µm, cell 604.7 µm** (unaligned → STAIR fine). Re-read that JSON directly
+before citing any number from this section — do not use the figures above.
+
 The stacked plot now matches the alignment figure's 12 × 4.3 inch canvas,
 equal column centers, 12° elevation, title row and bottom legend ("Domain True").
 Each qualitative panel is centered and zoomed to fit its column; apparent sizes

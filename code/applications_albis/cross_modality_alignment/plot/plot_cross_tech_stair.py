@@ -13,7 +13,8 @@ Produces, under sim_paper/data/figure_4/cross_modality_alignment/plots/ :
     figure4e_rmse_slice_<n>.png                   joint-Procrustes RMSE bar, unaligned
                                                    vs stair_init vs stair_fine
 
-Mirrors plot_figure4c.py's conventions (same Procrustes-for-display helper,
+Mirrors plot_figure4a.py's conventions (renamed from plot_figure4c.py
+2026-09-20; same Procrustes-for-display helper,
 same panel layout) but colors by `technology` instead of `slice_id`, and has
 no 3D sphere panel (cross-tech is a single 2D slice, not a z-stack).
 """
@@ -36,7 +37,7 @@ BASE = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/cross_modality
 COL_LABELS = ["Unaligned", "STAIR aligned", "Ground truth"]
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from manuscript_style import MODALITY_LOOKUP, category_color
 TECH_COLORS = {key: MODALITY_LOOKUP[key] for key in ('bin16um', 'spot', 'cell')}
 

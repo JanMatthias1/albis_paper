@@ -40,7 +40,8 @@ from mpl_toolkits.mplot3d import proj3d
 BASE = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/cross_modality_alignment"
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # shared reference_metrics.py
 from manuscript_style import MODALITY_LOOKUP, category_color
 TECH_COLORS = {key: MODALITY_LOOKUP[key] for key in ('bin16um', 'spot', 'cell')}
 COL_LABELS = ["Unaligned", "STAIR aligned", "Ground truth"]
@@ -156,6 +157,15 @@ def plot(adata, slice_id, outdir, do_procrustes=True, reference=None, common_lim
                          position.width, position.height])
     for center_x, label in zip(centers, COL_LABELS):
         fig.text(center_x, .85, label, ha="center", va="bottom", fontsize=13)
+
+    # Label each resolution beside its projected layer in the unaligned panel.
+    fig.canvas.draw()
+    for technology, label in (("bin16um", "Bin"), ("spot", "Spot"), ("cell", "Cell")):
+        bound = projected_bounds(panel_axes[0], cols3[0][tech == technology])
+        x, y = fig.transFigure.inverted().transform(
+            (bound.x1 + 5 * fig.dpi / 72, (bound.y0 + bound.y1) / 2)
+        )
+        fig.text(x, y, label, ha="left", va="center", fontsize=15, color="0.25")
 
     handles = [Line2D([0], [0], marker="o", ls="", mfc=lut[c], mec="none", label=c) for c in cats]
     fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.0),

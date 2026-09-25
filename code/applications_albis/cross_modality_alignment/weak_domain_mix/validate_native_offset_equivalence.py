@@ -12,7 +12,7 @@ import h5py
 import numpy as np
 from anndata._io.specs import read_elem
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[5]
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(ROOT / 'albis'))
 from albis.simulation_sphere import random_rigid_inplane_2d
