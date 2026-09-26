@@ -1,5 +1,10 @@
 """
-Figure 4C -- before/after STAIR 3D alignment of the ALBIS sphere z-stack.
+Figure 4A -- before/after STAIR 3D alignment of the ALBIS sphere z-stack.
+
+Renamed from plot_figure4c.py 2026-09-20 (this single-technology z-stack
+alignment task was relettered Figure 4C -> Figure 4A; see
+code/applications_albis/alignment/README.md's "Current manuscript selection").
+Output filenames below were renamed to match (figure4c_ -> figure4a_ prefix).
 
 Reads the STAIR outputs written by 3D_stair.py
     sim_paper/data/figure_4/alignment/STAIR/<dataset>/adata_results/
@@ -7,12 +12,12 @@ Reads the STAIR outputs written by 3D_stair.py
         metrics.json
 
 Produces, under sim_paper/data/figure_4/alignment/plots/ :
-    figure4c_overlay_2d_<colorby>_<dataset>.png  one modality per image, cols =
+    figure4a_overlay_2d_<colorby>_<dataset>.png  one modality per image, cols =
                                         [unaligned | STAIR | truth], all 10 slices overlaid, 2D
-    figure4c_sphere_3d_<colorby>_<dataset>.png   same columns, 3D scatter (the reconstructed sphere)
-    figure4c_rmse.png                   joint-Procrustes RMSE, unaligned vs STAIR, per modality
-    figure4c_metrics.csv                the numbers behind the bar chart
-    figure4c_mnn_domain_agreement.csv    domain-recovery quantification, unaligned vs STAIR: for
+    figure4a_sphere_3d_<colorby>_<dataset>.png   same columns, 3D scatter (the reconstructed sphere)
+    figure4a_rmse.png                   joint-Procrustes RMSE, unaligned vs STAIR, per modality
+    figure4a_metrics.csv                the numbers behind the bar chart
+    figure4a_mnn_domain_agreement.csv    domain-recovery quantification, unaligned vs STAIR: for
                                         every pair of the 10 slices, cross-slice mutual nearest
                                         neighbors (in the 2D spatial embedding) and what fraction
                                         share the same domain_true label. Skip with
@@ -127,7 +132,7 @@ def plot_overlay_2d(data, color_by, do_procrustes, outdir, tag):
                           "slice_id": "Slice ID"}.get(color_by, color_by))
         fig.patch.set_facecolor("white")
         fig.tight_layout(rect=[0, 0.035, 1, 0.94])
-        outpath = os.path.join(outdir, f"figure4c_overlay_2d_{tag}_{ds}.png")
+        outpath = os.path.join(outdir, f"figure4a_overlay_2d_{tag}_{ds}.png")
         fig.savefig(outpath, dpi=200, facecolor="white")
         plt.close(fig)
         print("wrote", outpath)
@@ -156,7 +161,7 @@ def plot_sphere_3d(data, color_by, do_procrustes, outdir, tag):
                           "slice_id": "Slice ID"}.get(color_by, color_by))
         fig.patch.set_facecolor("white")
         fig.subplots_adjust(left=0.01, right=0.99, top=0.92, bottom=0.08, wspace=0.0)
-        outpath = os.path.join(outdir, f"figure4c_sphere_3d_{tag}_{ds}.png")
+        outpath = os.path.join(outdir, f"figure4a_sphere_3d_{tag}_{ds}.png")
         fig.savefig(outpath, dpi=200, facecolor="white")
         plt.close(fig)
         print("wrote", outpath)
@@ -176,14 +181,14 @@ def plot_rmse(data, outdir):
         print("no metrics.json found, skipping RMSE bar")
         return
     df = pd.DataFrame(rows).set_index("dataset")
-    df.to_csv(os.path.join(outdir, "figure4c_metrics.csv"))
+    df.to_csv(os.path.join(outdir, "figure4a_metrics.csv"))
     ax = df[["unaligned", "stair_init", "stair_fine"]].plot.bar(figsize=(7, 4))
     ax.set_ylabel("joint-Procrustes RMSE to truth (um)")
     ax.set_xlabel("")
-    ax.set_title("Figure 4C -- alignment error before vs after STAIR")
+    ax.set_title("Figure 4A -- alignment error before vs after STAIR")
     plt.xticks(rotation=0)
     plt.tight_layout()
-    p = os.path.join(outdir, "figure4c_rmse.png")
+    p = os.path.join(outdir, "figure4a_rmse.png")
     plt.savefig(p, dpi=200)
     plt.close()
     print("wrote", p)
@@ -242,7 +247,7 @@ def write_mnn_metrics(data, outdir):
     script plot_stair_mnn_accuracy.py, which reads this CSV -- kept separate
     so there's a single source of truth for the final figure."""
     mnn_df = cross_slice_mnn_domain_agreement(data)
-    csv_path = os.path.join(outdir, "figure4c_mnn_domain_agreement.csv")
+    csv_path = os.path.join(outdir, "figure4a_mnn_domain_agreement.csv")
     mnn_df.to_csv(csv_path, index=False)
     print("wrote", csv_path)
     print((100 * mnn_df.groupby(["dataset", "method"])["agreement"].mean()).round(1))

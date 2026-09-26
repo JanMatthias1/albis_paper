@@ -22,7 +22,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     base = ROOT / 'sim_paper/data/figure_4/cross_modality_alignment'
     parser.add_argument('--source', type=Path, default=base / 'independent_offsets')
-    parser.add_argument('--comparison', type=Path, default=base / 'independent_offsets_shift3x')
+    # The post-hoc shift3x this replays against was archived when the native
+    # regen was promoted into independent_offsets_shift3x/ (2026-09-20).
+    parser.add_argument('--comparison', type=Path,
+                        default=base / 'independent_offsets_shift3x_before_native_20260920T162259708032Z')
     parser.add_argument('--output', type=Path, default=base / 'native_offsets_3075_seed12345/native_equivalence.json')
     parser.add_argument('--slice', type=int, default=5)
     args = parser.parse_args()

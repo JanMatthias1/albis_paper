@@ -4,11 +4,11 @@
 ONE ALBIS call builds one tissue (cells, domains, cell types, molecules) from
 the bin16um strong-mix parameters and aggregates it into bin16um, spot and
 cell outputs, so all three modalities share the same underlying tissue
-composition -- unlike ../generate_native_offsets.py, which ran one call per
+composition -- unlike ../weak_domain_mix/generate_native_offsets.py, which ran one call per
 modality with modality-specific n_cells/dispersion (different tissues).
 
 Tissue/expression = Figure 3 strong-mix bin16um config
-(code/clustering/strong_mix/generate_strong_mix_bin16um.sh, canonical point):
+(code/clustering/strong_domain_mix/generate/generate_strong_mix_bin16um.sh, canonical point):
 r=2050 um, 600k cells, log_mu=-2.5, theta=2.0, jitter=0.6, batch_sigma=0.7,
 STRONG_DOMAIN_TYPE_MIX. Offsets = shift3x: max_shift=3075, max_deg=270,
 base_seed_unaligned=12345, sync_unaligned_seed=False (each modality draws its
@@ -16,6 +16,14 @@ own rotation/translation per slice).
 
     python generate_strongmix_offsets.py --outdir OUT            # writes OUT/data/<tech>/
     python generate_strongmix_offsets.py --outdir OUT --print-config
+    python generate_strongmix_offsets.py --outdir OUT --crop-modalities bin,spot --crop-window-um 2221
+
+--crop-modalities/--crop-window-um crop only the listed bin/spot outputs to a
+W x W capture square (cell always keeps its window). The intact sphere is built
+once and sectioned twice -- listed modalities with the small window, the rest
+unchanged -- so the tissue stays shared and uncropped modalities match a run
+without the flag. 2221 um = Visium's 6.5 mm scaled by the sphere shrink
+(2050/6000), which crops the central sections to a full square.
 """
 import argparse
 import hashlib
@@ -50,6 +58,26 @@ STRONG_DOMAIN_TYPE_MIX = [
 # output folder -> (ALBIS modality, result key)
 TECHS = {"bin16um": ("bin", "bin_adatas"), "spot": ("spot", "spot_adatas"),
          "cell": ("cell", "adata_cell_sectioned")}
+# section_3d_molecule_sphere arguments; the rest go to the base (intact sphere)
+# call, mirroring how simulate_3d_molecule_sphere_multires splits them.
+SECTION_ONLY = ("n_slices", "batch_sigma", "bin_size_um", "spot_spacing_um", "spot_radius_um", "max_deg",
+                "max_shift", "base_seed_unaligned", "sync_unaligned_seed", "slice_axes")
+CAPTURE = ("capture_window_um", "capture_window_center_um", "xenium_capture_window_um")
+
+
+def simulate_cropped(params, crop_modalities, window_um):
+    """Build the sphere once; section crop_modalities with a window_um square."""
+    base = ab.simulate_3d_molecule_sphere_base(
+        **{k: v for k, v in params.items() if k not in SECTION_ONLY + ("_section",)})
+    section = {k: params[k] for k in SECTION_ONLY + CAPTURE}
+    keep = [m for m, _ in TECHS.values() if m not in crop_modalities]
+    sim = ab.section_3d_molecule_sphere(base, **section, output_modalities=keep)
+    cropped = ab.section_3d_molecule_sphere(base, **dict(section, capture_window_um=(window_um, window_um)),
+                                            output_modalities=crop_modalities)
+    for modality, key in TECHS.values():
+        if modality in crop_modalities:
+            sim[key] = cropped[key]
+    return sim
 
 
 def simulator_parameters(max_shift=3075., max_deg=270., perturbation_seed=12345,
@@ -82,12 +110,19 @@ def main():
     parser.add_argument("--base-seed-unaligned", type=int, default=12345)
     parser.add_argument("--seed", type=int, default=2025)
     parser.add_argument("--n-cells", type=int, default=None, help="Override (smoke tests only)")
+    parser.add_argument("--crop-modalities", default="", help="Comma list from {bin,spot} to crop")
+    parser.add_argument("--crop-window-um", type=float, default=None, help="Side of the square crop (um)")
     parser.add_argument("--print-config", action="store_true")
     args = parser.parse_args()
+    crop = [m for m in args.crop_modalities.split(",") if m]
+    if not set(crop) <= {"bin", "spot"} or bool(crop) != (args.crop_window_um is not None):
+        parser.error("--crop-modalities (bin and/or spot) and --crop-window-um go together")
     params = simulator_parameters(args.max_shift, args.max_deg, args.base_seed_unaligned, args.seed)
     if args.n_cells:
         params["n_cells"] = args.n_cells
     resolved = _to_serializable(params)
+    if crop:
+        resolved["crop"] = {"modalities": crop, "window_um": [args.crop_window_um] * 2}
     if args.print_config:
         print(json.dumps(resolved, indent=2))
         return
@@ -108,7 +143,10 @@ def main():
         (d / "generation_manifest.json").write_text(json.dumps(provenance, indent=2) + "\n")
     print(json.dumps(provenance, indent=2), flush=True)
 
-    sim = ab.simulate_3d_molecule_sphere_multires(**params)
+    if crop:
+        sim = simulate_cropped(params, crop, args.crop_window_um)
+    else:
+        sim = ab.simulate_3d_molecule_sphere_multires(**params)
     for tech, (modality, key) in TECHS.items():
         a = sim[key]["Z"]
         a.uns["native_generation_parameters"] = resolved

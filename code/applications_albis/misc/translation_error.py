@@ -1,8 +1,8 @@
 """
 Figure 4C -- per-slice translation error, before vs after STAIR.
 
-A rigid perturbation is rotation + translation. The existing figure4c_rmse.png
-(joint-Procrustes RMSE) mixes both together; this isolates just the
+A rigid perturbation is rotation + translation. The existing figure4a_rmse.png
+(joint-Procrustes RMSE, written by plot_figure4a.py) mixes both together; this isolates just the
 translation component: for each slice_id, the distance between that slice's
 centroid and the corresponding ground-truth centroid.
 
@@ -13,7 +13,8 @@ STAIR's own reconstruction is anchored on slice 0 in an arbitrary frame (no
 fixed relationship to the ground-truth frame), so transform_fine is first
 Procrustes-fit (rotation + translation, no scale) as ONE RIGID BODY onto
 spatial_true across all slices together -- same "for display" fit
-plot_figure4c.py uses -- before computing per-slice centroids. That removes
+plot_figure4a.py uses (renamed from plot_figure4c.py 2026-09-20) -- before
+computing per-slice centroids. That removes
 the one global degree of freedom STAIR's anchor choice introduces and leaves
 the genuine per-slice residual. unaligned needs no such fit: each slice's
 'spatial'/'spatial_true' already share the same base frame by construction

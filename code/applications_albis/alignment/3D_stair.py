@@ -1,5 +1,5 @@
 """
-Figure 4C -- 3D spatial alignment of an ALBIS sphere z-stack with STAIR.
+Figure 4A -- 3D spatial alignment of an ALBIS sphere z-stack with STAIR.
 
 Adapted from the multi-sample-alignment-benchmark script
     code/Jan/sim_data/3D_alignment/3D_stair.py
@@ -153,7 +153,7 @@ DATASETS = {
     # the smaller_sphere r=2050 shrink used for cross-modality consistency
     # elsewhere. Per-slice density is 7-35x higher than the r=2050 "cell"
     # entry above (16.7k-88.8k cells/slice vs ~2.4k) -- testing whether
-    # cell's weak cross-slice MNN domain-agreement in plot_figure4c.py
+    # cell's weak cross-slice MNN domain-agreement in plot_figure4a.py
     # (18.8% vs bin16um/spot's 52-54%) is a density/geometry artifact of the
     # shrink rather than a cell-resolution-inherent limitation. Reuses
     # data/figure_2/larger_sphere/data/cell_native_r6000/ (already generated,

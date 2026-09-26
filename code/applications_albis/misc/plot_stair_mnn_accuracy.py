@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
-Figure 4C -- STAIR cross-section alignment accuracy.
+Figure 4A -- STAIR cross-section alignment accuracy.
 
-Reads figure4c_mnn_domain_agreement.csv (written by plot_figure4c.py's
+Reads figure4a_mnn_domain_agreement.csv (written by plot_figure4a.py's
 cross_slice_mnn_domain_agreement). Exact quantity computed there:
 
   * for each of the C(10, 2) = 45 pairs of tissue sections, using every
@@ -36,7 +36,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 PLOTS_DIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/alignment/plots"
-CSV = os.path.join(PLOTS_DIR, "figure4c_mnn_domain_agreement.csv")
+CSV = os.path.join(PLOTS_DIR, "figure4a_mnn_domain_agreement.csv")
 
 MODALITIES = ["bin16um", "spot", "cell"]
 MOD_DISPLAY = {"bin16um": "Bin (16 µm)", "spot": "Spot", "cell": "Cell"}

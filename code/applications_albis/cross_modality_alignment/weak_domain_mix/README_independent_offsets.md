@@ -2,7 +2,8 @@
 
 ## Native ALBIS reproduction of the stronger-offset condition
 
-All new workflow code lives in this directory; the ALBIS package is used without
+Generation code lives in this directory; the shared STAIR/metric scripts are in
+`../` and the plotting scripts in `../plot/` (layout: `../README.md`). The ALBIS package is used without
 modification. `generate_native_offsets.py` calls
 `albis.simulate_3d_molecule_sphere_multires` with explicit manuscript presets and
 native `max_shift=3075`, `max_deg=270`, `base_seed_unaligned=12345`,
@@ -26,7 +27,7 @@ modality, followed by section-5 STAIR, the approved plots, reference RMSE, and
 the two-pair averaged gene metrics:
 
 ```bash
-bash sim_paper/code/applications_albis/cross_modality_alignment/run_native_offsets.sh submit
+bash sim_paper/code/applications_albis/cross_modality_alignment/weak_domain_mix/run_native_offsets.sh submit
 ```
 
 The default destination is `data/figure_4/cross_modality_alignment/native_offsets_3075_seed12345/`.
@@ -39,7 +40,7 @@ To inspect settings without writing data:
 
 ```bash
 sim_paper/env/albis-tutorial/bin/python \
-  sim_paper/code/applications_albis/cross_modality_alignment/generate_native_offsets.py \
+  sim_paper/code/applications_albis/cross_modality_alignment/weak_domain_mix/generate_native_offsets.py \
   --modality bin16um --outdir /tmp/unused --print-config
 ```
 
@@ -73,7 +74,7 @@ native experiment. Replacement was verified complete on 2026-09-20.
 The runner's optional sixth argument is the replacement target. Exact submission:
 
 ```bash
-bash sim_paper/code/applications_albis/cross_modality_alignment/run_native_offsets.sh submit \
+bash sim_paper/code/applications_albis/cross_modality_alignment/weak_domain_mix/run_native_offsets.sh submit \
   /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/cross_modality_alignment/native_offsets_3075_seed12345 \
   3075 12345 2025 \
   /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/cross_modality_alignment/independent_offsets_shift3x
@@ -81,13 +82,13 @@ bash sim_paper/code/applications_albis/cross_modality_alignment/run_native_offse
 
 ## Original independent-offset run
 
-Run `bash submit_independent_offsets.sh` once to submit three generation/QC tasks, then STAIR and plotting after all three succeed. Jobs and logs are recorded under `data/figure_4/cross_modality_alignment/independent_offsets/`.
+Run `bash ../misc/submit_independent_offsets.sh` (retired; see ../README.md) once to submit three generation/QC tasks, then STAIR and plotting after all three succeed. Jobs and logs are recorded under `data/figure_4/cross_modality_alignment/independent_offsets/`.
 
 These datasets are exclusively for this cross-modality experiment. Figure 2 data and other analyses are neither overwritten nor redirected. Historical synchronized cross-modality results remain in the parent directory.
 
 Generation retains the smaller Figure 2 sphere (radius 2050 µm), simulation seed 2025, weak domain mixture, modality-specific count parameters and batch sigmas (cell 1.5, bin16um 0.7, spot 0.3). Cell uses 24,207 simulated cells; bin and spot use 600,000. The native platform capture windows are retained. Per-modality rotation/translation draws are enabled by omitting `--sync-unaligned-seed`. Native modality-specific RNG offsets produce different perturbations while preserving the tissue/expression seed. Max shift is 1025 µm and max rotation 270 degrees, as in the Figure 2 generator. All modalities receive the existing QC filter.
 
-`validate_independent_offsets.py` checks every section's fitted rotation and translation differ across modalities, verifies rigid-transform residuals, and saves `perturbation_validation.json`. Failure blocks STAIR. The dedicated STAIR job reads only these new inputs, aligning section 5 across bin16um, spot, and cell with existing STAIR settings. Its output is under `independent_offsets/STAIR/cross_tech/slice_5`; refreshed plots are under `independent_offsets/plots`.
+`../misc/validate_independent_offsets.py` checks every section's fitted rotation and translation differ across modalities, verifies rigid-transform residuals, and saves `perturbation_validation.json`. Failure blocks STAIR. The dedicated STAIR job reads only these new inputs, aligning section 5 across bin16um, spot, and cell with existing STAIR settings. Its output is under `independent_offsets/STAIR/cross_tech/slice_5`; refreshed plots are under `independent_offsets/plots`.
 
 STAIR job 35812458 completed successfully. The existing STAIR coordinate rescaling
 and legacy metrics are retained in this run. Legacy per-technology independently
@@ -146,7 +147,7 @@ experiment's same-named plot is under `independent_offsets/plots/`; it now uses
 bin16um-only correction for both input and result, and common spatial limits.
 The vertical separation is an artificial modality display offset, not true depth.
 
-`prepare_stronger_shifts.py` creates a separate `independent_offsets_shift3x/`
+`../misc/prepare_stronger_shifts.py` (retired) creates a separate `independent_offsets_shift3x/`
 experiment from section 5 of the current QC inputs. It multiplies each modality's
 original fitted XY translation by three, retaining its original rotation,
 expression, observation membership and truth coordinates. It checks the resulting
@@ -155,7 +156,7 @@ overwrite an existing experiment. Original perturbation metadata is retained as
 source provenance, with the changed transform recorded under `uns['stronger_shifts']`.
 This experiment contains section 5 only.
 
-`run_stronger_shifts_stair.sh` reruns STAIR and the complete plotting/metric workflow
+`../misc/run_stronger_shifts_stair.sh` (retired) reruns STAIR and the complete plotting/metric workflow
 on those changed inputs. The source experiment remains available for comparison.
 The new result must be evaluated independently; source-run metrics do not apply.
 

@@ -19,7 +19,7 @@ def main():
     ap.add_argument('--submit', action='store_true')
     args = ap.parse_args()
     here = Path(__file__).resolve().parent
-    tasks = PROJECT / 'sim_paper/code/clustering/cellbin_batch_sigma_slide/batch_sigma_slide_seed_tasks.tsv'
+    tasks = PROJECT / 'sim_paper/code/clustering/strong_domain_mix/batch_sigma_slide/batch_sigma_slide_seed_tasks.tsv'
     with tasks.open() as f:
         rows = list(csv.DictReader(f, delimiter='\t'))
     plan = []
