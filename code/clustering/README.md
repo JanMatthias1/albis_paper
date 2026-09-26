@@ -4,6 +4,31 @@ Current workflow, updated 2026-09-18. Cell-type recovery and deconvolution
 reuse Figure 2 smaller-sphere data. Domain recovery and batch-effect sweeps
 use separate simulations generated with `--strong-domain-mix`.
 
+## Layout (2026-09-25)
+
+Scripts are grouped by dataset; `data/figure_3/` mirrors the same tree.
+
+```
+code/clustering/
+├── 00_qc_filter.py … step03_cluster_and_plot.py, plot_banksy_results.py   shared pipeline steps
+├── run_banksy_lambda.sh, submit_banksy_lambda.sh                         BANKSY at a fixed λ (task-table driven)
+├── strong_domain_mix/
+│   ├── generate/           generate_strong_mix_{cell,bin16um,spot}.sh, check_matches_figure2.py
+│   ├── batch_sigma_slide/  batch-σ sweep: seeds, final plot, cliff UMAPs
+│   ├── banksy/             λ sweep at batch_sigma 0 (+ domain/, cell_type/ final runs)
+│   └── pca_harmony/        strongmix_celltype_panel.sh (bs0 + usual σ)
+├── weak_domain_mix/
+│   ├── generate/           generate_weakmix_bs0.sh (batch_sigma 0 only; batched = Figure 2 data)
+│   ├── banksy/             λ sweep at batch_sigma 0 (+ domain/, cell_type/ final runs)
+│   └── pca_harmony/        {cell,bin,bin16um,spot}_celltype_panel.sh (Figure 2 data), bs0_celltype_panel.sh
+├── ari_recovery_summary/   plots across mixes/pipelines
+└── spatial_deconvolution/  RCTD (weak_domain/, strong_domain/)
+```
+
+Moved from `strong_mix/`, `cellbin_batch_sigma_slide/`, `pca_harmony_single_cell/`
+and `data/banksy_cell/`; see `data/figure_3/README.md` for the data side. The old
+`cellbin_batch_sigma_slide` path is retired; Figure 4B STAGATE and RCTD read the new one.
+
 ## Pipeline overview
 
 `02_leiden_resolution_sweep.py` and `step03_cluster_and_plot.py` are
@@ -42,7 +67,7 @@ of `step03`, it's a fork alongside it.
                     v
           ari_recovery_summary/plot_ari_recovery.py
           ari_recovery_summary/plot_domain_vs_celltype.py
-          cellbin_batch_sigma_slide/plot_batch_sigma_slide_final.py
+          strong_domain_mix/batch_sigma_slide/plot_batch_sigma_slide_final.py
 ```
 
 ## Cell-type clustering and deconvolution
@@ -57,9 +82,9 @@ All clustering panels use the QC-filtered h5ad, including cell.
 | bin16um | `packing_pf0p04_bin16um_log_mu_-2.5_bsigma07` |
 | spot | `packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03` |
 
-`pca_harmony_single_cell/{cell,bin,bin16um,spot}_celltype_panel.sh`
+`weak_domain_mix/pca_harmony/{cell,bin,bin16um,spot}_celltype_panel.sh`
 run PCA → Harmony → resolution-matched Leiden against `cell_type_true`.
-Results live under `data/figure_3/pca_harmony_single_cell/<modality>/`
+Results live under `data/figure_3/weak_domain_mix/pca_harmony/<modality>/bs<sigma>/`
 (`bin` denotes bin8um here). Existing PCA outputs are reused; changing an
 input tag alone does not invalidate an existing result.
 
@@ -68,7 +93,7 @@ Figure 2 QC cell data as the labelled reference and QC spot data as the query
 (Figure 2's weak/realistic domain mix); the independent-seed reference scripts
 live there too. `spatial_deconvolution/strong_domain/run_rctd_spot_strong_domain.sh`
 runs the same RCTD on the strong-domain-mix data (spot bs0.3 query; cell bs1.5
-references at seeds 2025/101/202, all from `cellbin_batch_sigma_slide/`), so it
+references at seeds 2025/101/202, all from `strong_domain_mix/batch_sigma_slide/`), so it
 needs the strong-mix and seed-replication jobs done first.
 `average_rctd_seeds.py --config {weak_mix,strong_mix}` averages each
 configuration's 3 references. Results: `data/figure_3/spatial_deconvolution/RCTD/`
@@ -81,9 +106,9 @@ Plotting (`plot_rctd_results.py`, `average_rctd_seeds.py`) stays at the top of
 The current baseline generators are:
 
 ```bash
-sbatch sim_paper/code/clustering/strong_mix/generate_strong_mix_cell.sh
-sbatch sim_paper/code/clustering/strong_mix/generate_strong_mix_bin16um.sh
-sbatch sim_paper/code/clustering/strong_mix/generate_strong_mix_spot.sh
+sbatch sim_paper/code/clustering/strong_domain_mix/generate/generate_strong_mix_cell.sh
+sbatch sim_paper/code/clustering/strong_domain_mix/generate/generate_strong_mix_bin16um.sh
+sbatch sim_paper/code/clustering/strong_domain_mix/generate/generate_strong_mix_spot.sh
 ```
 
 Each runs generation → QC → BANKSY + Harmony → matched Leiden/ARI →
@@ -99,7 +124,7 @@ Figure 2 dispersion; spot also uses its current Figure 2 dispersion.
 
 Generators write raw/QC inputs under `data/noisy/<technology>_strong_mix_bs<value>/`.
 BANKSY matrices, ARI results and scores go under
-`data/figure_3/cellbin_batch_sigma_slide/`, with per-point folders
+`data/figure_3/strong_domain_mix/batch_sigma_slide/`, with per-point folders
 `<cell|bin16um|spot>/bs<value>/`. Some older baseline raw/QC files were moved
 into those result folders; the generators do not automatically reuse those
 moved files. Do not assume rerunning a generator uses the same on-disk input
@@ -125,9 +150,9 @@ These change the simulation draw, not just the clustering initialization.
 The seed script matches the baseline generation/BANKSY settings above.
 
 ```bash
-python sim_paper/code/clustering/cellbin_batch_sigma_slide/gen_batch_sigma_slide_seed_tasks.py
+python sim_paper/code/clustering/strong_domain_mix/batch_sigma_slide/gen_batch_sigma_slide_seed_tasks.py
 # Full array for a fresh run (do not duplicate an already submitted array):
-sbatch sim_paper/code/clustering/cellbin_batch_sigma_slide/batch_sigma_slide_seeds.sh
+sbatch sim_paper/code/clustering/strong_domain_mix/batch_sigma_slide/batch_sigma_slide_seeds.sh
 ```
 
 The generated TSV contains 72 tasks: cell 18, bin16um 16, spot 38.
@@ -135,10 +160,10 @@ Indices 0–67 preserve the original task mapping. Indices 68–71 append cell
 0.05 seed101/seed202 and bin16um 0.05 seed101/seed202. Spot 0.4/0.6 include
 baseline generation as well as the two extra seeds. Seed simulation files
 live under `data/noisy/<cell|bin|spot>_batch_slide_bs<value>_seed<seed>/`;
-results live under `cellbin_batch_sigma_slide/<cell|bin16um|spot>/bs<value>_seed<seed>/`.
+results live under `data/figure_3/strong_domain_mix/batch_sigma_slide/<cell|bin16um|spot>/bs<value>_seed<seed>/`.
 
 ```bash
-python sim_paper/code/clustering/cellbin_batch_sigma_slide/plot_batch_sigma_slide_final.py
+python sim_paper/code/clustering/strong_domain_mix/batch_sigma_slide/plot_batch_sigma_slide_final.py
 ```
 
 The plot reads domain ARI JSON files from baseline and seed folders,
@@ -149,7 +174,7 @@ no SD bar. Duplicate entries for the same batch value and seed raise an
 error rather than being counted twice. Missing composition-score files do
 not exclude a completed ARI result.
 
-Outputs in `data/figure_3/cellbin_batch_sigma_slide/`:
+Outputs in `data/figure_3/strong_domain_mix/batch_sigma_slide/`:
 - `batch_sigma_slide_domain_ari_final.png`
 - `batch_sigma_slide_domain_ari_final.csv`: mean, SD, count, included seeds,
   and missing seeds for each technology/batch value.
@@ -230,7 +255,7 @@ differ from the main analysis stack. RCTD uses `sim_paper/env/rctd`.
    true types) and make this step's qualitative plots look like a mismatch
    that isn't really there.
 6. **`plot_ari_recovery.py`** -- grouped bar chart of `cell_type_true` ARI
-   across modality, from `pca_harmony_single_cell/`. Trimmed 2026-09-16 to
+   across modality, from `weak_domain_mix/pca_harmony/`. Trimmed 2026-09-16 to
    drop the `domain_true`/BANKSY half (it only ever read
    `data/clustering_<tag>/<modality>/banksy_ari_recovery/`, populated
    exclusively by `legacy/*_domain_panel.sh`, last built 2026-08-25) -- for

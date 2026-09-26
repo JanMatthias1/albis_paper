@@ -5,7 +5,7 @@ cell_type_true, resolution-matched to true category count -- see
 02_leiden_resolution_sweep.py) across modality (cell/bin/bin16um/spot), plain
 PCA+Harmony only.
 
-Reads data/figure_3/pca_harmony_single_cell/<modality>/ari_recovery_qc/
+Reads data/figure_3/weak_domain_mix/pca_harmony/<modality>/bs<sigma>/ari_recovery_qc/
 ari_summary_<modality>.json. A modality simply doesn't appear in the chart if
 that file isn't on disk yet -- rerun once more jobs land.
 
@@ -43,14 +43,14 @@ SIM_PAPER_DIR = SCRIPT_DIR.parents[2]
 
 MODALITY_ORDER = ["cell", "bin", "bin16um", "spot"]
 MODALITY_DISPLAY = {"cell": "Cell", "bin": "Bin (8 µm)", "bin16um": "Bin (16 µm)", "spot": "Spot"}
-# label -> (dir under data/figure_3/pca_harmony_single_cell/, modality name in the
+# label -> (dir under data/figure_3/weak_domain_mix/pca_harmony/, modality name in the
 # summary filename). bin16um's cell-type panel lives in its own bin16um/ dir but
 # 02_leiden_resolution_sweep.py was run with --modality bin, so the file is ari_summary_bin.json.
 CELLTYPE_PANEL = {
-    "cell": ("cell", "cell"),
-    "bin": ("bin", "bin"),
-    "bin16um": ("bin16um", "bin"),
-    "spot": ("spot", "spot"),
+    "cell": ("cell/bs1.5", "cell"),
+    "bin": ("bin8um/bs0.7", "bin"),
+    "bin16um": ("bin16um/bs0.7", "bin"),
+    "spot": ("spot/bs0.3", "spot"),
 }
 GROUND_TRUTH = "cell_type_true"
 GROUND_TRUTH_LABEL = "Cell type recovery"
@@ -64,7 +64,7 @@ def load_results() -> dict[str, dict[str, float]]:
     for modality in MODALITY_ORDER:
         ct_dir, ct_file_mod = CELLTYPE_PANEL[modality]
         summary_path = (
-            SIM_PAPER_DIR / "data" / "figure_3" / "pca_harmony_single_cell" / ct_dir
+            SIM_PAPER_DIR / "data" / "figure_3" / "weak_domain_mix" / "pca_harmony" / ct_dir
             / "ari_recovery_qc" / f"ari_summary_{ct_file_mod}.json"
         )
         if not summary_path.is_file():

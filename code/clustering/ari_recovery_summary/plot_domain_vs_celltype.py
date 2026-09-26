@@ -12,14 +12,14 @@ all to fight," the right panel asks "how well does the actual real-calibration
 pipeline recover cell types once the real per-modality batch effect is
 baked in." Domain recovery under the SAME canonical batch_sigma used on the
 right is a separate, much lower number (see
-cellbin_batch_sigma_slide/batch_sigma_slide_domain_ari_final.png for that
+strong_domain_mix/batch_sigma_slide/batch_sigma_slide_domain_ari_final.png for that
 full cliff curve) -- deliberately not shown here.
 
 bin8um is excluded: no strong-domain-mix data exists for it (out of scope
 per the 2026-09-18 Figure 3B closure decision), so it has no left-panel value.
 
-Left = data/figure_3/cellbin_batch_sigma_slide/<folder>/bs0/ari/ari_summary_<true_mod>.json
-Right = data/figure_3/pca_harmony_single_cell/<dir>/ari_recovery_qc/ari_summary_<mod>.json
+Left = data/figure_3/strong_domain_mix/batch_sigma_slide/<folder>/bs0/ari/ari_summary_<true_mod>.json
+Right = data/figure_3/weak_domain_mix/pca_harmony/<dir>/ari_recovery_qc/ari_summary_<mod>.json
 
 Supersedes code/clustering/misc/plot_domain_vs_celltype_recovery.py (archived
 to misc/legacy/ 2026-09-18 -- it read domain data from banksy_batch_compare/,
@@ -47,12 +47,12 @@ apply_style()
 SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[2]
 FIG3_DIR = SIM_PAPER_DIR / "data" / "figure_3"
-SLIDE_ROOT = FIG3_DIR / "cellbin_batch_sigma_slide"
-PLAIN_ROOT = FIG3_DIR / "pca_harmony_single_cell"
+SLIDE_ROOT = FIG3_DIR / "strong_domain_mix" / "batch_sigma_slide"
+PLAIN_ROOT = FIG3_DIR / "weak_domain_mix" / "pca_harmony"
 
 MODALITIES = ["cell", "bin16um", "spot"]
 MODALITY_DISPLAY = {"cell": "Cell", "bin16um": "Bin (16 µm)", "spot": "Spot"}
-# folder under cellbin_batch_sigma_slide/, and the modality name baked into
+# folder under strong_domain_mix/batch_sigma_slide/, and the modality name baked into
 # that folder's ari_summary_<...>.json filename (bin16um's pipeline was run
 # with --modality bin, so its file is ari_summary_bin.json, not _bin16um.json)
 DOMAIN_TRUE_MOD = {"cell": "cell", "bin16um": "bin", "spot": "spot"}
@@ -65,8 +65,8 @@ DOMAIN_BS0_DIR = {"cell": "bs0", "bin16um": "bs0", "spot": "bs0.0"}
 # was still queued. Reverted back to "bs0" here since this script is only
 # meant to run once that job has landed fresh ari/ output (see
 # replot_bin16um_bs0.sh, chained on that job via --dependency=afterok).
-# folder under pca_harmony_single_cell/, and that panel's summary-file modality
-PLAIN_DIR = {"cell": "cell", "bin16um": "bin16um", "spot": "spot"}
+# folder under weak_domain_mix/pca_harmony/ (Figure 2 data, usual batch_sigma), and that panel's summary-file modality
+PLAIN_DIR = {"cell": "cell/bs1.5", "bin16um": "bin16um/bs0.7", "spot": "spot/bs0.3"}
 PLAIN_TRUE_MOD = {"cell": "cell", "bin16um": "bin", "spot": "spot"}
 # each modality's own tuned per-slice batch_sigma (see batch_sigma_slide_domain_ari_final.png)
 BATCH_SIGMA = {"cell": 1.5, "bin16um": 0.7, "spot": 0.3}

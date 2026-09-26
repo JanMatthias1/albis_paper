@@ -7,12 +7,12 @@ bottom UMAP legends with explicit cluster-to-truth mappings. No script from
 
 ## Fresh analysis
 
-- `pca_harmony_single_cell/*_celltype_panel.sh`: simulation/QC, plain PCA and
+- `weak_domain_mix/pca_harmony/*_celltype_panel.sh`: simulation/QC, plain PCA and
   Harmony, clustering, PCA/UMAP panels, contingency plots, PC-pair diagnostics,
   and per-modality ARI results. Both fresh runs and `--plots-only` use the same
   plotting functions. `replot_typography.sh` can redraw existing outputs.
-- `strong_mix/generate_strong_mix_{cell,bin16um,spot}.sh` and
-  `cellbin_batch_sigma_slide/batch_sigma_slide_seeds.sh`: simulation/QC,
+- `strong_domain_mix/generate/generate_strong_mix_{cell,bin16um,spot}.sh` and
+  `strong_domain_mix/batch_sigma_slide/batch_sigma_slide_seeds.sh`: simulation/QC,
   BANKSY/Harmony, resolution selection and scores, followed automatically by
   `plot_banksy_results.py` for PCA, before/after UMAP, matched-cluster UMAP and
   contingency plots. Plotting adds display-embedding runtime to each job.

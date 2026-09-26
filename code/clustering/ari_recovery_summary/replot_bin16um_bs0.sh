@@ -2,7 +2,7 @@
 # One-shot follow-up to job 35789683 (generate_strong_mix_bin16um.sh, array
 # task 0 = the bin16um bs0 "poisson baseline" regen). Submit this WITH
 # --dependency=afterok:35789683_0 so it only runs once that job has landed
-# fresh ari/banksy_matrix output for data/figure_3/cellbin_batch_sigma_slide/
+# fresh ari/banksy_matrix output for data/figure_3/strong_domain_mix/batch_sigma_slide/
 # bin16um/bs0/ -- both scripts below read that folder (plot_domain_vs_celltype.py
 # directly, plot_batch_sigma_slide_final.py via its auto-discovery over all
 # bs<value> folders) and were left pointed at "bs0" (not the pre-regen
@@ -25,6 +25,6 @@ echo "[replot] plot_domain_vs_celltype.py"
 "${PYTHON_BIN}" sim_paper/code/clustering/ari_recovery_summary/plot_domain_vs_celltype.py
 
 echo "[replot] plot_batch_sigma_slide_final.py"
-"${PYTHON_BIN}" sim_paper/code/clustering/cellbin_batch_sigma_slide/plot_batch_sigma_slide_final.py
+"${PYTHON_BIN}" sim_paper/code/clustering/strong_domain_mix/batch_sigma_slide/plot_batch_sigma_slide_final.py
 
 echo "[done] both figures regenerated against bin16um/bs0's new poisson-baseline data"

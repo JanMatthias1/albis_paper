@@ -16,7 +16,7 @@ modality is on one table.
 
 Reads each modality's resolution-matched clustering written by
 02_leiden_resolution_sweep.py:
-    data/figure_3/pca_harmony_single_cell/<mod>/ari_recovery_qc/
+    data/figure_3/weak_domain_mix/pca_harmony/<mod>/bs<sigma>/ari_recovery_qc/
         simulation_<mod>_z_ari_recovery.h5ad
         -> obs['leiden_cell_type_true'], obs['leiden_domain_true']
            (Leiden at the resolution that hits k=8 / k=6)
@@ -58,8 +58,8 @@ Expected environment:
 
 Example:
     python sim_paper/code/clustering/composition_recovery.py \\
-        --h5ad data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/ari/simulation_spot_z_ari_recovery.h5ad \\
-        --tag spot_bs0.3 --out-dir data/figure_3/cellbin_batch_sigma_slide/scores
+        --h5ad data/figure_3/strong_domain_mix/batch_sigma_slide/spot/bs0.3/ari/simulation_spot_z_ari_recovery.h5ad \\
+        --tag spot_bs0.3 --out-dir data/figure_3/strong_domain_mix/batch_sigma_slide/scores
 """
 
 from __future__ import annotations

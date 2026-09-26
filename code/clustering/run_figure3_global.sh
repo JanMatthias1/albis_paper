@@ -8,9 +8,9 @@
 #   DRY_RUN=1                                print the sbatch commands, submit nothing
 #
 # Stages and where their data comes from:
-#   celltype  pca_harmony_single_cell/{cell,bin,bin16um,spot}_celltype_panel.sh
+#   celltype  weak_domain_mix/pca_harmony/{cell,bin,bin16um,spot}_celltype_panel.sh
 #             reads the Figure 2 datasets in data/figure_2/smaller_sphere/data/
-#             -> data/figure_3/pca_harmony_single_cell/<modality>/
+#             -> data/figure_3/weak_domain_mix/pca_harmony/<modality>/bs<sigma>/
 #   rctd      spatial_deconvolution/: canonical RCTD (Figure 2 cell reference +
 #             Figure 2 spot query), 2 independent-seed cell references (generated
 #             into data/figure_2/smaller_sphere/data/*_rctdref_seed*/ if absent),
@@ -21,13 +21,13 @@
 #             (strong_domain/), then their average
 #             -> RCTD/strong_mix{,_seed101,_seed202,_seed_avg}/
 #             (all under data/figure_3/spatial_deconvolution/RCTD/)
-#   banksy    strong_mix/generate_strong_mix_{cell,bin16um,spot}.sh (baseline
-#             seed 2025) + cellbin_batch_sigma_slide/batch_sigma_slide_seeds.sh
+#   banksy    strong_domain_mix/generate/generate_strong_mix_{cell,bin16um,spot}.sh (baseline
+#             seed 2025) + strong_domain_mix/batch_sigma_slide/batch_sigma_slide_seeds.sh
 #             (seeds 101/202; 72 tasks). Each task GENERATES its own data (Figure 2
 #             parameters + --strong-domain-mix + its batch_sigma/seed), named by
 #             those parameters, then QC -> seeded BANKSY -> Leiden ARI -> scores
-#             -> data/figure_3/cellbin_batch_sigma_slide/<modality>/bs<s>[_seed<n>]/
-#   summary   after everything above: strong_mix/check_matches_figure2.py (every
+#             -> data/figure_3/strong_domain_mix/batch_sigma_slide/<modality>/bs<s>[_seed<n>]/
+#   summary   after everything above: strong_domain_mix/generate/check_matches_figure2.py (every
 #             generated dataset = Figure 2 config + strong mix), then
 #             plot_figure3_summaries.sh (plot_ari_recovery, plot_domain_vs_celltype,
 #             plot_batch_sigma_slide_final)
@@ -61,7 +61,7 @@ ALL=()   # job IDs the summary stage waits on
 
 if has celltype; then
     for m in cell bin bin16um spot; do
-        j=$("${SB[@]}" "${CODE}/pca_harmony_single_cell/${m}_celltype_panel.sh")
+        j=$("${SB[@]}" "${CODE}/weak_domain_mix/pca_harmony/${m}_celltype_panel.sh")
         echo "[celltype] ${m}: ${j}"; ALL+=("${j}")
     done
 fi
@@ -84,10 +84,10 @@ fi
 if has banksy; then
     declare -A MIX
     for m in cell bin16um spot; do
-        j=$("${SB[@]}" "${CODE}/strong_mix/generate_strong_mix_${m}.sh")
+        j=$("${SB[@]}" "${CODE}/strong_domain_mix/generate/generate_strong_mix_${m}.sh")
         echo "[banksy] strong-mix ${m}: ${j}"; ALL+=("${j}"); MIX[${m}]="${j}"
     done
-    j=$("${SB[@]}" "${CODE}/cellbin_batch_sigma_slide/batch_sigma_slide_seeds.sh")
+    j=$("${SB[@]}" "${CODE}/strong_domain_mix/batch_sigma_slide/batch_sigma_slide_seeds.sh")
     echo "[banksy] seeds (72 tasks): ${j}"; ALL+=("${j}"); MIX[seeds]="${j}"
     if has rctd; then
         # afterany: the RCTD inputs are single tasks of those arrays, so one
@@ -116,6 +116,6 @@ if has summary; then
     j=$("${SB[@]}" "${DEP[@]}" --job-name=figure3_summary \
         --output="${LOGS}/figure3_summary_%j.out" \
         --time=02:00:00 --mem=64G --cpus-per-task=2 --partition=shared \
-        --wrap="source ${CODE}/_env.sh && \"\${PYTHON_BIN}\" ${CODE}/strong_mix/check_matches_figure2.py && bash ${CODE}/plot_figure3_summaries.sh")
+        --wrap="source ${CODE}/_env.sh && \"\${PYTHON_BIN}\" ${CODE}/strong_domain_mix/generate/check_matches_figure2.py && bash ${CODE}/plot_figure3_summaries.sh")
     echo "[summary] checker + plots: ${j}${DEP:+ (after all of the above)}"
 fi

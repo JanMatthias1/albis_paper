@@ -13,9 +13,9 @@
 # RCTD/strong_mix_seed_avg/ (seed 2025 shares the query's seed; kept by user
 # decision 2026-09-23 -- weak-mix replication showed that doesn't matter).
 # All inputs are Figure 2 configs + --strong-domain-mix and nothing else
-# (strong_mix/check_matches_figure2.py), written into
-# data/figure_3/cellbin_batch_sigma_slide/ by strong_mix/generate_strong_mix_
-# {cell,spot}.sh (seed 2025) and cellbin_batch_sigma_slide/
+# (strong_domain_mix/generate/check_matches_figure2.py), written into
+# data/figure_3/strong_domain_mix/batch_sigma_slide/ by strong_domain_mix/generate/generate_strong_mix_
+# {cell,spot}.sh (seed 2025) and strong_domain_mix/batch_sigma_slide/
 # batch_sigma_slide_seeds.sh (seeds 101/202) -- so weak vs strong RCTD differ
 # ONLY in how strongly each domain is dominated by 1-2 cell types.
 #
@@ -32,7 +32,7 @@ set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/logs
 
-SLIDE=/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/cellbin_batch_sigma_slide
+SLIDE=/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/strong_domain_mix/batch_sigma_slide
 RCTD_ROOT=/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD
 CELL_BODY="log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma15"
 

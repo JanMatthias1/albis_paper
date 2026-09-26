@@ -1,0 +1,249 @@
+[task 9] modality=cell batch_sigma=0.4 seed=202 lambda=0.5 k_geom=60 -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202
+[generate] cell_batch_slide_bs0.4_seed202
+Python: /dcs04/hicks/data/Jan/sim_project/sim_paper/env/sim-app-banksy/bin/python
+albis module: /dcs04/hicks/data/Jan/sim_project/albis/albis/__init__.py
+albis version: 0.1.0
+
+Generating cell data for slice axis Z with theta=0.4, theta_jitter=0.15, noise_scale=1.3, batch_sigma=0.4, base_gene_lognormal=(-2.5, 0.7), n_cells=24207, cell_r_mean=7.5, allow_cell_overlap=False, sphere_r_um=2050.0, capture_window_um=(12000.0, 24000.0), core_fuzz_width_um=102.5, max_shift=1025.0, bin_size_um=8.0, sync_unaligned_seed=True, seed=202
+/dcs04/hicks/data/Jan/sim_project/albis/albis/simulation_sphere.py:1513: FutureWarning: X.dtype being converted to np.float32 from int32. In the next version of anndata (0.9) conversion will not be automatic. Pass dtype explicitly to avoid this warning. Pass `AnnData(X, dtype=X.dtype, ...)` to get the future behavour.
+  adata_cell_true = ad.AnnData(X=X_cell_true, obs=cell_obs, var=var)
+/dcs04/hicks/data/Jan/sim_project/albis/albis/simulation_sphere.py:1517: FutureWarning: X.dtype being converted to np.float32 from int32. In the next version of anndata (0.9) conversion will not be automatic. Pass dtype explicitly to avoid this warning. Pass `AnnData(X, dtype=X.dtype, ...)` to get the future behavour.
+  adata_cell_obs = ad.AnnData(X=X_cell_obs, obs=cell_obs, var=var)
+
+Generated AnnData:
+AnnData object with n_obs × n_vars = 24207 × 556
+    obs: 'domain_true', 'cell_type_true', 'cell_radius', 'cell_sigma_for_95pct', 'slice_id_X', 'slice_id_Y', 'slice_id_Z', 'slice_axis', 'slice_id'
+    var: 'gene_class', 'is_noise', 'is_shared_marker'
+    uns: 'sim_params', 'batch_effect_factors', 'rigid_perturb_inplane', 'output'
+    obsm: 'spatial', 'spatial_3d', 'spatial_unaligned', 'spatial_3d_unaligned'
+    layers: 'counts_pre_batch'
+
+[nb] empirical theta_hat = 0.24 (real data fits ~0.15-0.16 via count_distribution.py --compare-input; lower --theta further if this is still much higher)
+
+Summary:
+{
+  "n_obs": 24207,
+  "n_vars": 556,
+  "total_counts": 2179057,
+  "nonzero_counts": 952298,
+  "platform": "cell",
+  "slice_axis": "Z",
+  "n_slices": 10,
+  "slice_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "obs_columns": [
+    "domain_true",
+    "cell_type_true",
+    "cell_radius",
+    "cell_sigma_for_95pct",
+    "slice_id_X",
+    "slice_id_Y",
+    "slice_id_Z",
+    "slice_axis",
+    "slice_id"
+  ],
+  "var_columns": [
+    "gene_class",
+    "is_noise",
+    "is_shared_marker"
+  ],
+  "layers": [
+    "counts_pre_batch"
+  ],
+  "obsm_keys": [
+    "spatial",
+    "spatial_3d",
+    "spatial_unaligned",
+    "spatial_3d_unaligned"
+  ],
+  "uns_keys": [
+    "sim_params",
+    "batch_effect_factors",
+    "rigid_perturb_inplane",
+    "output"
+  ],
+  "truth_annotations": [
+    "layers['counts_pre_batch']",
+    "obs['cell_type_true']",
+    "obs['domain_true']",
+    "obs['cell_radius']",
+    "obs['cell_sigma_for_95pct']"
+  ]
+}
+
+Saved summary -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma04_seed202_summary.json
+
+Generating diagnostic plots...
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/plots/log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma04_seed202/01_aligned_domain_true.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/plots/log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma04_seed202/02_aligned_cell_type_true.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/plots/log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma04_seed202/03_unaligned_slice_id.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/plots/log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma04_seed202/04_qc_count_distributions.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/plots/log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma04_seed202/05_cells_per_slice.png
+  saved sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/plots/log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma04_seed202/06_domain_composition_per_slice.png
+
+All diagnostic plots saved under sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/plots/log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma04_seed202
+
+Saved dataset -> sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma04_seed202.h5ad
+[qc] cell_batch_slide_bs0.4_seed202
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma04_seed202.h5ad
+[load] AnnData shape: 24207 x 556
+[qc] fully-empty (total_counts == 0): 0 (0.00%)
+[qc] near-empty (0 < total_counts, n_genes < 3): 0 (0.00%)
+[qc] dropped 0 observations (0.00%); 24207 remain
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma04_seed202_qc_summary.json
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma04_seed202_qc.h5ad
+[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma04_seed202_qc.h5ad
+[load] AnnData shape: 24207 x 556
+[stagger] offsetting each slice's x coordinate so slices don't overlap
+  slice 0: offset x by 0.0
+  slice 1: offset x by 20276.8
+  slice 2: offset x by 40553.6
+  slice 3: offset x by 60830.4
+  slice 4: offset x by 81107.1
+  slice 5: offset x by 101383.9
+  slice 6: offset x by 121660.7
+  slice 7: offset x by 141937.5
+  slice 8: offset x by 162214.3
+  slice 9: offset x by 182491.1
+
+[normalize] normalize_total (no log1p -- BANKSY expects normalized, non-log counts here)
+[hvg] skipped -- using all 556 genes (matches 01.2_pca_harmony.py's convention)
+
+[banksy] k_geom=60 max_m=1 lambda=0.5 decay=scaled_gaussian
+
+Median distance to closest cell = 29.1719978868959
+
+---- Ran median_dist_to_nearest_neighbour in 0.07 s ----
+
+---- Ran generate_spatial_distance_graph in 0.39 s ----
+
+---- Ran row_normalize in 0.07 s ----
+
+---- Ran generate_spatial_weights_fixed_nbrs in 0.84 s ----
+
+---- Ran generate_spatial_distance_graph in 0.70 s ----
+
+---- Ran theta_from_spatial_graph in 0.25 s ----
+
+---- Ran row_normalize in 0.07 s ----
+
+---- Ran generate_spatial_weights_fixed_nbrs in 1.47 s ----
+
+Runtime Sep-24-2026-00-08
+
+556 genes to be analysed:
+Gene List:
+Index(['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10',
+       ...
+       'G547', 'G548', 'G549', 'G550', 'G551', 'G552', 'G553', 'G554', 'G555',
+       'G556'],
+      dtype='object', length=556)
+
+Check if X contains only finite (non-NAN) values
+Decay Type: scaled_gaussian
+Weights Object: {'weights': {0: <24207x24207 sparse matrix of type '<class 'numpy.float64'>'
+	with 1452420 stored elements in Compressed Sparse Row format>, 1: <24207x24207 sparse matrix of type '<class 'numpy.complex128'>'
+	with 2904840 stored elements in Compressed Sparse Row format>}}
+
+Nbr matrix | Mean: 17.99 | Std: 22.32
+Size of Nbr | Shape: (24207, 556)
+Top 3 entries of Nbr Mat:
+
+[[15.01050279 29.58161062 78.04939584]
+ [31.46024368  2.46715083 76.20415649]
+ [43.94557281 18.5917846  90.88708475]]
+
+AGF matrix | Mean: 6.29 | Std: 6.41
+Size of AGF mat (m = 1) | Shape: (24207, 556)
+Top entries of AGF:
+[[ 3.66167946  3.76391716 43.79573915]
+ [13.30740743  0.87182617 26.07202416]
+ [17.52332099  2.93623684 28.63367063]]
+Ran 'Create BANKSY Matrix' in 0.12 mins
+
+Cell by gene matrix has shape (24207, 556)
+
+Scale factors squared: [0.5        0.33333333 0.16666667]
+Scale factors: [0.70710678 0.57735027 0.40824829]
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/sim-app-banksy/lib/python3.10/site-packages/banksy/main.py:368: FutureWarning: X.dtype being converted to np.float32 from float64. In the next version of anndata (0.9) conversion will not be automatic. Pass dtype explicitly to avoid this warning. Pass `AnnData(X, dtype=X.dtype, ...)` to get the future behavour.
+  return anndata.AnnData(concatenated_matrix, obs=adata.obs, var=var_combined)
+Shape of BANKSY matrix: (24207, 1668)
+Type of banksy_matrix: <class 'anndata._core.anndata.AnnData'>
+
+[banksy] BANKSY matrix shape: 24207 x 1668
+
+[pca] pre-Harmony PCA
+Current decay types: ['scaled_gaussian']
+
+Reducing dims of dataset in (Index = scaled_gaussian, lambda = 0.5)
+==================================================
+
+Setting the total number of PC = 30
+Original shape of matrix: (24207, 1668)
+Reduced shape of matrix: (24207, 30)
+------------------------------------------------------------
+min_value = -6.6288604736328125, mean = 1.9109993587562712e-08, max = 10.566131591796875
+
+  [plot] saved pca_preharmony_by_slice_id.png
+  [plot] saved pca_preharmony_by_domain_true.png
+  [plot] saved pca_preharmony_by_cell_type_true.png
+
+[harmony] batch_key=slice_id
+2026-09-24 00:08:37,165 - harmonypy - INFO - Running Harmony
+2026-09-24 00:08:37,165 - harmonypy - INFO -   Parameters:
+2026-09-24 00:08:37,165 - harmonypy - INFO -     max_iter_harmony: 10
+2026-09-24 00:08:37,165 - harmonypy - INFO -     max_iter_kmeans: 4
+2026-09-24 00:08:37,165 - harmonypy - INFO -     epsilon_cluster: 0.001
+2026-09-24 00:08:37,165 - harmonypy - INFO -     epsilon_harmony: 0.01
+2026-09-24 00:08:37,165 - harmonypy - INFO -     nclust: 100
+2026-09-24 00:08:37,165 - harmonypy - INFO -     block_size: 0.05
+2026-09-24 00:08:37,165 - harmonypy - INFO -     lamb: dynamic (alpha=0.2)
+2026-09-24 00:08:37,166 - harmonypy - INFO -     theta: [2. 2. 2. 2. 2. 2. 2. 2. 2. 2.]
+2026-09-24 00:08:37,166 - harmonypy - INFO -     sigma: [0.1 0.1 0.1 0.1 0.1]...
+2026-09-24 00:08:37,166 - harmonypy - INFO -     verbose: True
+2026-09-24 00:08:37,166 - harmonypy - INFO -     random_state: 0
+2026-09-24 00:08:37,166 - harmonypy - INFO -   Data: 30 PCs × 24207 cells
+2026-09-24 00:08:37,166 - harmonypy - INFO -   Batch variables: ['slice_id']
+2026-09-24 00:08:37,197 - harmonypy - INFO - Computing initial centroids...
+2026-09-24 00:08:37,696 - harmonypy - INFO - Initialization complete.
+2026-09-24 00:08:37,696 - harmonypy - INFO - Iteration 1 of 10
+2026-09-24 00:08:37,979 - harmonypy - INFO - Converged after 1 iteration
+  [plot] saved pca_postharmony_by_slice_id.png
+  [plot] saved pca_postharmony_by_domain_true.png
+  [plot] saved pca_postharmony_by_cell_type_true.png
+
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/banksy_matrix/simulation_cell_z_banksy_pca_harmony_qc.h5ad
+[save] done
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/banksy_matrix/simulation_cell_z_banksy_pca_harmony_qc.h5ad
+[load] AnnData shape: 24207 x 1668
+[neighbors] n_pcs=30 n_neighbors=15
+[ari] domain_true: target_k=6
+[ari] domain_true: resolution=0.0567 achieved_k=10 (target 6)  ARI=0.0149
+[ari] cell_type_true: target_k=8
+[ari] cell_type_true: resolution=0.0567 achieved_k=10 (target 8)  ARI=0.0014
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/ari/ari_summary_cell.json
+[save] sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/ari/simulation_cell_z_ari_recovery.h5ad
+[score] cell_bs0.4_seed202  <-  sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/ari/simulation_cell_z_ari_recovery.h5ad
+  [cell_bs0.4_seed202/cell_type] ARI=0.001 V=0.002  (leak 1.00)
+  [cell_bs0.4_seed202/domain] ARI=0.015 V=0.034  (leak 1.00)
+          modality  n_obs     level      ari  v_measure  slice_id_leakage_ari
+cell_bs0.4_seed202  24207 cell_type 0.001426   0.002301                   1.0
+cell_bs0.4_seed202  24207    domain 0.014864   0.033792                   1.0
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[save] BANKSY plots: sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202/ari/plots
+[done] task 9  ->  sim_paper/data/figure_3/cellbin_batch_sigma_slide/cell/bs0.4_seed202

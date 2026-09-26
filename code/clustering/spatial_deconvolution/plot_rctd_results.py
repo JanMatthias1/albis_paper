@@ -70,6 +70,18 @@ ZOOM_XMIN, ZOOM_XMAX = 0, 1200
 ZOOM_YMIN, ZOOM_YMAX = 0, 1200
 
 
+def add_dataset_caption(fig):
+    """Reserve a footer for the strong-domain-mix dataset label."""
+    if not Path(OUT_DIR).name.startswith("strong_mix"):
+        return
+    if fig.get_constrained_layout():
+        fig.get_layout_engine().set(rect=(0, 0.09, 1, 0.91))
+    else:
+        fig.tight_layout(rect=(0, 0.09, 1, 1))
+    fig.text(0.5, 0.025, "Strong Domain Mix Dataset", ha="center",
+             va="bottom", fontsize=15, color="#808080")
+
+
 def load_data():
     spot = ad.read_h5ad(SPOT_H5AD)
     true_frac = pd.DataFrame(
@@ -162,6 +174,8 @@ def plot_spatial_zoom(true_frac, est_frac, spatial, meta, spot_radius_um,
         fig.colorbar(sm, ax=axes[row, col_est], fraction=0.12, pad=0.03, aspect=8)
 
     fig.suptitle(f"RCTD deconvolution, slice {SLICE_ID}", fontsize=17, fontweight="bold")
+    if out_name == "rctd_spatial_zoom_4types.png":
+        add_dataset_caption(fig)
     out = os.path.join(OUT_DIR, out_name)
     fig.savefig(out, dpi=300)
     plt.close(fig)
@@ -244,6 +258,7 @@ def plot_error_boxplot(true_frac, est_frac):
         ax.spines[spine].set_color(MUTED)
 
     fig.tight_layout()
+    add_dataset_caption(fig)
     out = os.path.join(OUT_DIR, "rctd_error_boxplot.png")
     fig.savefig(out, dpi=300)
     plt.close(fig)
