@@ -1,0 +1,9 @@
+[spatial zoom -> rctd_spatial_zoom.png] slice 5, cropped to x/y in [-33.333333333333314,633.3333333333333]x[-33.333333333333314,633.3333333333333]: 77 spots, 8 cell types, 1 pair(s)/row
+wrote /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/pilot_sccube_35973290/results/rctd_spatial_zoom.png
+[spatial zoom -> rctd_spatial_zoom_4x4.png] slice 5, cropped to x/y in [-33.333333333333314,633.3333333333333]x[-33.333333333333314,633.3333333333333]: 77 spots, 8 cell types, 2 pair(s)/row
+wrote /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/pilot_sccube_35973290/results/rctd_spatial_zoom_4x4.png
+[spatial zoom -> rctd_spatial_zoom_main.png] slice 5, cropped to x/y in [-33.333333333333314,633.3333333333333]x[-33.333333333333314,633.3333333333333]: 77 spots, 2 cell types, 1 pair(s)/row
+wrote /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/pilot_sccube_35973290/results/rctd_spatial_zoom_main.png
+[spatial zoom -> rctd_spatial_zoom_4types.png] slice 5, cropped to x/y in [-33.333333333333314,633.3333333333333]x[-33.333333333333314,633.3333333333333]: 77 spots, 4 cell types, 2 pair(s)/row
+wrote /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/pilot_sccube_35973290/results/rctd_spatial_zoom_4types.png
+wrote /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/pilot_sccube_35973290/results/rctd_error_boxplot.png

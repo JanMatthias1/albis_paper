@@ -1,0 +1,1 @@
+Archived pilot workflows and superseded single-seed comparison on 2026-09-27. Files are preserved for provenance; archived scripts may reference their original locations and are not active entry points. See move_manifest.json for original and archived paths.
