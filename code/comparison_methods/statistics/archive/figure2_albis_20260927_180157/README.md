@@ -30,12 +30,6 @@ For cells, scCube appears unchanged in the log1p(normalized) histogram. For bins
 
 Outputs: `data/comparison_methods/figure_5B/jsd_overview_qc_hvg/jsd_boxplot.{png,pdf,svg}`, `jsd_by_slice.csv`, `protocol.json`, and per-slice samples/metadata. Boxes summarize ten slices from one tissue realization, not independent simulation seeds. Shared 60-bin histograms and reproducible positive-entry sampling are used for all comparisons. Current QC/HVG composite selection/transformation order is retained. The plot is an additional overview; existing panels are retained.
 
-## Current ALBIS source
+## ALBIS source update
 
-Figure 5B uses exactly the Figure 5A source links: Figure 4
-`cross_modality_alignment/strong_domain_mix_shift3x/data`, with
-`cell/simulation_cell_z.h5ad`, `bin16um/simulation_bin_z.h5ad`, and
-`spot/simulation_spot_z.h5ad`. All three arise from the shared 600k-cell tissue.
-The previous Figure 2-calibrated plots are preserved in the data archive;
-`figure_5B/source_change.json` records their exact location. This source update
-retains all existing filtering, gene selection and scale-handling rules.
+Figure 5B now uses the canonical Figure 2 QC datasets: cell `log_mu_-2.5_theta_0.40_jitter0.15_bsigma15`, bin16um `packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_bsigma07`, spot `packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03`, unsuffixed seed 2025. Competitors remain Figure 5A inputs. These modality-specific ALBIS tissues are not the shared Figure 5A 600k tissue. All earlier Figure 5B outputs are archived under `data/comparison_methods/archive/figure_5B_before_figure2_albis_20260927/`. This source update supersedes earlier source descriptions above.

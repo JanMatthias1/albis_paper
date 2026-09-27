@@ -1,0 +1,7 @@
+[load] our_method: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/albis/cell.h5ad
+[load] our_method shape before slice restriction: 600000 x 556
+[load] our_method restricted to slice_id=3: 82247 x 556
+[qc] our_method: dropped 0/82247 off-tissue/empty rows
+[load] splatter_spider: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/spider/cell.h5ad
+[load] splatter_spider shape before slice restriction: 600000 x 2000
+slurmstepd: error: *** JOB 35997563 ON compute-092 CANCELLED AT 2026-09-27T18:07:42 ***

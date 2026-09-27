@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Figure 5B: shared-tissue Figure 4 ALBIS and current Figure 5A competitors.
+"""Figure 5B: canonical Figure 2 ALBIS vs current Figure 5A competitors.
 
 Uses displayed Slice 5 (zero-based slice_id=4) for cell/bin/spot. Both versions
 remove explicitly empty/unassigned captures. --hvg-match additionally selects
@@ -33,10 +33,17 @@ FIGURE_5B_DIR = SIM_PAPER_DIR / "data/comparison_methods/figure_5B"
 _COLORS = {"our_method": "#2c7fb8", "splatter_spider": "#d95f02", "splatter_sccube": "#7570b3"}
 _DISPLAY_LABELS = {"our_method": "ALBIS", "splatter_spider": "SPIDER", "splatter_sccube": "scCube"}
 
+FIGURE2_DATA = SIM_PAPER_DIR / "data/figure_2/smaller_sphere/data"
+ALBIS_CONFIGS = {
+    "cell": "log_mu_-2.5_theta_0.40_jitter0.15_bsigma15",
+    "bin": "packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_bsigma07",
+    "spot": "packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03",
+}
+
 def sources_for(modality: str) -> list[dict]:
     methods = {"our_method": "albis", "splatter_spider": "spider", "splatter_sccube": "sccube"}
     return [{"label": label, "display_label": _DISPLAY_LABELS[label], "color": _COLORS[label],
-             "path": OVERVIEW_RUN / method / f"{modality}.h5ad"} for label, method in methods.items()]
+             "path": (FIGURE2_DATA / ALBIS_CONFIGS[modality] / f"simulation_{modality}_z_qc.h5ad") if method == "albis" else OVERVIEW_RUN / method / f"{modality}.h5ad"} for label, method in methods.items()]
 
 TARGET_SUM = 1e4
 SAMPLE_SIZE = 2_000_000
@@ -240,7 +247,8 @@ def plot_raw_norm_log_compare_n(datasets: list[dict], output_path: Path, rng: np
 
 
 def apply_qc(adata, label: str):
-    """Drop rows explicitly marked off-tissue/empty in the Figure 5A inputs. None of the three cell-level
+    """Drop off-tissue/empty rows, mirroring Figure 2's QC convention (see
+    data/figure_2/smaller_sphere/data/README.md). None of the three cell-level
     sources here carry is_empty or cell_type_true=="unassigned" -- those are
     only set by the bin/spot aggregation path -- so this is expected to be a
     documented no-op at cell resolution, not a silent assumption."""
@@ -377,7 +385,7 @@ def main() -> None:
         "cell_scale_handling": "scCube unchanged, shown only in log panel; native variance for scCube gene selection" if args.modality == "cell" else "scCube unchanged sums of cell log-expression; separate native panel; no count-based NB fit or total-count comparison",
         "slice_number": SLICE_ID + 1,
         "resolved_sources": {d["label"]: str(d["path"].resolve()) for d in datasets},
-        "caveat": "All methods use Figure 5A inputs with 600k source cells each. ALBIS uses the shared Figure 4 strong_domain_mix_shift3x tissue across cell/bin16um/spot. Expression/noise models and capture counts differ. Both versions remove explicitly empty/unassigned rows. scCube X is continuous. " + ("Panels matched by normalized-log variance selection; genes are not homologous across methods." if args.hvg_match else "Native gene panels: ALBIS 556; SPIDER/scCube 2000."),
+        "caveat": "ALBIS: canonical Figure 2 modality-specific QC datasets; SPIDER/scCube: current Figure 5A inputs. Tissue sizes, expression/noise models and capture counts differ. Both versions remove explicitly empty/unassigned rows. scCube X is continuous. " + ("Panels matched by normalized-log variance selection; genes are not homologous across methods." if args.hvg_match else "Native gene panels: ALBIS 556; SPIDER/scCube 2000."),
         "n_obs": {d["label"]: int(d["adata"].n_obs) for d in datasets},
         "n_vars": {d["label"]: int(d["adata"].n_vars) for d in datasets},
         "theta_hat": {d["label"]: d["theta"] if np.isfinite(d["theta"]) else None for d in datasets},
