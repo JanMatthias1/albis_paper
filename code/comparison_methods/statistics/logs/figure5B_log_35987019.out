@@ -1,0 +1,14 @@
+[load] our_method: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/albis/cell.h5ad
+[load] our_method shape before slice restriction: 600000 x 556
+[load] our_method restricted to slice_id=4: 88901 x 556
+[qc] our_method: dropped 0/88901 off-tissue/empty rows
+[load] splatter_spider: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/spider/cell.h5ad
+[load] splatter_spider shape before slice restriction: 600000 x 2000
+[load] splatter_spider restricted to slice_id=4: 59699 x 2000
+[qc] splatter_spider: dropped 0/59699 off-tissue/empty rows
+[load] splatter_sccube: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/sccube/cell.h5ad
+[load] splatter_sccube shape before slice restriction: 600000 x 2000
+[load] splatter_sccube restricted to slice_id=4: 59699 x 2000
+[qc] splatter_sccube: dropped 0/59699 off-tissue/empty rows
+Saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/cell/distribution_comparison/mean_variance_log_normalized.png
+Saved /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/cell/distribution_comparison_qc_hvg/mean_variance_log_normalized.png

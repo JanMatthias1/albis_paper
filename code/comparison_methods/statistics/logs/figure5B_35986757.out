@@ -1,0 +1,133 @@
+[load] our_method: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/albis/cell.h5ad
+[load] our_method shape before slice restriction: 600000 x 556
+[load] our_method restricted to slice_id=4: 88901 x 556
+[qc] our_method: dropped 0/88901 off-tissue/empty rows
+[load] splatter_spider: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/spider/cell.h5ad
+[load] splatter_spider shape before slice restriction: 600000 x 2000
+[load] splatter_spider restricted to slice_id=4: 59699 x 2000
+[qc] splatter_spider: dropped 0/59699 off-tissue/empty rows
+[load] splatter_sccube: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/sccube/cell.h5ad
+[load] splatter_sccube shape before slice restriction: 600000 x 2000
+[load] splatter_sccube restricted to slice_id=4: 59699 x 2000
+[qc] splatter_sccube: dropped 0/59699 off-tissue/empty rows
+[nb] our_method: theta_hat = 0.10
+[sparsity] our_method: 92.19% zero entries, 0.00% fully-empty cells
+[nb] splatter_spider: theta_hat = 1.74
+[sparsity] splatter_spider: 32.74% zero entries, 0.00% fully-empty cells
+[nb] splatter_sccube: theta_hat = nan
+[sparsity] splatter_sccube: 21.53% zero entries, 0.00% fully-empty cells
+[save] Comparison plots written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/cell/distribution_comparison
+[save] Numeric summary written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/cell/distribution_comparison/comparison_summary.json
+[load] our_method: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/albis/cell.h5ad
+[load] our_method shape before slice restriction: 600000 x 556
+[load] our_method restricted to slice_id=4: 88901 x 556
+[qc] our_method: dropped 0/88901 off-tissue/empty rows
+[load] splatter_spider: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/spider/cell.h5ad
+[load] splatter_spider shape before slice restriction: 600000 x 2000
+[load] splatter_spider restricted to slice_id=4: 59699 x 2000
+[qc] splatter_spider: dropped 0/59699 off-tissue/empty rows
+[load] splatter_sccube: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/sccube/cell.h5ad
+[load] splatter_sccube shape before slice restriction: 600000 x 2000
+[load] splatter_sccube restricted to slice_id=4: 59699 x 2000
+[qc] splatter_sccube: dropped 0/59699 off-tissue/empty rows
+[hvg-match] our_method: already at/below target (556 <= 556), unchanged
+[hvg-match] splatter_spider: 2000 -> 556 genes (target 556)
+[hvg-match] splatter_sccube: 2000 -> 556 genes (target 556)
+[nb] our_method: theta_hat = 0.10
+[sparsity] our_method: 92.19% zero entries, 0.00% fully-empty cells
+[nb] splatter_spider: theta_hat = 3.08
+[sparsity] splatter_spider: 7.13% zero entries, 0.00% fully-empty cells
+[nb] splatter_sccube: theta_hat = nan
+[sparsity] splatter_sccube: 0.05% zero entries, 0.00% fully-empty cells
+[save] Comparison plots written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/cell/distribution_comparison_qc_hvg
+[save] Numeric summary written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/cell/distribution_comparison_qc_hvg/comparison_summary.json
+[load] our_method: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/albis/bin.h5ad
+[load] our_method shape before slice restriction: 1656490 x 556
+[load] our_method restricted to slice_id=4: 165649 x 556
+[qc] our_method: dropped 114485/165649 off-tissue/empty rows
+[load] splatter_spider: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/spider/bin.h5ad
+[load] splatter_spider shape before slice restriction: 660490 x 2000
+[load] splatter_spider restricted to slice_id=4: 66049 x 2000
+[qc] splatter_spider: dropped 26740/66049 off-tissue/empty rows
+[load] splatter_sccube: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/sccube/bin.h5ad
+[load] splatter_sccube shape before slice restriction: 188896 x 2000
+[load] splatter_sccube restricted to slice_id=4: 18898 x 2000
+[qc] splatter_sccube: dropped 0/18898 off-tissue/empty rows
+[nb] our_method: theta_hat = 0.18
+[sparsity] our_method: 86.30% zero entries, 0.21% fully-empty cells
+[nb] splatter_spider: theta_hat = 1.51
+[sparsity] splatter_spider: 27.82% zero entries, 0.00% fully-empty cells
+[nb] splatter_sccube: theta_hat = 11.83
+[sparsity] splatter_sccube: 21.51% zero entries, 0.00% fully-empty cells
+/dcs04/hicks/data/Jan/sim_project/comparison_methods/env/analysis/lib/python3.11/site-packages/legacy_api_wrap/__init__.py:88: UserWarning: Some cells have zero counts
+  return fn(*args_all, **kw)
+[save] Comparison plots written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/bin/distribution_comparison
+[save] Numeric summary written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/bin/distribution_comparison/comparison_summary.json
+[load] our_method: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/albis/bin.h5ad
+[load] our_method shape before slice restriction: 1656490 x 556
+[load] our_method restricted to slice_id=4: 165649 x 556
+[qc] our_method: dropped 114485/165649 off-tissue/empty rows
+[load] splatter_spider: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/spider/bin.h5ad
+[load] splatter_spider shape before slice restriction: 660490 x 2000
+[load] splatter_spider restricted to slice_id=4: 66049 x 2000
+[qc] splatter_spider: dropped 26740/66049 off-tissue/empty rows
+[load] splatter_sccube: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/sccube/bin.h5ad
+[load] splatter_sccube shape before slice restriction: 188896 x 2000
+[load] splatter_sccube restricted to slice_id=4: 18898 x 2000
+[qc] splatter_sccube: dropped 0/18898 off-tissue/empty rows
+[hvg-match] our_method: already at/below target (556 <= 556), unchanged
+[hvg-match] splatter_spider: 2000 -> 556 genes (target 556)
+[hvg-match] splatter_sccube: 2000 -> 556 genes (target 556)
+[nb] our_method: theta_hat = 0.18
+[sparsity] our_method: 86.30% zero entries, 0.21% fully-empty cells
+[nb] splatter_spider: theta_hat = 2.00
+[sparsity] splatter_spider: 5.01% zero entries, 0.00% fully-empty cells
+[nb] splatter_sccube: theta_hat = 12.66
+[sparsity] splatter_sccube: 0.01% zero entries, 0.00% fully-empty cells
+/dcs04/hicks/data/Jan/sim_project/comparison_methods/env/analysis/lib/python3.11/site-packages/legacy_api_wrap/__init__.py:88: UserWarning: Some cells have zero counts
+  return fn(*args_all, **kw)
+[save] Comparison plots written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/bin/distribution_comparison_qc_hvg
+[save] Numeric summary written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/bin/distribution_comparison_qc_hvg/comparison_summary.json
+[load] our_method: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/albis/spot.h5ad
+[load] our_method shape before slice restriction: 43560 x 556
+[load] our_method restricted to slice_id=4: 4356 x 556
+[qc] our_method: dropped 3007/4356 off-tissue/empty rows
+[load] splatter_spider: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/spider/spot.h5ad
+[load] splatter_spider shape before slice restriction: 16810 x 2000
+[load] splatter_spider restricted to slice_id=4: 1681 x 2000
+[qc] splatter_spider: dropped 0/1681 off-tissue/empty rows
+[load] splatter_sccube: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/sccube/spot.h5ad
+[load] splatter_sccube shape before slice restriction: 59285 x 2000
+[load] splatter_sccube restricted to slice_id=4: 5927 x 2000
+[qc] splatter_sccube: dropped 0/5927 off-tissue/empty rows
+[nb] our_method: theta_hat = 1.45
+[sparsity] our_method: 38.09% zero entries, 0.00% fully-empty cells
+[nb] splatter_spider: theta_hat = 4.42
+[sparsity] splatter_spider: 10.20% zero entries, 0.00% fully-empty cells
+[nb] splatter_sccube: theta_hat = 42.04
+[sparsity] splatter_sccube: 21.50% zero entries, 0.00% fully-empty cells
+[save] Comparison plots written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/spot/distribution_comparison
+[save] Numeric summary written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/spot/distribution_comparison/comparison_summary.json
+[load] our_method: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/albis/spot.h5ad
+[load] our_method shape before slice restriction: 43560 x 556
+[load] our_method restricted to slice_id=4: 4356 x 556
+[qc] our_method: dropped 3007/4356 off-tissue/empty rows
+[load] splatter_spider: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/spider/spot.h5ad
+[load] splatter_spider shape before slice restriction: 16810 x 2000
+[load] splatter_spider restricted to slice_id=4: 1681 x 2000
+[qc] splatter_spider: dropped 0/1681 off-tissue/empty rows
+[load] splatter_sccube: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/sccube/spot.h5ad
+[load] splatter_sccube shape before slice restriction: 59285 x 2000
+[load] splatter_sccube restricted to slice_id=4: 5927 x 2000
+[qc] splatter_sccube: dropped 0/5927 off-tissue/empty rows
+[hvg-match] our_method: already at/below target (556 <= 556), unchanged
+[hvg-match] splatter_spider: 2000 -> 556 genes (target 556)
+[hvg-match] splatter_sccube: 2000 -> 556 genes (target 556)
+[nb] our_method: theta_hat = 1.45
+[sparsity] our_method: 38.09% zero entries, 0.00% fully-empty cells
+[nb] splatter_spider: theta_hat = 4.50
+[sparsity] splatter_spider: 0.08% zero entries, 0.00% fully-empty cells
+[nb] splatter_sccube: theta_hat = 38.37
+[sparsity] splatter_sccube: 0.00% zero entries, 0.00% fully-empty cells
+[save] Comparison plots written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/spot/distribution_comparison_qc_hvg
+[save] Numeric summary written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/spot/distribution_comparison_qc_hvg/comparison_summary.json
