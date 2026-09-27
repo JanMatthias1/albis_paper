@@ -18,8 +18,6 @@ ROOT = HERE.parents[3]
 OLD = ROOT / "comparison_methods"
 ENVS = OLD / "env"
 TYPES = [f"type{i}" for i in range(1, 9)]
-SPIDER_SOURCE = ROOT / "sim_paper/env/spider-overview-src"
-SPIDER_COMMIT = "6ccd4da77257f2807c430f8f42fbe2dc175991de"
 
 
 def run_command(command, log, env):
@@ -29,8 +27,6 @@ def run_command(command, log, env):
 
 
 def dispatch(args, cfg):
-    if args.spider_spots == "circle" and not (SPIDER_SOURCE / "COMMIT").exists():
-        raise FileNotFoundError("Run setup_spider.sh before requesting upstream circular Spider spots")
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
     if any(out.iterdir()):
@@ -59,9 +55,9 @@ def dispatch(args, cfg):
         run_command([ENVS / environment / "bin/python", __file__, "--method", method,
                      "--settings", config, "--out", out, "--spider-spots", args.spider_spots],
                     out / f"{method}.log", env)
-    run_command([ENVS / "analysis/bin/python", HERE / "plot.py", "--input", out],
+    run_command([ENVS / "analysis/bin/python", HERE / "plot_combined.py", "--input", out],
                 out / "plot.log", env)
-    print(f"Finished: {out / 'overview.pdf'}", flush=True)
+    print(f"Finished: {out / 'overview_combined.pdf'}", flush=True)
 
 
 def cell_data(X, genes, labels, xyz, cfg):
@@ -130,10 +126,8 @@ def competitor_outputs(method, cfg, out, spider_spots):
     if set(meta.cell_type_true) != set(TYPES):
         raise ValueError("Splatter pool must contain all eight types; increase pilot cell count")
     if method == "spider":
-        if spider_spots == "circle":
-            if (SPIDER_SOURCE / "COMMIT").read_text().strip() != SPIDER_COMMIT:
-                raise ValueError("Unexpected Spider source revision; run setup_spider.sh")
-            sys.path.insert(0, str(SPIDER_SOURCE))
+        if importlib.metadata.version('st-spider') != '1.2.0':
+            raise RuntimeError('Overview requires st-spider==1.2.0')
         import spider
         # Top-level alias still points to legacy sim_naive; use the corrected
         # native sim_expr implementation explicitly, without modifying its code.
@@ -161,7 +155,11 @@ def competitor_outputs(method, cfg, out, spider_spots):
         metadata = pd.DataFrame({"Cell": meta.cell_id, "Cell_type": meta.cell_type_true})
         reference = model.pre_process(pd.DataFrame(X.T.toarray(), index=genes, columns=meta.cell_id),
                                       metadata, is_normalized=False)
-        target_num = meta.cell_type_true.value_counts().reindex(TYPES).astype(int).to_dict()
+        # Reference pool size and requested output size are separate quantities.
+        requested = np.asarray(cfg['proportions']) * cfg['n_cells']
+        sizes = np.floor(requested).astype(int)
+        sizes[np.argsort(-(requested - sizes))[:cfg['n_cells'] - sizes.sum()]] += 1
+        target_num = dict(zip(TYPES, map(int, sizes)))
         generated_meta, data = model.train_vae_and_generate_cell(
             reference, celltype_key="Cell_type", cell_key="Cell", target_num=target_num,
             epoch_num=cfg["sccube_epochs"], used_device="cpu", save_model=True,
@@ -171,11 +169,15 @@ def competitor_outputs(method, cfg, out, spider_spots):
             delta=cfg["sccube_delta"], lamda=cfg["sccube_lamda"], is_split=False,
             set_seed=True, seed=cfg["seed"])
         generated_meta = generated_meta.loc[data.columns]
+        if len(generated_meta) != cfg['n_cells']:
+            raise ValueError('scCube did not generate the requested cell count')
         xyz = generated_meta[["point_x", "point_y", "point_z"]].to_numpy()
         scale = cfg["extent_um"] / cfg["sccube_grid_size"]
         cells = cell_data(data.T.to_numpy(), data.index, generated_meta.Cell_type, xyz * scale, cfg)
         cells.obsm["spatial_3d_native"] = xyz
     outputs = {"cell": cells}
+    if cfg.get('cell_only', False):
+        return outputs
     for modality in ("bin", "spot"):
         sections = []
         for sid in range(cfg["n_slices"]):
@@ -196,12 +198,17 @@ def competitor_outputs(method, cfg, out, spider_spots):
                 expr, xy, membership = result[:3]
                 counts = np.asarray(membership @ np.eye(len(TYPES), dtype=int)[codes])
                 if modality == "spot" and spider_spots == "circle":
-                    distance2 = ((xy[:, None, :] - sub.obsm["spatial"][None, :, :]) ** 2).sum(axis=2)
-                    expected = distance2 <= cfg["spot_radius_um"] ** 2
-                    if not np.array_equal(membership.toarray(), expected):
-                        raise ValueError("Native circular capture does not match the requested radius")
-                    if not np.allclose(expr.toarray(), expected @ sub.X.toarray()):
-                        raise ValueError("Native circular capture expression differs from contributing cells")
+                    from scipy.sparse import csr_matrix
+                    # Validate all captures in bounded batches; avoid a dense
+                    # spots x cells x genes product for large tissues.
+                    for start in range(0, len(xy), 128):
+                        stop = start + 128
+                        distance2 = ((xy[start:stop, None, :] - sub.obsm["spatial"][None, :, :]) ** 2).sum(axis=2)
+                        expected = distance2 <= cfg["spot_radius_um"] ** 2
+                        if not np.array_equal(membership[start:stop].toarray(), expected):
+                            raise ValueError("Native circular capture does not match the requested radius")
+                        if not np.allclose(expr[start:stop].toarray(), (csr_matrix(expected) @ sub.X).toarray()):
+                            raise ValueError("Native circular capture expression differs from contributing cells")
                 # Check native aggregation against its own membership matrix.
                 if modality == "bin" and not np.allclose(np.asarray(expr.sum(axis=0)), np.asarray(sub.X.sum(axis=0))):
                     raise ValueError("Spider square aggregation did not conserve expression")
@@ -251,7 +258,7 @@ def worker(args, cfg):
                   slice_ids="zero-based; capture z is section midpoint; cell z is continuous",
                   spider_spots=args.spider_spots, outputs={})
     if args.method == "spider":
-        report["spider_upstream_commit"] = SPIDER_COMMIT if args.spider_spots == "circle" else "installed"
+        report["spider_distribution_version"] = importlib.metadata.version('st-spider')
         import spider
         report["spider_source_path"] = spider.__file__
         report["spider_runtime_version"] = getattr(spider, "__version__", "unknown")
@@ -288,11 +295,11 @@ def worker(args, cfg):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--settings", type=Path, default=HERE / "settings.json")
+    parser.add_argument("--settings", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True, help="New directory; never overwrite existing runs")
     parser.add_argument("--method", choices=["all", "albis", "sccube", "spider"], default="all")
     parser.add_argument("--spider-spots", choices=["circle", "square"], default="circle",
-                        help="circle: pinned upstream; square: existing installed Spider")
+                        help="Native circular or square capture using installed st-spider 1.2.0")
     args = parser.parse_args()
     cfg = json.loads(args.settings.read_text())
     if len(cfg["proportions"]) != len(TYPES) or abs(sum(cfg["proportions"]) - 1) > 1e-8:
