@@ -13,7 +13,7 @@
 # bin16 0.7 / spot 0.3) to isolate what the batch effect does to STAGATE's
 # 3D-vs-2D domain recovery on weak-domain-mix data.
 #
-# Params copied verbatim from code/data/misc/generate_figure2_batch_tuned.sh
+# Params copied verbatim from code/misc/data/misc/generate_figure2_batch_tuned.sh
 # (which read them off each existing figure_2/<tag>/simulation_*.h5ad
 # uns['sim_params']):
 #   bin 16um: log_mu=-2.5, theta=2.0, jitter=1.0, sphere_r_um=2050, bin_size_um=16
