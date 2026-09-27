@@ -1,0 +1,99 @@
+Verified regenerated native 556-gene outputs
+{
+  "method": "sccube",
+  "source": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/overview_native556_seed202",
+  "truth": "contributing-cell fractions, not molecule fractions",
+  "reference": "same simulated tissue as query; optimistic pilot",
+  "gene_selection": "all native genes; identical ordered reference/query panel",
+  "rounding": "nearest integer (numpy.rint) on separate copies; no depth normalization",
+  "cell": {
+    "source": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/overview_native556_seed202/sccube/cell.h5ad",
+    "source_sha256": "96cc77fe2ee5447280faa0d0c975875b5718c63b0f5308f8353c3cb9e7f73d86",
+    "n_obs": 10000,
+    "n_genes": 556,
+    "fractional_nonzero_share": 0.9999997835394291,
+    "rounding_absolute_change": 1200943.884617161,
+    "total_before_quantiles": [
+      864.4253105819225,
+      889.1414255630225,
+      894.8718838207424,
+      900.7100453507155,
+      936.7165873460472
+    ],
+    "total_after_quantiles": [
+      857.0,
+      889.0,
+      896.0,
+      903.0,
+      934.0
+    ],
+    "detected_genes_quantiles": [
+      407.0,
+      414.0,
+      415.0,
+      417.0,
+      422.0
+    ]
+  },
+  "spot": {
+    "source": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/overview_native556_seed202/sccube/spot.h5ad",
+    "source_sha256": "9b1c8aa8606e82a4e4497fdcbaf8708ff9822531112958985dc8e46e13a5055c",
+    "n_obs": 924,
+    "n_genes": 556,
+    "fractional_nonzero_share": 0.9999976574706774,
+    "rounding_absolute_change": 106144.42639022414,
+    "total_before_quantiles": [
+      1780.2522459328175,
+      7961.612972676754,
+      9789.51603475213,
+      11652.469751670957,
+      21494.17238342762
+    ],
+    "total_after_quantiles": [
+      1778.0,
+      7956.0,
+      9793.5,
+      11653.75,
+      21493.0
+    ],
+    "detected_genes_quantiles": [
+      446.0,
+      462.0,
+      462.0,
+      462.0,
+      462.0
+    ],
+    "excluded_empty_or_zero_expression": 0
+  }
+}
+[load] reference (cell): /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/native556_seed202_sccube_35973993/inputs/cell.h5ad 
+[reference] n_cells=10000 n_genes=556 per-type counts:
+cell_types
+type1 type2 type3 type4 type5 type6 type7 type8 
+ 1250  1250  1250  1250  1250  1250  1250  1250 
+
+[load] query (spot): /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/native556_seed202_sccube_35973993/inputs/spot.h5ad 
+[query] n_spots=924 n_genes=556
+
+[RCTD] create.RCTD (doublet_mode=full, max_cores=8)
+Begin: process_cell_type_info
+process_cell_type_info: number of cells in reference: 10000
+process_cell_type_info: number of genes in reference: 556
+
+type1 type2 type3 type4 type5 type6 type7 type8 
+ 1250  1250  1250  1250  1250  1250  1250  1250 
+End: process_cell_type_info
+create.RCTD: getting regression differentially expressed genes: 
+get_de_genes: type1 found DE genes: 0
+get_de_genes: type2 found DE genes: 0
+get_de_genes: type3 found DE genes: 3
+get_de_genes: type4 found DE genes: 0
+get_de_genes: type5 found DE genes: 0
+get_de_genes: type6 found DE genes: 4
+get_de_genes: type7 found DE genes: 0
+get_de_genes: type8 found DE genes: 1
+get_de_genes: total DE genes: 8
+Error in create.RCTD(puck, reference, max_cores = MAX_CORES) : 
+  create.RCTD: Error: fewer than 10 regression differentially expressed genes found
+Calls: source -> withVisible -> eval -> eval -> create.RCTD
+Execution halted

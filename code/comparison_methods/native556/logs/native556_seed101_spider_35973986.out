@@ -1,0 +1,369 @@
+Verified regenerated native 556-gene outputs
+{
+  "method": "spider",
+  "source": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/overview_native556_seed101",
+  "truth": "contributing-cell fractions, not molecule fractions",
+  "reference": "same simulated tissue as query; optimistic pilot",
+  "gene_selection": "all native genes; identical ordered reference/query panel",
+  "rounding": "nearest integer (numpy.rint) on separate copies; no depth normalization",
+  "cell": {
+    "source": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/overview_native556_seed101/spider/cell.h5ad",
+    "source_sha256": "cf3d1e4958b498fe1f3b911b0265e455f6df961528c96ecc7c8802af3a9f6374",
+    "n_obs": 10000,
+    "n_genes": 556,
+    "fractional_nonzero_share": 0.0,
+    "rounding_absolute_change": 0.0,
+    "total_before_quantiles": [
+      29474.0,
+      51889.25,
+      59166.0,
+      68340.0,
+      122073.0
+    ],
+    "total_after_quantiles": [
+      29474.0,
+      51889.25,
+      59166.0,
+      68340.0,
+      122073.0
+    ],
+    "detected_genes_quantiles": [
+      420.0,
+      455.0,
+      463.0,
+      471.0,
+      498.0
+    ]
+  },
+  "spot": {
+    "source": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/overview_native556_seed101/spider/spot.h5ad",
+    "source_sha256": "da15493490844992ba05b4917b7d7148b73f8d8f46f031a7da8df7e781c5f7c9",
+    "n_obs": 360,
+    "n_genes": 556,
+    "fractional_nonzero_share": 0.0,
+    "rounding_absolute_change": 0.0,
+    "total_before_quantiles": [
+      0.0,
+      287404.0,
+      389814.5,
+      504345.25,
+      930109.0
+    ],
+    "total_after_quantiles": [
+      0.0,
+      287404.0,
+      389814.5,
+      504345.25,
+      930109.0
+    ],
+    "detected_genes_quantiles": [
+      0.0,
+      521.75,
+      527.0,
+      531.0,
+      541.0
+    ],
+    "excluded_empty_or_zero_expression": 4
+  }
+}
+[load] reference (cell): /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/native556_seed101_spider_35973986/inputs/cell.h5ad 
+[reference] n_cells=10000 n_genes=556 per-type counts:
+cell_types
+type1 type2 type3 type4 type5 type6 type7 type8 
+ 1250  1250  1250  1250  1250  1250  1250  1250 
+
+[load] query (spot): /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/native556_seed101_spider_35973986/inputs/spot.h5ad 
+[query] n_spots=356 n_genes=556
+
+[RCTD] create.RCTD (doublet_mode=full, max_cores=8)
+Begin: process_cell_type_info
+process_cell_type_info: number of cells in reference: 10000
+process_cell_type_info: number of genes in reference: 556
+
+type1 type2 type3 type4 type5 type6 type7 type8 
+ 1250  1250  1250  1250  1250  1250  1250  1250 
+End: process_cell_type_info
+create.RCTD: getting regression differentially expressed genes: 
+get_de_genes: type1 found DE genes: 12
+get_de_genes: type2 found DE genes: 11
+get_de_genes: type3 found DE genes: 11
+get_de_genes: type4 found DE genes: 7
+get_de_genes: type5 found DE genes: 9
+get_de_genes: type6 found DE genes: 4
+get_de_genes: type7 found DE genes: 12
+get_de_genes: type8 found DE genes: 8
+get_de_genes: total DE genes: 74
+create.RCTD: getting platform effect normalization differentially expressed genes: 
+get_de_genes: type1 found DE genes: 21
+get_de_genes: type2 found DE genes: 18
+get_de_genes: type3 found DE genes: 17
+get_de_genes: type4 found DE genes: 15
+get_de_genes: type5 found DE genes: 14
+get_de_genes: type6 found DE genes: 9
+get_de_genes: type7 found DE genes: 20
+get_de_genes: type8 found DE genes: 11
+get_de_genes: total DE genes: 119
+fitBulk: decomposing bulk
+chooseSigma: using initial Q_mat with sigma =  1
+starting worker pid=1416285 on localhost:11201 at 23:12:56.395
+starting worker pid=1416368 on localhost:11201 at 23:12:56.824
+starting worker pid=1416438 on localhost:11201 at 23:12:57.051
+starting worker pid=1416497 on localhost:11201 at 23:12:57.276
+starting worker pid=1416551 on localhost:11201 at 23:12:57.506
+starting worker pid=1416607 on localhost:11201 at 23:12:57.741
+starting worker pid=1416665 on localhost:11201 at 23:12:57.959
+starting worker pid=1416713 on localhost:11201 at 23:12:58.175
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Likelihood value: 168858.780511338
+Sigma value:  0.84
+starting worker pid=1418717 on localhost:11201 at 23:13:09.193
+starting worker pid=1418775 on localhost:11201 at 23:13:09.398
+starting worker pid=1418824 on localhost:11201 at 23:13:09.600
+starting worker pid=1418877 on localhost:11201 at 23:13:09.811
+starting worker pid=1418934 on localhost:11201 at 23:13:10.048
+starting worker pid=1418989 on localhost:11201 at 23:13:10.282
+starting worker pid=1419039 on localhost:11201 at 23:13:10.495
+starting worker pid=1419093 on localhost:11201 at 23:13:10.703
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Likelihood value: 164671.522873816
+Sigma value:  0.69
+starting worker pid=1421035 on localhost:11201 at 23:13:21.134
+starting worker pid=1421100 on localhost:11201 at 23:13:21.367
+starting worker pid=1421156 on localhost:11201 at 23:13:21.579
+starting worker pid=1421205 on localhost:11201 at 23:13:21.812
+starting worker pid=1421263 on localhost:11201 at 23:13:22.017
+starting worker pid=1421314 on localhost:11201 at 23:13:22.222
+starting worker pid=1421371 on localhost:11201 at 23:13:22.477
+starting worker pid=1421429 on localhost:11201 at 23:13:22.735
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Likelihood value: 160139.775084297
+Sigma value:  0.61
+starting worker pid=1423858 on localhost:11201 at 23:13:33.226
+starting worker pid=1423912 on localhost:11201 at 23:13:33.441
+starting worker pid=1423966 on localhost:11201 at 23:13:33.674
+starting worker pid=1424020 on localhost:11201 at 23:13:33.893
+starting worker pid=1424066 on localhost:11201 at 23:13:34.097
+starting worker pid=1424126 on localhost:11201 at 23:13:34.301
+starting worker pid=1424172 on localhost:11201 at 23:13:34.508
+starting worker pid=1424226 on localhost:11201 at 23:13:34.720
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Likelihood value: 157440.840395357
+Sigma value:  0.53
+starting worker pid=1426178 on localhost:11201 at 23:13:44.920
+starting worker pid=1426227 on localhost:11201 at 23:13:45.126
+starting worker pid=1426278 on localhost:11201 at 23:13:45.337
+starting worker pid=1426330 on localhost:11201 at 23:13:45.542
+starting worker pid=1426386 on localhost:11201 at 23:13:45.754
+starting worker pid=1426436 on localhost:11201 at 23:13:45.966
+starting worker pid=1426497 on localhost:11201 at 23:13:46.174
+starting worker pid=1426568 on localhost:11201 at 23:13:46.381
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Likelihood value: 154535.098176577
+Sigma value:  0.45
+starting worker pid=1428612 on localhost:11201 at 23:13:57.426
+starting worker pid=1428657 on localhost:11201 at 23:13:57.661
+starting worker pid=1428725 on localhost:11201 at 23:13:57.876
+starting worker pid=1428771 on localhost:11201 at 23:13:58.084
+starting worker pid=1428825 on localhost:11201 at 23:13:58.337
+starting worker pid=1428890 on localhost:11201 at 23:13:58.604
+starting worker pid=1428951 on localhost:11201 at 23:13:58.869
+starting worker pid=1429017 on localhost:11201 at 23:13:59.111
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Likelihood value: 151452.108633704
+Sigma value:  0.37
+starting worker pid=1431662 on localhost:11201 at 23:14:10.007
+starting worker pid=1431764 on localhost:11201 at 23:14:10.217
+starting worker pid=1431849 on localhost:11201 at 23:14:10.464
+starting worker pid=1431957 on localhost:11201 at 23:14:10.710
+starting worker pid=1432034 on localhost:11201 at 23:14:10.965
+starting worker pid=1432099 on localhost:11201 at 23:14:11.204
+starting worker pid=1432146 on localhost:11201 at 23:14:11.415
+starting worker pid=1432200 on localhost:11201 at 23:14:11.642
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Likelihood value: 148328.499019027
+Sigma value:  0.29
+starting worker pid=1434238 on localhost:11201 at 23:14:22.577
+starting worker pid=1434289 on localhost:11201 at 23:14:22.794
+starting worker pid=1434347 on localhost:11201 at 23:14:23.005
+starting worker pid=1434428 on localhost:11201 at 23:14:23.217
+starting worker pid=1434521 on localhost:11201 at 23:14:23.417
+starting worker pid=1434609 on localhost:11201 at 23:14:23.626
+starting worker pid=1434701 on localhost:11201 at 23:14:23.859
+starting worker pid=1434793 on localhost:11201 at 23:14:24.097
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Likelihood value: 145660.456454582
+Sigma value:  0.22
+starting worker pid=1437665 on localhost:11201 at 23:14:34.811
+starting worker pid=1437719 on localhost:11201 at 23:14:35.015
+starting worker pid=1437771 on localhost:11201 at 23:14:35.228
+starting worker pid=1437827 on localhost:11201 at 23:14:35.439
+starting worker pid=1437878 on localhost:11201 at 23:14:35.645
+starting worker pid=1437931 on localhost:11201 at 23:14:35.858
+starting worker pid=1437992 on localhost:11201 at 23:14:36.085
+starting worker pid=1438031 on localhost:11201 at 23:14:36.307
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+Loading required package: spacexr
+loaded spacexr and set parent environment
+
+[score] 356 / 356 spots have an RCTD estimate (rest failed QC/min-UMI inside RCTD)
+
+=== RESULTS ===
+spots scored: 356 / 356 
+overall Pearson r (all spots x all cell types, pooled): 0.8284 
+overall RMSE: 0.1182 
+mean per-spot Pearson r: 0.7863 
+per-cell-type Pearson r:
+      cell_type pearson_r       rmse
+type1     type1 0.9401930 0.08954970
+type2     type2 0.9708023 0.05642248
+type3     type3 0.8940262 0.12194756
+type4     type4 0.9396537 0.12483508
+type5     type5 0.9039769 0.14792770
+type6     type6 0.9283002 0.11644021
+type7     type7 0.9759526 0.05516848
+type8     type8 0.7472106 0.17766754
+
+[done] outputs written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/native556_seed101_spider_35973986/results 
+Completed spider: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/native556_seed101_spider_35973986
+[spatial zoom -> rctd_spatial_zoom.png] slice 5, cropped to x/y in [-50.0,650.0]x[-50.0,650.0]: 35 spots, 8 cell types, 1 pair(s)/row
+wrote /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/native556_seed101_spider_35973986/results/rctd_spatial_zoom.png
+[spatial zoom -> rctd_spatial_zoom_4x4.png] slice 5, cropped to x/y in [-50.0,650.0]x[-50.0,650.0]: 35 spots, 8 cell types, 2 pair(s)/row
+wrote /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/native556_seed101_spider_35973986/results/rctd_spatial_zoom_4x4.png
+[spatial zoom -> rctd_spatial_zoom_main.png] slice 5, cropped to x/y in [-50.0,650.0]x[-50.0,650.0]: 35 spots, 2 cell types, 1 pair(s)/row
+wrote /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/native556_seed101_spider_35973986/results/rctd_spatial_zoom_main.png
+[spatial zoom -> rctd_spatial_zoom_4types.png] slice 5, cropped to x/y in [-50.0,650.0]x[-50.0,650.0]: 35 spots, 4 cell types, 2 pair(s)/row
+wrote /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/native556_seed101_spider_35973986/results/rctd_spatial_zoom_4types.png
+wrote /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/native556_seed101_spider_35973986/results/rctd_error_boxplot.png
