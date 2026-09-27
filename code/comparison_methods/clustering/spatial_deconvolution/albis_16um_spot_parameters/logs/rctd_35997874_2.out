@@ -1,0 +1,5 @@
+Saved cell {'n_obs': 600000, 'n_genes': 556}
+Saved bin {'n_obs': 1656490, 'n_genes': 556}
+Saved spot {'n_obs': 43560, 'n_genes': 556}
+cell {'source': '/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/albis_16um_spot_parameters/seed202/data/cell/simulation_cell_z.h5ad', 'raw_observations': 600000, 'retained_observations': 600000}
+spot {'source': '/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/albis_16um_spot_parameters/seed202/data/spot/simulation_spot_z.h5ad', 'raw_observations': 43560, 'retained_observations': 10059}

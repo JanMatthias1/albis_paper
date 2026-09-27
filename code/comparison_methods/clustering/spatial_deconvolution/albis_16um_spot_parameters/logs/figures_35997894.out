@@ -1,0 +1,5 @@
+ seed     rmse  pearson_r  mean_absolute_error  spots_supplied  spots_scored
+ 2025 0.076751   0.849170             0.054436           10044          9842
+  101 0.078604   0.836732             0.055681           10044          9848
+  202 0.071547   0.866318             0.050554           10059          9864
+/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/spatial_deconvolution/albis_16um_spot_parameters/figures/rctd_error_seed_mean_comparison.png
