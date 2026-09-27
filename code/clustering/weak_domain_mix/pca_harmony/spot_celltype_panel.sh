@@ -31,7 +31,7 @@
 #   packing_pf0p04_log_mu_-2.5_bsigma03 -> packing_pf0p04_log_mu_-2.0_theta_0.25_bsigma03
 # (log_mu -2.5 -> -2.0, theta 2.0 -> 0.25; sphere_r_um 2050 + batch_sigma 0.3
 # unchanged -- batch_sigma stays fixed, it is set on this panel's Harmony
-# demo). Winner of code/data/misc/sweep_spot_*_probe.sh.
+# demo). Winner of code/misc/data/misc/sweep_spot_*_probe.sh.
 #
 # 2026-09-06: --theta-jitter added, SIM_TAG bumped to
 #   packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03
@@ -41,7 +41,7 @@
 # shows up as a disjoint upper cloud in Figure 2's mean_variance /
 # mean_dropout panels. Same artifact fixed for `cell` on 2026-08-25
 # (--theta-jitter 0.15). --theta-jitter 0.10 (largest of the swept
-# 0.10/0.15/0.25, code/data/misc/sweep_spot_jitter_probe.sh job 35536033)
+# 0.10/0.15/0.25, code/misc/data/misc/sweep_spot_jitter_probe.sh job 35536033)
 # fully collapses the two clouds; theta unchanged at 0.25. This resubmit
 # recomputes Figure 3's spot cell-typing on the fixed shared dataset; the
 # pre-jitter-fix outputs are archived at

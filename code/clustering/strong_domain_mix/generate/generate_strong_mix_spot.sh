@@ -8,7 +8,7 @@
 #SBATCH --partition=shared
 #
 # Spot's strong-domain-mix batch_sigma slide (no batch effect -> canonical
-# 0.3), consolidated 2026-09-17 from code/clustering/misc/
+# 0.3), consolidated 2026-09-17 from code/misc/clustering/misc/
 # spot_batch_sigma_slide_corrected.sh into data/strong_mix/ (was
 # data/figure_3/cellbin_batch_sigma_slide/). Logic unchanged -- spot's config
 # (BANKSY lambda=0.1/k_geom=8, dispersion log_mu=-2.0/theta=0.25/jitter=0.10)

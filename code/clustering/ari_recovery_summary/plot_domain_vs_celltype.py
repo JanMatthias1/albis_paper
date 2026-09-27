@@ -21,7 +21,7 @@ per the 2026-09-18 Figure 3B closure decision), so it has no left-panel value.
 Left = data/figure_3/strong_domain_mix/batch_sigma_slide/<folder>/bs0/ari/ari_summary_<true_mod>.json
 Right = data/figure_3/weak_domain_mix/pca_harmony/<dir>/ari_recovery_qc/ari_summary_<mod>.json
 
-Supersedes code/clustering/misc/plot_domain_vs_celltype_recovery.py (archived
+Supersedes code/misc/clustering/misc/plot_domain_vs_celltype_recovery.py (archived
 to misc/legacy/ 2026-09-18 -- it read domain data from banksy_batch_compare/,
 which no longer exists, and paired prebatch+tuned bars rather than the single
 batch_sigma=0 bar asked for here).

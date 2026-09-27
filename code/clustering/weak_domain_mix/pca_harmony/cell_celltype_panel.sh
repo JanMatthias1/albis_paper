@@ -44,7 +44,7 @@
 #
 # 2026-09-17: log_mu -2.3 -> -2.5 (tag now log_mu_-2.5_theta_0.40_jitter0.15_bsigma15),
 # following Figure 2's dispersion re-tune via an actual joint log_mu x theta
-# sweep vs both Xenium refs (code/data/misc/sweep_cell_logmu_theta_joint_xenium.sh,
+# sweep vs both Xenium refs (code/misc/data/misc/sweep_cell_logmu_theta_joint_xenium.sh,
 # job 35759008) -- cell had never gotten spot's joint-sweep treatment before,
 # just this single manual adjustment. Fixes the total_counts overshoot noted
 # above (ratio 1.38->1.04 vs lung_cancer); theta_hat/genes_per_cell shift

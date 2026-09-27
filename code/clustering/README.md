@@ -136,7 +136,7 @@ its existing 0.05 baseline is also included in seed replication and plotting.
 Spot baseline grid: 0, 0.05, 0.1, 0.12, 0.13, 0.14, 0.15, 0.18, 0.2,
 0.22, 0.25, 0.26, 0.27, 0.28, 0.29, 0.3; seed work extends it to 0.4 and 0.6.
 
-`misc/banksy_batch_compare/` and `misc/legacy/` contain historical workflows;
+`../misc/clustering/misc/banksy_batch_compare/` and `../misc/clustering/misc/legacy/` contain historical workflows;
 they are not prerequisites for the current baseline generators or plots.
 The strong-mix simulations are also intended for STAGATE. Its path audit
 is deferred: cell strong-mix paths currently expect raw/QC files in the
@@ -266,7 +266,7 @@ differ from the main analysis stack. RCTD uses `sim_paper/env/rctd`.
    ```
 
 Corresponding `run_*.sh` SLURM wrappers for steps 2-6 (`0-2` array over
-spot/bin/cell where relevant) live in `misc/` (`run_qc_filter.sh`,
+spot/bin/cell where relevant) live in `../misc/clustering/misc/` (`run_qc_filter.sh`,
 `run_pca_harmony.sh`, `run_clustering_leiden.sh`, `run_ari_vs_ground_truth.sh`)
 -- moved from the top level 2026-09-16: nothing in the current pipeline calls
 them (every panel/sweep script invokes the `.py` steps directly), and their
@@ -298,7 +298,7 @@ examples.
 
 Active BANKSY and Figure 4 analyses start from the input h5ad `.X`,
 including sigma=0 with Poisson resampling. BANKSY and STAGATE no longer
-accept `--use-pre-batch`; old oracle wrappers under `misc/` are historical
+accept `--use-pre-batch`; old oracle wrappers under `../misc/clustering/misc/` are historical
 and will fail on that obsolete flag rather than silently switching layers.
 Pre-batch layers remain stored as simulation provenance, not analysis inputs.
 The Figure 4 plotting launcher now selects the current strong-mix seed grid

@@ -1,7 +1,0 @@
-Job started: Tue Aug 25 03:47:39 AM EDT 2026
-Host: compute-174.cm.cluster
-Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-banksy/bin/python
-Modality: spot
-Command: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-banksy/bin/python sim_paper/code/clustering/clustering_leiden_louvain.py --modality spot --packing-tag packing_pf0p04_domain_shift --pipeline pca_harmony --resolution 0.5
-Input file not found: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/clustering_packing_pf0p04_domain_shift/spot/pca_harmony/simulation_spot_z_pca_harmony.h5ad
-Run sim_paper/code/clustering/pca_harmony.py first.

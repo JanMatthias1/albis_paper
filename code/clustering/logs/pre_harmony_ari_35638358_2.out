@@ -1,8 +1,0 @@
-[task] modality=bin16um
-/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  from pkg_resources import get_distribution, DistributionNotFound
-[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/pca_harmony_single_cell/bin16um/pca_harmony_qc/simulation_bin_z_pca_harmony_qc.h5ad
-[load] 365,785 x 556
-[neighbors] use_rep=X_pca_pre_harmony (NO Harmony) n_pcs=30 n_neighbors=15
-[RESULT] bin16um / cell_type_true (PRE-Harmony): resolution=0.2436 achieved_k=8 (target 8)  ARI=-0.0001  slice_leak_ARI=0.1660
-[RESULT] bin16um / domain_true (PRE-Harmony): resolution=0.2202 achieved_k=6 (target 6)  ARI=0.0087  slice_leak_ARI=0.1268

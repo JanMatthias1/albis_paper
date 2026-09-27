@@ -8,7 +8,7 @@
 #SBATCH --partition=shared
 #
 # Cell's strong-domain-mix batch_sigma slide, consolidated 2026-09-17 from
-# the scattered points built across code/clustering/misc/
+# the scattered points built across code/misc/clustering/misc/
 # cellbin_batch_sigma_slide.sh (bs0.5/1.0) + batch_sigma_slide_fine.sh
 # (bs0.1/0.2/0.3/0.4) into one self-contained array script, output moved
 # from data/figure_3/cellbin_batch_sigma_slide/cell/ to data/strong_mix/cell/.
@@ -34,7 +34,7 @@
 #
 # 2026-09-17 (same day, later still): dispersion log_mu -2.3 -> -2.5, matching
 # Figure 2's own retune -- an actual joint log_mu x theta grid search against
-# both Xenium refs (code/data/misc/sweep_cell_logmu_theta_joint_xenium.sh, job
+# both Xenium refs (code/misc/data/misc/sweep_cell_logmu_theta_joint_xenium.sh, job
 # 35759008), since cell had never gotten spot's joint-sweep treatment before
 # (see project_figure4c_alignment_4modality memory for the full sweep table
 # and Figure 2's before/after comparison -- total_counts fidelity ratio
@@ -68,7 +68,7 @@
 # slice per cell. Even bs=0 (no batch effect) only reached domain ARI 0.077
 # at k_geom=200, vs 0.784 in the old, correctly-scaled dataset -- this
 # wasn't a batch-robustness finding, k_geom=200 simply doesn't work at this
-# scale. Dedicated re-tune (code/clustering/misc/sweep_cell_kgeom_r2050.sh,
+# scale. Dedicated re-tune (code/misc/clustering/misc/sweep_cell_kgeom_r2050.sh,
 # job 35786358, k_geom in {15,30,60,100,150,200} at bs=0, lambda=0.5 held):
 #   k_geom=60   domain_ARI=0.5404  leakage=0.0524   <- winner
 #   k_geom=30   domain_ARI=0.5072  leakage=0.0090

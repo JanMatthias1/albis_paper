@@ -205,9 +205,6 @@ def main() -> None:
               Patch(facecolor="white", edgecolor="#808080", hatch="///", label="Cell type")]
     fig.legend(handles=legend, loc="lower center", ncol=2, frameon=False,
                fontsize=TICK_SIZE, bbox_to_anchor=(0.5, -0.03))
-    fig.text(0.01, -0.03, "Bars: mean over simulation seeds 2025/101/202 (± SD, dots = seeds). "
-             "BANKSY λ shown as domain / cell type.", fontsize=ANNOT_SIZE,
-             color=INK_MUTED, ha="left", va="center")
     fig.tight_layout(h_pad=2.5)
 
     out_path = FIG3_DIR / "ari_recovery_summary" / "banksy_vs_pca_recovery.png"

@@ -1,8 +1,0 @@
-[task] modality=bin
-/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  from pkg_resources import get_distribution, DistributionNotFound
-[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/banksy_batch_compare/bin/prebatch/banksy_matrix/simulation_bin_z_banksy_pca_harmony_qc.h5ad
-[load] 365,721 x 1,668
-[neighbors] BANKSY, NO Harmony, prebatch. n_pcs=30 n_neighbors=15
-[RESULT] bin / domain_true (BANKSY, NO Harmony, prebatch): resolution=0.1034 achieved_k=6 (target 6)  ARI=0.7895  slice_leak_ARI=0.0157
-[RESULT] bin / cell_type_true (BANKSY, NO Harmony, prebatch): resolution=0.1969 achieved_k=8 (target 8)  ARI=0.0982  slice_leak_ARI=0.0330

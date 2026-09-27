@@ -8,7 +8,7 @@
 #SBATCH --partition=shared
 #
 # Bin16um's strong-domain-mix batch_sigma slide, consolidated 2026-09-17
-# from the scattered points built across code/clustering/misc/
+# from the scattered points built across code/misc/clustering/misc/
 # bin16um_kgeom100_endpoints.sh (bs0/bs0.7) + cellbin_batch_sigma_slide.sh
 # (bs0.25/0.45) + batch_sigma_slide_fine.sh (bs0.30/0.35/0.40) into one
 # self-contained array script, output moved from
