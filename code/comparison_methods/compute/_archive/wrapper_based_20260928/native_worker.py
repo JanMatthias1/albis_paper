@@ -3,6 +3,7 @@
 import argparse
 from contextlib import contextmanager
 import hashlib
+import importlib
 import importlib.metadata
 import json
 import os
@@ -161,7 +162,6 @@ def competitor(method, cfg, reference_dir, m, report):
         else:
             import torch
             from scCube.sccube import scCube
-            import importlib
             sccube_module = importlib.import_module('scCube.sccube')
     with m.stage('reference_loading_preprocessing', 'input'):
         X = mmread(reference_dir/'counts.mtx').T.tocsr()
@@ -239,6 +239,8 @@ def competitor(method, cfg, reference_dir, m, report):
             v = block.data if hasattr(block,'tocsr') else block
             assert np.isfinite(v).all() and (v>=0).all()
             nnz += int(np.count_nonzero(v))
+        if method == 'spider':
+            assert np.array_equal(expression.obs.cell_type_true.to_numpy(), labels)
         report['output'] = dict(n_cells=cfg['n_cells'], n_genes=556,n_molecules=None,
             expression_nnz=nnz, expression_dtype=str(values.dtype),native_representation='cell_level_expression',
             coordinates_shape=list(xyz.shape), extent_um=extent,aggregation_called=False)
@@ -261,6 +263,8 @@ def main():
         thread_settings={k:os.environ.get(k) for k in ['OMP_NUM_THREADS','OPENBLAS_NUM_THREADS','MKL_NUM_THREADS','NUMBA_NUM_THREADS']})
     m = Measurements(a.out,report)
     try:
+        for package, expected in cfg.get('environment_versions', {}).get(a.method, {}).items():
+            assert importlib.metadata.version(package) == expected, f'Package version changed: {package}'
         with m.stage('seed_initialization', 'startup'):
             import numpy as np
             random.seed(cfg['seed']); np.random.seed(cfg['seed'])

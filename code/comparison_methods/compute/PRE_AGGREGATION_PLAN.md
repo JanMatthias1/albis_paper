@@ -1,7 +1,13 @@
+> Updated execution constraint (2026-09-28): the active implementation is
+> described in README.md and uses direct native API calls only. Earlier suggestions
+> below about instrumentation wrappers, forced expression materialization, or
+> standardized physical coordinates are superseded. Native outputs remain
+> unchanged; missing capabilities are unavailable. Wrapper-based results are excluded.
+
 # Native tissue generation before aggregation
 
-Status: feasibility checked on 2026-09-28; proposed implementation and pilot.
-No benchmark jobs submitted. This plan narrows the older ROADMAP.md proposal:
+Status: implementation and three-method smoke validation completed on 2026-09-28.
+The active run is recorded in sim_paper/data/comparison_methods/compute/CURRENT_RUN.txt. This plan narrows the older ROADMAP.md proposal:
 cell/bin/spot exports and sectioning are outside the measurement endpoint.
 
 ## Scientific question and endpoints

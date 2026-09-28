@@ -1,3 +1,5 @@
+> Superseded for the active compute benchmark by [PRE_AGGREGATION_PLAN.md](PRE_AGGREGATION_PLAN.md). The implementation now measures native tissue creation before aggregation. This document retains the earlier all-modalities proposal for context.
+
 # Revised compute benchmark: 556 genes
 
 Status: agreed gene count; proposed workflow and execution plan. No revised

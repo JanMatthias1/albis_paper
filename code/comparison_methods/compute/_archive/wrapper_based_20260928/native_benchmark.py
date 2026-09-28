@@ -42,10 +42,20 @@ def prepare(root, smoke=False):
         primary_cost='generation including scCube training; input preparation and startup recorded separately',
         reference_policy='fixed synthetic reference per seed; charged once to each competitor from-scratch total',
         smoke_test=smoke, implementation_hashes={})
-    for name in ['native_worker.py','native_benchmark.py','native_job.sh','summarize_native.py']:
+    for name in ['native_worker.py','native_benchmark.py','native_job.sh','summarize_native.py','advance_native.py','finish_native.sh']:
         source = CODE/name
         (root/'code'/name).write_bytes(source.read_bytes())
         protocol['implementation_hashes'][name] = digest(source)
+    protocol['environment_versions'] = {}
+    version_code = '''import importlib.metadata as m,json
+result={}
+for name in ['numpy','scipy','anndata','torch','scCube','st-spider']:
+ try: result[name]=m.version(name)
+ except m.PackageNotFoundError: pass
+print(json.dumps(result))'''
+    for method, envname in ENVIRONMENTS.items():
+        protocol['environment_versions'][method] = json.loads(subprocess.check_output(
+            [BENCH/'env'/envname/'bin/python','-c',version_code],text=True))
     # Code snapshots are audit copies. Execute canonical code only after hash checks.
     protocol['albis_source_sha256'] = digest(ROOT/'albis/albis/simulation_sphere.py')
     save(root/'protocol.json',protocol)
@@ -149,7 +159,7 @@ def run_task(root,key):
     if not ok: raise RuntimeError(f'Task failed: {key}; see {out}')
 
 
-def submit(root, phase):
+def submit(root, phase, methods=None):
     cfg = verify_code(root)
     tasks = json.loads((root/'tasks.json').read_text())
     if phase=='pilot': tasks = [t for t in tasks if t['seed']==2025 and t['n_cells'] in [10000,100000]]
@@ -159,11 +169,12 @@ def submit(root, phase):
         gate = root/'pilot_review.json'
         review = json.loads(gate.read_text()) if gate.exists() else {}
         if review.get('status')!='passed': raise RuntimeError('A successful pilot review is required before full submission')
+    if methods: tasks = [t for t in tasks if t['method'] in methods]
     records_path = root/'submissions.json'
     records = json.loads(records_path.read_text()) if records_path.exists() else []
     def sbatch(kind,key,seed,dependency=None,mem='16G',hours='02:00:00'):
         name = f'native_{key}'
-        cmd = ['sbatch','--parsable','--job-name',name,'--partition','shared','--cpus-per-task','2',
+        cmd = ['sbatch','--parsable','--job-name',name,'--kill-on-invalid-dep=yes','--partition','shared','--cpus-per-task','2',
             '--constraint',cfg['hardware_constraint'],'--mem',mem,'--time',hours,'--output',str(root/'logs'/f'{key}_%j.out')]
         if dependency: cmd += ['--dependency',f'afterok:{dependency}']
         cmd += [str(CODE/'native_job.sh'),str(root),kind,str(key if kind=='task' else seed)]
@@ -182,13 +193,24 @@ def submit(root, phase):
     for task in tasks:
         if task['key'] in submitted: continue
         dependencies = []
-        if task['method']!='albis': dependencies.append(pools[task['seed']])
+        refpath = root/'references'/f"seed{task['seed']}"/'reference_measurement.json'
+        reference_ready = refpath.exists() and json.loads(refpath.read_text()).get('status')=='ok'
+        if task['method']!='albis' and not reference_ready:
+            dependencies.append(pools[task['seed']])
         if previous[task['method']]: dependencies.append(previous[task['method']])
         if phase=='full':
             resources = json.loads((root/'pilot_review.json').read_text())['resources'][task['method']][str(task['n_cells'])]
             mem,hours = resources['memory'],resources['time_limit']
         else: mem,hours = ('16G','00:30:00') if phase=='smoke' else ('64G','1-00:00:00')
         previous[task['method']] = sbatch('task',task['key'],task['seed'],':'.join(dependencies) or None,mem,hours)
+    if phase=='pilot' and not (root/'pilot_monitor.json').exists():
+        ids=':'.join(r['job_id'] for r in records if r['phase']=='pilot' and r['kind']=='task')
+        job=subprocess.check_output(['sbatch','--parsable','--job-name','native_pilot_review','--partition','shared',
+            '--cpus-per-task','1','--mem','8G','--time','00:30:00','--dependency',f'afterany:{ids}',
+            '--output',str(root/'logs/pilot_review_%j.out'),str(CODE/'finish_native.sh'),str(root),'pilot'],text=True).strip().split(';')[0]
+        if not job.isdigit(): raise RuntimeError(job)
+        save(root/'pilot_monitor.json',dict(job_id=job,action='review pilot; advance only if passed; schedule final reporting'))
+        print(f'Pilot review and continuation job: {job}',flush=True)
 
 
 def main():
@@ -198,11 +220,12 @@ def main():
     p.add_argument('--smoke',action='store_true')
     p.add_argument('--seed',type=int,default=2025)
     p.add_argument('--key')
+    p.add_argument('--method',nargs='+',choices=list(ENVIRONMENTS))
     p.add_argument('--phase',choices=['smoke','pilot','full'],default='pilot')
     a=p.parse_args(); root=a.root.resolve()
     if a.command=='prepare': prepare(root,a.smoke)
     elif a.command=='reference': reference(root,a.seed)
     elif a.command=='task': run_task(root,a.key)
-    else: submit(root,a.phase)
+    else: submit(root,a.phase,a.method)
 
 if __name__=='__main__': main()

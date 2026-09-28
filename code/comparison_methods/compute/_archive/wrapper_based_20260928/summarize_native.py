@@ -173,6 +173,8 @@ def main():
     a=p.parse_args(); root=a.root.resolve()
     (root/'figures').mkdir(exist_ok=True)
     os.environ.setdefault('MPLCONFIGDIR',str(root/'cache/plots'))
+    os.environ.setdefault('XDG_CACHE_HOME',str(root/'cache'))
+    Path(os.environ['MPLCONFIGDIR']).mkdir(parents=True,exist_ok=True)
     cfg,rows,stages=collect(root,not a.no_accounting)
     csv_write(root/'measurements.csv',rows);csv_write(root/'stages.csv',stages)
     review_pilot(root,cfg,rows);plot(root,rows,stages)

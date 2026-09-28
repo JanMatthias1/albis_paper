@@ -1,80 +1,67 @@
-# Native tissue compute benchmark
+# Direct-native compute comparison
 
-The active benchmark measures native tissue creation before aggregation:
-ALBIS mRNA instances versus scCube/SPIDER cell-level expression and continuous
-3D coordinates. The outputs differ in resolution. See
-[PRE_AGGREGATION_PLAN.md](PRE_AGGREGATION_PLAN.md) for the design and feasibility
-check. The earlier all-modalities ROADMAP is superseded for this benchmark.
+Each method has its own short script containing top-level calls to its native
+public API. There are no custom method functions, adapters, monkey-patching,
+replacement implementations, or transformations of returned model outputs.
+Input preparation and elapsed-time measurement are permitted by the user.
 
-## Protocol
+- `albis_native.py`: `simulate_3d_molecule_sphere_base`. Native output selection
+  retains the molecular stream without sectioning or containment aggregation.
+- `sccube_native.py`: `pre_process`, `train_vae_and_generate_cell`, and
+  `generate_pattern_random`. Training and synthesis are timed together.
+  Returned expression and metadata remain unchanged, including native coordinates.
+- `spider_native.py`: `simulate_10X_3d` and `get_sim_cell_level_expr`. The returned
+  labels, coordinates and expression object, including its native view semantics,
+  remain unchanged. Requested cell-type counts are specified as inputs.
+- `reference_native.R`: direct Splatter `newSplatParams` and
+  `splatSimulateGroups`; native reference counts and Group labels are serialized
+  for ordinary input loading. No earlier workflow adapter is called.
 
-556 generated genes, eight types, fixed cell density, CPU only, one computational
-thread, Sapphire Rapids nodes. scCube uses 200 training epochs. Each competitor
-uses a shared synthetic 10,000-cell x 556-gene Splatter reference per seed.
-ALBIS uses the actual strong-domain-mix expression settings. Full molecule
-streams are retained without containment assignment, slicing, or capture.
-Native cell expression is materialized before stopping. Output writing and
-validation are outside generation timings; compact summaries are saved rather
-than full tissue datasets. Molecular count and expression sparsity are recorded.
+The endpoint is native API return, not a standardized output format. No bin/spot
+aggregation is performed. Unsupported native outputs remain unavailable: do not
+reconstruct fractions, labels, coordinates or other capabilities from other
+outputs. No full simulated dataset is exported in this timing experiment; only
+read-only shape checks and performance measurements are recorded separately.
 
-Primary generation time includes scCube training, labeled as a combined stage.
-Input loading/preprocessing, initialization and reference creation are separately
-reported; from-scratch totals include these. Memory uses process-tree RSS sampled
-at 50 ms plus stage boundaries. Peaks may miss brief transients, and summed RSS
-can double-count shared pages. GNU time is retained as a secondary measurement.
-Never interpret resource limits as measured maxima or infer complexity from
-three seeds. No cached model is used in this benchmark.
+## Protocol and interpretation
 
-## Run sequence
+556 genes; eight input cell types; fixed 10k-cell reference per seed; CPU only;
+one computational thread on Sapphire Rapids. scCube uses 200 epochs. ALBIS uses
+the strong-domain-mix expression settings. ALBIS/SPIDER tissue dimensions scale
+with N. scCube retains its native grid size 8 and coordinate units; we do not
+claim matched physical density or rescale its output.
 
-Use a fresh absolute directory; existing runs are never overwritten.
+Times cover direct native generation calls, including scCube training. Reference
+creation and input preprocessing are reported separately. SPIDER's returned
+expression view is not forcibly copied to make its endpoint resemble another
+method. This measures the cost of native representations, not equivalent outputs.
+Peak RSS is whole-process (including imports/input loading), from the OS; it is
+not isolated stage memory or a sum over subprocesses. Scheduler logs can supply
+whole-job wall/CPU/memory accounting. Failures are never plotted as successes.
 
-```bash
-bash run_compute.sh prepare --root /absolute/new-run
-bash run_compute.sh submit --root /absolute/new-run --phase pilot
-bash plot_compute.sh --root /absolute/new-run
-```
-
-The pilot is six tissue runs: 10k and 100k cells, seed 2025, all three methods.
-A reference job precedes competitors. Jobs use two allocated CPUs (one numerical
-thread plus monitoring), initially 64 GiB / 24 hours per tissue worker. At most
-three tissue jobs run concurrently within a submission, one chain per method.
-
-After successful pilot completion, reporting writes `pilot_review.json` with
-conservative resource recommendations. Hardware mismatches or excessive
-projected requests require review. To submit remaining points after that gate:
+## Execution
 
 ```bash
-bash run_compute.sh submit --root /absolute/new-run --phase full
+python prepare_native.py --root /absolute/new-directory --smoke
+bash submit_native.sh /absolute/new-directory smoke
+python report_native.py --root /absolute/new-directory
 ```
 
-The complete grid is 10k, 50k, 100k, 200k, 500k, 600k, 1M cells, seeds 2025/101/202
-(63 tissue runs). Already submitted keys are skipped; reference stages are reused
-per seed. A failed chain holds dependent jobs rather than spending resources
-on an unchecked larger case. Retries require a fresh run directory or explicit
-recovery, not silent overwriting. A separate smoke protocol uses 32 output cells,
-128 reference cells, one VAE epoch and a reduced SPIDER iteration budget; it must
-never be included in the scientific measurements.
+After smoke validation, prepare a fresh directory without `--smoke` and submit
+`pilot`. This launches six tissue runs (10k/100k cells, seed 2025, three methods),
+plus one reference. Each `.sbatch` executes exactly one method-specific script.
+The shell submitter only schedules processes and records job IDs; it never calls
+or wraps a model API. Source hashes and snapshots are retained. Do not change
+submitted scripts while jobs are pending/running.
 
-## Files and outputs
+The full proposed grid is recorded in `tasks.tsv` (seven sizes, three seeds,
+three methods = 63 runs). Remaining points require review of the direct-native
+pilot before submission. Smoke settings use 32 output cells, a 128-cell reference,
+one scCube epoch and reduced SPIDER iterations; they are not scientific results.
 
-- `native_worker.py`: native APIs, boundary guards, stage timings and validation.
-- `native_benchmark.py`, `native_job.sh`: preparation, reference generation,
-  source checks, execution, cluster submission and persistent job records.
-- `summarize_native.py`: scheduler reconciliation, CSVs, pilot review and figures.
-- `run_compute.*`, `plot_compute.*`: entry points for these active scripts.
+## Excluded implementations
 
-Run directories include the frozen protocol, implementation audit copies,
-settings, per-stage/process measurements, stdout/stderr, source hashes, versions,
-reference checksums, scheduler records, `measurements.csv`, `stages.csv`,
-`RESULTS.md`, and PNG/PDF/SVG runtime/memory and stage-breakdown plots.
-The canonical implementation must match the prepared hashes before a job runs.
-
-## Historical archive
-
-Old code snapshots are in `_archive/historical_20260928`. Old results are in
-`sim_paper/data/comparison_methods/compute/_archive/historical_20260928`, including
-the legacy `comparison_methods/figure_scaling` tree. Original result paths are
-compatibility symlinks so saved provenance continues to resolve. The archive
-manifest records every moved tree. These outputs are never read by the new
-collector. Old stress helpers are historical and are not current launchers.
+The earlier custom-wrapper code/results are in `_archive/wrapper_based_20260928`
+under the code/data compute directories. Their pilot and automatic continuation
+were cancelled. Do not reuse these measurements as comparison evidence.
+Earlier historical compute results are separately archived.
