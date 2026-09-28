@@ -60,7 +60,7 @@ def dispatch(args, cfg):
     print(f"Finished: {out / 'overview_combined.pdf'}", flush=True)
 
 
-def cell_data(X, genes, labels, xyz, cfg):
+def cell_data(X, genes, labels, xyz, slice_id=None):
     import anndata as ad
     import numpy as np
     import pandas as pd
@@ -70,23 +70,27 @@ def cell_data(X, genes, labels, xyz, cfg):
                    var=pd.DataFrame(index=list(genes)))
     a.obsm["spatial_3d"] = np.asarray(xyz, dtype=float)
     a.obsm["spatial"] = a.obsm["spatial_3d"][:, :2].copy()
-    # Known volume boundaries, not per-slice min/max; include the upper edge.
-    a.obs["slice_id"] = np.clip(np.floor(a.obsm["spatial_3d"][:, 2] /
-                               cfg["extent_um"] * cfg["n_slices"]), 0, cfg["n_slices"] - 1).astype(int)
+    # Section labels always come from the method's own slicing routine.
+    if slice_id is not None:
+        a.obs["slice_id"] = np.asarray(slice_id, dtype=int)
     return a
 
 
-def capture_data(X, genes, xy, counts, slice_id, cfg):
+def capture_data(X, genes, xy, composition, composition_key, n, slice_id, cfg):
+    """composition: the method's own per-capture cell-type counts/proportions,
+    columns in TYPES order. The only non-native step is the display label:
+    argmax (most common type; ties -> lowest type number, as in ALBIS)."""
     import numpy as np
+    composition = np.asarray(composition)
+    if composition.shape != (len(xy), len(TYPES)):
+        raise ValueError(f"Native composition has shape {composition.shape}")
     z = (slice_id + .5) * cfg["extent_um"] / cfg["n_slices"]
-    n = counts.sum(axis=1)
-    labels = np.array(TYPES)[counts.argmax(axis=1)]
+    labels = np.array(TYPES)[composition.argmax(axis=1)]
     labels = np.where(n > 0, labels, "unassigned")
-    a = cell_data(X, genes, labels, np.column_stack([xy, np.full(len(xy), z)]), cfg)
-    a.obs["slice_id"] = slice_id
+    a = cell_data(X, genes, labels, np.column_stack([xy, np.full(len(xy), z)]), slice_id)
     a.obs["n_source_cells"] = n
     a.obs["is_empty"] = n == 0
-    a.obsm["cell_type_counts"] = counts
+    a.obsm[composition_key] = composition
     return a
 
 
@@ -132,11 +136,11 @@ def competitor_outputs(method, cfg, out, spider_spots):
         # Top-level alias still points to legacy sim_naive; use the corrected
         # native sim_expr implementation explicitly, without modifying its code.
         from spider.sim_expr import get_sim_spot_level_expr
+        from spider.core import get_onehot_ct
         prior = np.array(cfg["proportions"])
-        trans = np.tile(prior, (len(TYPES), 1))
-        np.fill_diagonal(trans, 0)
-        trans *= (1 - cfg["spider_self_probability"]) / trans.sum(axis=1, keepdims=True)
-        np.fill_diagonal(trans, cfg["spider_self_probability"])
+        # Native st-spider helper: diagonal = strength, off-diagonal = (1-strength)/(K-1).
+        trans = spider.make_transition_matrix(
+            "attractive", len(TYPES), strength=cfg["spider_self_probability"])
         labels, xyz = spider.simulate_10X_3d(
             cell_num=cfg["n_cells"], Num_celltype=len(TYPES), prior=prior, target_trans=trans,
             image_width=cfg["extent_um"], image_height=cfg["extent_um"], image_depth=cfg["extent_um"],
@@ -145,10 +149,18 @@ def competitor_outputs(method, cfg, out, spider_spots):
         expression = spider.get_sim_cell_level_expr(
             celltype_assignment=labels, adata=reference, Num_celltype=len(TYPES),
             Num_ct_sample=np.bincount(labels, minlength=len(TYPES)), match_list=TYPES, ct_key="cell_type_true")
-        cells = cell_data(expression.X, genes, np.array(TYPES)[labels], xyz, cfg)
+        cells = cell_data(expression.X, genes, np.array(TYPES)[labels], xyz)
+        # Native st-spider sectioning. Explicit volume edges: z_bins=<int> uses
+        # data min/max with a half-open top bin and silently drops the max-z cell.
+        native_sections = spider.slice_anndata_by_z(
+            cells, z_key="spatial_3d", z_bins=np.linspace(0, cfg["extent_um"], cfg["n_slices"] + 1))
+        cells.obs["slice_id"] = -1
+        for section in native_sections:
+            cells.obs.loc[section.obs_names, "slice_id"] = section.uns["slice_info"]["slice_id"]
     else:
         import torch
         from scCube.sccube import scCube
+        from scCube.utils import calculate_spot_prop
         torch.manual_seed(cfg["seed"])
         torch.set_num_threads(1)
         model = scCube()
@@ -166,14 +178,17 @@ def competitor_outputs(method, cfg, out, spider_spots):
             save_path=str(out / "sccube_model"), project_name="synthetic_only")
         data, generated_meta = model.generate_pattern_random(
             data, generated_meta, spatial_dim=3, spatial_size=cfg["sccube_grid_size"],
-            delta=cfg["sccube_delta"], lamda=cfg["sccube_lamda"], is_split=False,
+            delta=cfg["sccube_delta"], lamda=cfg["sccube_lamda"],
+            # Native scCube sectioning along z; labels are 1-based.
+            is_split=True, split_coord="point_z", slice_num=cfg["n_slices"],
             set_seed=True, seed=cfg["seed"])
         generated_meta = generated_meta.loc[data.columns]
         if len(generated_meta) != cfg['n_cells']:
             raise ValueError('scCube did not generate the requested cell count')
         xyz = generated_meta[["point_x", "point_y", "point_z"]].to_numpy()
         scale = cfg["extent_um"] / cfg["sccube_grid_size"]
-        cells = cell_data(data.T.to_numpy(), data.index, generated_meta.Cell_type, xyz * scale, cfg)
+        cells = cell_data(data.T.to_numpy(), data.index, generated_meta.Cell_type, xyz * scale,
+                          generated_meta["slice"].astype(int).to_numpy() - 1)
         cells.obsm["spatial_3d_native"] = xyz
     outputs = {"cell": cells}
     if cfg.get('cell_only', False):
@@ -181,7 +196,8 @@ def competitor_outputs(method, cfg, out, spider_spots):
     for modality in ("bin", "spot"):
         sections = []
         for sid in range(cfg["n_slices"]):
-            sub = cells[cells.obs.slice_id == sid].copy()
+            sub = (native_sections[sid] if method == "spider" else
+                   cells[cells.obs.slice_id == sid].copy())
             if sub.n_obs == 0:
                 raise ValueError(f"Empty native cell section {sid}; increase n_cells or reduce n_slices")
             if method == "spider":
@@ -196,7 +212,20 @@ def competitor_outputs(method, cfg, out, spider_spots):
                     gap=cfg["spot_spacing_um"], coord_type="generic",
                     spot_generate_type="square" if modality == "bin" else spider_spots, cell_coord_type="generic")
                 expr, xy, membership = result[:3]
-                counts = np.asarray(membership @ np.eye(len(TYPES), dtype=int)[codes])
+                if sorted(set(codes)) != list(range(len(TYPES))):
+                    # get_onehot_ct only makes columns for types present.
+                    raise ValueError(f"Section {sid} lacks a cell type; Spider W columns would shift")
+                if len(result) == 4:
+                    counts = result[3]  # native W (spot_ct_count), square captures
+                else:
+                    # User-approved exception (AGENTS.md, 2026-09-28): st-spider 1.2.0's
+                    # circle branch computes W but does not return it. This repeats its
+                    # own line (spider/sim_expr.py: spot_ct_count = spot_cell_idx_matrix
+                    # * onehot_ct) with its own membership matrix and one-hot encoder.
+                    counts = membership * get_onehot_ct(init_assign=codes)
+                counts = np.asarray(counts)
+                n_cells = counts.sum(axis=1).astype(int)
+                composition_key = "spider_W"
                 if modality == "spot" and spider_spots == "circle":
                     from scipy.sparse import csr_matrix
                     # Validate all captures in bounded batches; avoid a dense
@@ -227,12 +256,17 @@ def competitor_outputs(method, cfg, out, spider_spots):
                 if len(membership) != sub.n_obs or membership.Cell.nunique() != sub.n_obs:
                     raise ValueError("scCube lost or duplicated cell memberships")
                 loc = loc.set_index("spot").loc[expr_df.columns]
-                counts = pd.crosstab(membership.spot, membership.Cell_type).reindex(
+                # Native scCube per-spot cell-type proportions; reindex only
+                # orders rows/columns (types absent from every spot get 0).
+                counts = calculate_spot_prop(membership).reindex(
                     index=expr_df.columns, columns=TYPES, fill_value=0).to_numpy()
-                if counts.sum() != sub.n_obs:
+                n_cells = membership.spot.value_counts().reindex(expr_df.columns, fill_value=0).to_numpy()
+                composition_key = "sccube_spot_prop"
+                if n_cells.sum() != sub.n_obs:
                     raise ValueError("scCube membership does not cover this section")
                 expr, xy = expr_df.T.to_numpy(), loc[["spot_x", "spot_y"]].to_numpy(dtype=float) * scale
-            sections.append(capture_data(expr, cells.var_names, xy, counts, sid, cfg))
+            sections.append(capture_data(expr, cells.var_names, xy, counts, composition_key,
+                                         n_cells, sid, cfg))
         outputs[modality] = ad.concat(sections, index_unique="-slice", merge="same")
     return outputs
 

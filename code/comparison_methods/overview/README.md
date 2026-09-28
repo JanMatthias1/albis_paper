@@ -41,6 +41,38 @@ sbatch sim_paper/code/comparison_methods/overview/submit_sccube600k.sh \
 The output directory must not exist. This trains the VAE afresh using the
 saved 600k settings; it does not regenerate the reference pool or other methods.
 
+## Native 3D generation and sectioning
+
+Each method builds its own 3D tissue and cuts it into sections with its own
+functions; `generate.py` adds no geometry or slicing of its own:
+
+- ALBIS: `simulate_3d_molecule_sphere_multires` (sphere, native sectioning).
+- scCube: `generate_pattern_random(spatial_dim=3, is_split=True,
+  split_coord="point_z", slice_num=n_slices)` (cube; labels 1-based, stored 0-based).
+- SPIDER: `simulate_10X_3d` (cube), then `spider.slice_anndata_by_z` with
+  explicit edges `linspace(0, extent_um, n_slices + 1)`; `z_bins=<int>` would
+  drop the max-z cell.
+
+Per-slice bins/spots use each method's own 2D capture routine. Bin/spot colour
+is the most common type (ties go to the lowest type number, as in ALBIS) of the
+method's own composition: scCube `calculate_spot_prop`; SPIDER's returned `W`
+for square bins. For SPIDER circular spots `W` is computed but not returned, so
+we repeat SPIDER's own one-line product (the single user-approved exception in
+`../AGENTS.md`). SPIDER's transition target comes from its
+`make_transition_matrix("attractive", 8, strength=0.7)`.
+
+SPIDER is not seedable through `simulate_10X_3d`. Its annealer builds
+`AnnealingConfig()` without `random_state`, so cell-type layouts differ between
+runs even with the same seed. Coordinates are reproducible, and the neighbour
+statistics are stable (8-NN same-type fraction about 0.69 across repeated runs).
+The seedable `spider.simulate_cells` was tested and rejected: with default
+settings it reaches only 0.19–0.33 against the 0.70 target. Figure 5A
+reproducibility therefore rests on the saved SPIDER outputs. The current
+600k scCube/SPIDER data predate this change (sections came from
+`floor(z / extent * n_slices)`), but both native slicers reproduce those
+assignments for all 600,000 cells (0 mismatches, checked 2026-09-28), so they
+were not regenerated.
+
 ## Inputs and dependencies
 
 All methods have 600,000 cells and ten sections. ALBIS uses the uncropped
