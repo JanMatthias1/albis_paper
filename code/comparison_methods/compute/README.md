@@ -1,120 +1,80 @@
-# Preliminary compute comparison
+# Native tissue compute benchmark
 
-Run commands from this directory. The Python runner uses the existing workflow
-adapters and isolated environments in the project's `comparison_methods/` tree;
-these files are not a standalone installation.
+The active benchmark measures native tissue creation before aggregation:
+ALBIS mRNA instances versus scCube/SPIDER cell-level expression and continuous
+3D coordinates. The outputs differ in resolution. See
+[PRE_AGGREGATION_PLAN.md](PRE_AGGREGATION_PLAN.md) for the design and feasibility
+check. The earlier all-modalities ROADMAP is superseded for this benchmark.
 
-## Plot completed results
+## Protocol
 
-```bash
-bash plot_compute.sh
-```
+556 generated genes, eight types, fixed cell density, CPU only, one computational
+thread, Sapphire Rapids nodes. scCube uses 200 training epochs. Each competitor
+uses a shared synthetic 10,000-cell x 556-gene Splatter reference per seed.
+ALBIS uses the actual strong-domain-mix expression settings. Full molecule
+streams are retained without containment assignment, slicing, or capture.
+Native cell expression is materialized before stopping. Output writing and
+validation are outside generation timings; compact summaries are saved rather
+than full tissue datasets. Molecular count and expression sparsity are recorded.
 
-Reads the corrected `comparison_methods/figure_scaling/raw` sweep, never the
-archived fixed-volume results. Writes PNG, PDF, SVG and a measurement CSV to
-`sim_paper/data/comparison_methods/compute/figures`.
+Primary generation time includes scCube training, labeled as a combined stage.
+Input loading/preprocessing, initialization and reference creation are separately
+reported; from-scratch totals include these. Memory uses process-tree RSS sampled
+at 50 ms plus stage boundaries. Peaks may miss brief transients, and summed RSS
+can double-count shared pages. GNU time is retained as a secondary measurement.
+Never interpret resource limits as measured maxima or infer complexity from
+three seeds. No cached model is used in this benchmark.
 
-```bash
-bash plot_compute.sh --input-dir /path/to/raw --output-dir /path/to/figures
-```
+## Run sequence
 
-Columns are cell/bin/spot; rows show wall time (log scale) and peak resident
-memory (GiB), with common y limits across technologies. SPIDER and scCube include
-Splatter: sequential wall/CPU times are summed; peak memory is the maximum of
-stage peaks, not their sum. Failure crosses sit outside the metric axes; failed
-runs are excluded from curves and retained in CSV. CSV also includes CPU seconds,
-source paths, seeds and failure reasons. One run per point: no uncertainty bands
-or fitted complexity claims. Lines only connect observations. Input size is
-requested cells, not output spots/bins. Some competitor spatial paths are 2D;
-this is a comparison of the configured workflows, not identical 3D algorithms.
-
-## Run compute
-
-One Python file dispatches all three methods (or selected methods) and runs
-Splatter once when needed. The default design matches the completed sweep:
-556 genes, random_null, CPU, deterministic seed, density-preserving geometry.
-scCube trains its VAE from scratch. Override `--seed` for a new replicate and
-use a separate output directory.
+Use a fresh absolute directory; existing runs are never overwritten.
 
 ```bash
-# Preview all subprocess commands without running or writing outputs.
-bash run_compute.sh --n-cells 10000 --technology cell --dry-run
-
-# One point, all methods (run on allocated compute resources).
-bash run_compute.sh --n-cells 10000 --technology cell
-
-# Select a method and a fresh output directory.
-bash run_compute.sh --n-cells 20000 --technology spot --method albis --out-dir /path/to/new-point
-
-# Submit all 15 size/technology points, all methods.
-sbatch run_compute.sh
-
-# A selected method across the sweep, in a separate output tree.
-COMPUTE_OUTPUT_ROOT=/path/to/new-sweep sbatch run_compute.sh --method albis
+bash run_compute.sh prepare --root /absolute/new-run
+bash run_compute.sh submit --root /absolute/new-run --phase pilot
+bash plot_compute.sh --root /absolute/new-run
 ```
 
-Default new results: `sim_paper/data/comparison_methods/compute/raw`.
-Existing nonempty point directories are refused. Each step retains stdout,
-stderr, GNU time measurements and its workflow manifest. The summary is saved
-after every step, including failures. A failed Splatter stage skips dependent
-methods while ALBIS can still run. The runner exits nonzero if any step fails.
-SPIDER's known upstream 3D reshape failure above 10k cells is expected; the
-launcher provides the full grid for reproducibility, not an upstream fix.
-Slurm logs appear in the submission directory; resources match the prior sweep
-(4 CPUs, 64 GiB request, two-day limit). No full sweep was submitted when creating
-these scripts.
+The pilot is six tissue runs: 10k and 100k cells, seed 2025, all three methods.
+A reference job precedes competitors. Jobs use two allocated CPUs (one numerical
+thread plus monitoring), initially 64 GiB / 24 hours per tissue worker. At most
+three tissue jobs run concurrently within a submission, one chain per method.
 
-## Larger stress sweep
-
-`prepare_stress.py`, `run_stress.sh`, and `finish_stress.sh` extend the sweep to
-200,000, 500,000 and 1,000,000 cells, for cell/bin/spot and all three methods.
-There are 27 independent method jobs, with at most three running concurrently.
-Each gets 64 GB, four allocated CPUs and 48 hours; computational thread counts
-are fixed to one. The wall limit applies to each method pipeline, including
-its Splatter stage, rather than all three methods sharing one job's limit.
-Each competitor generates a fresh full-size Splatter pool; its costs remain
-included. This differs from the illustration's fixed 10,000-cell reference.
-
-From the project root, choose a fresh absolute output root:
+After successful pilot completion, reporting writes `pilot_review.json` with
+conservative resource recommendations. Hardware mismatches or excessive
+projected requests require review. To submit remaining points after that gate:
 
 ```bash
-root=/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/compute/stress_YYYYMMDD
-comparison_methods/env/analysis/bin/python sim_paper/code/comparison_methods/compute/prepare_stress.py --root "$root"
-sbatch --output="$root/logs/%A_%a.out" sim_paper/code/comparison_methods/compute/run_stress.sh "$root"
-# Replace ARRAY_JOB_ID with the returned ID. Runs after success OR failure.
-sbatch --dependency=afterany:ARRAY_JOB_ID --output="$root/logs/finalize_%j.out" sim_paper/code/comparison_methods/compute/finish_stress.sh "$root" ARRAY_JOB_ID
+bash run_compute.sh submit --root /absolute/new-run --phase full
 ```
 
-The new root links the original 15 baseline directories without modifying them.
-The dependent job saves Slurm accounting, classifies unfinished method stages
-(timeout, out of memory, cancellation, infrastructure failure, or incomplete),
-and writes combined baseline + stress plots and CSV under `figures/`.
-Adapter-reported errors retain their failure reason. Missing measurements are
-never treated as successful runs or substituted with the requested memory limit.
-SPIDER cell tests above 10k are expected to fail in its native 3D path; the
-bin/spot paths are separate 2D workflows. These are workflow stress tests,
-not matched native 3D simulations. One seed per point is exploratory evidence,
-not a precise maximum capacity estimate.
+The complete grid is 10k, 50k, 100k, 200k, 500k, 600k, 1M cells, seeds 2025/101/202
+(63 tissue runs). Already submitted keys are skipped; reference stages are reused
+per seed. A failed chain holds dependent jobs rather than spending resources
+on an unchecked larger case. Retries require a fresh run directory or explicit
+recovery, not silent overwriting. A separate smoke protocol uses 32 output cells,
+128 reference cells, one VAE epoch and a reduced SPIDER iteration budget; it must
+never be included in the scientific measurements.
 
-## Capture correction: 16 µm bins and 55 µm circles
+## Files and outputs
 
-The current compute runner overrides the historical benchmark contract to use
-16 × 16 µm bins and 55 µm diameter circular spots at 100 µm center spacing.
-ALBIS consumes these dimensions directly. For SPIDER spot aggregation only,
-the adapter loads the unmodified upstream `sim_expr` implementation at commit
-`6ccd4da77257f2807c430f8f42fbe2dc175991de` under an isolated module name.
-Installed SPIDER placement stays unchanged; contracts without the explicit
-`pinned_circle_v1` flag retain legacy square behavior. Capture geometry and
-source commit are stored in the output AnnData; the resolved contract is in
-its manifest. scCube still uses its native occupancy-driven aggregation
-(three cells/bin, ten cells/spot); physical dimensions are not enforced there.
+- `native_worker.py`: native APIs, boundary guards, stage timings and validation.
+- `native_benchmark.py`, `native_job.sh`: preparation, reference generation,
+  source checks, execution, cluster submission and persistent job records.
+- `summarize_native.py`: scheduler reconciliation, CSVs, pilot review and figures.
+- `run_compute.*`, `plot_compute.*`: entry points for these active scripts.
 
-The replacement sweep is now **72 independent tests**: eight sizes
-(10k, 20k, 40k, 50k, 100k, 200k, 500k, 1M), three technologies, three methods.
-`prepare_stress.py` no longer links the old baseline, because its capture
-geometry differs. The old `stress_20260923` jobs 35882445/35882478 were cancelled;
-their partial results remain archived. Use a fresh root such as
-`stress_bin16_circle55_20260923` with the submission commands above.
-Summaries and CSV record a geometry version; the plotter refuses mixed versions.
-The earlier stress-sweep section describes the initial submission; these
-geometry and baseline-rerun changes supersede its 27-job/linking description.
+Run directories include the frozen protocol, implementation audit copies,
+settings, per-stage/process measurements, stdout/stderr, source hashes, versions,
+reference checksums, scheduler records, `measurements.csv`, `stages.csv`,
+`RESULTS.md`, and PNG/PDF/SVG runtime/memory and stage-breakdown plots.
+The canonical implementation must match the prepared hashes before a job runs.
+
+## Historical archive
+
+Old code snapshots are in `_archive/historical_20260928`. Old results are in
+`sim_paper/data/comparison_methods/compute/_archive/historical_20260928`, including
+the legacy `comparison_methods/figure_scaling` tree. Original result paths are
+compatibility symlinks so saved provenance continues to resolve. The archive
+manifest records every moved tree. These outputs are never read by the new
+collector. Old stress helpers are historical and are not current launchers.
