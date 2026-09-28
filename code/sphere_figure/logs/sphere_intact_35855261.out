@@ -1,0 +1,8 @@
+Job started: Tue Sep 22 03:36:14 PM EDT 2026
+Host: compute-127.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial/bin/python
+Generating intact base sphere...
+Saved: /dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/outputs/figure_1a_intact_sphere.png
+Saved: /dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/outputs/figure_1a_intact_sphere.pdf
+Saved: /dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/outputs/figure_1a_intact_sphere_transparent.png
+Job finished: Tue Sep 22 04:36:59 PM EDT 2026

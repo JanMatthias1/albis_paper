@@ -33,6 +33,7 @@ def collect(root):
             row = dict(n_cells=summary['n_cells'], n_genes=summary['n_genes'],
                        technology=summary['technology'], scenario=summary['scenario'], seed=summary['seed'],
                        method=name, status='ok' if ok else step.get('manifest_status', 'failed'),
+                       geometry_version=summary.get('geometry_version', 'legacy_bin20_square100'),
                        failure_reason=step.get('failure_reason') or '',
                        wall_seconds=sum(t['wall_clock_seconds'] for t in times) if ok and measured else None,
                        peak_memory_gib=max(t['max_rss_bytes'] for t in times) / 2**30 if ok and measured else None,
@@ -43,6 +44,8 @@ def collect(root):
             rows.append(row)
     if not rows:
         raise ValueError(f'No scaling summaries in {root}')
+    if len({r['geometry_version'] for r in rows}) != 1:
+        raise ValueError('Mixed capture geometries: plot these runs separately')
     if {(r['n_genes'], r['scenario']) for r in rows} != {(556, 'random_null')}:
         raise ValueError('Expected a homogeneous 556-gene random_null sweep')
     keys = [(r['technology'], r['n_cells'], r['method']) for r in rows]
@@ -85,7 +88,7 @@ def main():
                 ax.set_yscale('log')
                 ax.set_title(tech.capitalize(), pad=20)
             else:
-                ax.set_ylim(0, max(r['peak_memory_gib'] for r in rows if r['peak_memory_gib'] is not None) * 1.08)
+                ax.set_ylim(0, max([r['peak_memory_gib'] for r in rows if r['peak_memory_gib'] is not None] or [1]) * 1.08)
                 ax.set_xlabel('Requested cells (thousands)')
             if col == 0:
                 ax.set_ylabel(label)

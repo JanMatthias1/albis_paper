@@ -1,0 +1,12 @@
+Job started: Sat Sep 19 21:57:40 EDT 2026
+Host: compute-177.cm.cluster
+Python: /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial/bin/python
+Generating base sphere with full molecule stream for binning...
+Saved: /dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/outputs/figure_1b_capture_window.png
+Saved: /dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/outputs/figure_1b_capture_window.pdf
+Sectioning sphere into Visium HD-like bins...
+Saved: /dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/outputs/figure_1c_sectioned_bins.png
+Saved: /dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/outputs/figure_1c_sectioned_bins.pdf
+Saved: /dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/outputs/figure_1d_unaligned_bins.png
+Saved: /dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/outputs/figure_1d_unaligned_bins.pdf
+Job finished: Sat Sep 19 22:04:25 EDT 2026

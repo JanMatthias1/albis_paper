@@ -43,12 +43,12 @@ import albis as ab
 
 
 DOMAIN_COLORS = {
-    "D0": "#7B2CBF",
-    "D1": "#1E88E5",
-    "D2": "#00A6A6",
-    "D3": "#66BB6A",
-    "D4": "#F6A21A",
-    "D5": "#D7263D",
+    "D0": "#8E63C7",
+    "D1": "#4C8FD5",
+    "D2": "#43B7A5",
+    "D3": "#72C69C",
+    "D4": "#F2A65A",
+    "D5": "#E65F5C",
 }
 OUTSIDE_COLOR = "#C9CDD3"
 
@@ -98,6 +98,8 @@ def parse_args():
     parser.add_argument("--max-bins", type=int, default=220_000)
     parser.add_argument("--outdir", type=Path, default=SCRIPT_DIR / "outputs")
     parser.add_argument("--dpi", type=int, default=600)
+    parser.add_argument("--max-shift", type=float, default=1500.0,
+                        help="Maximum per-slice translation in µm (use 200 for the original schematic).")
     return parser.parse_args()
 
 
@@ -181,11 +183,9 @@ def plot_capture_window(base, outdir, dpi, max_cells):
     save_figure(fig, outdir, "figure_1b_capture_window", dpi)
 
 
-def run_sectioning(base):
-    # max_deg/max_shift intentionally left at section_3d_molecule_sphere's defaults
-    # (180 deg / 200 um) for this schematic -- a toned-down illustrative version of
-    # the misalignment used in the actual analyzed dataset (generate_simulation.py
-    # uses max_deg=270, max_shift=3000).
+def run_sectioning(base, max_shift=1500.0):
+    # Larger translations make slice displacement visible in the schematic.
+    # Retain the original 180-degree rotation range.
     return ab.section_3d_molecule_sphere(
         base,
         n_slices=10,
@@ -195,6 +195,8 @@ def run_sectioning(base):
         bin_size_um=8.0,
         output_modalities=("bin",),
         slice_axes=("Z",),
+        max_deg=180.0,
+        max_shift=max_shift,
     )
 
 
@@ -232,7 +234,9 @@ def _plot_stacked_bins(adata, outdir, dpi, max_bins, spatial_key, title, stem):
         depthshade=False,
         rasterized=True,
     )
-    style_3d_axis(ax, radius=6000, zlim=(-0.5 * z_offset, 9.5 * z_offset))
+    # Keep displaced slices within view if a larger shift is requested.
+    radius = max(6000.0, float(np.max(np.abs(coords[:, :2]))) * 1.05)
+    style_3d_axis(ax, radius=radius, zlim=(-0.5 * z_offset, 9.5 * z_offset))
     ax.set_box_aspect((1, 1, 1.25))
     ax.view_init(elev=22, azim=-60)
     ax.set_title(title, fontsize=8, fontweight="bold", y=0.94)
@@ -272,7 +276,7 @@ def main():
     plot_capture_window(base, args.outdir, args.dpi, args.max_cells)
 
     print("Sectioning sphere into Visium HD-like bins...")
-    sim = run_sectioning(base)
+    sim = run_sectioning(base, max_shift=args.max_shift)
     adata = sim["bin_adatas"]["Z"]
     plot_binned_sections(adata, args.outdir, args.dpi, args.max_bins)
     plot_unaligned_sections(adata, args.outdir, args.dpi, args.max_bins)

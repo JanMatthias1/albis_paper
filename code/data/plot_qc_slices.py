@@ -10,8 +10,16 @@ obsm['spatial'], colored by domain_true, one subplot per slice_id in a
 2x5 grid.
 
 Usage:
-    python plot_qc_slices.py --modality spot \
-        --tag packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03
+    python plot_qc_slices.py --modality spot [--color-by cell_type_true]
+
+--tag defaults to the current canonical Figure 2 tag for the modality; the
+plot lands in <tag_dir>/plots/.
+
+2026-09-23: FIG2 now points at smaller_sphere/data/ (data moved there in the
+2026-09-17 reorg; the old data/figure_2/<tag>/ path no longer exists), tags
+updated to the 2026-09-23 bin jitter / spot gene-mean retune (spot domain
+size factors tried and dropped the same day), bin8um added, cell
+tag corrected to the 2026-09-17 dispersion retune (-2.5, was -2.3).
 """
 
 import argparse
@@ -27,16 +35,17 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.lines import Line2D
 
-FIG2 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2"
+FIG2 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data"
 PASTEL = ["#4878d0", "#ee854a", "#6acc64", "#d65f5f", "#956cb4",
           "#8c613c", "#dc7ec0", "#797979", "#d5bb67", "#82c6e2"]
 
 DEFAULT_TAGS = {
-    "bin16um": "packing_pf0p04_bin16um_log_mu_-2.5_bsigma07",
-    "spot": "packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03",
-    "cell": "log_mu_-2.3_theta_0.40_jitter0.15_bsigma15",
+    "bin8um": "packing_pf0p04_bin8um_from16umcfg_log_mu_-2.5_jitter0.6_bsigma07",
+    "bin16um": "packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_bsigma07",
+    "spot": "packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03",
+    "cell": "log_mu_-2.5_theta_0.40_jitter0.15_bsigma15",
 }
-MODALITY_FILE_PREFIX = {"bin16um": "bin", "spot": "spot", "cell": "cell"}
+MODALITY_FILE_PREFIX = {"bin8um": "bin", "bin16um": "bin", "spot": "spot", "cell": "cell"}
 
 
 def parse_args():

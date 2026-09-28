@@ -1,4 +1,0 @@
-[config] n_cells=5641241 sphere_r_um=6000 log_mu=-2.0 theta=0.25 jitter=0.10 batch_sigma=0.3 tag=spot_sphere_r6000_ncells5641241
-[generate] spot_sphere_r6000_ncells5641241 not found, generating
-/var/spool/slurm/d/job35751600/slurm_script: line 67: 2277489 Killed                  "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py --modality "${MODALITY}" --sphere-r-um "${SPHERE_R_UM}" --n-cells "${N_CELLS}" --base-gene-lognormal "${LOG_MU}" 0.7 --theta "${THETA}" --theta-jitter "${JITTER}" --batch-sigma "${BATCH_SIGMA}" --sync-unaligned-seed --out-tag "${TAG}"
-slurmstepd: error: Detected 1 oom-kill event(s) in StepId=35751600.batch. Some of your processes may have been killed by the cgroup out-of-memory handler.

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Run one scaling point with existing isolated workflow environments.
 
-Defaults reproduce the corrected sweep: 556 genes, random_null, CPU only,
-volume scaled with cell count. Use --method to select one or more methods.
+Defaults use 556 genes, random_null, CPU only, and volume scaled with cell
+count; updated capture is 16um bins and 55um circular spots for ALBIS/SPIDER.
+scCube retains its native occupancy-based aggregation.
 Outputs are compatible with plot_compute.py and the original scaling summaries.
 """
 from __future__ import annotations
@@ -46,6 +47,13 @@ def main():
                     coordinate_units=bc.coordinate_units, technology=args.technology,
                     technology_params=bc.technologies[args.technology], sequencing_depth=bc.sequencing_depth,
                     scenario='random_null', organization_level=None)
+    contract['technology_params'] = dict(contract['technology_params'])
+    if args.technology == 'bin':
+        contract['technology_params']['bin_size_um'] = 16.0
+    if args.technology == 'spot':
+        contract['technology_params'].update(spot_radius_um=27.5, spot_spacing_um=100.0)
+        contract['spider_capture_implementation'] = 'pinned_circle_v1'
+    contract['compute_geometry_version'] = 'bin16_circle55_spacing100'
     steps = []
     if any(m != 'albis' for m in args.method):
         steps.append(('splatter_expression', 'splatter', 'splatter_expression.R'))
@@ -69,21 +77,35 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     (out / 'contract.json').write_text(json.dumps(contract, indent=2) + '\n')
     summary = dict(n_cells=args.n_cells, n_genes=556, technology=args.technology,
+                   geometry_version=contract['compute_geometry_version'],
+                   technology_params=contract['technology_params'],
                    scenario='random_null', seed=seed, steps=[])
+    # Persist planned stages before starting: Slurm may kill the whole job.
+    summary['steps'] = [dict(name=name, returncode=None, manifest_status='pending',
+                             failure_reason=None, time_v={}, out_dir=str(out / name))
+                        for name, _ in commands]
+    def save_summary():
+        temporary = out / 'scaling_summary.json.tmp'
+        temporary.write_text(json.dumps(summary, indent=2) + '\n')
+        temporary.replace(out / 'scaling_summary.json')
+    save_summary()
     pool_ok = False
-    for name, cmd in commands:
+    for index, (name, cmd) in enumerate(commands):
         step_dir = out / name
         step_dir.mkdir(exist_ok=True)
         if name in ('splatter_spider', 'splatter_sccube') and not pool_ok:
             result = dict(name=name, returncode=None, manifest_status='skipped',
                           failure_reason='Splatter prerequisite failed', time_v={}, out_dir=str(step_dir))
         else:
+            summary['steps'][index]['manifest_status'] = 'running'
+            save_summary()
             print(f'Running {name}: {args.n_cells} cells, {args.technology}', flush=True)
             started = time.monotonic()
             with (step_dir / 'stdout.log').open('w') as stdout, (step_dir / 'stderr.log').open('w') as stderr:
                 proc = subprocess.run(['/usr/bin/time', '-v', '-o', str(step_dir / 'time.txt')] + cmd,
                                       cwd=BENCH, stdout=stdout, stderr=stderr)
-            timing = parse_time_v((step_dir / 'time.txt').read_text())
+            timing_path = step_dir / 'time.txt'
+            timing = parse_time_v(timing_path.read_text()) if timing_path.exists() else {}
             timing.setdefault('wall_clock_seconds', time.monotonic() - started)
             manifest_path = step_dir / 'manifest.json'
             manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
@@ -95,10 +117,8 @@ def main():
                           time_v=timing, out_dir=str(step_dir))
             if name == 'splatter_expression':
                 pool_ok = ok
-        summary['steps'].append(result)
-        temporary = out / 'scaling_summary.json.tmp'
-        temporary.write_text(json.dumps(summary, indent=2) + '\n')
-        temporary.replace(out / 'scaling_summary.json')
+        summary['steps'][index] = result
+        save_summary()
         print(f"  {name}: {result['manifest_status']}", flush=True)
     if any(s['manifest_status'] != 'ok' for s in summary['steps']):
         sys.exit(1)

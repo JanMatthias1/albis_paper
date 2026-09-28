@@ -45,7 +45,7 @@
 # old 6000um/600k config (which is exactly what happened -- see figure.md).
 #
 # 2026-09-17: log_mu -2.3 -> -2.5, dispersion re-tuned via an actual joint
-# log_mu x theta grid search against both Xenium refs (code/data/misc/
+# log_mu x theta grid search against both Xenium refs (code/misc/data/misc/
 # sweep_cell_logmu_theta_joint_xenium.sh, job 35759008), mirroring spot's
 # probe-sweep methodology -- cell had never gotten this treatment before,
 # just one manual 2026-08-27 adjustment (see FIGURE2_METHODOLOGY.md's "Known

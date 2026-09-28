@@ -11,6 +11,16 @@ the calibration history.
 
 ## What's being compared
 
+**2026-09-23 spot decision:** we dropped the experimental
+`--domain-size-factors 0.35 0.6 1.0 1.0 1.6 2.8`. Despite improved
+total-count distribution fit, these factors made spatial domains partly
+identifiable from library depth. The adopted Figure 2 spot configuration
+uses `--base-gene-lognormal -2.25 1.0 --theta 0.25 --theta-jitter 0.10
+--batch-sigma 0.3`, with no domain size factors. Figure 3 uses the same
+expression settings, including in its strong-mix simulations. Earlier
+`dsf*` results are experimental history; see the
+[final decision](../../data/figure_2/smaller_sphere/test/README.md).
+
 Eight modality-vs-real pairings, **one script each** under this directory
 (`<pairing>.sh` -- the `_with_batch.sh` / `_with_batch_tuned.sh` variants
 were retired 2026-08-27 once slice-5 + post-batch became the defaults, and
@@ -19,21 +29,21 @@ reference moved to the two probe panels, see "Superseded output" below):
 
 | Modality | Real reference | Sim config tag |
 |---|---|---|
-| cell | Xenium `non_diseased_lung` | `log_mu_-2.3_theta_0.40_jitter0.15_bsigma15` |
-| cell | Xenium `lung_cancer` | `log_mu_-2.3_theta_0.40_jitter0.15_bsigma15` (same) |
-| bin (8um) | Visium HD `breast_cancer_visium_hd` | `packing_pf0p04_log_mu_0.0_bsigma08` |
-| bin (8um) | Visium HD `human_pancreas_visium_hd` | `packing_pf0p04_log_mu_0.0_bsigma08` (same) |
-| bin (16um) | Visium HD `breast_cancer_visium_hd_16um` | `packing_pf0p04_bin16um_log_mu_-2.5_bsigma07` |
-| bin (16um) | Visium HD `human_pancreas_visium_hd_16um` | `packing_pf0p04_bin16um_log_mu_-2.5_bsigma07` (same) |
-| spot | Visium `lymph_node_visium` (probe, CytAssist FFPE) | `packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03` |
-| spot | Visium `tonsil_visium` (probe, CytAssist FFPE) | `packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03` (same) |
+| cell | Xenium `non_diseased_lung` | `log_mu_-2.5_theta_0.40_jitter0.15_bsigma15` |
+| cell | Xenium `lung_cancer` | `log_mu_-2.5_theta_0.40_jitter0.15_bsigma15` (same) |
+| bin (8um) | Visium HD `breast_cancer_visium_hd` | `packing_pf0p04_bin8um_from16umcfg_log_mu_-2.5_jitter0.6_bsigma07` (2026-09-23: bin16um tissue at 8um) |
+| bin (8um) | Visium HD `human_pancreas_visium_hd` | `packing_pf0p04_bin8um_from16umcfg_log_mu_-2.5_jitter0.6_bsigma07` (same) |
+| bin (16um) | Visium HD `breast_cancer_visium_hd_16um` | `packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_bsigma07` |
+| bin (16um) | Visium HD `human_pancreas_visium_hd_16um` | `packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_bsigma07` (same) |
+| spot | Visium `lymph_node_visium` (probe, CytAssist FFPE) | `packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03` |
+| spot | Visium `tonsil_visium` (probe, CytAssist FFPE) | `packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03` (same) |
 
 **Spot (2026-09-05):** `breast_cancer_visium` (36k whole-transcriptome,
 fresh-frozen) was dropped as spot's tuning target on 2026-09-04 and replaced
 by the two 18k CytAssist probe references, tuned jointly against both. The
 config moved `log_mu` -2.5 -> -2.0 and `theta` 2.0 -> 0.25 (`sphere_r_um`
 2050 and `batch_sigma` 0.3 held). Picked by the probe sweeps
-(`code/data/misc/sweep_spot_logmu_probe.sh`, `sweep_spot_theta_probe.sh`,
+(`code/misc/data/misc/sweep_spot_logmu_probe.sh`, `sweep_spot_theta_probe.sh`,
 `sweep_spot_logmu_theta_joint_probe.sh`, tabulated by
 `summary_spot_logmu_theta_joint.sh`) on the lowest composite = sum of
 `|ln(sim/real ratio)|` over {`theta_hat`, `total_counts_median`,
@@ -52,7 +62,7 @@ a dense upper cloud (the floored genes) far above the NB fit, plus the main
 cloud on it. This is the **same artifact fixed for `cell` on 2026-08-25**
 (`--theta-jitter 0.15`, cell tag `..._jitter0.15_...`); the fix was never
 carried over when spot was retuned onto the probe refs. `--theta-jitter` was
-bracketed (0.10 / 0.15 / 0.25, `code/data/misc/sweep_spot_jitter_probe.sh`
+bracketed (0.10 / 0.15 / 0.25, `code/misc/data/misc/sweep_spot_jitter_probe.sh`
 job 35536033, tabulated by `summary_spot_jitter.sh`): **0.10** is the largest
 value that fully collapses the two clouds into one continuous locus (0.4% of
 genes floored vs 40%; per-gene `theta_hat` median ~0.20, smooth unimodal).
@@ -71,7 +81,7 @@ observations, a graph-fragmentation fix borrowed from the Figure 3
 clustering pipeline, not a real-data-parity correction), then runs
 `count_distribution.py` in four modes (see below). Bin/16um real references
 are resampled from the same raw 10x `binned_outputs/` at 16um instead of
-8um (`code/real_data_qc/misc/run_visium_hd_qc_16um.sh`) -- both resolutions
+8um (`code/misc/real_data_qc/misc/run_visium_hd_qc_16um.sh`) -- both resolutions
 are canonical Visium HD configurations, not a replacement of one by the
 other.
 
@@ -117,14 +127,14 @@ including the sim's batch effect is the fairer comparison now that we're
 down to one slice. It is *not* a small effect (bin16um `theta_hat` at slice
 5: ~1.2 pre-batch vs. ~0.18 post-batch).
 
-**`batch_sigma` is set per modality** (cell 1.5, bin 8um 0.8, bin 16um 0.7,
+**`batch_sigma` is set per modality** (cell 1.5, bin 8um 0.8 -> 0.7 on 2026-09-23 when it adopted the bin16um tissue, bin 16um 0.7,
 spot 0.3), finalized 2026-08-27. The value is chosen on Figure 3's
 pre/post-Harmony slice-separation demo -- each modality's aggregation
 footprint dilutes the fixed-size per-slice shift differently, so one global
 value would be invisible for some modalities and overwhelming for others --
 then confirmed here to still match the real count distribution (spot's and
 cell's `theta_hat` in particular are sensitive to it). Sweep scripts:
-`code/clustering/misc/batch_sigma_sweep.sh` and `batch_sigma_opt_round2.sh`.
+`code/misc/clustering/misc/batch_sigma_sweep.sh` and `batch_sigma_opt_round2.sh`.
 
 **3. Real platform capture window ("realwindow"), baked in 2026-08-31.**
 `generate_simulation_noisy.py` no longer scales the capture window with
@@ -191,7 +201,7 @@ flags together at the top of the relevant script(s) and resubmit -- doesn't
 touch the other pairings. Keep the matching
 `code/clustering/<modality>_celltype_panel.sh` in sync.
 
-`code/data/misc/generate_figure2_batch_tuned.sh` is a convenience SLURM
+`code/misc/data/misc/generate_figure2_batch_tuned.sh` is a convenience SLURM
 array that (re)generates all four sim configs at once into
 `data/figure_2/<tag>/`; the per-pairing scripts don't need it but it's the
 fastest way to rebuild everything.

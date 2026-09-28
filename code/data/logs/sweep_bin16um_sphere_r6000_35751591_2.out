@@ -1,3 +1,0 @@
-[config] n_cells=15043310 sphere_r_um=6000 bin_size_um=16 log_mu=-2.5 batch_sigma=0.7 tag=bin16um_sphere_r6000_ncells15043310
-[generate] bin16um_sphere_r6000_ncells15043310 not found, generating
-slurmstepd: error: *** JOB 35751591 ON compute-111 CANCELLED AT 2026-09-17T06:13:43 DUE TO TIME LIMIT ***

@@ -39,12 +39,12 @@ import albis as ab
 
 
 DOMAIN_COLORS = {
-    "D0": "#7B2CBF",
-    "D1": "#1E88E5",
-    "D2": "#00A6A6",
-    "D3": "#66BB6A",
-    "D4": "#F6A21A",
-    "D5": "#D7263D",
+    "D0": "#8E63C7",
+    "D1": "#4C8FD5",
+    "D2": "#43B7A5",
+    "D3": "#72C69C",
+    "D4": "#F2A65A",
+    "D5": "#E65F5C",
 }
 
 
@@ -162,6 +162,11 @@ def main():
         out = args.outdir / f"figure_1a_intact_sphere.{suffix}"
         fig.savefig(out, dpi=args.dpi, bbox_inches="tight", pad_inches=0.02)
         print(f"Saved: {out}")
+
+    transparent_out = args.outdir / "figure_1a_intact_sphere_transparent.png"
+    fig.savefig(transparent_out, dpi=args.dpi, bbox_inches="tight", pad_inches=0.02, transparent=True)
+    print(f"Saved: {transparent_out}")
+
     plt.close(fig)
 
 

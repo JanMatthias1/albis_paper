@@ -17,7 +17,7 @@
 # tuning knob -- see generate_simulation_noisy.py --bin-size-um help and
 # figure.md 2026-08-25 "bin's near-binary empty/non-empty bin sampling").
 # Compared against real Visium HD breast cancer resampled to 16um
-# (code/real_data_qc/misc/run_visium_hd_qc_16um.sh).
+# (code/misc/real_data_qc/misc/run_visium_hd_qc_16um.sh).
 #
 # Current winning sim config (2026-08-26, bin16um_logmu_sweep -- see
 # figure.md / DATA_VERSIONS.md): packing_pf0p04 (sphere_r_um=2050, ~4% 3D
@@ -48,13 +48,24 @@
 # hvg_matched are now empty-swamped diagnostics. Sim data is (re)generated
 # under data/noisy/<tag>/ then moved into data/figure_2/<tag>/; pre-realwindow
 # data is archived at data/figure_2_oldwindow_20260831/.
+# 2026-09-23: --theta-jitter 1.0 -> 0.6 (theta 2.0 now explicit). bin never
+# overrode generate_simulation_noisy.py's first-pass jitter default, so
+# theta_g = max(1e-3, N(2.0, 1.0)) floored ~2.3% of genes to theta=1e-3 -> a
+# detached band ~100-1000x above the mean-variance trend in every slice
+# (9-11 genes/slice). Swept 0.8/0.6/0.4 at theta=2.0 in
+# data/figure_2/smaller_sphere/test/ (run_theta_jitter_sweep.sh,
+# analyze_sweep.py, outlier_realism.py): 0.8 still leaves the band, 0.6 removes
+# it in all 10 slices; total counts / genes / zero fraction / bulk theta_hat
+# unchanged. Old data + plots archived under
+# data/figure_2/misc/archive/pre_jitter_dsf_retune_20260923/. Data staged
+# from test/data/<modality>_jitter0p6/ (identical flags + seed, no regen).
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/smaller_sphere/logs
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-SIM_TAG="packing_pf0p04_bin16um_log_mu_-2.5_bsigma07"
+SIM_TAG="packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_bsigma07"
 MODALITY="bin"
 REAL_LABEL="breast_cancer_visium_hd_16um"
 SIM_RAW="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MODALITY}_z.h5ad"
@@ -73,6 +84,8 @@ if [[ ! -f "${SIM_RAW}" ]]; then
             --sphere-r-um 2050 \
             --bin-size-um 16 \
             --base-gene-lognormal -2.5 0.7 \
+            --theta 2.0 \
+            --theta-jitter 0.6 \
             --batch-sigma 0.7 \
             --sync-unaligned-seed \
             --out-tag "${SIM_TAG}"

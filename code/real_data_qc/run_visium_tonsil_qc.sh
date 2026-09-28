@@ -23,7 +23,7 @@
 # Output under sim_paper/data/real_data_qc/tonsil_visium/:
 #   tonsil_visium_qc.h5ad, qc_summary.json, qc_*.png
 #
-# Feeds into code/data/misc/sweep_spot_logmu_probe.sh and
+# Feeds into code/misc/data/misc/sweep_spot_logmu_probe.sh and
 # count_distribution/spot_vs_tonsil_visium.sh.
 set -euo pipefail
 

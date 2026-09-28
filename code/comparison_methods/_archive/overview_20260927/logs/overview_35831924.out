@@ -1,0 +1,6 @@
+Job 35831924; host compute-161.cm.cluster; output /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/overview_full_35831924
+Generating synthetic Splatter input; logs and outputs: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/overview_full_35831924
+Generating albis: one tissue, then bin/spot/cell outputs
+Generating sccube: one tissue, then bin/spot/cell outputs
+Generating spider: one tissue, then bin/spot/cell outputs
+Finished: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/overview_full_35831924/overview.pdf

@@ -1,0 +1,46 @@
+{
+  "seed": 20260921,
+  "n_cells": 600000,
+  "n_genes": 2000,
+  "proportions": [
+    0.125,
+    0.125,
+    0.125,
+    0.125,
+    0.125,
+    0.125,
+    0.125,
+    0.125
+  ],
+  "n_slices": 10,
+  "extent_um": 4100.0,
+  "bin_width_um": 16.0,
+  "spot_spacing_um": 100.0,
+  "spot_radius_um": 27.5,
+  "sccube_grid_size": 8,
+  "sccube_delta": 2.0,
+  "sccube_lamda": 0.75,
+  "sccube_epochs": 200,
+  "sccube_cells_per_bin": 3,
+  "sccube_cells_per_spot": 10,
+  "spider_self_probability": 0.7,
+  "spider_max_iterations": 80000,
+  "splatter_source": "sim_paper/data/comparison_methods/overview_full_35831924/splatter",
+  "display_offsets_um": {
+    "albis": [
+      2050.0,
+      2050.0,
+      2050.0
+    ]
+  },
+  "unavailable_methods": {
+    "spider": "Native 3D unavailable at 600,000 cells\nUpstream large-cell path fails"
+  },
+  "albis_source": "Figure 2; separate modality simulations",
+  "plot_bin_edge_width": 0,
+  "plot_marker_sizes": {
+    "cell": 0.15,
+    "bin": 0.05,
+    "spot": 0.6
+  }
+}

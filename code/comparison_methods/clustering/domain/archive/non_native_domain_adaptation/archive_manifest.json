@@ -1,0 +1,34 @@
+[
+  {
+    "from": "sim_paper/code/comparison_methods/clustering/domain/generate_spider.py",
+    "to": "sim_paper/code/comparison_methods/clustering/domain/archive/non_native_domain_adaptation/generate_spider.py"
+  },
+  {
+    "from": "sim_paper/code/comparison_methods/clustering/domain/submit_spider600k.sh",
+    "to": "sim_paper/code/comparison_methods/clustering/domain/archive/non_native_domain_adaptation/submit_spider600k.sh"
+  },
+  {
+    "from": "sim_paper/code/comparison_methods/clustering/domain/compare_spider_iterations.py",
+    "to": "sim_paper/code/comparison_methods/clustering/domain/archive/non_native_domain_adaptation/compare_spider_iterations.py"
+  },
+  {
+    "from": "sim_paper/code/comparison_methods/clustering/domain/plot_spider_slices.py",
+    "to": "sim_paper/code/comparison_methods/clustering/domain/archive/non_native_domain_adaptation/plot_spider_slices.py"
+  },
+  {
+    "from": "sim_paper/code/comparison_methods/clustering/domain/README.md",
+    "to": "sim_paper/code/comparison_methods/clustering/domain/archive/non_native_domain_adaptation/README.md"
+  },
+  {
+    "from": "sim_paper/data/comparison_methods/clustering/domain/spider",
+    "to": "sim_paper/data/comparison_methods/clustering/domain/archive/non_native_domain_adaptation/spider"
+  },
+  {
+    "from": "sim_paper/data/comparison_methods/clustering/domain/README.md",
+    "to": "sim_paper/data/comparison_methods/clustering/domain/archive/non_native_domain_adaptation/README.md"
+  },
+  {
+    "from": "sim_paper/data/comparison_methods/clustering/domain/pilot_jobs.json",
+    "to": "sim_paper/data/comparison_methods/clustering/domain/archive/non_native_domain_adaptation/pilot_jobs.json"
+  }
+]

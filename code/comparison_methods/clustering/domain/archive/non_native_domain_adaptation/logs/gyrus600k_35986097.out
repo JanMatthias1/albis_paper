@@ -1,0 +1,2 @@
+Verified: 600,000 cells, 556 genes, four domains, eight cell types, ten slices.
+Shared domain/cell-type clustering input: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/clustering/domain/spider/gyrus600k_seed20260921/spider/cell.h5ad

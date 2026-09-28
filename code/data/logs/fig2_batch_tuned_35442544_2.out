@@ -1,2 +1,0 @@
-[config] idx=2 modality=spot log_mu=-2.5 bin_size=- theta=2.0 jitter=1.0 batch_sigma=0.3 tag=packing_pf0p04_log_mu_-2.5_bsigma03
-[skip] sim_paper/data/figure_2/packing_pf0p04_log_mu_-2.5_bsigma03 already complete

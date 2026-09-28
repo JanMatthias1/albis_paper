@@ -320,6 +320,12 @@ def parse_args():
         "(e.g. a parameter-sweep label like 'log_mu_-2.5'), so this run doesn't overwrite the "
         "existing simulation_<modality>_<axis>.h5ad.",
     )
+    parser.add_argument("--output-dir", type=Path, default=None,
+                        help="Explicit output directory; overrides data/noisy and --out-tag.")
+    parser.add_argument("--output-stem", default=None,
+                        help="File stem for the h5ad, its _summary.json and plots/<stem>/ (default: "
+                        "simulation_<modality>_<axis>). Figure 3's strong-mix scripts pass a "
+                        "parameter-derived name so the file itself records how it was generated.")
     return parser.parse_args()
 
 
@@ -350,9 +356,9 @@ MAX_SHIFT = args.max_shift if args.max_shift is not None else SPHERE_R_UM * MAX_
 SYNC_UNALIGNED_SEED = args.sync_unaligned_seed
 SEED = args.seed
 OUT_TAG = args.out_tag
-DATA_DIR = (BASE_DATA_DIR / OUT_TAG) if OUT_TAG else BASE_DATA_DIR
+DATA_DIR = args.output_dir if args.output_dir is not None else ((BASE_DATA_DIR / OUT_TAG) if OUT_TAG else BASE_DATA_DIR)
 DATA_DIR.mkdir(parents=True, exist_ok=True)
-OUTPUT_STEM = f"simulation_{OUTPUT_MODALITY}_{SLICE_AXIS.lower()}"
+OUTPUT_STEM = args.output_stem or f"simulation_{OUTPUT_MODALITY}_{SLICE_AXIS.lower()}"
 H5AD_PATH = DATA_DIR / f"{OUTPUT_STEM}.h5ad"
 SUMMARY_PATH = DATA_DIR / f"{OUTPUT_STEM}_summary.json"
 PLOTS_DIR = DATA_DIR / "plots" / OUTPUT_STEM
