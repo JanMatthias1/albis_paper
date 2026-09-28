@@ -64,3 +64,11 @@ Archived scripts preserve historical code and may reference their original
 locations; they are not current entry points.
 The 556-gene experiment launchers now live in `../native556/` and statistical
 distribution plotting in `../statistics/`. These serve other comparison panels.
+
+## Spot aggregation supplement
+
+[spot_aggregation/](spot_aggregation/) contains the slice5 scCube occupancy-sensitivity figure code and reproduction instructions.
+
+## Intact tissue column
+
+The combined overview now shows Tissue Simulation → Stacked Tissue Slices → Slice5. The first column renders all native continuous3D cell positions; it does not reconstruct tissue from section planes. scCube retains its native-coordinate record and is validated against the uniformly scaled display coordinates. All methods must retain more than10 distinct Z coordinates. Cell types use the same palette in all panels. Previous overview exports are preserved under figure_5A_600k/archive_before_intact_tissue_20260928/.

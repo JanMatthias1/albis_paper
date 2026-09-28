@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Combined section-stack and single-section overview, drawn from saved data.
+"""Intact 3D tissue, section-stack and single-section overview from saved data.
 
 No simulation or expression changes. Empty/unassigned captures are hidden,
 matching plot.py. PNG/PDF/SVG and a plotting summary are saved next to the inputs.
@@ -52,6 +52,13 @@ def main():
                 labels=a.obs.cell_type_true.astype(str).to_numpy(),
                 empty=a.obs.is_empty.to_numpy(dtype=bool) if 'is_empty' in a.obs else np.zeros(a.n_obs, bool),
                 n_genes=a.n_vars)
+            if modality == 'cell' and method == 'sccube':
+                native = np.asarray(a.obsm['spatial_3d_native'])
+                factor = cfg['extent_um'] / cfg['sccube_grid_size']
+                if not np.allclose(datasets[method, modality]['xyz'], native * factor):
+                    raise ValueError('scCube coordinates differ from scaled native 3D output')
+            if modality == 'cell' and len(np.unique(datasets[method, modality]['xyz'][:, 2])) <= cfg['n_slices']:
+                raise ValueError(f'{method}: cell Z coordinates are section planes, not intact tissue')
             a.file.close()
             datasets[method, modality]['xyz'] += np.asarray(cfg.get('display_offsets_um', {}).get(method, [0, 0, 0]))
     lo = min(0., min(d['xyz'].min() for d in datasets.values()))
@@ -64,28 +71,30 @@ def main():
     planes = (np.arange(cfg['n_slices']) + .5) * spacing
     plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 10,
                          'pdf.fonttype': 42, 'svg.fonttype': 'none'})
-    fig = plt.figure(figsize=(14.5, 6.8), facecolor='white')
+    fig = plt.figure(figsize=(19, 6.8), facecolor='white')
     # Paired groups each have three modalities; one row per method.
-    x_left = [.08, .225, .37]
-    x_right = [.575, .72, .865]
+    x_tissue = .105
+    x_left = [.285, .415, .545]
+    x_right = [.675, .805, .935]
     centers = x_left + x_right
     y_centers = [.73, .48, .23]
-    fig.text(.225, .963, '3D Tissue Simulation', ha='center', va='center', fontsize=15, fontweight='bold')
+    fig.text(x_tissue, .963, 'Tissue Simulation', ha='center', va='center', fontsize=15, fontweight='bold')
+    fig.text(.415, .963, 'Stacked Tissue Slices', ha='center', va='center', fontsize=15, fontweight='bold')
+    fig.text(x_tissue, .905, 'Intact 3D cells', ha='center', va='center', fontsize=13)
     section_title = f'Slice ID {args.slice_id}' if args.slice_id is not None else f'Slice {args.slice_number}'
-    fig.text(.72, .963, section_title, ha='center', va='center', fontsize=15, fontweight='bold')
+    fig.text(.805, .963, section_title, ha='center', va='center', fontsize=15, fontweight='bold')
     for x, label in zip(centers, modalities * 2):
         fig.text(x, .905, label.capitalize(), ha='center', va='center', fontsize=13)
-    fig.add_artist(plt.Line2D([.49, .49], [.115, .94], transform=fig.transFigure,
-                            color='#DDDDDD', linewidth=.8))
+    for divider in [.21, .61]:
+        fig.add_artist(plt.Line2D([divider, divider], [.115, .94], transform=fig.transFigure, color='#DDDDDD', linewidth=.8))
     summary = []
     default_limits = (lo, hi)
     for row, (method, name) in enumerate(zip(methods, names)):
         y = y_centers[row]
         name = cfg.get('method_labels', {}).get(method, name)
         fig.text(.012, y, name, rotation=90, ha='center', va='center', fontsize=12)
-        fig.text(.512, y, name, rotation=90, ha='center', va='center', fontsize=12)
         if method in cfg.get('unavailable_methods', {}):
-            for x in (.225, .72):
+            for x in (x_tissue, .415, .805):
                 fig.text(x, y, cfg['unavailable_methods'][method], ha='center', va='center', fontsize=11, color='#666666')
             continue
         lo, hi = cfg.get('method_display_limits_um', {}).get(method, default_limits)
@@ -95,6 +104,23 @@ def main():
         planes = (np.arange(cfg['n_slices']) + .5) * spacing
         marker_sizes = cfg.get('method_marker_sizes', {}).get(method, cfg.get(
             'plot_marker_sizes', {'cell': 1.5, 'bin': 1.5, 'spot': 9}))
+        # Preserve native continuous 3D cell positions; never reconstruct from slices.
+        tissue = datasets[method, 'cell']
+        keep_tissue = (tissue['labels'] != 'unassigned') & ~tissue['empty']
+        points = tissue['xyz'][keep_tissue]
+        tissue_labels = tissue['labels'][keep_tissue]
+        order = np.random.default_rng(cfg['seed']).permutation(len(points))
+        ax = fig.add_axes((x_tissue-.065, y-.12, .13, .24), projection='3d')
+        ax.scatter(*points[order].T, c=[colors[t] for t in tissue_labels[order]],
+                   s=marker_sizes['cell'], alpha=cfg.get('plot_alpha', {}).get('cell', .9),
+                   linewidths=0, depthshade=False, rasterized=True)
+        ax.set_proj_type('ortho'); ax.view_init(elev=12, azim=-60)
+        ax.set(xlim=(lo-pad,hi+pad), ylim=(lo-pad,hi+pad), zlim=(lo-pad,hi+pad))
+        ax.set_box_aspect((1,1,1), zoom=1.55); ax.set_axis_off()
+        summary.append(dict(method=method, modality='intact_tissue',
+                            total_observations=len(tissue['xyz']), displayed=int(keep_tissue.sum()),
+                            coordinates='Native continuous 3D cell coordinates; scCube uniform unit scaling and ALBIS display translation only',
+                            section_projection=False))
         for col, modality in enumerate(modalities):
             alpha = cfg.get('plot_alpha', {}).get(modality, .75)
             section_size = cfg.get('section_marker_sizes', {}).get(modality, marker_sizes[modality])
@@ -107,7 +133,7 @@ def main():
             stack[:, 2] = planes[sections[visible]]
             lab = labels[visible]
             order = np.random.default_rng(cfg['seed']).permutation(len(stack))
-            ax = fig.add_axes((x_left[col]-.078, y-.12, .156, .24), projection='3d')
+            ax = fig.add_axes((x_left[col]-.062, y-.12, .124, .24), projection='3d')
             ax.scatter(*stack[order].T, c=[colors[t] for t in lab[order]],
                        s=marker_sizes[modality], marker='s' if modality=='bin' else 'o',
                        alpha=alpha, linewidths=0, depthshade=False, rasterized=True, clip_on=False)
@@ -120,7 +146,7 @@ def main():
             section_mask = sections == args.slice_number - 1
             keep = visible & section_mask
             xy, lab = xyz[keep, :2], labels[keep]
-            ax = fig.add_axes((x_right[col]-.07, y-.12, .14, .24))
+            ax = fig.add_axes((x_right[col]-.06, y-.12, .12, .24))
             if modality == 'bin':
                 all_xy = xyz[section_mask, :2]
                 pitch = np.array([np.median(np.diff(np.unique(all_xy[:, j]))) for j in range(2)])
