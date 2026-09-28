@@ -4,7 +4,7 @@ The rapid adoption of spatial transcriptomics (ST) technologies has been accompa
 
 Here, we introduce ALBIS, a statistically grounded and highly customizable framework that generates synthetic ST data from an *in silico* 3D tissue. ALBIS defines spatially structured cell populations with corresponding markers for gene expression, then initializes individual mRNA molecules in 3D space to create cell-level information with a ground truth 3D coordinate for each molecule and cell. From this common realization, ALBIS cuts the 3D tissue into multiple 2D tissue sections with cell-, bin-, and spot-level measurements, enabling direct comparison across spatial resolutions. Properties of the simulated data, including spatial domains, cell-type composition, gene-expression effects, batch effects, transcript spillover, measurement resolution, and tissue scale, can be systematically varied, enabling rigorous stress-testing of computational methods under known and increasingly challenging conditions.
 
-**Authors:** Jan Matthias, Jianing Yao, Stephanie C. Hicks
+**Authors:** 
 
 **Paper:** Link to be added.
 
