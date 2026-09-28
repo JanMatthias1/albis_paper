@@ -1,68 +1,85 @@
 #!/usr/bin/env bash
-#SBATCH --job-name=sim-app-env
-#SBATCH --partition=shared
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=16G
-#SBATCH --time=02:00:00
-#SBATCH --output=sim-app-env-%j.log
-
 set -euo pipefail
 
-# --- Resolve paths -----------------------------------------------------------
-# $SLURM_SUBMIT_DIR is where you ran sbatch from. BASH_SOURCE is unreliable
-# under SLURM because the script is copied to a spool dir before execution,
-# so derive locations from the submit dir instead.
-SCRIPT_DIR="${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# =============================================================================
+# create_tutorial_env.sh
+#
+# Creates a conda environment for the albis tutorial, installs albis
+# with [tutorial,plot] extras, and registers a Jupyter kernel.
+#
+# Usage:
+#   bash create_tutorial_env.sh
+#
+# Override defaults with env vars:
+#   CONDA_ENV_NAME=my-env PYTHON_VERSION=3.11 bash create_tutorial_env.sh
+# =============================================================================
 
-# --- Load toolchain ----------------------------------------------------------
-# Compute nodes do not inherit your login-node module environment. Load an
-# appropriate Python here. Adjust the module name to whatever `module avail`
-# shows on JHPCE.
-module load conda 2>/dev/null || true
-# module load python/3.11   # alternative if you want a bare python instead
+if [[ -n "${SLURM_SUBMIT_DIR:-}" ]]; then
+    REPO_ROOT="${SLURM_SUBMIT_DIR}"
+else
+    REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+fi
+ALBIS_REPO="${ALBIS_REPO:-/dcs04/hicks/data/Jan/sim_project/albis}"
 
-PYTHON_BIN="${PYTHON:-python3}"
+CONDA_ENV_NAME="${CONDA_ENV_NAME:-albis-tutorial}"
+PYTHON_VERSION="${PYTHON_VERSION:-3.10}"
+KERNEL_NAME="${KERNEL_NAME:-albis-tutorial}"
+KERNEL_DISPLAY_NAME="${KERNEL_DISPLAY_NAME:-Python (albis tutorial)}"
+ENV_PREFIX="${REPO_ROOT}/env/${CONDA_ENV_NAME}"
 
-# --- Choose env location -----------------------------------------------------
-# Default to scratch (home has quotas; scratch is the right place for a venv).
-# Override by exporting SIM_APP_ENV_DIR before submitting.
-ENV_DIR="${SIM_APP_ENV_DIR:-${SCRATCH:?SCRATCH is not set}/sim-app-tutorial-venv}"
-KERNEL_NAME="${SIM_APP_KERNEL_NAME:-sim-app-tutorial}"
-KERNEL_DISPLAY_NAME="${SIM_APP_KERNEL_DISPLAY_NAME:-Python (sim-app tutorial)}"
+if ! command -v conda >/dev/null 2>&1; then
+    echo "ERROR: conda not found. Run: module load conda (or your cluster's conda module)." >&2
+    exit 1
+fi
 
-echo "Creating virtual environment at: ${ENV_DIR}"
-"${PYTHON_BIN}" -m venv "${ENV_DIR}"
+CONDA_BASE="$(conda info --base)"
+# shellcheck disable=SC1091
+source "${CONDA_BASE}/etc/profile.d/conda.sh"
 
-# shellcheck source=/dev/null
-source "${ENV_DIR}/bin/activate"
+if [[ -d "${ENV_PREFIX}" ]]; then
+    echo "[setup] Environment already exists at ${ENV_PREFIX} — skipping creation."
+else
+    echo "[setup] Creating conda environment at ${ENV_PREFIX} (python=${PYTHON_VERSION})"
+    conda create -y --prefix "${ENV_PREFIX}" "python=${PYTHON_VERSION}" pip
+fi
 
-echo "Upgrading packaging tools"
+conda activate "${ENV_PREFIX}"
+
+echo "[setup] Upgrading pip/setuptools/wheel"
 python -m pip install --upgrade pip setuptools wheel
 
-echo "Installing sim-app with plotting support"
-python -m pip install -e "${REPO_ROOT}/sim_app_package[plot]"
+echo "[setup] Installing albis with tutorial + plot extras"
+python -m pip install -e "${ALBIS_REPO}[tutorial,plot]"
 
-echo "Installing Jupyter tools"
-python -m pip install jupyterlab notebook ipykernel
+echo "[setup] Ensuring jupyter notebook + ipykernel are present"
+python -m pip install notebook ipykernel
 
-echo "Registering Jupyter kernel: ${KERNEL_DISPLAY_NAME}"
+echo "[setup] Pinning jupyter_server to 2.18.2 (2.19+ omits the hostname URL needed for JHPCE portal access)"
+python -m pip install "jupyter_server==2.18.2"
+
+echo "[setup] Registering Jupyter kernel: ${KERNEL_DISPLAY_NAME}"
 python -m ipykernel install \
-  --user \
-  --name "${KERNEL_NAME}" \
-  --display-name "${KERNEL_DISPLAY_NAME}"
+    --user \
+    --name "${KERNEL_NAME}" \
+    --display-name "${KERNEL_DISPLAY_NAME}"
 
-cat <<EOF
+echo "[setup] Verifying imports"
+python -c "
+import albis
+import notebook
+import ipykernel
+import jupyter_server
+print(f'albis {albis.__version__} OK')
+print('notebook OK')
+print('ipykernel OK')
+print(f'jupyter_server {jupyter_server.__version__} OK')
+"
 
-Environment ready.
-
-Activate it with:
-  source "${ENV_DIR}/bin/activate"
-
-Open the tutorial with:
-  jupyter lab "${REPO_ROOT}/tutorial/sim_app_tutorial.ipynb"
-
-In Jupyter, select the kernel:
-  ${KERNEL_DISPLAY_NAME}
-
-EOF
+echo ""
+echo "[setup] Done. Environment created at: ${ENV_PREFIX}"
+echo ""
+echo "Activate with:"
+echo "  conda activate ${ENV_PREFIX}"
+echo ""
+echo "Start notebook with:"
+echo "  jupyter-notebook --no-browser --ip=0.0.0.0 --port=8888"

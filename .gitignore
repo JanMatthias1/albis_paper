@@ -7,10 +7,31 @@ __pycache__/
 build/
 dist/
 tutorial/outputs/
-env/sim-app-tutorial
+env/albis-tutorial
 env/*.log
 env/slurm-*.out
+# Installed environments and third-party checkouts; retain env/*.sh setup scripts.
+/env/*/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-data/
+/data/
+/SVG_PLAN.md
+/figure.md
+/FIGURE2_DRAFT.md
+code/applications_albis/alignment/README.md
+code/applications_albis/spatial_clustering/T5_3D_tutorial_stagate.ipynb
+code/applications_albis/alignment/METHODS_reference_alignment_error.md
+
+
+# working notes (not manuscript content)
+code/applications_albis/alignment/README.md
+code/applications_albis/spatial_clustering/README.md
+code/applications_albis/spatial_clustering/TODO.md
+code/applications_albis/**/logs_*/
+code/comparison_methods/README_PRIOR_TESTING.md
+code/clustering/PATHS.md
+code/clustering/README_PLOTTING.md
+
+# Local historical code and logs
+/code/misc/
