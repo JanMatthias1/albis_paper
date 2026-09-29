@@ -1,5 +1,96 @@
 # Direct-native compute comparison
 
+## Staged 1M, 2M and 5M single-seed run
+
+`native_large_1m_5m_20260929` extends the same protocol using seed 2025 only.
+`prepare_large.py` writes scaled inputs and freezes the native workers.
+ALBIS/SPIDER are submitted one size at a time after inspecting previous results.
+scCube trains once, keeps the VAE in memory, and checks its prior measured peak
+before advancing. No model checkpoints are saved. A conservative projection
+(prior peak × size ratio × 1.75) must remain below 80% of the allocation.
+
+`sample_rss.py` observes only the scCube worker's `/proc` RSS every 100 ms,
+using phase labels written outside timed native calls. This adds a generation
+RSS measurement excluding training/validation intervals but including the
+resident VAE/reference and allocations retained from earlier stages. It does
+not measure incremental allocations or process-tree memory and may miss short
+peaks. Cumulative `ru_maxrss`, raw samples, timing stages and gate records are
+retained. Read-only finite checks run in chunks to limit validation temporaries.
+
+Regenerate the larger-run table and default three-panel figure with:
+
+```bash
+comparison_methods/env/analysis/bin/python sim_paper/code/comparison_methods/compute/report_large.py --root sim_paper/data/comparison_methods/compute/native_large_1m_5m_20260929
+```
+
+The plot chooses its range from successful measurements; above 600k it uses a
+logarithmic cell-count axis. It distinguishes sampled scCube generation RSS
+from earlier cumulative peaks. Missing measurements retain explicit statuses.
+
+## Default figure and retained measurements
+
+The default is the approved three-panel layout:
+A, simulation time excluding VAE training and Splatter; B, elapsed time including
+Splatter/input preparation and scCube VAE training; C, CPU process peak RSS.
+scCube's cumulative memory and separate training batches remain explicitly labeled.
+
+From the project root, regenerate the report and default PNG/PDF/SVG figure with:
+
+```bash
+comparison_methods/env/analysis/bin/python sim_paper/code/comparison_methods/compute/report_native_extension.py --root sim_paper/data/comparison_methods/compute/native_extension_200k_600k_20260929
+```
+
+The figure is `figures/three_panel_with_setup/compute_three_panel.{png,pdf,svg}`
+within that run. Add `--extra-plots` to also regenerate the earlier detailed
+runtime, setup, stage, memory and molecule-count figures. Existing extra figures
+are retained when the flag is omitted. For plot-only changes, run
+`plot_compute_three_panel.py --root <run-directory>` with the same Python.
+
+The full `measurements.csv` and `sccube_setup.csv` remain the data sources for
+additional plots: expression generation, spatial placement, native preparation,
+input/preprocessing, Splatter, VAE training, first-use totals, process memory,
+ALBIS molecule counts, batch identity and source paths are retained. The original
+measurement JSON files, validation records, logs and historical script snapshots
+remain unchanged. Plotting reads these measurements; it does not run simulations.
+Training-time annotations are derived from the setup table rather than fixed text.
+
+## Single-seed extension to 600k (2026-09-29)
+
+`native_extension_200k_600k_20260929` adds 200k, 400k, and 600k cells for
+ALBIS, SPIDER and scCube, using seed 2025 only. `prepare_extension.py` scales
+the original protocol to these sizes and freezes the executed scripts.
+ALBIS/SPIDER use independent native processes. scCube uses the validated split
+calls, one new training pass and an in-memory VAE across all three new sizes.
+The previous VAE was not saved, so this is a separate training batch.
+Large-run output hashing is disabled after the exact 10k equivalence check;
+shape and finite-value checks remain. `report_native_extension.py` combines
+the earlier pilot with these measurements, retaining batch-specific setup
+costs and cumulative scCube memory semantics. Missing measurements are reported.
+
+## scCube split-timing pilot (2026-09-29)
+
+The user approved direct calls to scCube's existing private preparation helper,
+`scCube.utils.train_vae`, and `scCube.utils.generate_vae` to separate VAE training
+from generation. `sccube_split.py` preserves native outputs and performs no
+wrapping, patching, or reimplementation. The original combined-API pilot remains
+unchanged. The new run is `sccube_split_pilot_20260929` under the compute data directory.
+
+Two separate processes run the combined API at 10k cells and the split sequence
+at 10k/100k. Both use the same 10k-cell reference, 556 genes, seed 2025, 200
+epochs, CPU class and one computational thread. The split process trains once,
+retains the VAE in memory, and prepares fresh native inputs per size. It saves
+no model files. The first generation follows training's RNG state; subsequent
+sizes reset generation RNGs to seed 2025. Output digests at 10k must match exactly
+before `report_sccube_split.py` accepts measurements and produces plots.
+
+Plots distinguish one-time setup, simulation scaling, and first-use accounting
+(setup charged once per size, not independently retrained). The reused Splatter
+reference cost comes from its original measurement. scCube RSS is a cumulative
+high-water mark over training, earlier generation and validation, not independent
+per-size generation memory. Larger sizes and additional seeds remain future work.
+
+## Original combined-API pilot
+
 Each method has its own short script containing top-level calls to its native
 public API. There are no custom method functions, adapters, monkey-patching,
 replacement implementations, or transformations of returned model outputs.
