@@ -31,6 +31,12 @@ with a cell-type legend and no footer.
   600,000 cells plus bins/spots, then renders the figure. Reuses the current
   synthetic Splatter pool and links the current ALBIS/SPIDER datasets.
 
+- `submit_native600k.sh`: regenerates **both** scCube and SPIDER through the
+  native-only `generate.py`, links the current ALBIS data and Splatter pool, and
+  renders once both finish. Run it with `bash` (it submits three jobs). The
+  default output is `figure_5A_600k_native_<date>`. First run: jobs
+  36030957 (spider), 36030958 (sccube) and 36030959 (render), 2026-09-28.
+
 To regenerate scCube without overwriting the current figure:
 
 ```bash

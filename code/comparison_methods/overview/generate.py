@@ -1,63 +1,19 @@
-"""One native 3D tissue per method, three outputs; use --help for invocation.
+"""scCube or SPIDER: one native 3D tissue, then native slices, bins and spots.
 
-The parent uses only stdlib and dispatches to the existing method environments.
+Run once per method inside that method's environment (see submit_figure5A.sh).
+Expression comes from the run's Splatter pool (OUT/splatter). ALBIS is not
+generated here; the Figure 5A ALBIS tissue comes from
+applications_albis/cross_modality_alignment/strong_domain_mix/generate_strongmix_offsets.py.
 No empirical inputs, pretrained atlas, or custom spatial/aggregation algorithm.
 """
 import argparse
 import hashlib
 import importlib.metadata
 import json
-import os
 from pathlib import Path
 import random
-import subprocess
-import sys
 
-HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[3]
-OLD = ROOT / "comparison_methods"
-ENVS = OLD / "env"
 TYPES = [f"type{i}" for i in range(1, 9)]
-
-
-def run_command(command, log, env):
-    with log.open("w") as handle:
-        subprocess.run(list(map(str, command)), stdout=handle, stderr=subprocess.STDOUT,
-                       env=env, check=True)
-
-
-def dispatch(args, cfg):
-    out = args.out.resolve()
-    out.mkdir(parents=True, exist_ok=True)
-    if any(out.iterdir()):
-        raise FileExistsError(f"Use a new output directory: {out}")
-    config = out / "settings.json"
-    config.write_text(json.dumps(cfg, indent=2) + "\n")
-    env = dict(os.environ, OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1",
-               MKL_NUM_THREADS="1", NUMBA_NUM_THREADS="1",
-               MPLCONFIGDIR=str(out / "cache/matplotlib"),
-               NUMBA_CACHE_DIR=str(out / "cache/numba"),
-               XDG_CACHE_HOME=str(out / "cache"), PYTHONHASHSEED=str(cfg["seed"]))
-    for p in ["cache/matplotlib", "cache/numba"]:
-        (out / p).mkdir(parents=True)
-    contract = out / "splatter_contract.json"
-    contract.write_text(json.dumps(dict(n_cells=cfg["n_cells"], n_genes=cfg["n_genes"],
-                                       n_cell_types=len(TYPES), cell_type_proportions=cfg["proportions"])))
-    print(f"Generating synthetic Splatter input; logs and outputs: {out}", flush=True)
-    run_command([ENVS / "splatter/bin/Rscript", OLD / "code/workflows/splatter_expression.R",
-                 "--contract", contract, "--seed", cfg["seed"], "--out-dir", out / "splatter"],
-                out / "splatter.log", env)
-    manifest = json.loads((out / "splatter/manifest.json").read_text())
-    if manifest["status"] != "ok":
-        raise RuntimeError(manifest["failure_reason"])
-    for method, environment in [("albis", "our_method"), ("sccube", "sccube"), ("spider", "spider")]:
-        print(f"Generating {method}: one tissue, then bin/spot/cell outputs", flush=True)
-        run_command([ENVS / environment / "bin/python", __file__, "--method", method,
-                     "--settings", config, "--out", out, "--spider-spots", args.spider_spots],
-                    out / f"{method}.log", env)
-    run_command([ENVS / "analysis/bin/python", HERE / "plot_combined.py", "--input", out],
-                out / "plot.log", env)
-    print(f"Finished: {out / 'overview_combined.pdf'}", flush=True)
 
 
 def cell_data(X, genes, labels, xyz, slice_id=None):
@@ -92,30 +48,6 @@ def capture_data(X, genes, xy, composition, composition_key, n, slice_id, cfg):
     a.obs["is_empty"] = n == 0
     a.obsm[composition_key] = composition
     return a
-
-
-def albis_outputs(cfg):
-    import numpy as np
-    sys.path.insert(0, str(ROOT / "albis"))
-    from albis.simulation_sphere import simulate_3d_molecule_sphere_multires
-    # Preserve ALBIS's native gene model: 80 markers/type => 556 genes for eight types.
-    mix = np.full((len(TYPES), len(TYPES)), .30 / (len(TYPES) - 1))
-    np.fill_diagonal(mix, .70)
-    result = simulate_3d_molecule_sphere_multires(
-        n_cells=cfg["n_cells"], n_cell_types=len(TYPES), n_domains=len(TYPES), domain_type_mix=mix,
-        marker_genes_per_type=80, sphere_R_um=cfg["extent_um"] / 2,
-        n_slices=cfg["n_slices"], batch_sigma=0, max_deg=0, max_shift=0,
-        capture_window_um=False, xenium_capture_window_um=False,
-        bin_size_um=cfg["bin_width_um"], spot_spacing_um=cfg["spot_spacing_um"],
-        spot_radius_um=cfg["spot_radius_um"], seed=cfg["seed"],
-        output_modalities=("cell", "bin", "spot"), slice_axes=("Z",))
-    outputs = {"cell": result["adata_cell_sectioned"]["Z"],
-               "bin": result["bin_adatas"]["Z"], "spot": result["spot_adatas"]["Z"]}
-    for a in outputs.values():
-        a.obsm["spatial_3d_native"] = a.obsm["spatial_3d"].copy()
-        a.obsm["spatial_3d"] = a.obsm["spatial_3d"] + cfg["extent_um"] / 2
-        a.obsm["spatial"] = a.obsm["spatial_3d"][:, :2].copy()
-    return outputs
 
 
 def competitor_outputs(method, cfg, out, spider_spots):
@@ -246,9 +178,10 @@ def competitor_outputs(method, cfg, out, spider_spots):
             else:
                 ids = sub.obs_names
                 # Native routine relies on columns 2/3 being x/y. Drop other metadata.
+                # Feed scCube its own unscaled grid coordinates, not a round-trip of ours.
                 native_meta = pd.DataFrame({"Cell": ids, "Cell_type": sub.obs.cell_type_true.to_numpy(),
-                                           "point_x": sub.obsm["spatial"][:, 0] / scale,
-                                           "point_y": sub.obsm["spatial"][:, 1] / scale})
+                                           "point_x": sub.obsm["spatial_3d_native"][:, 0],
+                                           "point_y": sub.obsm["spatial_3d_native"][:, 1]})
                 source = pd.DataFrame(sub.X.toarray().T, index=sub.var_names, columns=ids)
                 expr_df, loc, membership = model.generate_spot_data_random(
                     source, native_meta, platform="ST" if modality == "bin" else "Visium",
@@ -271,23 +204,15 @@ def competitor_outputs(method, cfg, out, spider_spots):
     return outputs
 
 
-# albis_outputs() never reads n_genes/proportions/sccube_*/spider_*; those only
-# feed the shared Splatter pool (dispatch()) or the competitor methods. Reporting
-# the full shared cfg under albis's manifest wrongly implies it consumed them.
-ALBIS_SETTINGS_KEYS = ["seed", "n_cells", "n_slices", "extent_um",
-                       "bin_width_um", "spot_spacing_um", "spot_radius_um"]
-
-
 def worker(args, cfg):
     import numpy as np
     random.seed(cfg["seed"])
     np.random.seed(cfg["seed"])
     destination = args.out / args.method
     destination.mkdir(parents=True, exist_ok=False)
-    outputs = albis_outputs(cfg) if args.method == "albis" else competitor_outputs(args.method, cfg, args.out, args.spider_spots)
-    reported_settings = {k: cfg[k] for k in ALBIS_SETTINGS_KEYS} if args.method == "albis" else cfg
-    report = dict(method=args.method, settings=reported_settings, empirical_input=False, pretrained_atlas=False,
-                  expression_input="internal" if args.method == "albis" else "Splatter synthetic pool",
+    outputs = competitor_outputs(args.method, cfg, args.out, args.spider_spots)
+    report = dict(method=args.method, settings=cfg, empirical_input=False, pretrained_atlas=False,
+                  expression_input="Splatter synthetic pool",
                   coordinate_units="um; scCube units scaled uniformly to requested extent",
                   slice_ids="zero-based; capture z is section midpoint; cell z is continuous",
                   spider_spots=args.spider_spots, outputs={})
@@ -298,7 +223,7 @@ def worker(args, cfg):
         report["spider_runtime_version"] = getattr(spider, "__version__", "unknown")
         report["aggregation_function"] = "spider.sim_expr.get_sim_spot_level_expr" if args.spider_spots == "circle" else "spider.get_sim_spot_level_expr"
     report["versions"] = {}
-    for package in ["numpy", "anndata", "scCube", "spider", "albis", "torch"]:
+    for package in ["numpy", "anndata", "scCube", "st-spider", "torch"]:
         try:
             report["versions"][package] = importlib.metadata.version(package)
         except importlib.metadata.PackageNotFoundError:
@@ -317,6 +242,8 @@ def worker(args, cfg):
             raise ValueError(f"Unexpected cell labels: {modality}")
         if not a.obs_names.is_unique:
             raise ValueError(f"Duplicate observation identifiers: {modality}")
+        if "n_genes" in cfg and a.n_vars != cfg["n_genes"]:
+            raise ValueError(f"{modality} has {a.n_vars} genes; settings expect {cfg['n_genes']}")
         a.uns["overview_method"] = args.method
         if args.method == "spider":
             a.uns["spider_spot_geometry"] = args.spider_spots
@@ -331,11 +258,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--settings", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True, help="New directory; never overwrite existing runs")
-    parser.add_argument("--method", choices=["all", "albis", "sccube", "spider"], default="all")
+    parser.add_argument("--method", choices=["sccube", "spider"], required=True)
     parser.add_argument("--spider-spots", choices=["circle", "square"], default="circle",
                         help="Native circular or square capture using installed st-spider 1.2.0")
     args = parser.parse_args()
     cfg = json.loads(args.settings.read_text())
     if len(cfg["proportions"]) != len(TYPES) or abs(sum(cfg["proportions"]) - 1) > 1e-8:
         raise ValueError("This overview expects eight types with proportions summing to 1")
-    dispatch(args, cfg) if args.method == "all" else worker(args, cfg)
+    worker(args, cfg)
