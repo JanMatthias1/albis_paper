@@ -125,7 +125,7 @@ def cluster(root, task):
     nc, labels = connected_components(a.obsp['connectivities'], directed=False)
     diagnostic = dict(connected_components=int(nc), largest_components=np.sort(np.bincount(labels))[-10:][::-1].tolist(),
                       expression_graph_k=15, weighting='umap', harmony_applied=False, reused='graph_source' in report)
-    sweep = load_shared('leiden_sweep', '02_leiden_resolution_sweep.py')
+    sweep = load_shared('leiden_sweep', 'step02_leiden_resolution_sweep.py')
     res, k, trials = sweep.find_resolution_for_k(a, 8, .01, 3., 15, 0, 'leiden_cell_type_true')
     # The saved result contains only this experiment's inferred labels.
     if 'leiden_domain_true' in a.obs:

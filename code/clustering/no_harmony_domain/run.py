@@ -28,7 +28,7 @@ def embed(root,task):
     report=dict(task=task,harmony_applied=False,n_obs=a.n_obs,n_genes=a.n_vars,versions={n:importlib.metadata.version(n) for n in ['scanpy','anndata','numpy','scipy','scikit-learn']})
     started=time.monotonic()
     if task['pipeline']=='expression':
-        load_shared('plain_pca','01.2_pca_harmony.py').preprocess_for_pca(a,30,0,10000)
+        load_shared('plain_pca','step01_pca_harmony.py').preprocess_for_pca(a,30,0,10000)
         pcs=a.obsm['X_pca_pre_harmony'].copy()
     else:
         from banksy.initialize_banksy import initialize_banksy
@@ -86,7 +86,7 @@ def cluster(root,task):
     nc,lab=connected_components(a.obsp['connectivities'],directed=False)
     diagnostic=dict(connected_components=int(nc),largest_components=np.sort(np.bincount(lab))[-10:][::-1].tolist(),expression_graph_k=15,weighting='umap',harmony_applied=False)
     save(dest/'graph_diagnostic.json',diagnostic)
-    sweep=load_shared('leiden_sweep','02_leiden_resolution_sweep.py')
+    sweep=load_shared('leiden_sweep','step02_leiden_resolution_sweep.py')
     target=int(a.obs.domain_true.nunique());assert target==6
     res,k,trials=sweep.find_resolution_for_k(a,target,.01,3.,15,0,'leiden_domain_true')
     result=dict(task=task,n_obs=a.n_obs,n_slices=int(a.obs.slice_id.nunique()),domain_ari=float(adjusted_rand_score(a.obs.domain_true.astype(str),a.obs.leiden_domain_true.astype(str))),slice_ari=float(adjusted_rand_score(a.obs.slice_id.astype(str),a.obs.leiden_domain_true.astype(str))),target_clusters=target,achieved_clusters=int(k),resolution=float(res),trials=trials,harmony_applied=False,graph=diagnostic)

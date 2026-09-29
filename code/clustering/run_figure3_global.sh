@@ -29,7 +29,7 @@
 #             -> data/figure_3/strong_domain_mix/batch_sigma_slide/<modality>/bs<s>[_seed<n>]/
 #   summary   after everything above: strong_domain_mix/generate/check_matches_figure2.py (every
 #             generated dataset = Figure 2 config + strong mix), then
-#             plot_figure3_summaries.sh (plot_ari_recovery, plot_domain_vs_celltype,
+#             plot_figure3_summaries.sh (plot_banksy_vs_pca_recovery, plot_banksy_vs_pca_condensed,
 #             plot_batch_sigma_slide_final)
 #
 # Data generation, QC, PCA/Harmony and BANKSY skip themselves when their output

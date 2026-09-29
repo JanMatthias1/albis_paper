@@ -15,7 +15,7 @@ bin/spot; `cell` gets a one-hot synthesised from its hard labels so every
 modality is on one table.
 
 Reads each modality's resolution-matched clustering written by
-02_leiden_resolution_sweep.py:
+step02_leiden_resolution_sweep.py:
     data/figure_3/weak_domain_mix/pca_harmony/<mod>/bs<sigma>/ari_recovery_qc/
         simulation_<mod>_z_ari_recovery.h5ad
         -> obs['leiden_cell_type_true'], obs['leiden_domain_true']

@@ -71,33 +71,33 @@ if [[ ! -f "${SIM_QC}" ]]; then
             --sync-unaligned-seed \
             --out-tag "${SIM_TAG}"
         echo "[qc] ${SIM_TAG}"
-        "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
+        "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
         echo "[move] ${NOISY_DIR} -> ${FIG2_DIR}"
         mkdir -p sim_paper/data/figure_2/smaller_sphere/data
         mv "${NOISY_DIR}" "${FIG2_DIR}"
     else
-        echo "[qc] ${SIM_QC} not found but raw exists, running 00_qc_filter.py directly against figure_2/"
-        "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" \
+        echo "[qc] ${SIM_QC} not found but raw exists, running step00_qc_filter.py directly against figure_2/"
+        "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py --modality "${MODALITY}" \
             --input "${SIM_RAW}" --output "${SIM_QC}"
     fi
 fi
 
 if [[ ! -f "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad" ]]; then
     echo "[pca_harmony] running"
-    "${PYTHON_BIN}" sim_paper/code/clustering/01.2_pca_harmony.py \
+    "${PYTHON_BIN}" sim_paper/code/clustering/step01_pca_harmony.py \
         --modality "${MODALITY}" --input "${SIM_QC}" \
         --no-umap-sample \
         --output "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad"
 fi
 
 echo "[ari] resolution-matched ARI recovery"
-"${PYTHON_BIN}" sim_paper/code/clustering/02_leiden_resolution_sweep.py \
+"${PYTHON_BIN}" sim_paper/code/clustering/step02_leiden_resolution_sweep.py \
     --modality "${MODALITY}" \
     --packing-tag "${SIM_TAG}" \
     --input "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad" \
     --output-dir "${CLUSTER_ROOT}/ari_recovery_qc"
 
-# Use the SAME resolution 02_leiden_resolution_sweep.py's binary search already found
+# Use the SAME resolution step02_leiden_resolution_sweep.py's binary search already found
 # for cell_type_true (achieves the true category count exactly), rather than a
 # fixed guess -- otherwise this qualitative plot's predicted-cluster count can
 # drift from the true count and look like a mismatch that isn't really there

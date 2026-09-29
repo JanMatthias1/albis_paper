@@ -1,7 +1,0 @@
-[task 7] bin16um batch_sigma=0.05 lambda=0.5 k_geom=100
-Python: /dcs04/hicks/data/Jan/sim_project/sim_paper/env/sim-app-banksy/bin/python
-albis module: /dcs04/hicks/data/Jan/sim_project/albis/albis/__init__.py
-albis version: 0.1.0
-
-Generating bin data for slice axis Z with theta=2.0, theta_jitter=0.6, noise_scale=1.3, batch_sigma=0.05, base_gene_lognormal=(-2.5, 0.7), n_cells=600000, cell_r_mean=7.5, allow_cell_overlap=False, sphere_r_um=2050.0, capture_window_um=(6500.0, 6500.0), core_fuzz_width_um=102.5, max_shift=1025.0, bin_size_um=16.0, sync_unaligned_seed=True, seed=2025
-slurmstepd: error: *** JOB 35884614 ON compute-177 CANCELLED AT 2026-09-23T14:12:54 ***

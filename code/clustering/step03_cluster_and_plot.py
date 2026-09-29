@@ -2,9 +2,9 @@
 """
 Run Leiden or Louvain clustering and UMAP from a Harmony-corrected representation.
 
-This is separate from 01.2_pca_harmony.py so clustering algorithm/resolution can be
+This is separate from step01_pca_harmony.py so clustering algorithm/resolution can be
 iterated without recomputing normalization, PCA, or Harmony. Clusters on
-01.2_pca_harmony.py's output (Harmony-corrected PCA embedding), using the first
+step01_pca_harmony.py's output (Harmony-corrected PCA embedding), using the first
 --n-pcs dimensions (variance-ordered).
 
 --pipeline is kept as a single-choice flag (every caller passes
@@ -65,7 +65,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--packing-tag", default=None,
         help="If set, use data/clustering_<packing-tag>/ as the root instead of data/clustering/ "
-        "(matches 02_leiden_resolution_sweep.py's --packing-tag). Ignored if --input/--output-dir given.",
+        "(matches step02_leiden_resolution_sweep.py's --packing-tag). Ignored if --input/--output-dir given.",
     )
     parser.add_argument("--modality", choices=VALID_MODALITIES, default="spot")
     parser.add_argument("--algorithm", choices=VALID_ALGORITHMS, default="leiden")
@@ -106,7 +106,7 @@ def fixed_margin_legend_ncol(categories, max_wide: int = 10) -> int:
     which sits inside PANEL_MARGINS' fixed strip with no tight_layout/
     bbox_inches to rescue a horizontal overflow. Short labels (cluster_label
     "0".."7") fit a full wide row even at 8 categories -- verified by
-    rendering (2026-09-18), same fix as 01.2_pca_harmony.py's identically-
+    rendering (2026-09-18), same fix as step01_pca_harmony.py's identically-
     named helper. Longer labels (cell_type_true "type1".."type8") overflow
     past the axis edge at the same count, so those still wrap to a narrower
     4-column row."""
@@ -246,7 +246,7 @@ def main() -> None:
     if not args.input.is_file():
         raise SystemExit(
             f"Input file not found: {args.input}\n"
-            f"Run sim_paper/code/clustering/01.2_pca_harmony.py first."
+            f"Run sim_paper/code/clustering/step01_pca_harmony.py first."
         )
 
     tag = resolution_tag(args.resolution)
@@ -322,7 +322,7 @@ def main() -> None:
     shared_umap_key = "X_umap_pca_post_harmony"
     if shared_umap_key in adata.obsm:
         print(
-            f"[umap] Reusing {shared_umap_key} from the 01.2_pca_harmony.py output -- this figure's "
+            f"[umap] Reusing {shared_umap_key} from the step01_pca_harmony.py output -- this figure's "
             "UMAP is then the exact same embedding as the before/after-Harmony panel "
             "(clustering/Leiden still uses its own neighbor graph above)."
         )

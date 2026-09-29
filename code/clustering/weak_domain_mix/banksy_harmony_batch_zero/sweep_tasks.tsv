@@ -1,0 +1,16 @@
+task	modality	k_geom	lambda	qc_h5ad	out_dir
+0	cell	60	0	sim_paper/data/figure_3/weak_domain_mix/data/cell/log_mu_-2.5_theta_0.40_jitter0.15_bsigma0_qc.h5ad	sim_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/sweep/cell/lam0
+1	cell	60	0.1	sim_paper/data/figure_3/weak_domain_mix/data/cell/log_mu_-2.5_theta_0.40_jitter0.15_bsigma0_qc.h5ad	sim_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/sweep/cell/lam0.1
+2	cell	60	0.2	sim_paper/data/figure_3/weak_domain_mix/data/cell/log_mu_-2.5_theta_0.40_jitter0.15_bsigma0_qc.h5ad	sim_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/sweep/cell/lam0.2
+3	cell	60	0.3	sim_paper/data/figure_3/weak_domain_mix/data/cell/log_mu_-2.5_theta_0.40_jitter0.15_bsigma0_qc.h5ad	sim_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/sweep/cell/lam0.3
+4	cell	60	0.5	sim_paper/data/figure_3/weak_domain_mix/data/cell/log_mu_-2.5_theta_0.40_jitter0.15_bsigma0_qc.h5ad	sim_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/sweep/cell/lam0.5
+5	bin16um	100	0	sim_paper/data/figure_3/weak_domain_mix/data/bin16um/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_bsigma0_qc.h5ad	sim_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/sweep/bin16um/lam0
+6	bin16um	100	0.1	sim_paper/data/figure_3/weak_domain_mix/data/bin16um/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_bsigma0_qc.h5ad	sim_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/sweep/bin16um/lam0.1
+7	bin16um	100	0.2	sim_paper/data/figure_3/weak_domain_mix/data/bin16um/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_bsigma0_qc.h5ad	sim_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/sweep/bin16um/lam0.2
+8	bin16um	100	0.3	sim_paper/data/figure_3/weak_domain_mix/data/bin16um/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_bsigma0_qc.h5ad	sim_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/sweep/bin16um/lam0.3
+9	bin16um	100	0.5	sim_paper/data/figure_3/weak_domain_mix/data/bin16um/packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_bsigma0_qc.h5ad	sim_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/sweep/bin16um/lam0.5
+10	spot	8	0	sim_paper/data/figure_3/weak_domain_mix/data/spot/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma0_qc.h5ad	sim_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/sweep/spot/lam0
+11	spot	8	0.1	sim_paper/data/figure_3/weak_domain_mix/data/spot/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma0_qc.h5ad	sim_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/sweep/spot/lam0.1
+12	spot	8	0.2	sim_paper/data/figure_3/weak_domain_mix/data/spot/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma0_qc.h5ad	sim_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/sweep/spot/lam0.2
+13	spot	8	0.3	sim_paper/data/figure_3/weak_domain_mix/data/spot/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma0_qc.h5ad	sim_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/sweep/spot/lam0.3
+14	spot	8	0.5	sim_paper/data/figure_3/weak_domain_mix/data/spot/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma0_qc.h5ad	sim_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/sweep/spot/lam0.5

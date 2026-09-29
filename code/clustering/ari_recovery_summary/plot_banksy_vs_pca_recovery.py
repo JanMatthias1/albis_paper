@@ -50,7 +50,7 @@ INK_MUTED = "#3d3d3d"
 GRIDLINE = "#DDDDDD"
 BASELINE = "#c3c2b7"
 
-# Same type scale as plot_domain_vs_celltype.py / Figure 2.
+# Same type scale as the Figure 2 plots.
 TITLE_SIZE = 16
 LABEL_SIZE = 15
 TICK_SIZE = 12
@@ -67,7 +67,7 @@ def read_ari(path: Path, ground_truth: str) -> float:
 
 def final_runs(mix: str, target: str) -> list[tuple[str, str, int, Path]]:
     """[(modality, λ, seed, ari_summary path)] from that mix's final_tasks.tsv."""
-    tsv = CODE_DIR / mix / "banksy" / TARGET_DIR[target] / "final_tasks.tsv"
+    tsv = CODE_DIR / mix / "banksy_harmony_batch_zero" / TARGET_DIR[target] / "final_tasks.tsv"
     return [(r["modality"], r["lambda"], int(r["seed"]),
              PROJECT_DIR / r["out_dir"] / "ari" / f"ari_summary_{TRUE_MOD[r['modality']]}.json")
             for r in csv.DictReader(tsv.open(), delimiter="\t")]

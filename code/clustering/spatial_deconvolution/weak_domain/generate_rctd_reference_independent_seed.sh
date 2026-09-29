@@ -80,7 +80,7 @@ fi
 
 if [[ ! -f "${SIM_QC}" ]]; then
     echo "[qc] ${TAG}"
-    "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+    "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
         --modality cell --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 

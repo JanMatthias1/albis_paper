@@ -13,7 +13,7 @@ def main():
     inputs = {}
     audit = []
     for mix in ['strong', 'weak']:
-        table = SHARED / f'{mix}_domain_mix/banksy/domain/final_tasks.tsv'
+        table = SHARED / f'{mix}_domain_mix/banksy_harmony_batch_zero/domain/final_tasks.tsv'
         for row in csv.DictReader(table.open(), delimiter='\t'):
             modality, seed = row['modality'], int(row['seed'])
             path = (ROOT / row['qc_h5ad']).resolve(strict=True)
@@ -44,9 +44,9 @@ def main():
     snap=BASE/'source_snapshot';snap.mkdir()
     for f in CODE.iterdir():
         if f.is_file():shutil.copy2(f,snap/f.name)
-    for name in ['01_build_banksy_matrix.py','01.2_pca_harmony.py','02_leiden_resolution_sweep.py']:
+    for name in ['step01_build_banksy_matrix.py','step01_pca_harmony.py','step02_leiden_resolution_sweep.py']:
         shutil.copy2(SHARED/name,snap/name)
-    save(BASE/'shared_source_sha256.json',{n:hashlib.sha256((SHARED/n).read_bytes()).hexdigest() for n in ['01_build_banksy_matrix.py','01.2_pca_harmony.py','02_leiden_resolution_sweep.py']})
+    save(BASE/'shared_source_sha256.json',{n:hashlib.sha256((SHARED/n).read_bytes()).hexdigest() for n in ['step01_build_banksy_matrix.py','step01_pca_harmony.py','step02_leiden_resolution_sweep.py']})
     shutil.copy2(CODE/'README.md',BASE/'README.md')
     print(f'Validated {len(inputs)} inputs; prepared {len(sweep)} sweep tasks and {len(final)} final tasks.',flush=True)
 

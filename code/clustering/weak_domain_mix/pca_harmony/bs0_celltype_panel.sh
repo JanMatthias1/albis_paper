@@ -46,13 +46,13 @@ echo "[input] ${SIM_QC} -> ${CLUSTER_ROOT}"
 
 if [[ ! -f "${PCA_H5AD}" ]]; then
     echo "[pca_harmony] running"
-    "${PYTHON_BIN}" sim_paper/code/clustering/01.2_pca_harmony.py \
+    "${PYTHON_BIN}" sim_paper/code/clustering/step01_pca_harmony.py \
         --modality "${MOD}" --input "${SIM_QC}" "${UMAP_FLAGS[@]}" --output "${PCA_H5AD}"
 fi
 
 if [[ ! -f "${ARI_JSON}" ]]; then
     echo "[ari] resolution-matched ARI recovery"
-    "${PYTHON_BIN}" sim_paper/code/clustering/02_leiden_resolution_sweep.py \
+    "${PYTHON_BIN}" sim_paper/code/clustering/step02_leiden_resolution_sweep.py \
         --modality "${MOD}" --input "${PCA_H5AD}" --output-dir "${CLUSTER_ROOT}/ari_recovery_qc"
 fi
 

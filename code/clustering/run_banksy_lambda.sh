@@ -4,7 +4,7 @@
 #SBATCH --partition=shared
 #
 # One BANKSY run at a fixed lambda = one array task. Used by the Figure 3
-# strong_domain_mix/banksy/ and weak_domain_mix/banksy/ panels; submit through
+# strong_domain_mix/banksy_harmony_batch_zero/ and weak_domain_mix/banksy_harmony_batch_zero/ panels; submit through
 # submit_banksy_lambda.sh, which sets --array/--mem/--output per modality.
 #
 #   sbatch --array=<ids> run_banksy_lambda.sh TASKS_TSV
@@ -13,8 +13,8 @@
 #   task  modality  k_geom  lambda  qc_h5ad  out_dir  [seed]
 # (seed = the simulation seed of qc_h5ad; only the plots group by it)
 #
-# Each task: 01_build_banksy_matrix.py (BANKSY -> PCA -> Harmony, seeded) ->
-# 02_leiden_resolution_sweep.py (Leiden resolution bisected to the true
+# Each task: step01_build_banksy_matrix.py (BANKSY -> PCA -> Harmony, seeded) ->
+# step02_leiden_resolution_sweep.py (Leiden resolution bisected to the true
 # category count; scores BOTH domain_true and cell_type_true) -> labels.csv.gz.
 # --max-m 1 / --stagger-scale 5 match strong_domain_mix/generate/generate_strong_mix_*.sh, so
 # lambda is the only BANKSY setting that differs from the batch-sigma plot.
@@ -53,7 +53,7 @@ echo "[input] ${QC}"
 echo "[output] ${RUN}"
 
 if [[ ! -f "${BANKSY_H5AD}" && ( "${MODE}" == final || ! -f "${ARI_JSON}" ) ]]; then
-    "${BANKSY_PYTHON}" sim_paper/code/clustering/01_build_banksy_matrix.py \
+    "${BANKSY_PYTHON}" sim_paper/code/clustering/step01_build_banksy_matrix.py \
         --modality "${PMOD}" --input "${QC}" \
         --lambda "${LAM}" --k-geom "${KG}" --max-m 1 \
         --stagger-scale 5 --skip-umap \
@@ -61,7 +61,7 @@ if [[ ! -f "${BANKSY_H5AD}" && ( "${MODE}" == final || ! -f "${ARI_JSON}" ) ]]; 
 fi
 
 if [[ ! -f "${ARI_JSON}" || ( "${MODE}" == final && ! -f "${ARI_H5AD}" ) ]]; then
-    "${TUTORIAL_PYTHON}" sim_paper/code/clustering/02_leiden_resolution_sweep.py \
+    "${TUTORIAL_PYTHON}" sim_paper/code/clustering/step02_leiden_resolution_sweep.py \
         --modality "${PMOD}" --input "${BANKSY_H5AD}" --output-dir "${RUN}/ari"
 
     "${TUTORIAL_PYTHON}" - "${ARI_H5AD}" "${RUN}/labels.csv.gz" <<'EOF'

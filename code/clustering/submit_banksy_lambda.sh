@@ -4,8 +4,8 @@
 #
 #   bash submit_banksy_lambda.sh TASKS_TSV LOG_DIR [sweep|final]
 #
-# Called by the run_*.sh wrappers in strong_domain_mix/banksy/ and
-# weak_domain_mix/banksy/. Rows already done are not submitted (sweep: ARI
+# Called by the run_*.sh wrappers in strong_domain_mix/banksy_harmony_batch_zero/ and
+# weak_domain_mix/banksy_harmony_batch_zero/. Rows already done are not submitted (sweep: ARI
 # summary exists; final: ARI summary and ari/plots/ exist). DRY_RUN=1 prints
 # the sbatch commands only. DEPENDENCY=<sbatch dependency, e.g. afterany:123>
 # gates every submitted array (the runner fails loudly if an input is missing).

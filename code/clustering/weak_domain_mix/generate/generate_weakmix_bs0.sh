@@ -54,7 +54,7 @@ if [[ ! -f "${SIM_RAW}" ]]; then
         --output-dir "${RUN}" --output-stem "${STEM}"
 fi
 if [[ ! -f "${SIM_QC}" ]]; then
-    "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+    "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
         --modality "${MOD}" --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 echo "[done] ${RUN}"

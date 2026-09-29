@@ -1,4 +1,4 @@
-"""Shared PC-pair grid plotting, used by 01.2_pca_harmony.py.
+"""Shared PC-pair grid plotting, used by step01_pca_harmony.py.
 
 Plots adjacent PC pairs (PC1 vs PC2, PC3 vs PC4, ...) before and after Harmony
 as two grid figures, colored by a single obs column.

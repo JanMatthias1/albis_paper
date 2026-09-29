@@ -19,7 +19,7 @@
 # canonical=0.7, sphere_r_um=2050 (smaller_sphere disc), bin_size_um=16.
 #
 # Full pipeline per point: generate (strong-domain-mix) -> QC ->
-# BANKSY+Harmony -> 02_leiden_resolution_sweep.py -> composition_recovery.py
+# BANKSY+Harmony -> step02_leiden_resolution_sweep.py -> composition_recovery.py
 # (ARI + slice_id leakage).
 # 2026-09-23: generate flags matched to the retuned Figure 2 config so the
 # normal- and strong-mix datasets differ ONLY by --strong-domain-mix
@@ -74,21 +74,21 @@ if [[ ! -f "${SIM_RAW}" ]]; then
         --output-dir "${RUN}" --output-stem "${DATA_TAG}"
 fi
 if [[ ! -f "${SIM_QC}" ]]; then
-    "${TUTORIAL_PYTHON}" sim_paper/code/clustering/00_qc_filter.py \
+    "${TUTORIAL_PYTHON}" sim_paper/code/clustering/step00_qc_filter.py \
         --modality bin --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 
 mkdir -p "${RUN}"
 BANKSY_H5AD="${RUN}/banksy_matrix/simulation_bin_z_banksy_pca_harmony_qc.h5ad"
 if [[ ! -f "${BANKSY_H5AD}" ]]; then
-    "${BANKSY_PYTHON}" sim_paper/code/clustering/01_build_banksy_matrix.py \
+    "${BANKSY_PYTHON}" sim_paper/code/clustering/step01_build_banksy_matrix.py \
         --modality bin --input "${SIM_QC}" \
         --lambda "${LAM}" --k-geom "${KG}" --max-m 1 \
         --stagger-scale 5 --skip-umap \
         --output-dir "${RUN}/banksy_matrix"
 fi
 
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/02_leiden_resolution_sweep.py \
+"${TUTORIAL_PYTHON}" sim_paper/code/clustering/step02_leiden_resolution_sweep.py \
     --modality bin --packing-tag "strong_mix_bin16um_bs${BS}" \
     --input "${BANKSY_H5AD}" --output-dir "${RUN}/ari"
 

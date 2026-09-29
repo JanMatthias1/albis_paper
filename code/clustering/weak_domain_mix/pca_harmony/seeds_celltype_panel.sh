@@ -51,11 +51,11 @@ echo "[task ${TASK}] ${NAME} batch=${BATCH} seed=${SEED}: ${SIM_QC} -> ${CLUSTER
 [[ -n "${DRY_RUN:-}" || -f "${SIM_QC}" ]] || { echo "[error] input missing: ${SIM_QC}" >&2; exit 1; }
 
 if [[ ! -f "${PCA_H5AD}" ]]; then
-    "${RUN[@]}" "${PYTHON_BIN}" sim_paper/code/clustering/01.2_pca_harmony.py \
+    "${RUN[@]}" "${PYTHON_BIN}" sim_paper/code/clustering/step01_pca_harmony.py \
         --modality "${MOD}" --input "${SIM_QC}" "${UMAP_FLAGS[@]}" --output "${PCA_H5AD}"
 fi
 if [[ ! -f "${ARI_JSON}" ]]; then
-    "${RUN[@]}" "${PYTHON_BIN}" sim_paper/code/clustering/02_leiden_resolution_sweep.py \
+    "${RUN[@]}" "${PYTHON_BIN}" sim_paper/code/clustering/step02_leiden_resolution_sweep.py \
         --modality "${MOD}" --input "${PCA_H5AD}" --output-dir "${CLUSTER_ROOT}/ari_recovery_qc"
 fi
 [[ -n "${DRY_RUN:-}" ]] && { echo "[dry-run] then step03_cluster_and_plot.py at the cell_type_true-matched resolution"; exit 0; }

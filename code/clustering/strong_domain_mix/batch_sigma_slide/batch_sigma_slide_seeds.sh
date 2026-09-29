@@ -120,21 +120,21 @@ if [[ ! -f "${SIM_RAW}" ]]; then
 fi
 if [[ ! -f "${SIM_QC}" ]]; then
     echo "[qc] ${TAG}"
-    "${TUTORIAL_PYTHON}" sim_paper/code/clustering/00_qc_filter.py \
+    "${TUTORIAL_PYTHON}" sim_paper/code/clustering/step00_qc_filter.py \
         --modality "${MOD}" --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 
 mkdir -p "${RUN}"
 BANKSY_H5AD="${RUN}/banksy_matrix/simulation_${MOD}_z_banksy_pca_harmony_qc.h5ad"
 if [[ ! -f "${BANKSY_H5AD}" ]]; then
-    "${BANKSY_PYTHON}" sim_paper/code/clustering/01_build_banksy_matrix.py \
+    "${BANKSY_PYTHON}" sim_paper/code/clustering/step01_build_banksy_matrix.py \
         --modality "${MOD}" --input "${SIM_QC}" \
         --lambda "${LAM}" --k-geom "${KG}" --max-m 1 \
         --stagger-scale 5 --skip-umap \
         --output-dir "${RUN}/banksy_matrix"
 fi
 
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/02_leiden_resolution_sweep.py \
+"${TUTORIAL_PYTHON}" sim_paper/code/clustering/step02_leiden_resolution_sweep.py \
     --modality "${MOD}" --packing-tag "cellbin_batch_slide_${TAG}" \
     --input "${BANKSY_H5AD}" --output-dir "${RUN}/ari"
 

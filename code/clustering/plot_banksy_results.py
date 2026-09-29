@@ -16,7 +16,7 @@ from anndata._io.specs import read_elem
 import step03_cluster_and_plot as cluster
 from pc_pairs import sampled_indices
 
-SPEC = importlib.util.spec_from_file_location('pca_plotting', Path(__file__).with_name('01.2_pca_harmony.py'))
+SPEC = importlib.util.spec_from_file_location('pca_plotting', Path(__file__).with_name('step01_pca_harmony.py'))
 pca = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(pca)
 
