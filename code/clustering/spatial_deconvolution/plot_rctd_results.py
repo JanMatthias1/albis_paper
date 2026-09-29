@@ -65,7 +65,9 @@ ANNOT_COLOR = "#eb6834"  # categorical slot 2 (orange) -- visually distinct "thi
 GRID_COLOR = "#DDDDDD"
 MUTED = "#898781"
 
-SLICE_ID = "5"
+# Stored slice_id 4 = 5th of 10 slices from the bottom (was 5 = 5th from the top
+# until 2026-09-29); same slice as Figures 2 and 5. Titles count from 1.
+SLICE_ID = "4"
 ZOOM_XMIN, ZOOM_XMAX = 0, 1200
 ZOOM_YMIN, ZOOM_YMAX = 0, 1200
 
@@ -173,7 +175,7 @@ def plot_spatial_zoom(true_frac, est_frac, spatial, meta, spot_radius_um,
         sm = ScalarMappable(norm=norm, cmap=row_cmap)
         fig.colorbar(sm, ax=axes[row, col_est], fraction=0.12, pad=0.03, aspect=8)
 
-    fig.suptitle(f"RCTD deconvolution, slice {SLICE_ID}", fontsize=17, fontweight="bold")
+    fig.suptitle(f"RCTD deconvolution, slice {int(SLICE_ID) + 1}", fontsize=17, fontweight="bold")
     if out_name == "rctd_spatial_zoom_4types.png":
         add_dataset_caption(fig)
     out = os.path.join(OUT_DIR, out_name)

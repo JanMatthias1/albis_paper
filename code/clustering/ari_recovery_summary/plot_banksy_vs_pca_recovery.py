@@ -1,40 +1,10 @@
 #!/usr/bin/env python
-"""
-Manuscript panel: BANKSY vs. plain gene-expression embedding, each scored on
-BOTH spatial-domain and cell-type recovery, across cell / bin16um / spot, on
-the weak (Figure 2) and strong domain-mix data.
-
-    rows     strong mix, weak mix
-    columns  BANKSY -> PCA -> Harmony   (batch_sigma = 0)
-             genes  -> PCA -> Harmony   (batch_sigma = 0)
-             genes  -> PCA -> Harmony   (each modality's tuned batch_sigma:
-                                         cell 1.5 / bin16um 0.7 / spot 0.3)
-
-The first two columns are the controlled comparison (same data, only the
-embedding differs). BANKSY is not shown under batch: its neighbour
-aggregation keeps the per-slice batch shift and removes all cross-slice
-overlap, so Harmony cannot correct it and Leiden clusters by slice (found
-2026-09-24; archived notes: data/misc/banksy_cell_20260925/README.md). The third column shows the plain
-pipeline doing its actual job, correcting a real batch effect.
-
-Sources (all resolution-matched Leiden ARI from 02_leiden_resolution_sweep.py):
-  BANKSY     figure_3/<mix>_domain_mix/banksy/{domain,cell_type}/<mod>/lam<λ>/ari/
-             final runs at the λ chosen on the strong mix and reused for the weak
-             mix; λ is read from code/clustering/<mix>_domain_mix/banksy/
-             {domain,cell_type}/final_tasks.tsv (the tables that ran the jobs), so
-             the figure cannot drift from the code. Choice + reasons:
-             code/clustering/strong_domain_mix/banksy/README.md
-  genes σ=0  figure_3/<mix>_domain_mix/pca_harmony/<mod>/bs0/ari_recovery_qc/
-  genes σ    figure_3/<mix>_domain_mix/pca_harmony/<mod>/bs<σ>/ari_recovery_qc/
-             (weak mix at its usual σ = the Figure 2 data)
-Every bar is the mean over simulation seeds 2025/101/202 (seed 2025 folders
-have no suffix, the others end in _seed<n>), with a sample-SD error bar and
-one dot per seed; a bar with fewer than 3 finished seeds is labelled n=1/n=2.
-Missing inputs are drawn as "pending" instead of failing.
-
-Usage:
-    conda activate /dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial
-    python sim_paper/code/clustering/ari_recovery_summary/plot_banksy_vs_pca_recovery.py
+"""Figure 3 recovery: batch-zero BANKSY/expression use PCA → Leiden.
+Tuned-batch expression retains PCA → Harmony → Leiden. Batch-zero results
+come from the completed no_harmony_domain and no_harmony_cell_type experiments.
+BANKSY lambdas were retuned on strong-mix seed2025, also included in reporting.
+load() retains historical Harmony results for paired diagnostic comparisons;
+load_current() supplies the manuscript plots.
 """
 
 from __future__ import annotations
@@ -70,9 +40,9 @@ TARGET_DIR = {"domain_true": "domain", "cell_type_true": "cell_type"}
 ROWS = {"strong": ("Strong domain mix", "strong_domain_mix"), "weak": ("Weak domain mix", "weak_domain_mix")}
 COLUMNS = ["banksy", "genes_bs0", "genes_bs"]
 COLUMN_TITLE = {
-    "banksy": "BANKSY → PCA → Harmony\nσ = 0",
-    "genes_bs0": "Genes → PCA → Harmony\nσ = 0",
-    "genes_bs": "Genes → PCA → Harmony\ntuned σ",
+    "banksy": "BANKSY → PCA → Leiden\nσ = 0",
+    "genes_bs0": "Genes → PCA → Leiden\nσ = 0",
+    "genes_bs": "Genes → PCA → Harmony → Leiden\ntuned σ",
 }
 
 INK = "#000000"
@@ -129,6 +99,46 @@ def load() -> tuple[dict, dict]:
                 for target in TARGETS:
                     for seed in SEEDS:
                         put((row, col, m, target), seed, read_ari(genes_path(row, m, batched, seed), target))
+    return data, lambdas
+
+
+def load_current():
+    """Require complete, verified no-Harmony scores for every batch-zero bar."""
+    historical, _ = load()
+    data = {key: value for key, value in historical.items() if key[1] == 'genes_bs'}
+    lambdas = {}
+    for target, experiment, metric, count in [
+        ('domain_true', 'no_harmony_domain', 'domain_ari', 6),
+        ('cell_type_true', 'no_harmony_cell_type', 'cell_type_ari', 8),
+    ]:
+        path = FIG3_DIR / experiment / 'summary/metrics_by_seed.csv'
+        with path.open() as handle:
+            rows = list(csv.DictReader(handle))
+        if len(rows) != 36:
+            raise ValueError(f'{path}: expected 36 results')
+        for row in rows:
+            saved = json.loads(Path(row['path']).read_text())
+            if saved['harmony_applied'] or row['status'] != 'complete' or int(row['achieved_clusters']) != count:
+                raise ValueError(f'Invalid no-Harmony result: {row["path"]}')
+            col = 'banksy' if row['pipeline'] == 'banksy' else 'genes_bs0'
+            key = (row['mix'], col, row['modality'], target)
+            seed = int(row['seed'])
+            if seed in data.setdefault(key, {}):
+                raise ValueError(f'Duplicate result: {key}/{seed}')
+            value = float(row[metric])
+            if not np.isclose(value, saved[metric]):
+                raise ValueError(f'Summary differs from run: {row["path"]}')
+            data[key][seed] = value
+            if col == 'banksy':
+                lam = row['lambda']
+                if lambdas.setdefault((row['modality'], target), lam) != lam:
+                    raise ValueError('Inconsistent BANKSY lambda')
+    for mix in ROWS:
+        for col in COLUMNS:
+            for mod in MODALITIES:
+                for target in TARGETS:
+                    if set(data.get((mix, col, mod, target), {})) != set(SEEDS):
+                        raise ValueError(f'Incomplete results: {mix}/{col}/{mod}/{target}')
     return data, lambdas
 
 
@@ -189,7 +199,7 @@ def plot_panel(ax, data: dict, lambdas: dict, row: str, col: str) -> None:
 
 
 def main() -> None:
-    data, lambdas = load()
+    data, lambdas = load_current()
 
     fig, axes = plt.subplots(len(ROWS), len(COLUMNS), figsize=(16, 9.6), sharey=True)
     for r, (row, (row_title, _)) in enumerate(ROWS.items()):
@@ -209,7 +219,8 @@ def main() -> None:
 
     out_path = FIG3_DIR / "ari_recovery_summary" / "banksy_vs_pca_recovery.png"
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, dpi=300, facecolor="white", bbox_inches="tight")
+    for ext in ("png", "pdf", "svg"):
+        fig.savefig(out_path.with_suffix("." + ext), dpi=300, facecolor="white", bbox_inches="tight")
     plt.close(fig)
     print(f"[save] {out_path}")
 

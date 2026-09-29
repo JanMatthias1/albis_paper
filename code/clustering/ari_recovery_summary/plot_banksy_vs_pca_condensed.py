@@ -14,7 +14,7 @@ import plot_banksy_vs_pca_recovery as source
 
 
 def main():
-    data, lambdas = source.load()
+    data, lambdas = source.load_current()
     out = source.FIG3_DIR / 'ari_recovery_summary'
     stem = out / 'banksy_vs_pca_recovery_condensed'
     styles = [
@@ -69,8 +69,8 @@ def main():
             ax.text(x, -.25, text, transform=ax.get_xaxis_transform(),
                     ha='center', va='top', fontsize=source.TICK_SIZE, fontweight='bold')
     axes[0].set_ylabel('Adjusted Rand Index')
-    handles = [Patch(facecolor='#808080', edgecolor='white', label='BANKSY → PCA → Harmony'),
-               Patch(facecolor='white', edgecolor='#808080', hatch='///', label='Genes → PCA → Harmony')]
+    handles = [Patch(facecolor='#808080', edgecolor='white', label='BANKSY → PCA → Leiden'),
+               Patch(facecolor='white', edgecolor='#808080', hatch='///', label='Genes → PCA → Harmony → Leiden')]
     fig.legend(handles=handles, loc='lower center', bbox_to_anchor=(.5, .005),
                ncol=2, frameon=False, fontsize=source.TICK_SIZE, columnspacing=2.0, handletextpad=.6)
     fig.subplots_adjust(left=.055, right=.992, top=.83, bottom=.30, wspace=.08)
@@ -86,8 +86,8 @@ def main():
     metadata = dict(source_plot_code=str(source.__file__), n_groups=12, n_seed_scores=36,
                     retained='Domain: BANKSY only at batch0. Cell type: expression-only at tuned batch. Both mixes and all modalities.',
                     aggregation='Bars: mean; error bars: sample SD; dots: simulation seeds 2025, 101, 202.',
-                    downstream='Every series uses PCA, Harmony by slice, and Leiden with resolution selected for known category count.',
-                    banksy='Domain lambda: cell1.0/bin0.5/spot0.3. All BANKSY inputs have batch_sigma0; no tuned-batch BANKSY series is shown.',
+                    downstream='Batch-zero series use PCA and Leiden without Harmony; tuned-batch expression retains Harmony by slice. Resolution targets the known category count.',
+                    banksy='Domain lambda: cell0.3, bin0.3/spot0.5. Selected on strong-mix seed2025, which also participates in reporting. All BANKSY inputs have batch_sigma0; no tuned-batch BANKSY series is shown.',
                     batch='Nonzero expression series: cell1.5/bin0.7/spot0.3.',
                     spatial='k_geom cell60/bin100/spot8.',
                     styling='Original Figure 3 modality palette and typography. Solid: BANKSY; hatched: expression-only. Numeric labels are means.',
@@ -97,12 +97,12 @@ def main():
     caption = ('Spatial-domain recovery uses BANKSY embeddings at '
                'batch_sigma=0; cell-type recovery uses expression-only embeddings with tuned '
                'batch_sigma=1.5, 0.7, and 0.3 for cells, 16um bins, and spots, respectively. '
-               'Both panels show strong and weak domain mixing. All series use PCA, Harmony '
+               'Both panels show strong and weak domain mixing. Batch-zero BANKSY uses PCA and Leiden without Harmony; tuned-batch expression uses PCA, Harmony '
                'by slice, and Leiden with resolution selected to match the known category count. '
                'Bars show mean ARI across simulation seeds 2025, 101, 202; '
                'error bars show sample SD and dots show all three seeds. Numeric labels show means. '
-               'BANKSY domain lambda is 1.0, 0.5, 0.3 for cells, bins, spots; k_geom is 60, 100, 8. '
-               'Parameters were selected on strong-mix data and reused for weak-mix data. '
+               'BANKSY domain lambda is 0.3, 0.3, 0.5 for cells, bins, spots; k_geom is 60, 100, 8. '
+               'Parameters were retuned on strong-mix seed2025 and reused for weak-mix data; seed2025 also participates in reporting. '
                'Bin/spot cell-type recovery scores dominant labels, not mixture fractions.\n')
     with open(f'{stem}_caption.txt', 'w') as f:
         f.write(caption)

@@ -1,0 +1,16 @@
+== /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/strong_mix/
+Traceback (most recent call last):
+  File "/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/plot_rctd_results.py", line 271, in <module>
+    true_frac, est_frac, spatial, meta, spot_radius_um = load_data()
+  File "/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/plot_rctd_results.py", line 88, in load_data
+    spot = ad.read_h5ad(SPOT_H5AD)
+  File "/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/anndata/_io/h5ad.py", line 239, in read_h5ad
+    with h5py.File(filename, "r") as f:
+  File "/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/h5py/_hl/files.py", line 555, in __init__
+    fid = make_fid(name, mode, userblock_size, fapl, fcpl, swmr=swmr)
+  File "/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/h5py/_hl/files.py", line 232, in make_fid
+    fid = h5f.open(name, flags, fapl=fapl)
+  File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper
+  File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper
+  File "h5py/h5f.pyx", line 106, in h5py.h5f.open
+FileNotFoundError: [Errno 2] Unable to synchronously open file (unable to open file: name = '/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/cellbin_batch_sigma_slide/spot/bs0.3/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_strongmix_bsigma03_qc.h5ad', errno = 2, error message = 'No such file or directory', flags = 0, o_flags = 0)
