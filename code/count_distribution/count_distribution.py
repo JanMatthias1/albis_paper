@@ -36,11 +36,13 @@ adata.layers["counts_pre_batch"] when present (counts before the synthetic
 batch-effect multiplier). The raw/norm/log panel always uses adata.X
 regardless, since that is what the clustering pipeline actually consumes.
 
-By default --input is also restricted to a single slice (--slice-id 5, a
-representative near-equatorial interior section) rather than pooling all 10
-z-planes, matching the single-section nature of every real reference. Pass
---all-slices to pool. Real --compare-input data has no slice_id and is never
-filtered.
+By default --input is also restricted to a single slice (--slice-id 4, the
+5th of 10 slices counted from the bottom; slice_id 0 is the lowest z) rather
+than pooling all 10 z-planes, matching the single-section nature of every
+real reference. Changed from 5 (5th from the top) on 2026-09-29 so Figure 2
+and Figure 5 use the same central slice. Pass --all-slices to pool.
+--compare-input data is never filtered by slice (real data has no slice_id);
+pre-subset a simulated --compare-input yourself.
 
 Pass --compare-input (plus --compare-label) to overlay a second dataset --
 e.g. real Xenium data -- on the same four diagnostics instead of plotting
@@ -81,6 +83,8 @@ SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
 # dataset role (primary vs compare), never plot order.
 PRIMARY_COLOR = "#2a78d6"  # blue
 COMPARE_COLOR = "#eb6834"  # orange
+# Comparison-plot title suffix; set from --title-context (default = Figure 2's).
+TITLE_CONTEXT = "simulated vs real"
 
 # Restored from typography_refresh_20260919/count_distribution_before.py,
 # with the final refresh axis/base font size (16 pt), verified against saved plots.
@@ -172,11 +176,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--slice-id",
         type=int,
-        default=5,
+        default=4,
         help="Restrict --input (the sim/primary dataset) to this single obs['slice_id'] value "
-        "before computing any stats or plots, instead of pooling all slices. Defaults to 5 (a "
-        "representative near-equatorial interior section); pass --all-slices to pool instead. Real "
-        "--compare-input data has no slice_id and is never filtered by this flag.",
+        "before computing any stats or plots, instead of pooling all slices. Defaults to 4 (the "
+        "5th of 10 slices from the bottom, a central section); pass --all-slices to pool instead. "
+        "--compare-input data is never filtered by this flag.",
+    )
+    parser.add_argument(
+        "--title-context",
+        default="simulated vs real",
+        help="Text after the colon in comparison-plot titles, e.g. 'ALBIS vs SPIDER' for a "
+        "method-vs-method comparison. Default keeps Figure 2's titles.",
     )
     parser.add_argument(
         "--all-slices",
@@ -409,7 +419,7 @@ def plot_mean_variance_compare(datasets: list[dict], output_path: Path) -> None:
     ax.set_yscale("log")
     ax.set_xlabel("Mean count per gene")
     ax.set_ylabel("Variance per gene")
-    ax.set_title("Gene mean-variance: simulated vs real")
+    ax.set_title(f"Gene mean-variance: {TITLE_CONTEXT}")
     ax.legend(frameon=False, loc="upper left")
     fig.tight_layout()
     fig.savefig(output_path, dpi=180, bbox_inches="tight")
@@ -434,7 +444,7 @@ def plot_mean_dropout_compare(datasets: list[dict], output_path: Path) -> None:
     ax.set_xscale("log")
     ax.set_xlabel("Mean count per gene")
     ax.set_ylabel("Fraction of zero cells")
-    ax.set_title("Gene mean-dropout: simulated vs real")
+    ax.set_title(f"Gene mean-dropout: {TITLE_CONTEXT}")
     ax.legend(frameon=False, loc="upper left", bbox_to_anchor=(1.01, 1.0), borderaxespad=0)
     fig.tight_layout()
     fig.savefig(output_path, dpi=180, bbox_inches="tight")
@@ -456,7 +466,7 @@ def plot_total_counts_compare(datasets: list[dict], output_path: Path) -> None:
     ax.set_xscale("log")
     ax.set_xlabel("Total counts per cell")
     ax.set_ylabel("Density (fraction of cells)")
-    ax.set_title("Total counts per cell: simulated vs real")
+    ax.set_title(f"Total counts per cell: {TITLE_CONTEXT}")
     annotate_jsd(ax, compute_jsd(positive[0], positive[1], bins), loc="upper left")
     fig.tight_layout()
     fig.savefig(output_path, dpi=180, bbox_inches="tight")
@@ -475,7 +485,7 @@ def plot_genes_per_cell_compare(datasets: list[dict], output_path: Path) -> None
     ax.set_xscale("log")
     ax.set_xlabel("Genes detected per cell")
     ax.set_ylabel("Density (fraction of cells)")
-    ax.set_title("Genes detected per cell: simulated vs real")
+    ax.set_title(f"Genes detected per cell: {TITLE_CONTEXT}")
     ax.legend(frameon=False, loc="upper right")
     annotate_jsd(ax, compute_jsd(positive[0], positive[1], bins), loc="upper left")
     fig.tight_layout()
@@ -503,7 +513,7 @@ def plot_sparsity_summary_compare(datasets: list[dict], output_path: Path) -> No
     ax.set_xticklabels([label for _, label in metrics])
     ax.set_ylabel("Percent (%)")
     ax.set_ylim(0, 105)
-    ax.set_title("Sparsity summary: simulated vs real")
+    ax.set_title(f"Sparsity summary: {TITLE_CONTEXT}")
     ax.legend(frameon=False)
     fig.tight_layout()
     fig.savefig(output_path, dpi=180, bbox_inches="tight")
@@ -580,6 +590,8 @@ def restrict_to_slice(adata: ad.AnnData, slice_id: int) -> ad.AnnData:
 
 
 def run_compare(args: argparse.Namespace, rng: np.random.Generator) -> None:
+    global TITLE_CONTEXT
+    TITLE_CONTEXT = args.title_context
     print(f"[load] primary: {args.input}")
     primary = sc.read_h5ad(args.input)
     print(f"[load] primary shape: {primary.n_obs} observations x {primary.n_vars} genes")

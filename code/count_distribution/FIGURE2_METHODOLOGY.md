@@ -112,10 +112,15 @@ the sphere's poles) are geometrically degenerate -- their cross-sectional
 disc is much smaller than at the equator, so most observations land
 off-tissue (~21% empty bins vs. <0.5% for the 8 interior slices on the
 bin16um config). Pooling silently dragged the aggregate stats down.
-**Decision: restrict to `slice_id=5`** (near-equator, representative),
-applied to the sim/primary side only (real data has no `slice_id`). This is
-now the `count_distribution.py` **default** (`--slice-id 5`); pass
-`--all-slices` to pool.
+**Decision: restrict to one central slice**, applied to the sim/primary side
+only (real data has no `slice_id`). This is the `count_distribution.py`
+**default**; pass `--all-slices` to pool. `slice_id` 0 is the lowest z.
+**2026-09-29: changed from `slice_id=5` (5th from the top) to `slice_id=4`
+(5th from the bottom)**, so Figure 2 and Figure 5 (5A/5B/5D, Supplementary
+Figure 6) use the same physical slice. With 10 slices there is no single
+middle slice; 4 and 5 are its two mirror-image central sections.
+Slice-5 outputs are archived at
+`data/figure_2/misc/archive/smaller_sphere_plots_slice_id5_20260929/`.
 
 **2. Batch effect: included (post-batch counts).** The sim's synthetic
 per-slice technical batch shift (`batch_sigma`) is included in the

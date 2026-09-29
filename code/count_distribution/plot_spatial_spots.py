@@ -16,7 +16,7 @@ from manuscript_style import CELLTYPE_COLORS
 p = argparse.ArgumentParser(description=__doc__)
 p.add_argument('--input', type=Path, required=True)
 p.add_argument('--output-dir', type=Path, required=True)
-p.add_argument('--slice-id', type=int, default=5)
+p.add_argument('--slice-id', type=int, default=4)  # 5th slice from the bottom
 a = p.parse_args()
 x = ad.read_h5ad(a.input, backed='r')
 mask = x.obs.slice_id.to_numpy() == a.slice_id

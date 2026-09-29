@@ -20,7 +20,7 @@
 # the SHARED Figure 2 / Figure 3 dataset (cell 1.5, bin8 0.8, bin16 0.7,
 # spot 0.3), tuned on the Figure 3 pre/post-Harmony demo then confirmed here
 # to still match the real count distribution. count_distribution.py now
-# defaults to --slice-id 5 and post-batch counts, so those flags are no
+# defaults to --slice-id 4 (5th slice from the bottom; was 5 until 2026-09-29) and post-batch counts, so those flags are no
 # longer passed per-call below. The matching clustering panel is
 # code/clustering/<modality>_celltype_panel.sh (same SIM_TAG).
 #
