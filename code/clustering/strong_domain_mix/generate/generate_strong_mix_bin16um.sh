@@ -7,33 +7,13 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --partition=shared
 #
-# Bin16um's strong-domain-mix batch_sigma slide, consolidated 2026-09-17
-# from the scattered points built across code/misc/clustering/misc/
-# bin16um_kgeom100_endpoints.sh (bs0/bs0.7) + cellbin_batch_sigma_slide.sh
-# (bs0.25/0.45) + batch_sigma_slide_fine.sh (bs0.30/0.35/0.40) into one
-# self-contained array script, output moved from
-# data/figure_3/cellbin_batch_sigma_slide/bin/ to data/strong_mix/bin16um/.
-# Config unchanged: BANKSY lambda=0.5/k_geom=100 (bin16um's own Phase-1
-# winner, beats the older k_geom=200 -- 0.806 vs 0.784 domain ARI at
-# bs=0), dispersion log_mu=-2.5 (defaults for theta/jitter), batch_sigma
-# canonical=0.7, sphere_r_um=2050 (smaller_sphere disc), bin_size_um=16.
-#
-# Full pipeline per point: generate (strong-domain-mix) -> QC ->
-# BANKSY+Harmony -> step02_leiden_resolution_sweep.py -> composition_recovery.py
-# (ARI + slice_id leakage).
-# 2026-09-23: generate flags matched to the retuned Figure 2 config so the
-# normal- and strong-mix datasets differ ONLY by --strong-domain-mix
-# (bin16um: --theta 2.0 --theta-jitter 0.6; spot: --base-gene-lognormal
-# -2.25 1.0, no per-domain depth factors; all: --sync-unaligned-seed, which only changes
-# obsm['spatial_unaligned'] -- verified byte-identical counts/spatial/labels).
-# Old figure_3/ and data/noisy/*_strong_mix_*/*_batch_slide_* inputs archived to
-# data/figure_3_archive_20260923/ and data/noisy/_archive_figure3_20260923/,
-# so every skip-if-exists step below regenerates from scratch.
-# 2026-09-23 (later): ONE TREE PER POINT -- raw/QC h5ad are written straight
-# into the point folder ${RUN} (next to banksy_matrix/ and ari/) via
-# --output-dir, instead of data/noisy/<tag>/ + hand-made symlinks. Existing
-# inputs were moved there from data/noisy/ (verified: Figure 2 config +
-# --strong-domain-mix, check_matches_figure2.py).
+# Bin16um strong-domain-mix batch-σ sweep, one array task per batch_sigma
+# (0, 0.25, 0.30, 0.35, 0.40, 0.45, 0.7, 0.05), seed 2025.
+# Data = Figure 2 bin16um settings (r = 2050 µm, 16 µm bins, log_mu -2.5,
+# theta 2.0, jitter 0.6) + --strong-domain-mix; nothing else differs.
+# Per point: generate -> QC -> BANKSY (λ 0.5, k_geom 100) + Harmony ->
+# resolution-matched Leiden ARI -> composition_recovery (ARI + slice leakage)
+# -> plots. Raw/QC h5ad are written into the point folder; existing files are reused.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/strong_domain_mix/generate/logs
@@ -47,18 +27,13 @@ OUT_ROOT="sim_paper/data/figure_3/strong_domain_mix/batch_sigma_slide"
 LAM=0.5
 KG=100
 
-# 0.05 appended 2026-09-23 (index 7): its baseline used to exist only as a
-# hand-built folder; the seed script already expects bs0.05 + seeds 101/202.
 BATCH_SIGMAS=(0 0.25 0.30 0.35 0.40 0.45 0.7 0.05)
 BS="${BATCH_SIGMAS[${SLURM_ARRAY_TASK_ID:-0}]}"
 TAG="bin16um_strong_mix_bs${BS}"
 
 RUN="${OUT_ROOT}/bin16um/bs${BS}"
-# The data files are named, Figure 2 style, by the parameters they were
-# generated with: <Fig2 tag body>_strongmix_bsigma<batch_sigma, no dot>
-# [_seed<seed>] (default seed 2025 not written), e.g.
-# log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma05_seed101.h5ad / ..._qc.h5ad.
-# The skip-if-exists checks use that name, so a parameter change regenerates.
+# Data files are named by their settings: <Figure 2 tag>_strongmix_bsigma<σ>[_seed<n>];
+# existing files are reused, so a settings change regenerates.
 DATA_TAG="packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_strongmix_bsigma$(printf '%g' "${BS}" | tr -d .)"
 SIM_RAW="${RUN}/${DATA_TAG}.h5ad"
 SIM_QC="${RUN}/${DATA_TAG}_qc.h5ad"

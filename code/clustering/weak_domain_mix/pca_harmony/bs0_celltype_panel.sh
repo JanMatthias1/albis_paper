@@ -14,8 +14,7 @@
 # Figure 2 data at its usual batch_sigma), and the weak-mix counterpart of
 # ../../strong_domain_mix/pca_harmony/strongmix_celltype_panel.sh.
 #
-# PCA+Harmony + ARI were first run inside generate_weakmix_bs0.sh (2026-09-24)
-# and moved here; this script skips them when present and adds the plots.
+# PCA/Harmony/ARI are skipped when already present; this script adds the plots.
 #
 # Outputs: data/figure_3/weak_domain_mix/pca_harmony/<modality>/bs0/
 set -euo pipefail

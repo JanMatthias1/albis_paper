@@ -6,43 +6,12 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# Figure 3, cell-type recovery panel, BIN modality at the 16um Visium HD
-# bin resolution (new 2026-08-26, alongside the existing 8um
-# bin_celltype_panel.sh -- both resolutions are canonical, not a
-# replacement, matching Figure 2's bin-at-both-resolutions decision).
-# Fully self-contained: generates the sim data if not already present,
-# QC-filters, runs plain PCA->Harmony->Leiden, reports ARI against
-# cell_type_true, and produces the ground-truth-vs-predicted UMAP +
-# contingency heatmap plots.
-#
-# Uses the EXACT SAME dataset as Figure 2's
-# figure_2/bin_vs_breast_cancer_visium_hd_16um comparison
-# (packing_pf0p04_bin16um_log_mu_-2.5_bsigma07) -- per user decision, this
-# panel reads Figure 2's data directly (SIM_RAW/SIM_QC point at
-# data/figure_2/<tag>/, not a separate data/noisy/<tag>/ copy). If that file
-# isn't there yet, the fallback below generates+QCs it with the identical
-# config Figure 2 uses, then moves it into data/figure_2/ itself (same
-# pattern as
-# code/count_distribution/bin16um_vs_breast_cancer_visium_hd_with_batch_tuned.sh).
-# batch_sigma=0.5, same as the 8um bin panel (bin's Figure-3-decided value,
-# applied at both resolutions per 2026-08-26 user decision) -- see
-# bin_celltype_panel.sh for the batch_sigma=0.5 rationale (small-footprint
-# aggregation needs a stronger shift than the manuscript default to produce
-# a visible pre/post-Harmony correction story); not yet separately verified
-# whether 0.5 is still the right value at 16um's larger aggregation
-# footprint (16um pools ~4x the area of 8um), left as-is for now.
-#
-# Uses the WEAK (manuscript-baseline) domain_type_mix, same as the 8um
-# celltype panel -- separate dataset from any future 16um domain panel.
-# Pipeline: plain PCA+Harmony, NOT BANKSY -- same rationale as the 8um bin
-# panel (BANKSY collapses bin's cell_type_true ARI; see bin_celltype_panel.sh).
-
-# 2026-09-23: moved to the retuned Figure 2 tag (bin: --theta-jitter 1.0 -> 0.6;
-# spot: --base-gene-lognormal -2.25 1.0, no per-domain depth factors; see
-# data/figure_2/smaller_sphere/test/README.md). Fallback generate flags now
-# match the Figure 2 pairing scripts exactly (incl. --sync-unaligned-seed).
-# The old figure_3/ tree was archived whole to data/figure_3_archive_20260923/,
-# so the skip-if-exists PCA step below recomputes from the new data.
+# Figure 3 cell-type recovery, BIN 16 µm (Visium HD 16 µm bins).
+# Uses the Figure 2 bin16um dataset (weak domain mix, batch_sigma 0.7);
+# generates and QCs it with the Figure 2 settings if it is missing. Pipeline:
+# plain PCA -> Harmony -> Leiden at the true cell-type count, ARI against
+# cell_type_true, then UMAP (true vs predicted) and contingency plots.
+# BANKSY is not used for bin cell types (see bin_celltype_panel.sh).
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
@@ -55,10 +24,8 @@ SIM_RAW="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MOD
 SIM_QC="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
 NOISY_DIR="sim_paper/data/noisy/${SIM_TAG}"
 FIG2_DIR="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}"
-# "bin16um" (not "bin") keeps this panel's output separate from the 8um
-# bin_celltype_panel.sh output -- the underlying --modality passed to the
-# python tools below is still "bin" (bin/spot/cell are the only valid
-# modality values), only the output directory name is resolution-qualified.
+# Output folder "bin16um" keeps this apart from the 8 µm panel; the tools still
+# take --modality bin.
 CLUSTER_ROOT="sim_paper/data/figure_3/weak_domain_mix/pca_harmony/bin16um/bs0.7"
 
 if [[ ! -f "${SIM_QC}" ]]; then
@@ -96,9 +63,7 @@ echo "[ari] resolution-matched ARI recovery"
     --input "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad" \
     --output-dir "${CLUSTER_ROOT}/ari_recovery_qc"
 
-# Use the SAME resolution step02_leiden_resolution_sweep.py's binary search already found
-# for cell_type_true (achieves the true category count exactly), rather than a
-# fixed guess -- see bin_celltype_panel.sh for why.
+# Plot at the resolution step02 found for cell_type_true (true category count).
 RESOLUTION=$("${PYTHON_BIN}" -c "
 import json
 with open('${CLUSTER_ROOT}/ari_recovery_qc/ari_summary_${MODALITY}.json') as f:

@@ -78,8 +78,8 @@ def main() -> None:
     print(f"[load] AnnData shape: {n_before} x {adata.n_vars}")
 
     # Filter on the POST-batch counts -- the matrix every downstream step
-    # actually consumes (count_distribution.py runs post-batch by default since
-    # 2026-08-27, step01_pca_harmony.py always did, STAIR reads the post-QC X). Using
+    # Filter on the POST-batch counts -- the matrix every downstream step
+    # actually consumes (count_distribution.py, step01_pca_harmony.py, STAIR). Using
     # counts_pre_batch here let near-empty bins pass the >=min-genes floor on
     # their pre-batch counts and then get zeroed by the batch noise, entering
     # PCA as empty rows (the detached-island artifact in the Fig 3 UMAPs).

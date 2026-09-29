@@ -6,52 +6,15 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# Figure 3, cell-type recovery panel, CELL modality.
-# Fully self-contained: generates the sim data if not already present,
-# QC-filters, runs plain PCA->Harmony->Leiden, reports ARI against
-# cell_type_true (the ground truth this panel targets), and produces the
-# ground-truth-vs-predicted UMAP + contingency heatmap plots.
-#
-# Uses the WEAK (manuscript-baseline) domain_type_mix -- this is a separate
-# dataset from the domain panel (cell_domain_panel.sh) on purpose: combining
-# a strengthened domain_type_mix with Harmony's slice-batch-correction
-# collapsed cell_type_true ARI from ~1.0 to ~0.26 (likely because slices now
-# carry real, not just batch, compositional differences that Harmony can't
-# distinguish from technical noise). Rather than chase that interaction,
-# each panel gets the dataset built for its own question -- see figure.md,
-# 2026-08-25, "two-dataset strategy".
-#
-# 2026-08-26: switched to the EXACT SAME dataset as Figure 2's
-# figure_2/cell_vs_non_diseased_lung comparison instead of this panel's own
-# previously-separate packing_pf0p04 tag. The old tag used sphere_r_um=2050
-# (~4% packing, borrowed from bin/spot) with default dispersion
-# (theta=2.0/jitter=1.0/log_mu=0.7); the shared tag uses cell's own baseline
-# sphere_r_um=6000 default (~0.16% packing -- cell has no aggregation to need
-# the bin/spot packing fix). This panel reads Figure 2's data directly
-# (SIM_RAW/SIM_QC point at data/figure_2/<tag>/); the fallback below
-# regenerates the identical config if it's missing.
-#
-# 2026-08-27: cell config retuned to log_mu=-2.3, theta=0.40, theta_jitter=0.15,
-# batch_sigma=1.5 (tag log_mu_-2.3_theta_0.40_jitter0.15_bsigma15). batch_sigma
-# had to go to 1.5 for a visible pre/post-Harmony demo, but at the earlier
-# log_mu=-2.5/theta=0.25 that dropped cell_type_true ARI to 0.47 (from 0.54
-# pre-batch) and cell's Figure 2 theta_hat to 0.056 (real ~0.16). Raising theta
-# to 0.40 pre-compensates the batch-effect dispersion drop: ARI recovers to
-# 0.64, Figure 2 theta_hat to ~0.083, genes/cell 30->42. Tradeoff: median
-# total_counts overshoots (~327 vs real ~90). See figure.md.
-# Pipeline: plain PCA+Harmony, NOT BANKSY -- BANKSY is neutral-to-destructive
-# for cell_type_true recovery at cell resolution in every test run so far.
-#
-# 2026-09-17: log_mu -2.3 -> -2.5 (tag now log_mu_-2.5_theta_0.40_jitter0.15_bsigma15),
-# following Figure 2's dispersion re-tune via an actual joint log_mu x theta
-# sweep vs both Xenium refs (code/misc/data/misc/sweep_cell_logmu_theta_joint_xenium.sh,
-# job 35759008) -- cell had never gotten spot's joint-sweep treatment before,
-# just this single manual adjustment. Fixes the total_counts overshoot noted
-# above (ratio 1.38->1.04 vs lung_cancer); theta_hat/genes_per_cell shift
-# slightly further from real as the accepted tradeoff (see
-# project_figure4c_alignment_4modality memory for the full sweep table).
-# Old output archived to
-# figure_3/pca_harmony_single_cell/cell_pre_dispersion_retune_20260917/.
+# Figure 3 cell-type recovery, CELL.
+# Uses the Figure 2 cell dataset (weak domain mix, batch_sigma 1.5); generates
+# and QCs it with the Figure 2 settings if it is missing. Pipeline: plain
+# PCA -> Harmony -> Leiden at the true cell-type count, ARI against
+# cell_type_true, then UMAP (true vs predicted) and contingency plots.
+# Weak (not strong) domain mix: strongly mixed domains make slices differ in
+# composition, which Harmony cannot tell apart from batch, so cell-type panels
+# use the weak-mix data. BANKSY is not used for cell types (no gain at cell
+# resolution).
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
@@ -64,8 +27,6 @@ SIM_RAW="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MOD
 SIM_QC="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
 NOISY_DIR="sim_paper/data/noisy/${SIM_TAG}"
 FIG2_DIR="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}"
-# Final-config output lives under figure_3/ (2026-08-25 reorg, same convention
-# as the figure_2/ move) -- not the generic clustering_<tag>/ sweep location.
 CLUSTER_ROOT="sim_paper/data/figure_3/weak_domain_mix/pca_harmony/cell/bs1.5"
 
 if [[ ! -f "${SIM_QC}" ]]; then
@@ -104,12 +65,8 @@ echo "[ari] resolution-matched ARI recovery"
     --input "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad" \
     --output-dir "${CLUSTER_ROOT}/ari_recovery_qc"
 
-# Use the SAME resolution step02_leiden_resolution_sweep.py's binary search already found
-# for cell_type_true (achieves the true category count exactly), rather than a
-# fixed guess -- otherwise this qualitative plot's predicted-cluster count can
-# drift from the true count and look like a mismatch that isn't really there
-# (found 2026-08-25 on spot: fixed res=0.5 landed on 7 clusters vs. 8 true
-# types, while the matched res=0.524 hits 8/8).
+# Plot at the resolution step02 found for cell_type_true (true category count);
+# a fixed resolution can miss it (e.g. 7 vs 8 clusters on spot).
 RESOLUTION=$("${PYTHON_BIN}" -c "
 import json
 with open('${CLUSTER_ROOT}/ari_recovery_qc/ari_summary_${MODALITY}.json') as f:

@@ -10,8 +10,8 @@
 #     task 1  seed 101   cell/bs1.5_seed101/  -> RCTD/strong_mix_seed101/
 #     task 2  seed 202   cell/bs1.5_seed202/  -> RCTD/strong_mix_seed202/
 # then average_rctd_seeds.py --config strong_mix averages all 3 into
-# RCTD/strong_mix_seed_avg/ (seed 2025 shares the query's seed; kept by user
-# decision 2026-09-23 -- weak-mix replication showed that doesn't matter).
+# RCTD/strong_mix_seed_avg/ (seed 2025 shares the query's seed; the weak-mix
+# replication showed this does not matter).
 # All inputs are Figure 2 configs + --strong-domain-mix and nothing else
 # (strong_domain_mix/generate/check_matches_figure2.py), written into
 # data/figure_3/strong_domain_mix/batch_sigma_slide/ by strong_domain_mix/generate/generate_strong_mix_

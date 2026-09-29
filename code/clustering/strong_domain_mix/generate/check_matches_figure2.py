@@ -2,7 +2,7 @@
 
 Compares uns['sim_params'] of each
 data/figure_3/strong_domain_mix/batch_sigma_slide/{cell,bin16um,spot}/bs*/ raw h5ad
-(one tree per point since 2026-09-23; previously data/noisy/) against the
+(one tree per point) against the
 canonical Figure 2 dataset of the same modality. The only allowed differences are
 strong_domain_mix (must be True here, False in Figure 2), batch_sigma (the
 swept variable) and seed (seed replicates). Anything else is reported as a

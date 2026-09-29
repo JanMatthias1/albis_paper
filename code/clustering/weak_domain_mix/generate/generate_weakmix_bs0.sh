@@ -7,18 +7,11 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# Weak (Figure 2) domain-mix data with NO batch effect, for cell / bin16um / spot:
+# Figure 2 domain-mix data with NO batch effect, for cell / bin16um / spot:
 # the exact Figure 2 generator flags with --batch-sigma 0 (no --strong-domain-mix),
 # so vs. Figure 2 only batch differs, and vs. the strong-mix data only the domain
-# mix differs. Only batch_sigma 0 lives here; the batched weak-mix data is
-# Figure 2's own. Generates + QC-filters only -- ../pca_harmony/bs0_celltype_panel.sh
-# and ../banksy/ cluster it.
-#
-# History: written 2026-09-24 in data/banksy_cell/ to test whether BANKSY's
-# slice collapse on Figure 2 data is entirely the batch effect (it is). Moved
-# here 2026-09-25; its outputs were moved, not regenerated (jobs 35904914 +
-# 35910892). It used to run PCA+Harmony too; that step now lives in
-# ../pca_harmony/bs0_celltype_panel.sh.
+# mix differs. The batched weak-mix data is Figure 2's own. Generates + QC only;
+# clustered by ../pca_harmony/bs0_celltype_panel.sh and ../../no_harmony_*/.
 #
 # Outputs: data/figure_3/weak_domain_mix/data/<modality>/{<stem>.h5ad, <stem>_qc.h5ad, plots/}
 set -euo pipefail

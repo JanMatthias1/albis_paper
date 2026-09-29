@@ -1,57 +1,17 @@
 #!/usr/bin/env python
 """
-Figure 3B, fairer scoring: how well do Leiden clusters recover the ground-truth
-structure of an *aggregated* observation, when that observation is a mixture of
-cell types rather than a single labelled cell?
+Score one resolution-matched clustering (from step02_leiden_resolution_sweep.py)
+against the ground truth, for both targets (cell_type, domain):
 
-Motivation (PI feedback 2026-09-06): the existing metric is hard-label ARI of
-resolution-matched Leiden clusters vs `cell_type_true` / `domain_true`. For a
-single `cell` that is well posed. For a `bin` or (especially) a `spot`, the unit
-is a mixture -- `cell_type_true` there is only the argmax of a ~5-6-way
-composition, so hard-label ARI penalises the method for something it structurally
-cannot do. The generator already stores the soft truth:
-`obsm['cell_type_frac_true']` (n x 8) and `obsm['domain_frac_true']` (n x 6) for
-bin/spot; `cell` gets a one-hot synthesised from its hard labels so every
-modality is on one table.
+  hard-label : ARI, V-measure, homogeneity, completeness vs the stored labels
+               (for bins/spots the label is the dominant type of a mixture)
+  leak       : slice_id_leakage_ari = ARI(predicted clusters, slice_id); high
+               values mean clusters follow slices, not biology.
 
-Reads each modality's resolution-matched clustering written by
-step02_leiden_resolution_sweep.py:
-    data/figure_3/weak_domain_mix/pca_harmony/<mod>/bs<sigma>/ari_recovery_qc/
-        simulation_<mod>_z_ari_recovery.h5ad
-        -> obs['leiden_cell_type_true'], obs['leiden_domain_true']
-           (Leiden at the resolution that hits k=8 / k=6)
-        -> obsm['X_pca_harmony'], obsm['{cell_type,domain}_frac_true']
-
-For each modality x {cell_type, domain} it reports:
-  hard-label   : ARI, V-measure, homogeneity, completeness  (vs argmax truth)
-  leak         : slice_id_leakage_ari -- ARI(predicted clusters, slice_id).
-                 High leak means a cluster's apparent "recovery" is actually
-                 just rediscovering slice boundaries, not real structure.
-
-Scores one clustered h5ad per invocation (--h5ad), writing
-<out-dir>/composition_recovery_<tag>.json -- every sweep script (batch_sigma
-slides, banksy_batch_compare, etc.) calls this per config/point.
-slice_id_leakage_ari is read by summary_banksy_lambda_kgeom.py's table; no
-current script visualizes it (plot_banksy_batch_compare_3mod.py's dagger
-annotation was removed 2026-09-16, see below).
-
-2026-09-16: dropped the other, no-args mode this file used to also support
-(score all 4 canonical modalities at once, write a combined
-composition_recovery_summary.csv + composition_recovery.png to
-data/figure_3/composition_recovery/) -- nothing has called it that way since
-the "Proposed Fig 3B" reframing (2026-09-06) it was built for was abandoned;
-that output is archived at data/figure_3/_archive_20260914/composition_recovery/,
-and plot_composition_recovery.py (the only reader) moved to misc/ as
-superseded.
-
-2026-09-16: also dropped the composition/local_knn/oracle/context metrics
-(mean JSD/L1/Pearson r, composition R2, kNN concordance vs chance, KMeans-
-on-truth oracle ceiling, effective-categories-per-obs) -- computed for the
-same abandoned "Proposed Fig 3B" reframing above, and unread by anything
-active (only misc/summary_banksy_lambda_kgeom.py, a dormant summary for an
-already-decided BANKSY lambda/k_geom sweep, read a few of them -- it'll break
-loudly if rerun, which is fine, that sweep's already been superseded).
-X_pca_harmony is no longer read either, since it only fed the kNN check.
+Input: --h5ad with obs['leiden_cell_type_true'] / obs['leiden_domain_true']
+(Leiden at the resolution giving 8 / 6 groups). Output:
+<out-dir>/composition_recovery_<tag>.json. Called per point by the batch-σ
+sweep scripts.
 
 Expected environment:
     source code/count_distribution/_env.sh   (albis-tutorial: scanpy/sklearn/scipy)

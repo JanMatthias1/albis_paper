@@ -12,7 +12,7 @@
 # config) and at batch_sigma 0: resolution-matched ARI vs cell_type_true and
 # domain_true, then UMAP + contingency plots. Seed 2025 is covered by
 # {cell,bin16um,spot}_celltype_panel.sh (usual sigma) and bs0_celltype_panel.sh.
-# Added 2026-09-25 so every Figure 3 bar can show mean +- SD over 3 seeds.
+# Gives every Figure 3 bar three seeds (mean ± SD).
 #
 # Task = modality (3) x batch (usual, 0) x seed (101, 202), same order as the
 # generator. Output: data/figure_3/weak_domain_mix/pca_harmony/<modality>/bs<sigma>_seed<n>/

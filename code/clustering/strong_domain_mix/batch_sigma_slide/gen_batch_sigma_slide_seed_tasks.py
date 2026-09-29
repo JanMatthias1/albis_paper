@@ -33,8 +33,8 @@ EXISTING_BS = {
     "spot": [0, 0.05, 0.1, 0.12, 0.13, 0.14, 0.15, 0.18, 0.2, 0.22, 0.25, 0.26, 0.27, 0.28, 0.29, 0.3],
 }
 
-# New batch_sigma points, beyond canonical, spot only (per 2026-09-16 decision --
-# cell/bin16 were left as-is). No baseline exists yet, so these need a "" (no
+# New batch_sigma points, beyond canonical, spot only (cell/bin16um unchanged).
+# No baseline exists yet, so these need a "" (no
 # --seed flag, i.e. the library default seed=2025) run in addition to the 2
 # extra seeds, to seed a matching baseline point on the plot.
 NEW_BS = {

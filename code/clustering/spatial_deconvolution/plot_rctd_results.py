@@ -23,10 +23,9 @@ import anndata as ad
 
 OUT_DIR = sys.argv[1] if len(sys.argv) > 1 else \
     "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/weak_mix"
-# The spot truth to score against MUST be the query RCTD was fitted on (spot_ids
-# map back by row position). run_rctd_spot.R and average_rctd_seeds.py record
-# it in metrics_summary.json ("spot_h5ad"), so it's read from there; outputs
-# from before 2026-09-23 lack it and fall back to the Figure 2 (weak-mix) spot.
+# The spot truth must be the query RCTD was fitted on (spot_ids map back by row
+# position); it is read from the run's metrics_summary.json ("spot_h5ad"), with
+# the Figure 2 (weak-mix) spot as fallback.
 def _fitted_spot_h5ad():
     try:
         import json
@@ -65,8 +64,8 @@ ANNOT_COLOR = "#eb6834"  # categorical slot 2 (orange) -- visually distinct "thi
 GRID_COLOR = "#DDDDDD"
 MUTED = "#898781"
 
-# Stored slice_id 4 = 5th of 10 slices from the bottom (was 5 = 5th from the top
-# until 2026-09-29); same slice as Figures 2 and 5. Titles count from 1.
+# Stored slice_id 4 = 5th of 10 slices from the bottom (same slice as
+# Figures 2 and 5). Titles count from 1.
 SLICE_ID = "4"
 ZOOM_XMIN, ZOOM_XMAX = 0, 1200
 ZOOM_YMIN, ZOOM_YMAX = 0, 1200

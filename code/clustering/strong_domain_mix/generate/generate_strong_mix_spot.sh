@@ -7,33 +7,13 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# Spot's strong-domain-mix batch_sigma slide (no batch effect -> canonical
-# 0.3), consolidated 2026-09-17 from code/misc/clustering/misc/
-# spot_batch_sigma_slide_corrected.sh into data/strong_mix/ (was
-# data/figure_3/cellbin_batch_sigma_slide/). Logic unchanged -- spot's config
-# (BANKSY lambda=0.1/k_geom=8, dispersion log_mu=-2.0/theta=0.25/jitter=0.10)
-# was already a single clean array script covering the full 16-point grid,
-# just relocated.
-#
-# Full pipeline per point: generate (strong-domain-mix) -> QC ->
-# BANKSY+Harmony -> step02_leiden_resolution_sweep.py -> composition_recovery.py
-# (ARI + slice_id leakage).
-# 2026-09-23: generate flags matched to the retuned Figure 2 config so the
-# normal- and strong-mix datasets differ ONLY by --strong-domain-mix
-# (bin16um: --theta 2.0 --theta-jitter 0.6; spot: --base-gene-lognormal
-# -2.25 1.0, no per-domain depth factors; all: --sync-unaligned-seed, which only changes
-# obsm['spatial_unaligned'] -- verified byte-identical counts/spatial/labels).
-# Old figure_3/ and data/noisy/*_strong_mix_*/*_batch_slide_* inputs archived to
-# data/figure_3_archive_20260923/ and data/noisy/_archive_figure3_20260923/,
-# so every skip-if-exists step below regenerates from scratch.
-# 2026-09-23 (later): ONE TREE PER POINT -- raw/QC h5ad are written straight
-# into the point folder ${RUN} (next to banksy_matrix/ and ari/) via
-# --output-dir, instead of data/noisy/<tag>/ + hand-made symlinks. Existing
-# inputs were moved there from data/noisy/ (verified: Figure 2 config +
-# --strong-domain-mix, check_matches_figure2.py).
-# 2026-09-23 (latest): spot --domain-size-factors DROPPED by user decision
-# (per-domain depth, spot-only, made domains partly identifiable from depth);
-# spot now = Figure 2 packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03.
+# Spot strong-domain-mix batch-σ sweep, one array task per batch_sigma
+# (16 points from 0 to the canonical 0.3), seed 2025.
+# Data = Figure 2 spot settings (r = 2050 µm, log_mu -2.25 / sigma 1.0,
+# theta 0.25, jitter 0.10) + --strong-domain-mix; nothing else differs.
+# Per point: generate -> QC -> BANKSY (λ 0.1, k_geom 8) + Harmony ->
+# resolution-matched Leiden ARI -> composition_recovery (ARI + slice leakage)
+# -> plots. Raw/QC h5ad are written into the point folder; existing files are reused.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/strong_domain_mix/generate/logs
@@ -52,11 +32,8 @@ BS="${BATCH_SIGMAS[${SLURM_ARRAY_TASK_ID:-0}]}"
 TAG="spot_strong_mix_bs${BS}"
 
 RUN="${OUT_ROOT}/spot/bs${BS}"
-# The data files are named, Figure 2 style, by the parameters they were
-# generated with: <Fig2 tag body>_strongmix_bsigma<batch_sigma, no dot>
-# [_seed<seed>] (default seed 2025 not written), e.g.
-# log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma05_seed101.h5ad / ..._qc.h5ad.
-# The skip-if-exists checks use that name, so a parameter change regenerates.
+# Data files are named by their settings: <Figure 2 tag>_strongmix_bsigma<σ>[_seed<n>];
+# existing files are reused, so a settings change regenerates.
 DATA_TAG="packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_strongmix_bsigma$(printf '%g' "${BS}" | tr -d .)"
 SIM_RAW="${RUN}/${DATA_TAG}.h5ad"
 SIM_QC="${RUN}/${DATA_TAG}_qc.h5ad"

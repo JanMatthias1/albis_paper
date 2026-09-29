@@ -12,10 +12,8 @@
 # obsm['cell_type_frac_true'] gives an EXACT per-spot ground truth to score
 # against -- no need to fabricate either side of the evaluation.
 #
-# Column order of cell_type_frac_true verified empirically before writing
-# this script (2026-09-18): columns are type1..type8 in that exact natural
-# order -- argmax(cell_type_frac_true) matches obs['cell_type_true'] for
-# 10034/10034 spots, 0 mismatches.
+# Column order of cell_type_frac_true is type1..type8 (checked: its argmax
+# matches obs["cell_type_true"] for every spot).
 #
 # Mode: "full" (arbitrary per-spot mixtures), not RCTD's "doublet" mode
 # (assumes ~1-2 cell types per spot) -- the domain structure here creates
@@ -25,7 +23,7 @@
 # Reference and query both use the exact same 556-gene ALBIS panel by
 # construction, so no gene-panel intersection step is needed.
 #
-# Input: Figure 2's smaller_sphere, locked 2026-09-17 (log_mu=-2.5 cell retune):
+# Input: Figure 2's smaller_sphere data:
 #   reference (cell): data/figure_2/smaller_sphere/data/
 #                      log_mu_-2.5_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad
 #   query (spot):      data/figure_2/smaller_sphere/data/

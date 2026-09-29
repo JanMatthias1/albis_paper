@@ -135,9 +135,8 @@ def fixed_margin_legend_ncol(categories, max_wide: int = 10) -> int:
     """Column count for plot_umap_before_after's bottom-anchored legend, which
     sits inside PANEL_MARGINS' fixed strip with no tight_layout/bbox_inches to
     rescue a horizontal overflow. Short labels (slice_id "0".."9", cluster
-    labels "0".."7") fit a full wide row even at 10 categories -- verified by
-    rendering (2026-09-18), and the user explicitly asked to keep slice_id's
-    one-row layout, not to flat-cap every legend the same way. Longer labels
+    labels "0".."7") fit a full wide row even at 10 categories (checked by
+    rendering); slice_id deliberately keeps its one-row layout. Longer labels
     (cell_type_true "type1".."type8") overflow past the axis edge at the same
     count, so those still wrap to a narrower 4-column row."""
     max_label_len = max(len(str(c)) for c in categories)

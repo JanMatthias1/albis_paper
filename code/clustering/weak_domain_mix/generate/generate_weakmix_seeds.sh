@@ -8,8 +8,8 @@
 #SBATCH --partition=shared
 #
 # Extra simulation seeds (101, 202) of the weak (Figure 2) domain-mix data for
-# cell / bin16um / spot, so every Figure 3 bar can show mean +- SD over seeds
-# 2025/101/202 (added 2026-09-25). Seed 2025 already exists and is not touched.
+# cell / bin16um / spot, so every Figure 3 bar can show mean ± SD over seeds
+# 2025/101/202. Seed 2025 already exists and is not touched.
 # Flags are the seed-2025 flags exactly (checked against each file's
 # uns['sim_params']); only --seed differs. bin8um is left at one seed.
 #

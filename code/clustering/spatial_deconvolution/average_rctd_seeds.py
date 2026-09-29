@@ -8,13 +8,11 @@ Averages the per-spot, per-cell-type estimated fractions across 3 RCTD runs
 that share one query and differ only in the reference draw:
   weak_mix:   RCTD/weak_mix/ + RCTD/weak_mix_seed{999999,314159}/ (Figure 2
               cell references at seed 2025 / independent seeds, from
-              weak_domain/run_rctd_spot{,_independent_seed}.sh; seed 271828
-              dropped 2026-09-23 so weak and strong share one design)
+              weak_domain/run_rctd_spot{,_independent_seed}.sh)
   strong_mix: RCTD/strong_mix/ + RCTD/strong_mix_seed{101,202}/ (strong-mix
               cell bs1.5 references at seed 2025/101/202, from
               strong_domain/run_rctd_spot_strong_domain.sh; 2025 shares the
-              query's seed -- chosen 2026-09-23, since weak-mix replication
-              showed seed sharing didn't matter)
+              query's seed, which the weak-mix replication showed does not matter)
 into a single combined estimate, then
 recomputes the same metrics run_rctd_spot.R computes (per-spot/per-cell-type
 Pearson r + RMSE, overall summary) against that average -- a single reference
@@ -137,8 +135,7 @@ def compute_and_write_metrics(est, truth):
 
     overall_cor = safe_cor(est_arr.ravel(), truth_arr.ravel())
     overall_rmse = float(np.sqrt(np.mean((est_arr - truth_arr) ** 2)))
-    # Read from the seed runs (same query for all) instead of a hardcoded
-    # count -- was 10034, which silently went stale on the 2026-09-23 spot retune.
+    # Read from the seed runs (same query for all) instead of a hard-coded count.
     seed_totals = {json.load(open(os.path.join(d, "metrics_summary.json")))["n_spots_total"] for d in SEED_DIRS}
     assert len(seed_totals) == 1, f"seed runs disagree on n_spots_total: {seed_totals}"
     summary = {

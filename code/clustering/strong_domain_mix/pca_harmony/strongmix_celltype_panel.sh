@@ -19,8 +19,7 @@
 #   canonical   cell bs1.5 / bin16um bs0.7 / spot bs0.3  -- same batch_sigma
 #               as the weak-mix panels, so weak vs strong mix differ only in
 #               --strong-domain-mix
-#   bs0         no batch effect -- same inputs as the strongmix rows of the
-#               BANKSY lambda sweep (../banksy/)
+#   bs0         no batch effect
 # Outputs: data/figure_3/strong_domain_mix/pca_harmony/<modality>/bs<X>/
 #   (spot's no-batch input folder is bs0.0; its output folder is bs0 like the others)
 set -euo pipefail
@@ -37,8 +36,7 @@ TASKS=(
     "bin16um bin bin16um/bs0"
     "spot spot spot/bs0.3"
     "spot spot spot/bs0.0"
-    # 6-17: simulation seeds 101/202 (added 2026-09-25; submit --array=6-17 so
-    # the seed-2025 runs above are not re-clustered)
+    # 6-17: simulation seeds 101/202 (submit --array=6-17 to skip the seed-2025 runs)
     "cell cell cell/bs1.5_seed101"
     "cell cell cell/bs1.5_seed202"
     "cell cell cell/bs0_seed101"

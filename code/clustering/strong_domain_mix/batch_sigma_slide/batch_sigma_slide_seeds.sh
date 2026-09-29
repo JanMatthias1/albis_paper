@@ -7,34 +7,13 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --partition=shared
 #
-# Seed-replication follow-up to cellbin_batch_sigma_slide.sh /
-# batch_sigma_slide_fine.sh (batch_sigma_slide_domain_ari_final.png). Those
-# swept batch_sigma at a SINGLE seed each; this adds 2 extra seeds (101, 202)
-# per existing point across all three modalities, plus 2 new spot points
-# beyond its canonical (0.4, 0.6), so the plot can show mean +/- spread
-# instead of one line -- see gen_batch_sigma_slide_seed_tasks.py (rerun that
-# to regenerate batch_sigma_slide_seed_tasks.tsv; this script just consumes
-# it, one row per array task, same generate -> QC -> BANKSY+Harmony -> ARI ->
-# composition_recovery pipeline as the two sweep scripts above).
-#
-# Requires FRESH simulations per task (the batch shift is baked into counts
-# at generation time, same as the original sweeps).
-# 2026-09-23: generate flags matched to the retuned Figure 2 config so the
-# normal- and strong-mix datasets differ ONLY by --strong-domain-mix
-# (bin16um: --theta 2.0 --theta-jitter 0.6; spot: --base-gene-lognormal
-# -2.25 1.0, no per-domain depth factors; all: --sync-unaligned-seed, which only changes
-# obsm['spatial_unaligned'] -- verified byte-identical counts/spatial/labels).
-# Old figure_3/ and data/noisy/*_strong_mix_*/*_batch_slide_* inputs archived to
-# data/figure_3_archive_20260923/ and data/noisy/_archive_figure3_20260923/,
-# so every skip-if-exists step below regenerates from scratch.
-# 2026-09-23 (later): ONE TREE PER POINT -- raw/QC h5ad are written straight
-# into the point folder ${RUN} (next to banksy_matrix/ and ari/) via
-# --output-dir, instead of data/noisy/<tag>/ + hand-made symlinks. Existing
-# inputs were moved there from data/noisy/ (verified: Figure 2 config +
-# --strong-domain-mix, generate/check_matches_figure2.py).
-# 2026-09-23 (latest): spot --domain-size-factors DROPPED by user decision
-# (per-domain depth, spot-only, made domains partly identifiable from depth);
-# spot now = Figure 2 packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03.
+# Seed replication of the batch-σ sweep: seeds 101 and 202 for every point of
+# all three modalities (plus extra spot points), so the final plot shows
+# mean ± spread. One array task per row of batch_sigma_slide_seed_tasks.tsv
+# (written by gen_batch_sigma_slide_seed_tasks.py). Same pipeline as the
+# seed-2025 generators: generate -> QC -> BANKSY + Harmony -> ARI ->
+# composition_recovery. Each task simulates fresh data (the batch shift is part
+# of the counts); settings = Figure 2 + --strong-domain-mix.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
@@ -57,10 +36,6 @@ SEED="$(echo "${LINE}" | cut -f3)"
 FOLDER="${MOD}"
 case "${MOD}" in
   cell)
-    # 2026-09-18: synced to generate_strong_mix_cell.sh's authoritative config
-    # (was stale at the OLD r=6000/log_mu=-2.3/k_geom=200 -- the exact combo
-    # found broken/collapsed at this dataset's scale; see
-    # project_figure3_banksy_domain_sweep memory 2026-09-18 for the full story).
     SPHERE_R_UM=2050
     LAM=0.5; KG=60
     TAG_BODY="log_mu_-2.5_theta_0.40_jitter0.15"
@@ -71,16 +46,10 @@ case "${MOD}" in
     LAM=0.5; KG=100
     TAG_BODY="packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6"
     GEN_FLAGS=(--bin-size-um 16 --base-gene-lognormal -2.5 0.7 --theta 2.0 --theta-jitter 0.6 --strong-domain-mix --sync-unaligned-seed)
-    # 2026-09-17: cellbin_batch_sigma_slide/ folder renamed "bin" -> "bin16um"
-    # in the strong_mix consolidation -- --modality is still "bin" (only
-    # cell/bin/spot are valid), but the ON-DISK folder is "bin16um".
+    # on-disk folder is bin16um; the tools take --modality bin
     FOLDER="bin16um"
     ;;
   spot)
-    # 2026-09-18: synced to generate_strong_mix_spot.sh's authoritative
-    # dispersion (was stale at the bare generate_simulation_noisy.py defaults,
-    # log_mu=-2.5/theta=2.0/jitter=1.0 -- predates Figure 2's spot retune to
-    # log_mu=-2.0/theta=0.25/jitter=0.10, see [[reference_generate_noisy_theta_jitter_default]]).
     SPHERE_R_UM=2050
     LAM=0.1; KG=8
     TAG_BODY="packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10"
@@ -97,11 +66,8 @@ else
     RUN="${OUT_ROOT}/${FOLDER}/bs${BS}"
     SEED_FLAG=()
 fi
-# The data files are named, Figure 2 style, by the parameters they were
-# generated with: <Fig2 tag body>_strongmix_bsigma<batch_sigma, no dot>
-# [_seed<seed>] (default seed 2025 not written), e.g.
-# log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma05_seed101.h5ad / ..._qc.h5ad.
-# The skip-if-exists checks use that name, so a parameter change regenerates.
+# Data files are named by their settings: <Figure 2 tag>_strongmix_bsigma<σ>[_seed<n>];
+# existing files are reused, so a settings change regenerates.
 DATA_TAG="${TAG_BODY}_strongmix_bsigma$(printf '%g' "${BS}" | tr -d .)${SEED:+_seed${SEED}}"
 SIM_RAW="${RUN}/${DATA_TAG}.h5ad"
 SIM_QC="${RUN}/${DATA_TAG}_qc.h5ad"

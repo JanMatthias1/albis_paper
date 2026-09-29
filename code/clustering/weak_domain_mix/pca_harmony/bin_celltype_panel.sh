@@ -6,46 +6,13 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# Figure 3, cell-type recovery panel, BIN modality (8um Visium-HD-like grid).
-# Fully self-contained: generates the sim data if not already present,
-# QC-filters, runs plain PCA->Harmony->Leiden, reports ARI against
-# cell_type_true, and produces the ground-truth-vs-predicted UMAP +
-# contingency heatmap plots.
-#
-# Uses the WEAK (manuscript-baseline) domain_type_mix -- separate dataset
-# from the domain panel (bin_domain_panel.sh) by design, see
-# cell_celltype_panel.sh for why the two panels don't share one dataset.
-#
-# Reads Figure 2's canonical bin8um dataset directly (SIM_RAW/SIM_QC point at
-# data/figure_2/smaller_sphere/data/<tag>/, not a separate data/noisy/ copy;
-# user decision 2026-08-26) so both figures describe the same simulated data.
-# If it isn't there yet, the fallback below generates+QCs it with the
-# identical config Figure 2 uses, then moves it into data/figure_2/ itself.
-#
-# Current dataset (since 2026-09-23): bin16um's exact config with only
-# --bin-size-um 8 (same tissue as bin16um), so batch_sigma is bin16um's 0.7.
-# History: the earlier bin8um datasets used their own batch_sigma (0.5,
-# bracketed 2026-08-25 for a visible pre/post-Harmony contrast; later 0.8
-# with log_mu 0.0) -- both archived, neither applies to this dataset.
-# Memory: 100G (was 250G until 2026-09-23) -- every earlier run of this job
-# peaked at ~54-55 GB MaxRSS (sacct, jobs 35453839/35454205/35882942/35884606),
-# so 100G keeps ~2x headroom without waiting in the queue for a 250G node.
-# Pipeline: plain PCA+Harmony, NOT BANKSY -- BANKSY collapses bin's
-# cell_type_true ARI (0.28 plain -> 0.004 BANKSY on the domain-panel
-# dataset); every BANKSY parameter tried so far (k_geom, nbr_weight_decay,
-# max_m) has failed to stabilize it for bin.
-
-# 2026-09-23: moved to the retuned Figure 2 tag (bin: --theta-jitter 1.0 -> 0.6;
-# spot: --base-gene-lognormal -2.25 1.0, no per-domain depth factors; see
-# data/figure_2/smaller_sphere/test/README.md). Fallback generate flags now
-# match the Figure 2 pairing scripts exactly (incl. --sync-unaligned-seed).
-# The old figure_3/ tree was archived whole to data/figure_3_archive_20260923/,
-# so the skip-if-exists PCA step below recomputes from the new data.
-# 2026-09-23 (later): Figure 2's canonical bin8um is now the same-tissue-as-16um
-# dataset (bin16um's exact config, only --bin-size-um 8; see
-# code/count_distribution/smaller_sphere/bin8um_same_tissue_as_16um.sh). The
-# old log_mu=0.0 / batch_sigma 0.8 tag was archived, and this panel's
-# fallback would otherwise have silently regenerated it.
+# Figure 3 cell-type recovery, BIN 8 µm (Visium-HD-like grid).
+# Uses the Figure 2 bin8um dataset (bin16um's settings at 8 µm, same tissue;
+# weak domain mix, batch_sigma 0.7); generates and QCs it with the Figure 2
+# settings if it is missing. Pipeline: plain PCA -> Harmony -> Leiden at the
+# true cell-type count, ARI against cell_type_true, then UMAP (true vs
+# predicted) and contingency plots. BANKSY is not used for bin cell types: it
+# collapsed cell-type ARI in every setting tried. Peak memory ~55 GB.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
@@ -58,8 +25,6 @@ SIM_RAW="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MOD
 SIM_QC="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}/simulation_${MODALITY}_z_qc.h5ad"
 NOISY_DIR="sim_paper/data/noisy/${SIM_TAG}"
 FIG2_DIR="sim_paper/data/figure_2/smaller_sphere/data/${SIM_TAG}"
-# Final-config output lives under figure_3/ (2026-08-25 reorg, same convention
-# as the figure_2/ move) -- not the generic clustering_<tag>/ sweep location.
 CLUSTER_ROOT="sim_paper/data/figure_3/weak_domain_mix/pca_harmony/bin8um/bs0.7"
 
 if [[ ! -f "${SIM_QC}" ]]; then
@@ -97,12 +62,8 @@ echo "[ari] resolution-matched ARI recovery"
     --input "${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad" \
     --output-dir "${CLUSTER_ROOT}/ari_recovery_qc"
 
-# Use the SAME resolution step02_leiden_resolution_sweep.py's binary search already found
-# for cell_type_true (achieves the true category count exactly), rather than a
-# fixed guess -- otherwise this qualitative plot's predicted-cluster count can
-# drift from the true count and look like a mismatch that isn't really there
-# (found 2026-08-25 on spot: fixed res=0.5 landed on 7 clusters vs. 8 true
-# types, while the matched res=0.524 hits 8/8).
+# Plot at the resolution step02 found for cell_type_true (true category count);
+# a fixed resolution can miss it (e.g. 7 vs 8 clusters on spot).
 RESOLUTION=$("${PYTHON_BIN}" -c "
 import json
 with open('${CLUSTER_ROOT}/ari_recovery_qc/ari_summary_${MODALITY}.json') as f:

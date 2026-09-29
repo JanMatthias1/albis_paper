@@ -8,9 +8,7 @@ step01_pca_harmony.py's output (Harmony-corrected PCA embedding), using the firs
 --n-pcs dimensions (variance-ordered).
 
 --pipeline is kept as a single-choice flag (every caller passes
-"pca_harmony" explicitly) rather than removed outright, since a second
-gene-space Harmony pipeline (gene_harmony_umap.py) existed here before being
-deleted 2026-08-27 -- reintroducing it would slot back into this flag.
+"pca_harmony" explicitly) so another embedding can be added later.
 
 Example:
     python sim_paper/code/clustering/step03_cluster_and_plot.py --resolution 0.5
@@ -106,7 +104,7 @@ def fixed_margin_legend_ncol(categories, max_wide: int = 10) -> int:
     which sits inside PANEL_MARGINS' fixed strip with no tight_layout/
     bbox_inches to rescue a horizontal overflow. Short labels (cluster_label
     "0".."7") fit a full wide row even at 8 categories -- verified by
-    rendering (2026-09-18), same fix as step01_pca_harmony.py's identically-
+    rendering, same fix as step01_pca_harmony.py's identically-
     named helper. Longer labels (cell_type_true "type1".."type8") overflow
     past the axis edge at the same count, so those still wrap to a narrower
     4-column row."""

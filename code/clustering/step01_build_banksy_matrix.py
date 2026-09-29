@@ -103,7 +103,7 @@ def parse_args() -> argparse.Namespace:
         args.input = root / f"simulation_{args.modality}_z.h5ad"
     if args.output_dir is None:
         # "_qc" in the dirname since this script is meant to run on QC-filtered input
-        # (see step00_qc_filter.py / figure.md 2026-08-24) -- named explicitly so it's
+        # (see step00_qc_filter.py) -- named explicitly so it's
         # never ambiguous with a hypothetical non-QC BANKSY run.
         args.output_dir = (
             SIM_PAPER_DIR / "data" / f"clustering_{args.packing_tag}" / args.modality / "banksy_pca_harmony_qc"
@@ -238,9 +238,8 @@ def main() -> None:
     # ── PCA + UMAP (pre-Harmony) ─────────────────────────────────────────────
     print(f"\n[pca] pre-Harmony PCA{'' if args.skip_umap else ' + UMAP'}")
     # banksy_utils calls sklearn PCA(n_components=...) with no random_state; at
-    # BANKSY-matrix sizes sklearn's 'auto' solver picks the randomized SVD, which
-    # then draws from numpy's global RNG. Unseeded, the same input gave cell
-    # strong-mix bs0 domain ARI 0.61 in one run and 0.48 in another (2026-09-23).
+    # then draws from numpy's global RNG. Unseeded, the same input gave clearly
+    # different domain ARIs between runs (0.61 vs 0.48 on cell strong-mix bs0).
     # Seeding the global RNG here makes the PCA -- and everything downstream --
     # reproducible.
     np.random.seed(args.random_state)
