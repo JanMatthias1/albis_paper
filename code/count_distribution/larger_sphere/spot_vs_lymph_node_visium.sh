@@ -6,14 +6,8 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# larger_sphere counterpart of smaller_sphere/spot_vs_lymph_node_visium.sh --
-# resubmit of sweep_spot_sphere_r6000.sh's n_cells=15043310 point, which
-# TIMED OUT at 64G/8h on 2026-09-16/17 (its own n_cells=5641241 midpoint
-# OOM'd at 64G after 4h06m, MaxRSS ~112GB and still climbing when killed --
-# spot's generation is markedly more memory-hungry per cell than bin16um's
-# at the same n_cells, hence the larger 512G request here vs bin16um's
-# 400G). Fresh SIM_TAG (not the old spot_sphere_r6000_ncells15043310 tag,
-# which left an empty directory from the failed attempt).
+# Larger-sphere version of smaller_sphere/spot_vs_lymph_node_visium.sh (supplementary, not part of
+# Figure 2): the same comparison on tissue at r = 6000 µm with the smaller-sphere 3D packing (~15.0 M cells); generation needs several hundred GB of memory.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/larger_sphere/logs
@@ -44,7 +38,7 @@ if [[ ! -f "${SIM_RAW}" ]]; then
             --out-tag "${SIM_TAG}"
     fi
     if [[ ! -f "${NOISY_DIR}/simulation_${MODALITY}_z_qc.h5ad" ]]; then
-        "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+        "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
             --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
     fi
     mkdir -p sim_paper/data/figure_2/larger_sphere/data
@@ -52,8 +46,8 @@ if [[ ! -f "${SIM_RAW}" ]]; then
 fi
 
 if [[ ! -f "${SIM_QC}" ]]; then
-    echo "[qc] ${SIM_QC} not found, running 00_qc_filter.py"
-    "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+    echo "[qc] ${SIM_QC} not found, running step00_qc_filter.py"
+    "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
         --modality "${MODALITY}" --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 

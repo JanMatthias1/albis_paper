@@ -6,9 +6,8 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# larger_sphere counterpart of smaller_sphere/cell_vs_non_diseased_lung.sh --
-# see cell_vs_lung_cancer.sh (larger_sphere) for the full rationale. Same
-# cell_native_r6000 dataset, different real reference.
+# Larger-sphere version of smaller_sphere/cell_vs_non_diseased_lung.sh (supplementary, not part of
+# Figure 2): the same comparison on cells at r = 6000 µm (600,000 cells; the data already exist, so this only runs the comparison).
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/larger_sphere/logs
@@ -39,7 +38,7 @@ if [[ ! -f "${SIM_RAW}" ]]; then
             --out-tag "${SIM_TAG}"
     fi
     if [[ ! -f "${NOISY_DIR}/simulation_${MODALITY}_z_qc.h5ad" ]]; then
-        "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+        "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
             --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
     fi
     mkdir -p sim_paper/data/figure_2/larger_sphere/data
@@ -47,8 +46,8 @@ if [[ ! -f "${SIM_RAW}" ]]; then
 fi
 
 if [[ ! -f "${SIM_QC}" ]]; then
-    echo "[qc] ${SIM_QC} not found, running 00_qc_filter.py"
-    "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+    echo "[qc] ${SIM_QC} not found, running step00_qc_filter.py"
+    "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
         --modality "${MODALITY}" --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 

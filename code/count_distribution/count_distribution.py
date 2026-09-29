@@ -39,10 +39,9 @@ regardless, since that is what the clustering pipeline actually consumes.
 By default --input is also restricted to a single slice (--slice-id 4, the
 5th of 10 slices counted from the bottom; slice_id 0 is the lowest z) rather
 than pooling all 10 z-planes, matching the single-section nature of every
-real reference. Changed from 5 (5th from the top) on 2026-09-29 so Figure 2
-and Figure 5 use the same central slice. Pass --all-slices to pool.
---compare-input data is never filtered by slice (real data has no slice_id);
-pre-subset a simulated --compare-input yourself.
+real reference. Pass --all-slices to pool. --compare-input data is never
+filtered by slice (real data has no slice_id); pre-subset a simulated
+--compare-input yourself.
 
 Pass --compare-input (plus --compare-label) to overlay a second dataset --
 e.g. real Xenium data -- on the same four diagnostics instead of plotting
@@ -86,8 +85,6 @@ COMPARE_COLOR = "#eb6834"  # orange
 # Comparison-plot title suffix; set from --title-context (default = Figure 2's).
 TITLE_CONTEXT = "simulated vs real"
 
-# Restored from typography_refresh_20260919/count_distribution_before.py,
-# with the final refresh axis/base font size (16 pt), verified against saved plots.
 # Sized for legibility once these PNGs are shrunk into a multi-panel print
 # figure -- default matplotlib sizes (title ~12, legend ~10) read fine full-size
 # on screen but wash out at print scale.

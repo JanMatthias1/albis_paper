@@ -6,87 +6,17 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# Figure 2, "spot" modality, real reference 1 of 2: simulated Visium-like
-# SPOTS (100um spacing, 27.5um capture radius) vs. Visium V2 Human Lymph
-# Node (probe-based CytAssist FFPE, 18k-gene panel -- see
-# real_data_qc/run_visium_lymph_qc.sh for provenance). Run alongside
-# spot_vs_tonsil_visium.sh, which uses the SAME SIM_TAG against the second
-# probe reference (CytAssist FFPE Human Tonsil); spot's config is tuned
-# jointly against both, not either one alone.
-#
-# 2026-09-05: spot retuned onto the two 18k CytAssist probe references.
-# breast_cancer_visium (36k whole-transcriptome, fresh-frozen) was dropped
-# as spot's tuning target on 2026-09-04, so this pairing replaces the old
-# spot_vs_breast_cancer_visium.sh (deleted).
-# base_gene_lognormal log_mu -2.5 -> -2.0, theta (NB dispersion) 2.0 -> 0.25;
-# sphere_r_um 2050 (packing_pf0p04) and batch_sigma 0.3 unchanged (batch_sigma
-# stays fixed -- it is set on the Figure 3 Harmony demo, explicit user
-# constraint). Winner of the probe sweeps (code/misc/data/misc/sweep_spot_*_probe.sh,
-# tabulated by summary_spot_logmu_theta_joint.sh): lowest composite
-# = sum of |ln(sim/real ratio)| over {theta_hat, total_counts_median,
-# matrix_zero_frac}, summed across BOTH probe refs. lymph_node is the strong
-# half of the joint fit; tonsil is looser (theta_hat still ~2.5x high, tonsil's
-# real HVG-matched theta_hat is only ~0.34). Residual: genes_per_cell median
-# undershoots lymph_node -- pre-existing spot genes_per_cell gap, not in
-# the composite, see figure.md Panel C.
-#
-# 2026-09-06: --theta-jitter added, SIM_TAG bumped to
-#   packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03
-# The shared spot config generated with --theta 0.25 and NO --theta-jitter,
-# so generate_simulation_noisy.py fell back to its default THETA_JITTER=1.0.
-# Per-gene NB dispersion ~N(0.25, 1.0) -> ~40% of genes floored to 1e-3
-# (extreme overdispersion), producing the disjoint upper cloud far above the
-# NB fit in mean_variance_compare.png / mean_dropout_compare.png. Same
-# artifact fixed for `cell` on 2026-08-25 (--theta-jitter 0.15); the fix was
-# never carried to spot through the 2026-09-05 probe retune. --theta-jitter
-# 0.10 is the largest of the swept values (0.10/0.15/0.25,
-# code/misc/data/misc/sweep_spot_jitter_probe.sh, job 35536033) that fully
-# collapses the two clouds into one continuous locus (0.4% of genes floored,
-# vs 40%); per-gene theta_hat median ~0.20, lymph_node hvg composite 0.68.
-# theta itself unchanged at 0.25 -- a re-check now that jitter is sane is
-# still open (figure.md 2026-09-06).
-#
-# The SIM_TAG data was staged from the jitter sweep build
-# (data/noisy/spot_jitter_sweep_0.10/, byte-identical generate flags + the
-# --out-tag, rng seeded) into data/figure_2/<tag>/. If absent, the block
-# below regenerates it identically. Figure 3's
-# code/clustering/spot_celltype_panel.sh reads the same SIM_TAG
-# (byte-identical shared dataset).
-#
-# 2026-08-31 realwindow (still in force): generate_simulation_noisy.py uses
-# the real 6.5x6.5 mm Visium window (no --capture-window-um); the ~2050 um
-# tissue disc sits inside it with a wide empty border, so ~77% of spots are
-# off-tissue before QC and get domain_true/cell_type_true = "unassigned",
-# obs["is_empty"] = True, dropped by 00_qc_filter.py. Only qc_filtered /
-# qc_and_hvg_matched are meaningful for the figure; full_panel / hvg_matched
-# are empty-swamped diagnostics.
-#
-# Prereq: real_data_qc/run_visium_lymph_qc.sh (writes
-# data/real_data_qc/lymph_node_visium/lymph_node_visium_qc.h5ad).
-# 2026-09-23: spot count-shape retune (theta/jitter unchanged), vs both
-# probe refs, hvg-matched, in data/figure_2/smaller_sphere/test/
-# (run_spot_improve_sweep.sh + run_spot_round2.sh, analyze_spot_improve.py):
-#   --domain-size-factors 0.35 0.6 1.0 1.0 1.6 2.8  per-domain depth spread;
-#       the only knob that widens the too-narrow total_counts peak
-#       (lymph_node total_counts JSD 0.30 -> 0.03).
-#   --base-gene-lognormal -2.25 1.0  wider gene-mean spread (sigma 0.7 -> 1.0,
-#       log_mu shifted so exp(mu + sigma^2/2) stays ~fixed) -- sim gene means
-#       now reach real's highly-expressed range.
-# Composite (sum |ln sim/real| over theta_hat, total_counts_median,
-# zero_frac, both refs) 2.76 -> 2.03; theta_hat 1.19 -> 0.77 (lymph_node
-# 0.76); genes/spot 412 -> 394 (lymph_node 394). Same config verified in the
-# strong domain mix (composite 1.93). Old data + plots archived under
-# data/figure_2/misc/archive/pre_jitter_dsf_retune_20260923/. Data staged
-# from test/data/spot_dsfS_sigma10/ (identical flags + seed, no regen).
-# 2026-09-23 (later, superseding the note above): --domain-size-factors
-# DROPPED by user decision -- region-dependent depth for spot only (cell/bin
-# have none), with hand-picked per-domain values, and it made spot domains
-# partly identifiable from depth alone in Figure 3. Spot keeps the wider
-# gene-mean spread (--base-gene-lognormal -2.25 1.0; round-1 'sigma10' in
-# data/figure_2/smaller_sphere/test/: composite 2.76 -> 2.25, total_counts
-# shape unchanged vs the old config). Data (re)generated by this script
-# (same flags + seed as test/data/spot_sigma10/). dsf data/plots archived to
-# data/figure_2/misc/archive/spot_dsf_dropped_20260923/.
+# Figure 2, spot: simulated Visium-like spots (100 µm spacing, 27.5 µm capture
+# radius) vs Visium human lymph node (CytAssist FFPE probe panel, 18k genes;
+# QC by real_data_qc/). The same simulation is compared with the second probe
+# reference in spot_vs_tonsil_visium.sh (tonsil); the spot settings were tuned against both
+# (composite of |ln(sim/real)| over θ̂, median total counts and zero fraction).
+# Settings: r = 2050 µm, --base-gene-lognormal -2.25 1.0, theta 0.25,
+# theta-jitter 0.10 (larger jitter floors many genes to extreme dispersion),
+# batch_sigma 0.3 (set on the Figure 3 Harmony demo). Figure 3's spot panels
+# use the same data.
+# The simulation covers the full 6.5 × 6.5 mm Visium window, so most spots are
+# off-tissue before QC: use the qc_filtered / qc_and_hvg_matched outputs.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/smaller_sphere/logs
@@ -118,7 +48,7 @@ if [[ ! -f "${SIM_RAW}" ]]; then
             --out-tag "${SIM_TAG}"
     fi
     if [[ ! -f "${NOISY_DIR}/simulation_${MODALITY}_z_qc.h5ad" ]]; then
-        "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+        "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
             --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
     fi
     mkdir -p sim_paper/data/figure_2/smaller_sphere/data
@@ -126,8 +56,8 @@ if [[ ! -f "${SIM_RAW}" ]]; then
 fi
 
 if [[ ! -f "${SIM_QC}" ]]; then
-    echo "[qc] ${SIM_QC} not found, running 00_qc_filter.py"
-    "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+    echo "[qc] ${SIM_QC} not found, running step00_qc_filter.py"
+    "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
         --modality "${MODALITY}" --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 

@@ -6,20 +6,8 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# larger_sphere counterpart of smaller_sphere/bin_vs_breast_cancer_visium_hd.sh
-# (8um bins) -- grows the disc to cell's native sphere_r_um=6000 instead of
-# the shared 2050um disc, holding 3D packing fraction fixed via
-# n_cells = 600000 * (6000/2050)^3 ~ 15,043,310 (same target fraction as the
-# smaller_sphere packing_pf0p04 config, ~4%).
-#
-# NEW territory as of 2026-09-17: unlike cell (already had a native-r6000
-# baseline) and bin16um/spot (attempted the night before at 64G/8h and
-# failed -- bin16um's matching n_cells task TIMED OUT, spot's OOM'd and
-# TIMED OUT, see figure.md 2026-09-16), bin8um was never tried at r=6000 at
-# all. Sized generously off that failure data: bin16um's 5.6M-cell task hit
-# ~97GB RSS in 1h43m and its 15M-cell task didn't finish generating within
-# 8h, so 400G/24h is a deliberately large first attempt, not a tuned
-# estimate -- expect to revisit if it's still not enough.
+# Larger-sphere version of smaller_sphere/bin_vs_breast_cancer_visium_hd.sh (supplementary, not part of
+# Figure 2): the same comparison on tissue at r = 6000 µm with the smaller-sphere 3D packing (~15.0 M cells); generation needs several hundred GB of memory.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/larger_sphere/logs
@@ -48,7 +36,7 @@ if [[ ! -f "${SIM_RAW}" ]]; then
             --out-tag "${SIM_TAG}"
     fi
     if [[ ! -f "${NOISY_DIR}/simulation_${MODALITY}_z_qc.h5ad" ]]; then
-        "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+        "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
             --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
     fi
     mkdir -p sim_paper/data/figure_2/larger_sphere/data
@@ -56,8 +44,8 @@ if [[ ! -f "${SIM_RAW}" ]]; then
 fi
 
 if [[ ! -f "${SIM_QC}" ]]; then
-    echo "[qc] ${SIM_QC} not found, running 00_qc_filter.py"
-    "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+    echo "[qc] ${SIM_QC} not found, running step00_qc_filter.py"
+    "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
         --modality "${MODALITY}" --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 

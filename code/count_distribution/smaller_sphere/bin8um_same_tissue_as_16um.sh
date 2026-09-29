@@ -6,27 +6,12 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# CANONICAL Figure 2 bin8um comparison as of 2026-09-23 (started as an
-# exploratory check the same day; promoted by user decision because it matches
-# real 8um Visium HD better on the panel-matched QC comparison: median
-# counts/genes/zero-frac 47/21/0.953 vs breast 35/25/0.951, where the old
-# log_mu=0.0 config gave 512/145/0.727). Replaces bin_vs_{breast_cancer,
-# human_pancreas}_visium_hd.sh, archived with their data/plots under
-# code/misc/count_distribution/misc/superseded_bin8um_logmu0_20260923/ and
-# data/figure_2/misc/archive/bin8um_logmu0_superseded_20260923/.
-#
-# Question: could bin8um and bin16um share ONE underlying tissue? This takes
-# bin16um's exact generate command (bin16um_vs_*_visium_hd.sh: log_mu=-2.5,
-# theta 2.0, jitter 0.6, batch_sigma 0.7, same default seed) and changes only
-# --bin-size-um 16 -> 8. The simulator bins the same full molecule stream
-# (aggregate_molecules_to_grid_bins_2d_slices_window) and draws batch factors
-# from seed-derived RNGs independent of bin size, so these 8um bins are an
-# exact 2x2 subdivision of the canonical bin16um dataset's bins.
-#
-# The superseded 8um config used log_mu=0.0 / batch_sigma 0.8, i.e. a ~12x
-# denser molecule tissue tuned separately from 16um.
-# Compared against both real 8um Visium HD datasets; QC panels only (see
-# realwindow note in the bin16um scripts -- pre-QC panels are ~77% empty).
+# Figure 2, bin 8 µm: simulated 8 µm bins vs Visium HD human breast cancer and
+# human pancreas (8 µm; QC by real_data_qc/), one run per reference.
+# The simulation is the bin16um tissue at 8 µm: the bin16um settings with only
+# --bin-size-um 8. The simulator bins the same molecules and draws batch factors
+# independently of bin size, so these bins are an exact 2 × 2 subdivision of the
+# 16 µm bins. QC modes only (most bins are off-tissue before QC).
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/smaller_sphere/logs
@@ -54,7 +39,7 @@ if [[ ! -f "${SIM_RAW}" ]]; then
             --out-tag "${SIM_TAG}"
     fi
     if [[ ! -f "${NOISY_DIR}/simulation_${MODALITY}_z_qc.h5ad" ]]; then
-        "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+        "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
             --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
     fi
     mkdir -p sim_paper/data/figure_2/smaller_sphere/data
@@ -62,8 +47,8 @@ if [[ ! -f "${SIM_RAW}" ]]; then
 fi
 
 if [[ ! -f "${SIM_QC}" ]]; then
-    echo "[qc] ${SIM_QC} not found, running 00_qc_filter.py"
-    "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+    echo "[qc] ${SIM_QC} not found, running step00_qc_filter.py"
+    "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
         --modality "${MODALITY}" --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 

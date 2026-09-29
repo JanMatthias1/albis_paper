@@ -6,14 +6,8 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# larger_sphere counterpart of
-# smaller_sphere/bin16um_vs_human_pancreas_visium_hd.sh -- see
-# larger_sphere/bin16um_vs_breast_cancer_visium_hd.sh for the full rationale.
-# Same bin16um r6000 sim dataset (shared SIM_TAG), different real reference.
-#
-# NOTE: shares SIM_TAG with bin16um_vs_breast_cancer_visium_hd.sh -- submit
-# that one first (or with a real dependency) so this one finds the data
-# already generated instead of racing it.
+# Larger-sphere version of smaller_sphere/bin16um_vs_human_pancreas_visium_hd.sh (supplementary, not part of
+# Figure 2): the same comparison on tissue at r = 6000 µm with the smaller-sphere 3D packing (~15.0 M cells); generation needs several hundred GB of memory.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/larger_sphere/logs
@@ -43,7 +37,7 @@ if [[ ! -f "${SIM_RAW}" ]]; then
             --out-tag "${SIM_TAG}"
     fi
     if [[ ! -f "${NOISY_DIR}/simulation_${MODALITY}_z_qc.h5ad" ]]; then
-        "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+        "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
             --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
     fi
     mkdir -p sim_paper/data/figure_2/larger_sphere/data
@@ -51,8 +45,8 @@ if [[ ! -f "${SIM_RAW}" ]]; then
 fi
 
 if [[ ! -f "${SIM_QC}" ]]; then
-    echo "[qc] ${SIM_QC} not found, running 00_qc_filter.py"
-    "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+    echo "[qc] ${SIM_QC} not found, running step00_qc_filter.py"
+    "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
         --modality "${MODALITY}" --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 

@@ -6,17 +6,8 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# larger_sphere counterpart of
-# smaller_sphere/bin16um_vs_breast_cancer_visium_hd.sh -- resubmit of
-# sweep_bin16um_sphere_r6000.sh's n_cells=15043310 point (the one that
-# TIMED OUT at 64G/8h on 2026-09-16/17, MaxRSS still only 3.1G at
-# cancellation -- i.e. it never even got close to finishing generation, not
-# a near-miss). This version uses a fresh SIM_TAG (not the old
-# bin16um_sphere_r6000_ncells15043310 tag, which left an empty directory
-# from the failed attempt) and a much larger 400G/24h budget, sized off the
-# lower two sweep points that DID complete: 3.0M cells -> ~60GB/38min,
-# 5.6M cells -> ~97GB/1h43m (both exceeding their own 64G request without
-# being killed, and scaling worse than linearly with n_cells).
+# Larger-sphere version of smaller_sphere/bin16um_vs_breast_cancer_visium_hd.sh (supplementary, not part of
+# Figure 2): the same comparison on tissue at r = 6000 µm with the smaller-sphere 3D packing (~15.0 M cells); generation needs several hundred GB of memory.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/larger_sphere/logs
@@ -46,7 +37,7 @@ if [[ ! -f "${SIM_RAW}" ]]; then
             --out-tag "${SIM_TAG}"
     fi
     if [[ ! -f "${NOISY_DIR}/simulation_${MODALITY}_z_qc.h5ad" ]]; then
-        "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+        "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
             --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
     fi
     mkdir -p sim_paper/data/figure_2/larger_sphere/data
@@ -54,8 +45,8 @@ if [[ ! -f "${SIM_RAW}" ]]; then
 fi
 
 if [[ ! -f "${SIM_QC}" ]]; then
-    echo "[qc] ${SIM_QC} not found, running 00_qc_filter.py"
-    "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+    echo "[qc] ${SIM_QC} not found, running step00_qc_filter.py"
+    "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
         --modality "${MODALITY}" --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 

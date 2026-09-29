@@ -6,42 +6,15 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=shared
 #
-# Figure 2 final comparison: bin vs. Visium HD human_pancreas_visium_hd, at
-# the 16um bin resolution. Fully self-contained: generates the sim data (if
-# not already present), QC-filters it, then runs all 4 count_distribution.py
-# modes. Same sim config and rationale as bin16um_vs_breast_cancer_visium_hd.sh
-# -- see that script's header for the full explanation.
-
-# 2026-08-27: SIM_TAG now carries the per-modality batch_sigma finalized for
-# the SHARED Figure 2 / Figure 3 dataset (cell 1.5, bin8 0.8, bin16 0.7,
-# spot 0.3), tuned on the Figure 3 pre/post-Harmony demo then confirmed here
-# to still match the real count distribution. count_distribution.py now
-# defaults to --slice-id 4 (5th slice from the bottom; was 5 until 2026-09-29) and post-batch counts, so those flags are no
-# longer passed per-call below. The matching clustering panel is
-# code/clustering/<modality>_celltype_panel.sh (same SIM_TAG).
-#
-# 2026-08-31: realwindow is now the default (the old sphere-scaled tight
-# capture window is retired). generate_simulation_noisy.py no longer scales
-# the window with --sphere-r-um; with --capture-window-um unset it uses the
-# real instrument window (6.5 x 6.5 mm for Visium / Visium HD). The ~2050 um
-# tissue disc sits inside that window with a wide empty border: off-tissue
-# bins get domain_true / cell_type_true = "unassigned", obs["is_empty"] = True,
-# and are dropped by 00_qc_filter.py (~77% of rows). Only the qc_filtered /
-# qc_and_hvg_matched panels are meaningful for the figure; full_panel /
-# hvg_matched are now empty-swamped diagnostics. Sim data is (re)generated
-# under data/noisy/<tag>/ then moved into data/figure_2/<tag>/; pre-realwindow
-# data is archived at data/figure_2_oldwindow_20260831/.
-# 2026-09-23: --theta-jitter 1.0 -> 0.6 (theta 2.0 now explicit). bin never
-# overrode generate_simulation_noisy.py's first-pass jitter default, so
-# theta_g = max(1e-3, N(2.0, 1.0)) floored ~2.3% of genes to theta=1e-3 -> a
-# detached band ~100-1000x above the mean-variance trend in every slice
-# (9-11 genes/slice). Swept 0.8/0.6/0.4 at theta=2.0 in
-# data/figure_2/smaller_sphere/test/ (run_theta_jitter_sweep.sh,
-# analyze_sweep.py, outlier_realism.py): 0.8 still leaves the band, 0.6 removes
-# it in all 10 slices; total counts / genes / zero fraction / bulk theta_hat
-# unchanged. Old data + plots archived under
-# data/figure_2/misc/archive/pre_jitter_dsf_retune_20260923/. Data staged
-# from test/data/<modality>_jitter0p6/ (identical flags + seed, no regen).
+# Figure 2, bin 16 µm: simulated 16 µm bins vs Visium HD human pancreas, resampled to 16 µm bins
+# (Visium HD ships 2/8/16 µm; QC by real_data_qc/). The same simulation is
+# compared with bin16um_vs_breast_cancer_visium_hd.sh (breast cancer).
+# Settings: r = 2050 µm, --base-gene-lognormal -2.5 0.7, theta 2.0,
+# theta-jitter 0.6 (larger jitter floors some genes to extreme dispersion),
+# batch_sigma 0.7 (set on the Figure 3 Harmony demo). Figure 3's bin16um panels
+# use the same data.
+# The simulation covers the full 6.5 × 6.5 mm window, so most bins are
+# off-tissue before QC: use the qc_filtered / qc_and_hvg_matched outputs.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/smaller_sphere/logs
@@ -74,7 +47,7 @@ if [[ ! -f "${SIM_RAW}" ]]; then
             --out-tag "${SIM_TAG}"
     fi
     if [[ ! -f "${NOISY_DIR}/simulation_${MODALITY}_z_qc.h5ad" ]]; then
-        "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+        "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
             --modality "${MODALITY}" --packing-tag "${SIM_TAG}"
     fi
     mkdir -p sim_paper/data/figure_2/smaller_sphere/data
@@ -82,8 +55,8 @@ if [[ ! -f "${SIM_RAW}" ]]; then
 fi
 
 if [[ ! -f "${SIM_QC}" ]]; then
-    echo "[qc] ${SIM_QC} not found, running 00_qc_filter.py"
-    "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py \
+    echo "[qc] ${SIM_QC} not found, running step00_qc_filter.py"
+    "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
         --modality "${MODALITY}" --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 
