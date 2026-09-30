@@ -29,10 +29,35 @@ code/applications_albis/alignment/README.md
 code/applications_albis/spatial_clustering/README.md
 code/applications_albis/spatial_clustering/TODO.md
 code/applications_albis/**/logs_*/
-code/comparison_methods/README_PRIOR_TESTING.md
 code/clustering/PATHS.md
 code/clustering/README_PLOTTING.md
 
 # Local historical code and logs
 /code/misc/
 /docs/
+
+# Job logs stay on disk but are not versioned (2026-09-29)
+code/clustering/**/logs/
+# Detailed internal clustering notes stay on disk, not versioned; public overview = code/clustering/README.md
+code/clustering/README_internal.md
+code/clustering/HISTORY_internal.md
+code/clustering/README_PLOTTING.md
+code/clustering/PATHS.md
+code/clustering/*/**/README.md
+
+# Internal agent / assistant instruction files (2026-09-30)
+AGENTS.md
+CLAUDE.md
+.claude/
+
+# Internal working notes (2026-09-30); public docs are the per-panel READMEs
+/figure_5.md
+/FIGURE_FINALIZATION_AUDIT.md
+/DATA_VERSIONS.md
+code/comparison_methods/README.md
+**/README_PRIOR_TESTING.md
+**/OUTPUT_POLICY_AUDIT.md
+
+# Job logs stay on disk but are not versioned (extends the 2026-09-29 clustering rule)
+code/**/logs/
+code/**/logs_*/

@@ -20,7 +20,7 @@
 #   spot:     log_mu=-2.5, theta=2.0, jitter=1.0, sphere_r_um=2050
 #   cell:     log_mu=-2.3, theta=0.40, jitter=0.15, sphere_r_um=default 6000
 # Only --batch-sigma differs (-> 0.05). Uses the current (post-batch) QC in
-# 00_qc_filter.py and the current realwindow default in
+# step00_qc_filter.py and the current realwindow default in
 # generate_simulation_noisy.py, so it is consistent with the family-1 tags.
 #
 # generate_simulation_noisy.py writes to data/noisy/<out-tag>/ only; this
@@ -82,7 +82,7 @@ fi
 
 if [[ ! -f "${NOISY_DIR}/simulation_${MODALITY}_z_qc.h5ad" ]]; then
     echo "[qc] ${TAG}"
-    "${PYTHON_BIN}" sim_paper/code/clustering/00_qc_filter.py --modality "${MODALITY}" --packing-tag "${TAG}"
+    "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py --modality "${MODALITY}" --packing-tag "${TAG}"
 fi
 
 echo "[move] ${NOISY_DIR} -> ${DEST_DIR}"

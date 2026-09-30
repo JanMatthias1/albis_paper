@@ -18,8 +18,8 @@ OUTDIR="/dcs04/hicks/data/Jan/sim_project/sim_paper/code/applications_albis/alig
 LOGDIR="${OUTDIR}/logs_stair_3D"
 mkdir -p "${LOGDIR}"
 
+# 2026-09-28: Fig4C strong-mix data (see 3D_stair.py DATASETS); bin8um dropped.
 DATASETS=(
-  "bin8um"
   "bin16um"
   "spot"
   "cell"
@@ -38,6 +38,8 @@ for d in "${DATASETS[@]}"; do
   # 2026-09-19: cell_r6000 is 600k obs -- between bin16um (350k, 150G default
   # is fine) and bin8um (1.3M, needs 250G) -- bump proportionally, untested.
   [[ "${d}" == "cell_r6000" ]] && MEM="200G" && TIME="24:00:00"
+  # 2026-09-28: cell is now the Fig4C 600k-cell stack (same size as cell_r6000).
+  [[ "${d}" == "cell" ]] && MEM="200G" && TIME="24:00:00"
 
   sbatch \
   "${DEP_ARG[@]}" \

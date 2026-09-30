@@ -16,7 +16,7 @@ Differences from the benchmark version:
     *misaligned* coords (spatial_unaligned -> spatial).
   * Known slice order only: batch_order stays sorted by slice_id, the STAIR
     z-reconstruction path (sort_slices / loc_predict_z) is left disabled.
-  * Four modalities driven from a dataset table (bin8um / bin16um / spot / cell) rather
+  * Three modalities driven from a dataset table (bin16um / spot / cell) rather
     than a filename-prefix switch.
 
 Output (per dataset) under
@@ -86,7 +86,7 @@ BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/alignme
 # 2026-09-01: realwindow is now the baked-in default for the Figure 2 tags, so
 # bin16um / spot carry a real 6.5 mm platform window with ~77% off-tissue
 # bins/spots labelled domain_true="unassigned" / is_empty=True pre-QC. Point
-# STAIR at the QC-filtered h5ad (00_qc_filter.py drops the empty border, leaving
+# STAIR at the QC-filtered h5ad (step00_qc_filter.py drops the empty border, leaving
 # the clean 6-domain disc) -- the raw simulation_<mod>_z.h5ad would feed STAIR a
 # mostly-empty stack and a 7th "unassigned" domain. cell has no off-tissue
 # observations (12x24 mm window fully covered) so it stays on the raw h5ad.
@@ -119,50 +119,36 @@ BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/alignme
 # than a tuned choice. All 4 pre-reorg STAIR outputs (bin16um/spot/cell were
 # stale vs. the reorg regardless of bin8um) archived to
 # data/figure_4/alignment/STAIR/<dataset>_pre_reorg_20260917/.
+# 2026-09-28: Figure 4A switched to the Figure 4C strong-domain-mix data
+# (user decision): one ALBIS call builds a single shared tissue for all three
+# modalities -- strong domain mix, r=2050 sphere, 600k cells (so cell is dense,
+# ~16-89k cells/slice, like the old cell_r6000 run but at the current -2.5
+# dispersion), UNCROPPED (the parent of Fig4C's _cropped_bin_spot; also the exact data
+# symlinked by Figure 5's data/figure_5/figure_5A_600k/albis/), per-slice
+# rigid perturbation max_shift 3075 um / 270 deg (shift3x). The Figure 2
+# smaller_sphere tags above are no longer used here; bin8um and cell_r6000 were
+# dropped (no bin8um in the 4C data; cell is now the dense cell). All prior
+# STAIR outputs archived to data/figure_4/alignment/STAIR/_archive_20260928_pre_strongmix/.
+FIG4C = ("/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/"
+         "cross_modality_alignment/strong_domain_mix_shift3x/data")
 DATASETS = {
-    # 8 um Visium HD bin z-stack. Untuned first pass -- n_neigh_hom/c_neigh_het
-    # reused from bin16um (nearest analog), not empirically tuned for this
-    # modality. Also by far the largest of the 4 datasets (6.6M obs, ~4x
-    # bin16um's 1.65M) -- resourced separately in run_stair_3D.sh; may need a
-    # resubmit at higher mem/time if it OOMs or times out on the first try.
-    "bin8um": dict(
-        h5ad=f"{FIG2}/packing_pf0p04_log_mu_0.0_bsigma08/simulation_bin_z_qc.h5ad",
-        n_neigh_hom=4,
-        c_neigh_het=0.97,
-    ),
-    # 16 um Visium HD bin z-stack
+    # 16 um Visium HD bin z-stack -- counts/labels/truth identical to Fig3
+    # strong_domain_mix bin16um/bs0.7 (verified 2026-09-28); only the
+    # misalignment differs (max_shift 3075 vs 1025)
     "bin16um": dict(
-        h5ad=f"{FIG2}/packing_pf0p04_bin16um_log_mu_-2.5_bsigma07/simulation_bin_z_qc.h5ad",
+        h5ad=f"{FIG4C}/bin16um/simulation_bin_z_qc.h5ad",
         n_neigh_hom=4,
         c_neigh_het=0.97,
     ),
-    # Visium spot z-stack
+    # Visium spot z-stack (same tissue, bin16um sim params)
     "spot": dict(
-        h5ad=f"{FIG2}/packing_pf0p04_log_mu_-2.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad",
+        h5ad=f"{FIG4C}/spot/simulation_spot_z_qc.h5ad",
         n_neigh_hom=8,
         c_neigh_het=0.90,
     ),
-    # single-cell z-stack
+    # single-cell z-stack, 600k cells (same tissue, bin16um sim params)
     "cell": dict(
-        h5ad=f"{FIG2}/log_mu_-2.5_theta_0.40_jitter0.15_bsigma15/simulation_cell_z.h5ad",
-        n_neigh_hom=8,
-        c_neigh_het=0.90,
-    ),
-    # 2026-09-19: single-cell z-stack at cell's NATIVE geometry (sphere_r_um
-    # 6000, 600,000 cells, real Xenium 12x24mm capture window) rather than
-    # the smaller_sphere r=2050 shrink used for cross-modality consistency
-    # elsewhere. Per-slice density is 7-35x higher than the r=2050 "cell"
-    # entry above (16.7k-88.8k cells/slice vs ~2.4k) -- testing whether
-    # cell's weak cross-slice MNN domain-agreement in plot_figure4a.py
-    # (18.8% vs bin16um/spot's 52-54%) is a density/geometry artifact of the
-    # shrink rather than a cell-resolution-inherent limitation. Reuses
-    # data/figure_2/larger_sphere/data/cell_native_r6000/ (already generated,
-    # see project_figure2_smaller_larger_sphere memory) -- note this predates
-    # the 2026-09-17 cell dispersion retune (log_mu -2.3 here, not the
-    # current -2.5), so this is a geometry-only comparison, not an
-    # apples-to-apples rerun of the current cell config at a different size.
-    "cell_r6000": dict(
-        h5ad="/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/larger_sphere/data/cell_native_r6000/simulation_cell_z_qc.h5ad",
+        h5ad=f"{FIG4C}/cell/simulation_cell_z_qc.h5ad",
         n_neigh_hom=8,
         c_neigh_het=0.90,
     ),

@@ -8,6 +8,18 @@ Here, we introduce ALBIS, a statistically grounded and highly customizable frame
 
 **Paper:** Link to be added.
 
+## The ALBIS package
+
+ALBIS is available on PyPI as [`albis`](https://pypi.org/project/albis/):
+
+```bash
+pip install albis
+```
+
+Source code and package documentation are on GitHub:
+[JanMatthias1/Albis](https://github.com/JanMatthias1/Albis#readme).
+This repository contains only the manuscript analyses that use it.
+
 ## Code for the manuscript figures
 
 This repository contains the analysis and plotting code for the ALBIS manuscript. Code is organized by analysis; some directories contribute to more than one figure.
@@ -15,7 +27,7 @@ This repository contains the analysis and plotting code for the ALBIS manuscript
 | Figure | Code directory |
 | --- | --- |
 | Figure 1 | [code/sphere_figure](code/sphere_figure/) |
-| Figure 2 | [code/comparison_methods](code/comparison_methods/) |
+| Figure 2 | [code/count_distribution](code/count_distribution/) |
 | Figure 3 | [code/clustering](code/clustering/) |
 | Figure 4 | [code/applications_albis](code/applications_albis/) |
 | Figure 5 | [code/comparison_methods](code/comparison_methods/) |

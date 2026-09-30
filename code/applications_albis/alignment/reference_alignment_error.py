@@ -108,7 +108,7 @@ def main():
     parser.add_argument('--reference',default='0')
     args=parser.parse_args()
     rows, fits=[],[]
-    for ds in ['cell_r6000','bin16um','spot']:
+    for ds in ['cell','bin16um','spot']:  # 2026-09-28: Fig4C strong-mix data, cell = 600k dense
         r,f=evaluate(args.base/f'STAIR/{ds}/adata_results/Sim_3D_STAIR_{ds}.h5ad',ds,args.reference)
         rows.extend(r);fits.extend(f)
     out=args.base/'plots';out.mkdir(exist_ok=True)
