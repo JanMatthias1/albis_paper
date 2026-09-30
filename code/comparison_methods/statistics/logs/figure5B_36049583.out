@@ -1,0 +1,369 @@
+/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/albis/cell.h5ad -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_cell_slice4.h5ad: slice_id 4, 88901 x 556
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_cell_slice4.h5ad
+[load] AnnData shape: 88901 x 556
+[qc] fully-empty (total_counts == 0): 0 (0.00%)
+[qc] near-empty (0 < total_counts, n_genes < 3): 0 (0.00%)
+[qc] dropped 0 observations (0.00%); 88901 remain
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_cell_slice4_qc_summary.json
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_cell_slice4_qc.h5ad
+/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/spider/cell.h5ad -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_cell_slice4.h5ad: slice_id 4, 59699 x 556
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_cell_slice4.h5ad
+[load] AnnData shape: 59699 x 556
+[qc] fully-empty (total_counts == 0): 0 (0.00%)
+[qc] near-empty (0 < total_counts, n_genes < 3): 0 (0.00%)
+[qc] dropped 0 observations (0.00%); 59699 remain
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_cell_slice4_qc_summary.json
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_cell_slice4_qc.h5ad
+/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/sccube/cell.h5ad -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_cell_slice4.h5ad: slice_id 4, 59699 x 556
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_cell_slice4.h5ad
+[load] AnnData shape: 59699 x 556
+[qc] fully-empty (total_counts == 0): 0 (0.00%)
+[qc] near-empty (0 < total_counts, n_genes < 3): 0 (0.00%)
+[qc] dropped 0 observations (0.00%); 59699 remain
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_cell_slice4_qc_summary.json
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_cell_slice4_qc.h5ad
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] primary: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_cell_slice4.h5ad
+[load] primary shape: 88901 observations x 556 genes
+[slice] restricting to slice_id=4: 88901 -> 88901 observations
+[load] compare: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_cell_slice4.h5ad
+[load] compare shape: 59699 observations x 556 genes
+[nb] ALBIS: theta_hat = 0.10, X used for mean-variance/total-counts
+[sparsity] ALBIS: 92.19% zero entries, 0.00% fully-empty cells
+[nb] SPIDER: theta_hat = 3.57, X used for mean-variance/total-counts
+[sparsity] SPIDER: 17.69% zero entries, 0.00% fully-empty cells
+[save] Comparison plots written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/cell/albis_vs_spider/full_panel
+[save] Numeric summary written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/cell/albis_vs_spider/full_panel/comparison_summary.json
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+{
+  "modality": "cell",
+  "inputs": {
+    "ALBIS": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_cell_slice4.h5ad",
+    "scCube": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_cell_slice4.h5ad"
+  },
+  "n_obs": {
+    "ALBIS": 88901,
+    "scCube": 59699
+  },
+  "n_vars": {
+    "ALBIS": 556,
+    "scCube": 556
+  },
+  "genes_per_cell_median": {
+    "ALBIS": 42.0,
+    "scCube": 480.0
+  },
+  "matrix_zero_frac": {
+    "ALBIS": 0.921884937242049,
+    "scCube": 0.13652461671929483
+  },
+  "empty_row_frac": {
+    "ALBIS": 0.0,
+    "scCube": 0.0
+  },
+  "jsd_albis_vs_sccube": {
+    "genes_per_cell": 1.0,
+    "log1p_normalized": 0.8235823099505574
+  }
+}
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] primary: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_cell_slice4_qc.h5ad
+[load] primary shape: 88901 observations x 556 genes
+[slice] restricting to slice_id=4: 88901 -> 88901 observations
+[load] compare: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_cell_slice4_qc.h5ad
+[load] compare shape: 59699 observations x 556 genes
+[nb] ALBIS: theta_hat = 0.10, X used for mean-variance/total-counts
+[sparsity] ALBIS: 92.19% zero entries, 0.00% fully-empty cells
+[nb] SPIDER: theta_hat = 3.57, X used for mean-variance/total-counts
+[sparsity] SPIDER: 17.69% zero entries, 0.00% fully-empty cells
+[save] Comparison plots written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/cell/albis_vs_spider/qc_filtered
+[save] Numeric summary written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/cell/albis_vs_spider/qc_filtered/comparison_summary.json
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+{
+  "modality": "cell",
+  "inputs": {
+    "ALBIS": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_cell_slice4_qc.h5ad",
+    "scCube": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_cell_slice4_qc.h5ad"
+  },
+  "n_obs": {
+    "ALBIS": 88901,
+    "scCube": 59699
+  },
+  "n_vars": {
+    "ALBIS": 556,
+    "scCube": 556
+  },
+  "genes_per_cell_median": {
+    "ALBIS": 42.0,
+    "scCube": 480.0
+  },
+  "matrix_zero_frac": {
+    "ALBIS": 0.921884937242049,
+    "scCube": 0.13652461671929483
+  },
+  "empty_row_frac": {
+    "ALBIS": 0.0,
+    "scCube": 0.0
+  },
+  "jsd_albis_vs_sccube": {
+    "genes_per_cell": 1.0,
+    "log1p_normalized": 0.8235823099505574
+  }
+}
+/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/albis/bin.h5ad -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_bin_slice4.h5ad: slice_id 4, 165649 x 556
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_bin_slice4.h5ad
+[load] AnnData shape: 165649 x 556
+[qc] fully-empty (total_counts == 0): 114595 (69.18%)
+[qc] near-empty (0 < total_counts, n_genes < 3): 451 (0.27%)
+[qc] dropped 115046 observations (69.45%); 50603 remain
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_bin_slice4_qc_summary.json
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_bin_slice4_qc.h5ad
+/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/spider/bin.h5ad -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_bin_slice4.h5ad: slice_id 4, 66049 x 556
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_bin_slice4.h5ad
+[load] AnnData shape: 66049 x 556
+[qc] fully-empty (total_counts == 0): 26740 (40.49%)
+[qc] near-empty (0 < total_counts, n_genes < 3): 0 (0.00%)
+[qc] dropped 26740 observations (40.49%); 39309 remain
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_bin_slice4_qc_summary.json
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_bin_slice4_qc.h5ad
+/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/sccube/bin.h5ad -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_bin_slice4.h5ad: slice_id 4, 18898 x 556
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_bin_slice4.h5ad
+[load] AnnData shape: 18898 x 556
+[qc] fully-empty (total_counts == 0): 0 (0.00%)
+[qc] near-empty (0 < total_counts, n_genes < 3): 0 (0.00%)
+[qc] dropped 0 observations (0.00%); 18898 remain
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_bin_slice4_qc_summary.json
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_bin_slice4_qc.h5ad
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/legacy_api_wrap/__init__.py:88: UserWarning: Some cells have zero counts
+  return fn(*args_all, **kw)
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/legacy_api_wrap/__init__.py:88: UserWarning: Some cells have zero counts
+  return fn(*args_all, **kw)
+[load] primary: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_bin_slice4.h5ad
+[load] primary shape: 165649 observations x 556 genes
+[slice] restricting to slice_id=4: 165649 -> 165649 observations
+[load] compare: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_bin_slice4.h5ad
+[load] compare shape: 66049 observations x 556 genes
+[nb] ALBIS: theta_hat = 0.05, X used for mean-variance/total-counts
+[sparsity] ALBIS: 95.77% zero entries, 69.18% fully-empty cells
+[nb] SPIDER: theta_hat = 0.69, X used for mean-variance/total-counts
+[sparsity] SPIDER: 49.24% zero entries, 40.49% fully-empty cells
+[save] Comparison plots written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/bin/albis_vs_spider/full_panel
+[save] Numeric summary written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/bin/albis_vs_spider/full_panel/comparison_summary.json
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+{
+  "modality": "bin",
+  "inputs": {
+    "ALBIS": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_bin_slice4.h5ad",
+    "scCube": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_bin_slice4.h5ad"
+  },
+  "n_obs": {
+    "ALBIS": 165649,
+    "scCube": 18898
+  },
+  "n_vars": {
+    "ALBIS": 556,
+    "scCube": 556
+  },
+  "genes_per_cell_median": {
+    "ALBIS": 0.0,
+    "scCube": 480.0
+  },
+  "matrix_zero_frac": {
+    "ALBIS": 0.9576836233987172,
+    "scCube": 0.1363319440753884
+  },
+  "empty_row_frac": {
+    "ALBIS": 0.6917940947424976,
+    "scCube": 0.0
+  },
+  "jsd_albis_vs_sccube": {
+    "genes_per_cell": 1.0
+  }
+}
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] primary: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_bin_slice4_qc.h5ad
+[load] primary shape: 50603 observations x 556 genes
+[slice] restricting to slice_id=4: 50603 -> 50603 observations
+[load] compare: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_bin_slice4_qc.h5ad
+[load] compare shape: 39309 observations x 556 genes
+[nb] ALBIS: theta_hat = 0.18, X used for mean-variance/total-counts
+[sparsity] ALBIS: 86.15% zero entries, 0.00% fully-empty cells
+[nb] SPIDER: theta_hat = 2.17, X used for mean-variance/total-counts
+[sparsity] SPIDER: 14.71% zero entries, 0.00% fully-empty cells
+[save] Comparison plots written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/bin/albis_vs_spider/qc_filtered
+[save] Numeric summary written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/bin/albis_vs_spider/qc_filtered/comparison_summary.json
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+{
+  "modality": "bin",
+  "inputs": {
+    "ALBIS": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_bin_slice4_qc.h5ad",
+    "scCube": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_bin_slice4_qc.h5ad"
+  },
+  "n_obs": {
+    "ALBIS": 50603,
+    "scCube": 18898
+  },
+  "n_vars": {
+    "ALBIS": 556,
+    "scCube": 556
+  },
+  "genes_per_cell_median": {
+    "ALBIS": 74.0,
+    "scCube": 480.0
+  },
+  "matrix_zero_frac": {
+    "ALBIS": 0.8615010882426996,
+    "scCube": 0.1363319440753884
+  },
+  "empty_row_frac": {
+    "ALBIS": 0.0,
+    "scCube": 0.0
+  },
+  "jsd_albis_vs_sccube": {
+    "genes_per_cell": 1.0
+  }
+}
+/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/albis/spot.h5ad -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_spot_slice4.h5ad: slice_id 4, 4356 x 556
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_spot_slice4.h5ad
+[load] AnnData shape: 4356 x 556
+[qc] fully-empty (total_counts == 0): 3007 (69.03%)
+[qc] near-empty (0 < total_counts, n_genes < 3): 3 (0.07%)
+[qc] dropped 3010 observations (69.10%); 1346 remain
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_spot_slice4_qc_summary.json
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_spot_slice4_qc.h5ad
+/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/spider/spot.h5ad -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_spot_slice4.h5ad: slice_id 4, 1681 x 556
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_spot_slice4.h5ad
+[load] AnnData shape: 1681 x 556
+[qc] fully-empty (total_counts == 0): 0 (0.00%)
+[qc] near-empty (0 < total_counts, n_genes < 3): 0 (0.00%)
+[qc] dropped 0 observations (0.00%); 1681 remain
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_spot_slice4_qc_summary.json
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_spot_slice4_qc.h5ad
+/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_600k/sccube/spot.h5ad -> /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_spot_slice4.h5ad: slice_id 4, 5927 x 556
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_spot_slice4.h5ad
+[load] AnnData shape: 5927 x 556
+[qc] fully-empty (total_counts == 0): 0 (0.00%)
+[qc] near-empty (0 < total_counts, n_genes < 3): 0 (0.00%)
+[qc] dropped 0 observations (0.00%); 5927 remain
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_spot_slice4_qc_summary.json
+[save] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_spot_slice4_qc.h5ad
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/legacy_api_wrap/__init__.py:88: UserWarning: Some cells have zero counts
+  return fn(*args_all, **kw)
+[load] primary: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_spot_slice4.h5ad
+[load] primary shape: 4356 observations x 556 genes
+[slice] restricting to slice_id=4: 4356 -> 4356 observations
+[load] compare: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_spot_slice4.h5ad
+[load] compare shape: 1681 observations x 556 genes
+[nb] ALBIS: theta_hat = 0.22, X used for mean-variance/total-counts
+[sparsity] ALBIS: 80.83% zero entries, 69.03% fully-empty cells
+[nb] SPIDER: theta_hat = 5.58, X used for mean-variance/total-counts
+[sparsity] SPIDER: 5.26% zero entries, 0.00% fully-empty cells
+[save] Comparison plots written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/spot/albis_vs_spider/full_panel
+[save] Numeric summary written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/spot/albis_vs_spider/full_panel/comparison_summary.json
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+{
+  "modality": "spot",
+  "inputs": {
+    "ALBIS": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_spot_slice4.h5ad",
+    "scCube": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_spot_slice4.h5ad"
+  },
+  "n_obs": {
+    "ALBIS": 4356,
+    "scCube": 5927
+  },
+  "n_vars": {
+    "ALBIS": 556,
+    "scCube": 556
+  },
+  "genes_per_cell_median": {
+    "ALBIS": 0.0,
+    "scCube": 480.0
+  },
+  "matrix_zero_frac": {
+    "ALBIS": 0.8082781708517484,
+    "scCube": 0.13598845910617552
+  },
+  "empty_row_frac": {
+    "ALBIS": 0.6903122130394858,
+    "scCube": 0.0
+  },
+  "jsd_albis_vs_sccube": {
+    "genes_per_cell": 0.9684070582257979
+  }
+}
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+[load] primary: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_spot_slice4_qc.h5ad
+[load] primary shape: 1346 observations x 556 genes
+[slice] restricting to slice_id=4: 1346 -> 1346 observations
+[load] compare: /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/spider_spot_slice4_qc.h5ad
+[load] compare shape: 1681 observations x 556 genes
+[nb] ALBIS: theta_hat = 1.46, X used for mean-variance/total-counts
+[sparsity] ALBIS: 37.95% zero entries, 0.00% fully-empty cells
+[nb] SPIDER: theta_hat = 5.58, X used for mean-variance/total-counts
+[sparsity] SPIDER: 5.26% zero entries, 0.00% fully-empty cells
+[save] Comparison plots written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/spot/albis_vs_spider/qc_filtered
+[save] Numeric summary written to /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/spot/albis_vs_spider/qc_filtered/comparison_summary.json
+/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import get_distribution, DistributionNotFound
+{
+  "modality": "spot",
+  "inputs": {
+    "ALBIS": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/albis_spot_slice4_qc.h5ad",
+    "scCube": "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B/inputs/sccube_spot_slice4_qc.h5ad"
+  },
+  "n_obs": {
+    "ALBIS": 1346,
+    "scCube": 5927
+  },
+  "n_vars": {
+    "ALBIS": 556,
+    "scCube": 556
+  },
+  "genes_per_cell_median": {
+    "ALBIS": 359.0,
+    "scCube": 480.0
+  },
+  "matrix_zero_frac": {
+    "ALBIS": 0.37954450703924225,
+    "scCube": 0.13598845910617552
+  },
+  "empty_row_frac": {
+    "ALBIS": 0.0,
+    "scCube": 0.0
+  },
+  "jsd_albis_vs_sccube": {
+    "genes_per_cell": 0.995602639850581
+  }
+}
+[done] /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5B

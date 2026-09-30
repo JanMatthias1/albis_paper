@@ -6,12 +6,15 @@ settings <- fromJSON(Sys.getenv('SETTINGS'))
 out <- Sys.getenv('REFERENCE')
 if (dir.exists(out)) stop('Reference directory already exists')
 dir.create(out, recursive=TRUE)
+phase_file <- Sys.getenv('PHASE_FILE')
+if (nzchar(phase_file)) writeLines('reference', phase_file)
 started <- proc.time()
 params <- newSplatParams(batchCells=settings$reference_cells, nGenes=556,
     group.prob=rep(1/8,8), de.prob=0.15, de.facLoc=0.5, de.facScale=0.4,
     dropout.type='experiment', dropout.mid=0, seed=settings$seed)
 reference <- splatSimulateGroups(params, verbose=FALSE)
 generation_seconds <- unname((proc.time()-started)['elapsed'])
+if (nzchar(phase_file)) writeLines('export', phase_file)
 stopifnot(nrow(reference)==556, ncol(reference)==settings$reference_cells)
 # Serialize native counts and labels. Column names are input-schema names, not new model outputs.
 writeMM(as(counts(reference), 'CsparseMatrix'), file.path(out,'counts.mtx'))

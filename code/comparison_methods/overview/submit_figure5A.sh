@@ -12,7 +12,7 @@ code="$project/sim_paper/code/comparison_methods/overview"
 envs="$project/comparison_methods/env"
 albis_python="$project/sim_paper/env/albis-tutorial/bin/python"
 albis_generator="$project/sim_paper/code/applications_albis/cross_modality_alignment/strong_domain_mix/generate_strongmix_offsets.py"
-out="${1:-$project/sim_paper/data/comparison_methods/figure_5A_600k}"
+out="${1:-$project/sim_paper/data/figure_5/figure_5A_600k}"
 [[ -e "$out" ]] && { echo "Refusing to overwrite existing output: $out" >&2; exit 1; }
 
 mkdir -p "$out/logs" "$out/albis" "$out/cache/matplotlib" "$out/cache/numba"

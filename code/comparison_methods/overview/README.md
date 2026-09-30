@@ -1,112 +1,86 @@
-# Figure 5A — 600,000-cell 3D overview
+# Figure 5A: 600,000-cell 3D overview
 
-Current outputs and configuration:
-`sim_paper/data/comparison_methods/figure_5A_600k/`.
+Output: `sim_paper/data/figure_5/figure_5A_600k/`. Everything in that
+folder is regenerated there by one command; nothing is linked from older runs.
 
-## Redraw the current figure
+## Reproduce
 
-From the project root:
-
-```bash
-bash sim_paper/code/comparison_methods/overview/render.sh
-```
-
-This reads the saved inputs and settings and rewrites
-`overview_combined.{png,pdf,svg}` plus the plotting summary. It does not run
-simulations. Titles are “3D Tissue Simulation” and “Slice 5” (stored ID 4),
-with a cell-type legend and no footer.
-
-## Active files
-
-- `plot_combined.py`: the current figure layout, colors and rendering.
-- `render.sh`: redraws the canonical figure; optional first argument selects
-  another prepared input directory.
-- `generate.py`: native simulation worker, including st-spider 1.2.0 and
-  aggregation validation. Also used by the separate native556 workflows.
-- `submit_spider600k.sh`: cluster generation and rendering for a **new,
-  prepared** directory containing settings, ALBIS/scCube links and a Splatter
-  reference. It refuses to overwrite an existing SPIDER dataset.
-- `logs/`: the completed 600k SPIDER job log.
-- `submit_sccube600k.sh`: prepares a new directory, trains scCube and generates
-  600,000 cells plus bins/spots, then renders the figure. Reuses the current
-  synthetic Splatter pool and links the current ALBIS/SPIDER datasets.
-
-- `submit_native600k.sh`: regenerates **both** scCube and SPIDER through the
-  native-only `generate.py`, links the current ALBIS data and Splatter pool, and
-  renders once both finish. Run it with `bash` (it submits three jobs). The
-  default output is `figure_5A_600k_native_<date>`. First run: jobs
-  36030957 (spider), 36030958 (sccube) and 36030959 (render), 2026-09-28.
-
-To regenerate scCube without overwriting the current figure:
+From anywhere (submits five SLURM jobs; the output folder must not exist):
 
 ```bash
-sbatch sim_paper/code/comparison_methods/overview/submit_sccube600k.sh \
-  /dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/figure_5A_sccube_rerun
+bash sim_paper/code/comparison_methods/overview/submit_figure5A.sh [OUT]
 ```
 
-The output directory must not exist. This trains the VAE afresh using the
-saved 600k settings; it does not regenerate the reference pool or other methods.
+| Stage | What | Environment |
+|---|---|---|
+| splatter | 556-gene Splatter expression pool, seed 20260921, 10,000 cells | `comparison_methods/env/splatter` |
+| albis | ALBIS shared tissue: `applications_albis/cross_modality_alignment/strong_domain_mix/generate_strongmix_offsets.py` with its defaults (Figure 4C strong-mix 16 µm parameters, seed 2025, 600k cells, 556 genes) | `sim_paper/env/albis-tutorial` |
+| spider | `generate.py --method spider` | `comparison_methods/env/spider` |
+| sccube | `generate.py --method sccube` | `comparison_methods/env/sccube` |
+| finish | `verify_reproducibility.py`, then `render.sh` | `comparison_methods/env/analysis` |
 
-## Native 3D generation and sectioning
+Redraw only (no simulation): `bash sim_paper/code/comparison_methods/overview/render.sh [OUT]`.
 
-Each method builds its own 3D tissue and cuts it into sections with its own
-functions; `generate.py` adds no geometry or slicing of its own:
+## Files
 
-- ALBIS: `simulate_3d_molecule_sphere_multires` (sphere, native sectioning).
-- scCube: `generate_pattern_random(spatial_dim=3, is_split=True,
-  split_coord="point_z", slice_num=n_slices)` (cube; labels 1-based, stored 0-based).
-- SPIDER: `simulate_10X_3d` (cube), then `spider.slice_anndata_by_z` with
-  explicit edges `linspace(0, extent_um, n_slices + 1)`; `z_bins=<int>` would
-  drop the max-z cell.
+- `submit_figure5A.sh`: the full pipeline above.
+- `settings_figure5A.json`: all Figure 5A settings (copied into OUT as `settings.json`).
+- `generate.py`: scCube or SPIDER, one native 3D tissue then native slices, bins
+  and spots. Also used by `../native556/` and `../clustering/cell_type/run_task.py`.
+- `verify_reproducibility.py`: compares the new Splatter pool with
+  `archive/overview_native556_20260926/splatter` and the new ALBIS outputs with Figure 4
+  `strong_domain_mix_shift3x/data`; writes `OUT/reproducibility_check.json`.
+- `plot_combined.py`, `render.sh`: the figure.
+- `figure_supp_6/`: supplementary Figure 6, scCube spot aggregation vs cells per
+  spot on Figure 5A slice 5, using scCube's own `generate_spot_data_random` and
+  `calculate_spot_prop`. Outputs: `sim_paper/data/figure_5/figure_supp_6/`.
 
-Per-slice bins/spots use each method's own 2D capture routine. Bin/spot colour
-is the most common type (ties go to the lowest type number, as in ALBIS) of the
-method's own composition: scCube `calculate_spot_prop`; SPIDER's returned `W`
-for square bins. For SPIDER circular spots `W` is computed but not returned, so
-we repeat SPIDER's own one-line product (the single user-approved exception in
-`../AGENTS.md`). SPIDER's transition target comes from its
-`make_transition_matrix("attractive", 8, strength=0.7)`.
+## What is native
 
-SPIDER is not seedable through `simulate_10X_3d`. Its annealer builds
-`AnnealingConfig()` without `random_state`, so cell-type layouts differ between
-runs even with the same seed. Coordinates are reproducible, and the neighbour
-statistics are stable (8-NN same-type fraction about 0.69 across repeated runs).
-The seedable `spider.simulate_cells` was tested and rejected: with default
-settings it reaches only 0.19–0.33 against the 0.70 target. Figure 5A
-reproducibility therefore rests on the saved SPIDER outputs. The current
-600k scCube/SPIDER data predate this change (sections came from
-`floor(z / extent * n_slices)`), but both native slicers reproduce those
-assignments for all 600,000 cells (0 mismatches, checked 2026-09-28), so they
-were not regenerated.
+All three methods build the whole 3D tissue before slicing (ALBIS a sphere,
+scCube and SPIDER a cube). Slicing only labels cells; bins and spots are then
+made per slice. ALBIS slices molecules; scCube and SPIDER slice whole cells.
 
-## Inputs and dependencies
+| Step | scCube | SPIDER |
+|---|---|---|
+| Expression | `train_vae_and_generate_cell` (from the Splatter pool) | `get_sim_cell_level_expr` (from the Splatter pool) |
+| 3D layout | `generate_pattern_random(spatial_dim=3)` | `simulate_10X_3d` |
+| Neighbour target | – | `make_transition_matrix("attractive", 8, strength=0.7)` |
+| Slicing | `is_split=True, split_coord="point_z"` (1-based, stored 0-based) | `slice_anndata_by_z` with edges `linspace(0, extent, n+1)` (`z_bins=<int>` drops the max-z cell) |
+| Bins / spots | `generate_spot_data_random` (ST / Visium) | `sim_expr.get_sim_spot_level_expr` (square / circle) |
+| Per-capture composition | `calculate_spot_prop` → `obsm["sccube_spot_prop"]` | returned `W` → `obsm["spider_W"]`; circle spots: see exception |
 
-All methods have 600,000 cells and ten sections. ALBIS uses the uncropped
-`figure_4/cross_modality_alignment/strong_domain_mix_shift3x/data` files,
-with aligned coordinates and 16 µm bins. scCube reuses the completed 600k
-realization. SPIDER was generated with installed `st-spider==1.2.0`.
-Exact paths and parameters are in the output directory's `settings.json`,
-`input_provenance.json` and method manifests. Do not move linked source data.
+Our conventions (not simulation): bin/spot colour is the most common type of the
+method's own composition (ties go to the lowest type number, as in ALBIS);
+scCube grid units are scaled by `extent_um / sccube_grid_size` (512.5 µm);
+bin/spot z is the slice midpoint (unused by any calculation or plot); the
+Splatter pool is the expression input for scCube and SPIDER.
 
-Plotting imports `code/manuscript_style.py` for default colors; the current
-stronger palette, opacity and spot sizes are specified in `settings.json`.
-Python environments live in `comparison_methods/env/`. Full generation also
-uses shared helpers and Splatter code under `comparison_methods/code/` and
-the local ALBIS package; this folder is not a standalone software bundle.
+Exception (user-approved, `../AGENTS.md`): SPIDER's circle branch computes `W`
+but returns only three values, so we repeat its own line
+`spot_cell_idx_matrix * onehot_ct` with SPIDER's membership matrix and
+`spider.core.get_onehot_ct`.
 
-## Cleanup
+## Reproducibility
 
-Superseded preparation scripts, renderers, settings, launchers and the old
-README are archived in `../_archive/overview_20260927/`, with a move manifest.
-Archived scripts preserve historical code and may reference their original
-locations; they are not current entry points.
-The 556-gene experiment launchers now live in `../native556/` and statistical
-distribution plotting in `../statistics/`. These serve other comparison panels.
+- Splatter and ALBIS are deterministic; `reproducibility_check.json` records
+  byte/array identity with the earlier runs.
+- scCube is seeded (`set_seed`, torch seed).
+- SPIDER cannot be seeded through `simulate_10X_3d`: its annealer builds
+  `AnnealingConfig()` without `random_state`. Coordinates reproduce; cell-type
+  layouts differ between runs, with stable statistics (8-NN same-type ≈ 0.69).
+  The seedable `spider.simulate_cells` reaches only 0.19–0.33 of the 0.70 target
+  with default settings and was rejected. The saved outputs are the reference.
 
-## Spot aggregation supplement
+## Genes
 
-[spot_aggregation/](spot_aggregation/) contains the slice5 scCube occupancy-sensitivity figure code and reproduction instructions.
+All methods have 556 genes. ALBIS's are its own marker/shared/noise genes;
+scCube/SPIDER reproduce the 556 Splatter genes. Counts match, identities do not.
 
-## Intact tissue column
+## Archive
 
-The combined overview now shows Tissue Simulation → Stacked Tissue Slices → Slice5. The first column renders all native continuous3D cell positions; it does not reconstruct tissue from section planes. scCube retains its native-coordinate record and is validated against the uniformly scaled display coordinates. All methods must retain more than10 distinct Z coordinates. Cell types use the same palette in all panels. Previous overview exports are preserved under figure_5A_600k/archive_before_intact_tissue_20260928/.
+- Code: `../_archive/overview_20260929/` (superseded submit scripts, old logs,
+  `generate.py` with the removed ALBIS/`--method all` path; `moved_files.json`).
+  Older: `../_archive/overview_20260927/`.
+- Data: `data/figure_5/archive/_archive/figure_5A_superseded_20260929/`
+  (2,000-gene figure, 2026-09-28 native 2,000-gene run, old pools and trial runs).

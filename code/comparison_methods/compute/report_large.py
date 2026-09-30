@@ -15,6 +15,14 @@ protocol = json.loads((root / 'protocol.json').read_text())
 previous = Path(protocol['previous_run'])
 source = Path(protocol['source_pilot'])
 base = pd.read_csv(previous / 'measurements.csv')
+# Resolve source provenance after archival without modifying historical tables.
+relocation = previous.parent / 'relocation.json'
+if relocation.exists():
+    for old, new in json.loads(relocation.read_text())['paths'].items():
+        base['source'] = base['source'].str.replace(old, new, regex=False)
+        relative_old = old[old.index('sim_paper/'):] if 'sim_paper/' in old else old
+        relative_new = new[new.index('sim_paper/'):] if 'sim_paper/' in new else new
+        base['source'] = base['source'].str.replace(relative_old+'/', relative_new+'/', regex=False)
 setup_table = pd.read_csv(previous / 'sccube_setup.csv')
 ref_seconds = json.loads((source / 'references/seed2025/measurement.json').read_text())['generation_seconds']
 receipt = pd.read_csv(root / 'submissions.tsv', sep='\t', dtype=str)
@@ -114,6 +122,6 @@ missing = data.loc[~data.status.eq('ok')]
 if len(missing):
     lines += ['Incomplete measurements:', missing[['method', 'n_cells', 'status', 'job_id']].to_string(index=False), '']
 (root / 'RESULTS.md').write_text('\n'.join(lines))
-subprocess.run([sys.executable, str(Path(__file__).with_name('plot_compute_three_panel.py')),
+subprocess.run([sys.executable, str(Path(__file__).with_name('plot_compute_four_panel_preliminary.py')),
                 '--root', str(root)], check=True)
 print('\n'.join(lines))

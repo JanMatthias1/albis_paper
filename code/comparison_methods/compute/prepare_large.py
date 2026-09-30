@@ -12,13 +12,18 @@ args = parser.parse_args()
 root, previous = args.root.resolve(), args.previous.resolve()
 prior = json.loads((previous / 'protocol.json').read_text())
 source = Path(prior['source_pilot'])
+if not source.exists():
+    source = previous.parent / source.name
+validated_split = Path(prior['validated_split'])
+if not validated_split.exists():
+    validated_split = previous.parent / validated_split.name
 root.mkdir(parents=True, exist_ok=False)
 for folder in ['settings', 'raw', 'logs', 'code']:
     (root / folder).mkdir()
 code = Path(__file__).resolve().parent
 files = ['albis_native.py', 'spider_native.py', 'sccube_split.py', 'sample_rss.py',
          'native_extension.sbatch', 'sccube_large.sbatch', 'prepare_large.py',
-         'report_large.py', 'report_large.sbatch', 'plot_compute_three_panel.py']
+         'report_large.py', 'report_large.sbatch', 'plot_compute_four_panel_preliminary.py']
 for name in files:
     shutil.copy2(code / name, root / 'code' / name)
 template = json.loads((source / 'settings/n600000_seed2025.json').read_text())
@@ -39,7 +44,7 @@ for n in sizes:
 (root / 'tasks.tsv').write_text('\n'.join(rows) + '\n')
 protocol = dict(seed=2025, sizes=sizes, n_genes=556, threads=1, hardware_constraint='sapphirerapids',
                 previous_run=str(previous), source_pilot=str(source),
-                validated_split=prior['validated_split'], sccube_epochs=200,
+                validated_split=str(validated_split), sccube_epochs=200,
                 scCube_memory='100-ms external sampling of worker RSS by phase; VAE resident. Also retain cumulative ru_maxrss. RSS includes process allocations retained from previous stages.',
                 scCube_gate='Before 2M and 5M: prior high-water RSS × size ratio × 1.75 < 80% of 96 GiB allocation.',
                 scheduling='ALBIS/SPIDER submitted one size at a time after reviewing prior results.',

@@ -48,6 +48,8 @@ provenance = dict(mode=args.mode, seed=seed, settings=settings,
                                  for p in [Path(__file__), Path(native_module.__file__),
                                            Path(native_utils.__file__), reference_dir / 'counts.mtx']})
 (out / 'protocol.json').write_text(json.dumps(provenance, indent=2))
+if args.phase_file:
+    args.phase_file.write_text('setup')
 started = time.perf_counter()
 counts = mmread(reference_dir / 'counts.mtx')
 genes = (reference_dir / 'genes.tsv').read_text().splitlines()

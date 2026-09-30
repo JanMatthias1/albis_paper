@@ -7,15 +7,22 @@ import time
 import hashlib
 from albis.simulation_sphere import simulate_3d_molecule_sphere_base
 
+phase_file = Path(os.environ['PHASE_FILE']) if os.environ.get('PHASE_FILE') else None
+if phase_file:
+    phase_file.write_text('setup')
 settings_path = Path(os.environ['SETTINGS'])
 settings = json.loads(settings_path.read_text())
 out = Path(os.environ['OUTPUT'])
 out.mkdir(parents=True, exist_ok=False)
 (out/'settings.json').write_text(settings_path.read_text())
 params = settings['albis']
+if phase_file:
+    phase_file.write_text('generation')
 started = time.perf_counter()
 result = simulate_3d_molecule_sphere_base(**params)
 generation_seconds = time.perf_counter() - started
+if phase_file:
+    phase_file.write_text('validation')
 
 # Read-only validation/measurement; do not alter the returned dictionary or arrays.
 assert result['adata_cell_true'].shape == (settings['n_cells'], 556)

@@ -14,6 +14,9 @@ from scipy.io import mmread
 from spider import simulate_10X_3d, get_sim_cell_level_expr
 
 assert importlib.metadata.version('st-spider') == '1.2.0'
+phase_file = Path(os.environ['PHASE_FILE']) if os.environ.get('PHASE_FILE') else None
+if phase_file:
+    phase_file.write_text('setup')
 settings_path = Path(os.environ['SETTINGS'])
 settings = json.loads(settings_path.read_text())
 out = Path(os.environ['OUTPUT'])
@@ -30,6 +33,8 @@ reference = ad.AnnData(counts, obs=metadata.set_index('Cell'), var=pd.DataFrame(
 input_seconds = time.perf_counter() - started
 requested_counts = np.array(list(settings['target_cells_per_type'].values()), dtype=int)
 
+if phase_file:
+    phase_file.write_text('generation')
 started = time.perf_counter()
 labels, xyz = simulate_10X_3d(
     cell_num=settings['n_cells'], Num_celltype=8,
@@ -41,6 +46,8 @@ expression = get_sim_cell_level_expr(
     celltype_assignment=labels, adata=reference, Num_celltype=8,
     Num_ct_sample=requested_counts, match_list=list(settings['target_cells_per_type']), ct_key='Cell_type')
 generation_seconds = time.perf_counter() - started
+if phase_file:
+    phase_file.write_text('validation')
 
 assert xyz.shape == (settings['n_cells'],3)
 assert expression.shape == (settings['n_cells'],556)

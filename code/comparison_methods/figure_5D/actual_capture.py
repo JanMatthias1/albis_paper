@@ -8,15 +8,21 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Circle,Patch
 from matplotlib.colors import to_rgb
 from matplotlib.collections import PatchCollection
+import argparse
 ROOT=Path('/dcs04/hicks/data/Jan/sim_project');PAPER=ROOT/'sim_paper'
-BASE=PAPER/'data/comparison_methods/figure_5A_600k'
-OUT=PAPER/'data/comparison_methods/figure_5D_actual_coordinates';OUT.mkdir(exist_ok=True)
+BASE=PAPER/'data/figure_5/figure_5A_600k'
+CANONICAL_OUT=PAPER/'data/figure_5/figure_5D_actual_coordinates'
+# Defaults reproduce the canonical panel. --spider-base/--out build the distinct-seeds variant:
+# with a shared seed, scCube and SPIDER draw identical uniform cell positions (see README).
+parser=argparse.ArgumentParser();parser.add_argument('--spider-base',type=Path,default=BASE);parser.add_argument('--out',type=Path,default=CANONICAL_OUT)
+args=parser.parse_args();SPIDER_BASE=args.spider_base
+OUT=args.out;OUT.mkdir(exist_ok=True)
 SOURCE=PAPER/'data/figure_4/cross_modality_alignment/strong_domain_mix_shift3x'
 cfg=json.loads((SOURCE/'config.json').read_text());palette=json.loads((BASE/'settings.json').read_text())['celltype_colors']
 angles=np.arange(6)*np.pi/3;centers=np.vstack([[0,0],100*np.column_stack([np.cos(angles),np.sin(angles)])]);radius=27.5
 source_code=ROOT/'albis/albis/simulation_sphere.py';digest=hashlib.sha256(source_code.read_bytes()).hexdigest()
 expected=json.loads((SOURCE/'data/spot/generation_manifest.json').read_text())['source_sha256']['albis/albis/simulation_sphere.py'];assert digest==expected
-cache=OUT/'albis_molecules_roi.npz'
+cache=CANONICAL_OUT/'albis_molecules_roi.npz'  # ALBIS is identical in every variant
 if not cache.exists():
  sys.path.insert(0,str(ROOT/'albis'));from albis.simulation_sphere import simulate_3d_molecule_sphere_base
  print('Regenerating native ALBIS molecular realization',flush=True)
@@ -44,7 +50,7 @@ cell_types=a.obs.cell_type_true.astype(str).to_numpy()[cell_keep]
 cell_colors=[tuple(.55+.45*np.asarray(to_rgb(palette[t]))) for t in cell_types]
 a.file.close()
 for method,name in [('sccube','scCube'),('spider','SPIDER')]:
- a=ad.read_h5ad(BASE/method/'cell.h5ad',backed='r');xyz=np.asarray(a.obsm['spatial_3d']);xy=xyz[:,:2]-2050
+ a=ad.read_h5ad((SPIDER_BASE if method=='spider' else BASE)/method/'cell.h5ad',backed='r');xyz=np.asarray(a.obsm['spatial_3d']);xy=xyz[:,:2]-2050
  keep=(a.obs.slice_id.to_numpy().astype(int)==4)&(np.abs(xy[:,0])<=145)&(np.abs(xy[:,1])<=145)
  points[name]=xy[keep];types[name]=a.obs.cell_type_true.astype(str).to_numpy()[keep];ids[name]=a.obs_names.to_numpy()[keep];a.file.close()
  np.savez_compressed(OUT/f'{method}_cells_roi.npz',xy=points[name],types=types[name],cell_ids=ids[name])
@@ -70,4 +76,4 @@ for ax,name in zip(axes,['ALBIS','scCube','SPIDER']):
 fig.legend(handles=[Patch(color=palette[f'type{i}'],label=f'Type {i}') for i in range(1,9)],loc='lower center',bbox_to_anchor=(.5,.10),ncol=8,frameon=False,fontsize=10)
 fig.subplots_adjust(left=.025,right=.975,top=.80,bottom=.20,wspace=.15)
 for ext in ['png','pdf','svg']:fig.savefig(OUT/f'figure5d_actual_coordinates.{ext}',dpi=300,bbox_inches='tight',facecolor='white')
-(OUT/'provenance.json').write_text(json.dumps(dict(source=str(BASE),slice_id=4,roi_rule='Central XY field of each tissue, selected independently of types; same physical scale',geometry='Custom seven-spot hexagonal overlay, not native captures',albis_cell_overlay=dict(source='albis/cell.h5ad',radius_field='obs.cell_radius',coordinates='obsm.spatial_3d',n_cells=len(cell_xy),selection='Centers in slice_id 4; projected circles intersecting the XY field',interpretation='Full-radius XY projections of spherical cells, not thin-plane cross-sections',style='Pastel translucent cell-type-colored circles and centers'),reports=reports),indent=2)+'\n');print(reports,flush=True)
+(OUT/'provenance.json').write_text(json.dumps(dict(source=str(BASE),spider_source=str(SPIDER_BASE/'spider'),slice_id=4,roi_rule='Central XY field of each tissue, selected independently of types; same physical scale',geometry='Custom seven-spot hexagonal overlay, not native captures',albis_cell_overlay=dict(source='albis/cell.h5ad',radius_field='obs.cell_radius',coordinates='obsm.spatial_3d',n_cells=len(cell_xy),selection='Centers in slice_id 4; projected circles intersecting the XY field',interpretation='Full-radius XY projections of spherical cells, not thin-plane cross-sections',style='Pastel translucent cell-type-colored circles and centers'),reports=reports),indent=2)+'\n');print(reports,flush=True)
