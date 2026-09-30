@@ -87,13 +87,4 @@ Environments (`sim_paper/env/`): `albis-tutorial` (`_env.sh`; QC, PCA/Harmony,
 Leiden, plots), `sim-app-banksy` (`_env_banksy.sh`; BANKSY), `rctd` (RCTD, R).
 Python requirements: `requirements.txt`.
 
-## Figures
-
-| Figure | Script | Output (`data/figure_3/`) |
-|---|---|---|
-| Domain / cell-type recovery bars | `ari_recovery_summary/plot_banksy_vs_pca_recovery.py`, `plot_banksy_vs_pca_condensed.py` | `ari_recovery_summary/banksy_vs_pca_recovery(_condensed).*` |
-| Domain ARI vs batch σ | `strong_domain_mix/batch_sigma_slide/plot_batch_sigma_slide_final.py` | `strong_domain_mix/batch_sigma_slide/batch_sigma_slide_domain_ari_final.png` |
-| Cell-type UMAP / contingency panels | `weak_domain_mix/pca_harmony/*_celltype_panel.sh` | `weak_domain_mix/pca_harmony/<modality>/` |
-| RCTD deconvolution | `spatial_deconvolution/` (`plot_rctd_results.py`) | `spatial_deconvolution/RCTD/<run>/` |
-
 Single-slice plots use stored `slice_id` 4 (the 5th of 10 slices from the bottom).
