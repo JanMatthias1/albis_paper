@@ -1,63 +1,71 @@
+# Single .gitignore for the repository (nested code/*/.gitignore files merged here 2026-09-30)
+
+# System, Python and build artifacts
 .DS_Store
 .venv/
-env/.venv/
 __pycache__/
 *.py[cod]
 *.egg-info/
 build/
 dist/
-tutorial/outputs/
-env/albis-tutorial
-env/*.log
-env/slurm-*.out
-# Installed environments and third-party checkouts; retain env/*.sh setup scripts.
-/env/*/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+# Environments: installed environments and third-party checkouts; keep env/*.sh setup scripts
+/env/*/
+env/.venv/
+env/albis-tutorial
+env/*.log
+env/slurm-*.out
+tutorial/outputs/
+
+# Data and local-only folders
 /data/
+/docs/
+/code/misc/
+
+# Job logs stay on disk but are not versioned
+code/**/logs/
+code/**/logs_*/
+
+# Internal agent / assistant instruction files
+AGENTS.md
+CLAUDE.md
+.claude/
+
+# Internal working notes (not manuscript content); public docs are the per-folder READMEs
 /SVG_PLAN.md
 /figure.md
 /FIGURE2_DRAFT.md
+/figure_5.md
+/FIGURE_FINALIZATION_AUDIT.md
+/DATA_VERSIONS.md
+**/README_PRIOR_TESTING.md
+**/OUTPUT_POLICY_AUDIT.md
+
+# code/applications_albis (Figure 4)
 code/applications_albis/alignment/README.md
-code/applications_albis/spatial_clustering/T5_3D_tutorial_stagate.ipynb
 code/applications_albis/alignment/METHODS_reference_alignment_error.md
-
-
-# working notes (not manuscript content)
-code/applications_albis/alignment/README.md
 code/applications_albis/spatial_clustering/README.md
 code/applications_albis/spatial_clustering/TODO.md
-code/applications_albis/**/logs_*/
-code/clustering/PATHS.md
-code/clustering/README_PLOTTING.md
+code/applications_albis/spatial_clustering/T5_3D_tutorial_stagate.ipynb
 
-# Local historical code and logs
-/code/misc/
-/docs/
-
-# Job logs stay on disk but are not versioned (2026-09-29)
-code/clustering/**/logs/
-# Detailed internal clustering notes stay on disk, not versioned; public overview = code/clustering/README.md
+# code/clustering (Figure 3); public overview = code/clustering/README.md
 code/clustering/README_internal.md
 code/clustering/HISTORY_internal.md
 code/clustering/README_PLOTTING.md
 code/clustering/PATHS.md
 code/clustering/*/**/README.md
 
-# Internal agent / assistant instruction files (2026-09-30)
-AGENTS.md
-CLAUDE.md
-.claude/
-
-# Internal working notes (2026-09-30); public docs are the per-panel READMEs
-/figure_5.md
-/FIGURE_FINALIZATION_AUDIT.md
-/DATA_VERSIONS.md
+# code/comparison_methods (Figure 5); public docs = per-panel READMEs
 code/comparison_methods/README.md
-**/README_PRIOR_TESTING.md
-**/OUTPUT_POLICY_AUDIT.md
 
-# Job logs stay on disk but are not versioned (extends the 2026-09-29 clustering rule)
-code/**/logs/
-code/**/logs_*/
+# code/count_distribution (Figure 2); was code/count_distribution/.gitignore
+code/count_distribution/**/README_internal.md
+code/count_distribution/**/FIGURE2_METHODOLOGY.md
+code/count_distribution/**/HISTORY_internal.md
+
+# code/real_data_qc; was code/real_data_qc/.gitignore
+code/real_data_qc/**/README.md
+code/real_data_qc/**/_env.sh
