@@ -1,7 +1,0 @@
-Job started: Wed Jul 29 01:11:43 PM EDT 2026
-Host: compute-177.cm.cluster
-Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
-Generating intact base sphere...
-Saved: /dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/outputs/figure_1a_intact_sphere.png
-Saved: /dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/outputs/figure_1a_intact_sphere.pdf
-Job finished: Wed Jul 29 01:54:27 PM EDT 2026

@@ -1,4 +1,0 @@
-/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/lib/python3.10/site-packages/louvain/__init__.py:54: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  from pkg_resources import get_distribution, DistributionNotFound
-Building full graph 600000 128 umap
-Components 8342 largest [20968 19497  6319  4430  3783  2990  1221  1216   959   767   747   706]

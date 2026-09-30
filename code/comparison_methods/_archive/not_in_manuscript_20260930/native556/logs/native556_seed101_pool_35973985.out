@@ -1,6 +1,0 @@
-Warning message:
-'as(<matrix>, "lgCMatrix")' is deprecated.
-Use 'as(as(as(., "lMatrix"), "generalMatrix"), "CsparseMatrix")' instead.
-See help("Deprecated") and help("Matrix-deprecated"). 
-{"status":"ok","out_dir":"/dcs04/hicks/data/Jan/sim_project/sim_paper/data/comparison_methods/overview_native556_seed101/splatter"} 
-Verified fresh Splatter pool: 556 unique genes

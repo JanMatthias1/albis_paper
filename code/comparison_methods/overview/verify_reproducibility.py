@@ -16,7 +16,7 @@ import numpy as np
 from scipy import sparse
 
 DATA = Path(__file__).resolve().parents[3] / "data"
-POOL_REF = DATA / "comparison_methods/archive/overview_native556_20260926/splatter"
+POOL_REF = DATA / "figure_5/archive/overview_native556_20260926/splatter"
 ALBIS_REF = DATA / "figure_4/cross_modality_alignment/strong_domain_mix_shift3x/data"
 ALBIS_FILES = {"cell": "cell/simulation_cell_z.h5ad", "bin": "bin16um/simulation_bin_z.h5ad",
                "spot": "spot/simulation_spot_z.h5ad"}

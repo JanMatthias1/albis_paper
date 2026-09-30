@@ -1,4 +1,9 @@
-"""Actual Figure5A simulator coordinates under an explicitly custom hex overlay."""
+"""Figure 5D: actual Figure5A simulator coordinates under an explicitly custom hex overlay.
+
+ALBIS and scCube come from figure_5A_600k. SPIDER comes from a separate run with its
+own seed (distinct_seeds/, see submit_distinct_seeds.sh): with Figure 5A's shared seed,
+scCube and SPIDER draw identical uniform cell positions, which this panel would expose.
+"""
 from pathlib import Path
 import sys,json,hashlib
 import numpy as np,anndata as ad
@@ -11,10 +16,9 @@ from matplotlib.collections import PatchCollection
 import argparse
 ROOT=Path('/dcs04/hicks/data/Jan/sim_project');PAPER=ROOT/'sim_paper'
 BASE=PAPER/'data/figure_5/figure_5A_600k'
-CANONICAL_OUT=PAPER/'data/figure_5/figure_5D_actual_coordinates'
-# Defaults reproduce the canonical panel. --spider-base/--out build the distinct-seeds variant:
-# with a shared seed, scCube and SPIDER draw identical uniform cell positions (see README).
-parser=argparse.ArgumentParser();parser.add_argument('--spider-base',type=Path,default=BASE);parser.add_argument('--out',type=Path,default=CANONICAL_OUT)
+ALBIS_DIR=PAPER/'data/figure_5/figure_5D_actual_coordinates'  # shared ALBIS molecule cache
+PANEL=ALBIS_DIR/'distinct_seeds'  # manuscript panel
+parser=argparse.ArgumentParser();parser.add_argument('--spider-base',type=Path,default=PANEL);parser.add_argument('--out',type=Path,default=PANEL)
 args=parser.parse_args();SPIDER_BASE=args.spider_base
 OUT=args.out;OUT.mkdir(exist_ok=True)
 SOURCE=PAPER/'data/figure_4/cross_modality_alignment/strong_domain_mix_shift3x'
@@ -22,7 +26,7 @@ cfg=json.loads((SOURCE/'config.json').read_text());palette=json.loads((BASE/'set
 angles=np.arange(6)*np.pi/3;centers=np.vstack([[0,0],100*np.column_stack([np.cos(angles),np.sin(angles)])]);radius=27.5
 source_code=ROOT/'albis/albis/simulation_sphere.py';digest=hashlib.sha256(source_code.read_bytes()).hexdigest()
 expected=json.loads((SOURCE/'data/spot/generation_manifest.json').read_text())['source_sha256']['albis/albis/simulation_sphere.py'];assert digest==expected
-cache=CANONICAL_OUT/'albis_molecules_roi.npz'  # ALBIS is identical in every variant
+cache=ALBIS_DIR/'albis_molecules_roi.npz'  # ALBIS is identical in every variant
 if not cache.exists():
  sys.path.insert(0,str(ROOT/'albis'));from albis.simulation_sphere import simulate_3d_molecule_sphere_base
  print('Regenerating native ALBIS molecular realization',flush=True)
@@ -36,7 +40,7 @@ if not cache.exists():
  zlo=-cfg['sphere_R_um']+4*(2*cfg['sphere_R_um']/cfg['n_slices']);zhi=zlo+2*cfg['sphere_R_um']/cfg['n_slices']
  keep=(xyz[:,2]>=zlo)&(xyz[:,2]<zhi)&(np.abs(xyz[:,0])<=145)&(np.abs(xyz[:,1])<=145)
  np.savez_compressed(cache,xyz=xyz[keep],gene=mol['full_gene'][keep],source_type=mol['full_src_celltype'][keep])
- (OUT/'albis_regeneration.json').write_text(json.dumps(dict(source_sha256=digest,seed=cfg['seed'],config=cfg,validated='All600k original cell coordinates and type labels match saved Figure5A',z_bounds=[zlo,zhi],molecules='Native pre-batch molecule instances; not post-resampling molecule coordinates'),indent=2)+'\n')
+ (ALBIS_DIR/'albis_regeneration.json').write_text(json.dumps(dict(source_sha256=digest,seed=cfg['seed'],config=cfg,validated='All600k original cell coordinates and type labels match saved Figure5A',z_bounds=[zlo,zhi],molecules='Native pre-batch molecule instances; not post-resampling molecule coordinates'),indent=2)+'\n')
  del base,mol,xyz,truth
 points={};types={};ids={}
 m=np.load(cache);points['ALBIS']=m['xyz'][:,:2];types['ALBIS']=np.array([f'type{i+1}' for i in m['source_type']]);ids['ALBIS']=np.arange(len(points['ALBIS']))

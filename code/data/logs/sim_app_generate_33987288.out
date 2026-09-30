@@ -1,5 +1,0 @@
-Job started: Wed Jul  8 05:09:46 PM EDT 2026
-Host: compute-124.cm.cluster
-Python: /dcs04/hicks/data/Jan/sim_project/sim_app/env/sim-app-tutorial/bin/python
-/var/spool/slurm/d/job33987288/slurm_script: line 52: 4004172 Killed                  "${PYTHON_BIN}" generate_simulation.py
-slurmstepd: error: Detected 1 oom-kill event(s) in StepId=33987288.batch. Some of your processes may have been killed by the cgroup out-of-memory handler.

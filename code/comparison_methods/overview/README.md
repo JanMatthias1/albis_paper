@@ -26,13 +26,13 @@ Redraw only (no simulation): `bash sim_paper/code/comparison_methods/overview/re
 - `submit_figure5A.sh`: the full pipeline above.
 - `settings_figure5A.json`: all Figure 5A settings (copied into OUT as `settings.json`).
 - `generate.py`: scCube or SPIDER, one native 3D tissue then native slices, bins
-  and spots. Also used by `../native556/` and `../clustering/cell_type/run_task.py`.
+  and spots. Also used by `../figure_5D/submit_distinct_seeds.sh` (SPIDER, own seed).
 - `verify_reproducibility.py`: compares the new Splatter pool with
   `archive/overview_native556_20260926/splatter` and the new ALBIS outputs with Figure 4
   `strong_domain_mix_shift3x/data`; writes `OUT/reproducibility_check.json`.
 - `plot_combined.py`, `render.sh`: the figure.
 - `figure_supp_6/`: supplementary Figure 6, scCube spot aggregation vs cells per
-  spot on Figure 5A slice 5, using scCube's own `generate_spot_data_random` and
+  spot on Figure 5A slice 5 (stored `slice_id` 4), using scCube's own `generate_spot_data_random` and
   `calculate_spot_prop`. Outputs: `sim_paper/data/figure_5/figure_supp_6/`.
 
 ## What is native
@@ -50,7 +50,7 @@ made per slice. ALBIS slices molecules; scCube and SPIDER slice whole cells.
 | Bins / spots | `generate_spot_data_random` (ST / Visium) | `sim_expr.get_sim_spot_level_expr` (square / circle) |
 | Per-capture composition | `calculate_spot_prop` → `obsm["sccube_spot_prop"]` | returned `W` → `obsm["spider_W"]`; circle spots: see exception |
 
-Our conventions (not simulation): bin/spot colour is the most common type of the
+Our conventions (not simulation; full list in `../README.md`): bin/spot colour is the most common type of the
 method's own composition (ties go to the lowest type number, as in ALBIS);
 scCube grid units are scaled by `extent_um / sccube_grid_size` (512.5 µm);
 bin/spot z is the slice midpoint (unused by any calculation or plot); the
