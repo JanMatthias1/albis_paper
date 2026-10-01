@@ -1,6 +1,6 @@
 #!/bin/bash
 # Weak domain mix, batch_sigma 0: final BANKSY runs for cell type recovery at the
-# chosen λ (final_tasks.tsv; chosen on the strong mix, see ../../../strong_domain_mix/banksy_harmony_batch_zero/README.md).
+# chosen λ (final_tasks.tsv; chosen on the strong mix).
 # Keeps every h5ad and draws UMAP + spatial plots (MODE=final)
 # -> data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/cell_type/<modality>/lam<λ>/
 set -euo pipefail

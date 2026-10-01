@@ -36,7 +36,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from manuscript_style import (
     apply_style, scatter_colors, legend_handles, pretty_label,
     LEGEND_MARKERSIZE, LEGEND_TITLE_SIZE, PANEL_FIGSIZE, PANEL_MARGINS, PANEL_EXPORT_BOTTOM,
-    matched_labels,
+    matched_labels, category_order,
 )
 apply_style()
 
@@ -181,9 +181,16 @@ def plot_umap_true_vs_predicted(adata, true_key: str, pred_key: str, output_path
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
         if categories is not None:
-            legend = ax.legend(handles=legend_handles(categories, swatches), title=pretty_label(key),
+            if key == pred_key:
+                categories = category_order(adata.obs[key].astype(str))
+            handles = legend_handles(categories, swatches)
+            ncol = len(categories) // 2 if len(categories) in (6, 8) else (4 if len(categories) <= 6 else 2)
+            if len(categories) in (6, 8):
+                # Matplotlib fills columns first; keep the displayed rows sequential.
+                handles = [handles[i] for col in range(ncol) for i in (col, col + ncol)]
+            legend = ax.legend(handles=handles, title=pretty_label(key),
                       title_fontsize=LEGEND_TITLE_SIZE, bbox_to_anchor=(0.5, -0.25),
-                      loc="upper center", ncol=4 if len(categories) <= 6 else 2, frameon=False, fontsize=12,
+                      loc="upper center", ncol=ncol, frameon=False, fontsize=12,
                       columnspacing=1.0, handlelength=2.0, handletextpad=0.4)
             legends.append(legend)
     # Record the display-only correspondence; cluster IDs and scores are unchanged.
@@ -193,7 +200,7 @@ def plot_umap_true_vs_predicted(adata, true_key: str, pred_key: str, output_path
         "unmatched_color": "#B9C0C7",
     }, indent=2))
 
-    # Preserve the full canvas for the explicit cluster-to-truth legend.
+    # Preserve the full canvas for the two-row legends.
     fig.subplots_adjust(**PANEL_MARGINS)
     crop = Bbox.from_extents(0, PANEL_EXPORT_BOTTOM,
                              fig.get_figwidth(), fig.get_figheight())

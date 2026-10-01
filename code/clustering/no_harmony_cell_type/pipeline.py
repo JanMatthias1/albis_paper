@@ -190,8 +190,9 @@ def summarize(root):
     old, lambdas = previous.load()
     comparison = []
     for r in rows:
-        value = old[(r['mix'], 'banksy' if r['pipeline'] == 'banksy' else 'genes_bs0', r['modality'], 'cell_type_true')][r['seed']]
-        comparison.append(dict(r, previous_harmony_ari=value, ari_difference=r['cell_type_ari']-value,
+        # previous Harmony runs may be archived; then the comparison is left empty (as in no_harmony_domain/summarize.py)
+        value = old.get((r['mix'], 'banksy' if r['pipeline'] == 'banksy' else 'genes_bs0', r['modality'], 'cell_type_true'), {}).get(r['seed'])
+        comparison.append(dict(r, previous_harmony_ari=value, ari_difference=None if value is None else r['cell_type_ari']-value,
                                previous_lambda=lambdas[(r['modality'],'cell_type_true')] if r['pipeline'] == 'banksy' else None,
                                interpretation='BANKSY lambda also retuned; not an isolated Harmony effect.' if r['pipeline'] == 'banksy' else 'Same expression pipeline with Harmony removed.'))
     pd.DataFrame(comparison).to_csv(root/'summary/comparison_to_previous_harmony.csv', index=False)

@@ -19,14 +19,16 @@ def main():
     experiment = source.FIG3_DIR / 'no_harmony_domain'
     selected = json.loads((experiment/'selected_parameters.json').read_text())
     records = list(csv.DictReader((experiment/'summary/metrics_by_seed.csv').open()))
-    assert len(records) == 36 and all(r['status'] == 'complete' for r in records)
+    assert len(records) == 36 and all(r['status'] in ('complete', 'not_converged') for r in records)
+    # runs whose Leiden search missed 6 domains within 15 trials: left out of the bar (labelled n=2)
+    excluded = [r for r in records if r['status'] == 'not_converged']
     for m in source.MODALITIES:
         lambdas[(m,'domain_true')] = str(selected['modalities'][m]['lambda'])
         for mix in ['strong','weak']:
             for pipeline, key in [('banksy','banksy'),('expression','genes_bs0')]:
                 matches = [r for r in records if r['mix']==mix and r['modality']==m and r['pipeline']==pipeline]
                 assert {int(r['seed']) for r in matches} == set(source.SEEDS)
-                data[(mix,key,m,'domain_true')] = {int(r['seed']):float(r['domain_ari']) for r in matches}
+                data[(mix,key,m,'domain_true')] = {int(r['seed']):float(r['domain_ari']) for r in matches if r['status'] == 'complete'}
     out = source.FIG3_DIR / 'ari_recovery_summary'
     stem = out / 'banksy_vs_pca_recovery_condensed_no_harmony'
     styles = [
@@ -47,9 +49,11 @@ def main():
         for j, (pipeline, color, marker, label) in enumerate(active):
             for x, (mix, mod) in zip(positions, groups):
                 values = data.get((mix, pipeline, mod, target), {})
-                if set(values) != set(source.SEEDS):
-                    raise RuntimeError(f'Expected three completed seeds: {mix}/{pipeline}/{mod}/{target}: {values}')
-                vals = np.array([values[s] for s in source.SEEDS])
+                dropped = {int(r['seed']) for r in excluded if target == 'domain_true' and (r['mix'], r['modality']) == (mix, mod)
+                           and pipeline == ('banksy' if r['pipeline'] == 'banksy' else 'genes_bs0')}
+                if set(values) != set(source.SEEDS) - dropped or len(values) < 2:
+                    raise RuntimeError(f'Expected completed seeds: {mix}/{pipeline}/{mod}/{target}: {values}')
+                vals = np.array([values[s] for s in sorted(values)])
                 mean, sd = float(vals.mean()), float(vals.std(ddof=1))
                 color = source.MODALITY_LOOKUP[mod]
                 xp = x + (j-(len(active)-1)/2)*.38
@@ -62,15 +66,15 @@ def main():
                             elinewidth=1.1, capsize=3, zorder=4)
                 ax.scatter(np.full(len(vals), xp), vals, color=source.INK_MUTED,
                            marker='o', s=12, edgecolors='white', linewidths=.5, zorder=5)
-                ax.text(xp, max(mean+sd, float(vals.max()), 0)+.02, f'{round(mean,2)+0.:.2f}',
+                ax.text(xp, max(mean+sd, float(vals.max()), 0)+.02, f'{round(mean,2)+0.:.2f}' + (f'\nn={len(vals)}' if dropped else ''),
                         ha='center', va='bottom', fontsize=source.ANNOT_SIZE,
                         fontweight='bold', color=source.INK)
                 lam = lambdas[(mod, target)] if pipeline == 'banksy' else ''
                 sigma = float(source.BATCH_SIGMA[mod]) if pipeline == 'genes_bs' else 0.
                 common = dict(mix=mix, modality=mod, target=target, pipeline=pipeline,
                               batch_sigma=sigma, banksy_lambda=lam)
-                summary.append(dict(common, mean_ari=mean, sample_sd=sd, n_seeds=3))
-                for seed, value in zip(source.SEEDS, vals):
+                summary.append(dict(common, mean_ari=mean, sample_sd=sd, n_seeds=len(vals)))
+                for seed, value in sorted(values.items()):
                     rows.append(dict(common, seed=seed, ari=float(value)))
         ax.set(title=title, xticks=positions,
                xticklabels=[source.MODALITY_DISPLAY[m] + (f'\nσ={source.BATCH_SIGMA[m]}' if target == 'cell_type_true' else '') for _, m in groups],
@@ -94,8 +98,11 @@ def main():
             writer = csv.DictWriter(f, fieldnames=list(records[0]))
             writer.writeheader()
             writer.writerows(records)
-    assert len(rows) == 54 and len(summary) == 18
-    metadata = dict(source_plot_code=str(Path(__file__).resolve()), selected_parameters=str(experiment/'selected_parameters.json'), n_groups=18, n_seed_scores=54,
+    assert len(rows) == 54 - len(excluded) and len(summary) == 18
+    not_converged = [f"{r['mix']} mix / {source.MODALITY_DISPLAY[r['modality']]} / seed {r['seed']} / "
+                     f"{'BANKSY' if r['pipeline'] == 'banksy' else 'expression-only'} ({r['achieved_clusters']} clusters)" for r in excluded]
+    metadata = dict(source_plot_code=str(Path(__file__).resolve()), selected_parameters=str(experiment/'selected_parameters.json'), n_groups=18, n_seed_scores=len(rows),
+                    not_converged_excluded=not_converged,
                     retained='Domain: BANKSY and expression-only at batch0. Cell type: expression-only at tuned batch. Both mixes and all modalities.',
                     aggregation='Bars: mean; error bars: sample SD; dots: simulation seeds 2025, 101, 202.',
                     downstream='Domain: PCA/Leiden without Harmony. Cell type: existing PCA/Harmony/Leiden. Resolution selected for known category count.',
@@ -116,7 +123,10 @@ def main():
                'error bars show sample SD and dots show all three seeds. Numeric labels show means. '
                f"BANKSY domain lambda (cell/bin/spot): {[selected['modalities'][m]['lambda'] for m in source.MODALITIES]}; k_geom is 60, 100, 8. "
                'Parameters were selected on strong-mix seed2025 and frozen across final runs; seed2025 is not held out. '
-               'Bin/spot cell-type recovery scores dominant labels, not mixture fractions.\n')
+               'Bin/spot cell-type recovery scores dominant labels, not mixture fractions.'
+               + (' Bars labelled n=2 average the remaining seeds: Leiden did not reach exactly 6 domains within 15 '
+                  'resolution trials for ' + '; '.join(not_converged) + ', which is excluded.' if not_converged else '')
+               + '\n')
     with open(f'{stem}_caption.txt', 'w') as f:
         f.write(caption)
     print(f'Validated {len(rows)} seed scores; saved {stem}.png')

@@ -102,8 +102,15 @@ def load() -> tuple[dict, dict]:
     return data, lambdas
 
 
+# (mix, column, modality, target, seed) of no-Harmony runs whose Leiden search did not
+# reach the target cluster count; filled by load_current(), left out of the bars
+EXCLUDED = []
+
+
 def load_current():
-    """Require complete, verified no-Harmony scores for every batch-zero bar."""
+    """Require verified no-Harmony scores for every batch-zero bar; runs marked
+    not_converged by the summaries are left out (and listed in EXCLUDED)."""
+    EXCLUDED.clear()
     historical, _ = load()
     data = {key: value for key, value in historical.items() if key[1] == 'genes_bs'}
     lambdas = {}
@@ -117,12 +124,15 @@ def load_current():
         if len(rows) != 36:
             raise ValueError(f'{path}: expected 36 results')
         for row in rows:
-            saved = json.loads(Path(row['path']).read_text())
-            if saved['harmony_applied'] or row['status'] != 'complete' or int(row['achieved_clusters']) != count:
-                raise ValueError(f'Invalid no-Harmony result: {row["path"]}')
             col = 'banksy' if row['pipeline'] == 'banksy' else 'genes_bs0'
             key = (row['mix'], col, row['modality'], target)
             seed = int(row['seed'])
+            if row['status'] == 'not_converged':
+                EXCLUDED.append((*key, seed))
+                continue
+            saved = json.loads(Path(row['path']).read_text())
+            if saved['harmony_applied'] or row['status'] != 'complete' or int(row['achieved_clusters']) != count:
+                raise ValueError(f'Invalid no-Harmony result: {row["path"]}')
             if seed in data.setdefault(key, {}):
                 raise ValueError(f'Duplicate result: {key}/{seed}')
             value = float(row[metric])
@@ -137,7 +147,8 @@ def load_current():
         for col in COLUMNS:
             for mod in MODALITIES:
                 for target in TARGETS:
-                    if set(data.get((mix, col, mod, target), {})) != set(SEEDS):
+                    expected = set(SEEDS) - {e[4] for e in EXCLUDED if e[:4] == (mix, col, mod, target)}
+                    if set(data.get((mix, col, mod, target), {})) != expected:
                         raise ValueError(f'Incomplete results: {mix}/{col}/{mod}/{target}')
     return data, lambdas
 

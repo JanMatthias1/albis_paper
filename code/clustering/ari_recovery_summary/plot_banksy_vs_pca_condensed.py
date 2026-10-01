@@ -35,9 +35,11 @@ def main():
         for j, (pipeline, color, marker, label) in enumerate(active):
             for x, (mix, mod) in zip(positions, groups):
                 values = data.get((mix, pipeline, mod, target), {})
-                if set(values) != set(source.SEEDS):
-                    raise RuntimeError(f'Expected three completed seeds: {mix}/{pipeline}/{mod}/{target}: {values}')
-                vals = np.array([values[s] for s in source.SEEDS])
+                # seeds of runs that did not converge are left out; such bars are labelled n=<seeds>
+                dropped = {e[4] for e in source.EXCLUDED if e[:4] == (mix, pipeline, mod, target)}
+                if set(values) != set(source.SEEDS) - dropped or len(values) < 2:
+                    raise RuntimeError(f'Expected completed seeds: {mix}/{pipeline}/{mod}/{target}: {values}')
+                vals = np.array([values[s] for s in sorted(values)])
                 mean, sd = float(vals.mean()), float(vals.std(ddof=1))
                 color = source.MODALITY_LOOKUP[mod]
                 xp = x + (j-(len(active)-1)/2)*.38
@@ -50,15 +52,15 @@ def main():
                             elinewidth=1.1, capsize=3, zorder=4)
                 ax.scatter(np.full(len(vals), xp), vals, color=source.INK_MUTED,
                            marker='o', s=12, edgecolors='white', linewidths=.5, zorder=5)
-                ax.text(xp, max(mean+sd, float(vals.max()), 0)+.02, f'{round(mean,2)+0.:.2f}',
+                ax.text(xp, max(mean+sd, float(vals.max()), 0)+.02, f'{round(mean,2)+0.:.2f}' + (f'\nn={len(vals)}' if dropped else ''),
                         ha='center', va='bottom', fontsize=source.ANNOT_SIZE,
                         fontweight='bold', color=source.INK)
                 lam = lambdas[(mod, target)] if pipeline == 'banksy' else ''
                 sigma = float(source.BATCH_SIGMA[mod]) if pipeline == 'genes_bs' else 0.
                 common = dict(mix=mix, modality=mod, target=target, pipeline=pipeline,
                               batch_sigma=sigma, banksy_lambda=lam)
-                summary.append(dict(common, mean_ari=mean, sample_sd=sd, n_seeds=3))
-                for seed, value in zip(source.SEEDS, vals):
+                summary.append(dict(common, mean_ari=mean, sample_sd=sd, n_seeds=len(vals)))
+                for seed, value in sorted(values.items()):
                     rows.append(dict(common, seed=seed, ari=float(value)))
         ax.set(title=title, xticks=positions,
                xticklabels=[source.MODALITY_DISPLAY[m] + (f'\nσ={source.BATCH_SIGMA[m]}' if target == 'cell_type_true' else '') for _, m in groups],
@@ -82,8 +84,8 @@ def main():
             writer = csv.DictWriter(f, fieldnames=list(records[0]))
             writer.writeheader()
             writer.writerows(records)
-    assert len(rows) == 36 and len(summary) == 12
-    metadata = dict(source_plot_code=str(source.__file__), n_groups=12, n_seed_scores=36,
+    assert len(summary) == 12 and len(rows) == sum(s['n_seeds'] for s in summary)
+    metadata = dict(source_plot_code=str(source.__file__), n_groups=12, n_seed_scores=len(rows),
                     retained='Domain: BANKSY only at batch0. Cell type: expression-only at tuned batch. Both mixes and all modalities.',
                     aggregation='Bars: mean; error bars: sample SD; dots: simulation seeds 2025, 101, 202.',
                     downstream='Batch-zero series use PCA and Leiden without Harmony; tuned-batch expression retains Harmony by slice. Resolution targets the known category count.',
