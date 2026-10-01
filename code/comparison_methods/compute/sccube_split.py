@@ -30,11 +30,13 @@ parser.add_argument('--phase-file', type=Path,
                     help='Optional phase labels for an external read-only RSS sampler.')
 parser.add_argument('--memory-budget-gib', type=float,
                     help='Check measured high-water RSS before advancing to each larger size.')
+parser.add_argument('--seed', type=int, default=2025, help='Simulation seed of the settings files to read')
+parser.add_argument('--out', type=Path, help='Output folder (default: ROOT/MODE)')
 args = parser.parse_args()
-out = args.root / args.mode
+out = args.out or args.root / args.mode
 out.mkdir(parents=True, exist_ok=False)
 settings_dir = args.settings_dir or args.source / 'settings'
-settings = [json.loads((settings_dir / f'n{n}_seed2025.json').read_text())
+settings = [json.loads((settings_dir / f'n{n}_seed{args.seed}.json').read_text())
             for n in args.sizes]
 seed = settings[0]['seed']
 random.seed(seed); np.random.seed(seed); torch.manual_seed(seed)

@@ -26,9 +26,22 @@ Counts are molecules for ALBIS and cells for scCube/SPIDER, not comparable units
 - ALBIS: native molecules regenerated from the exact Figure 5A config and seed
   (source hash and all 600k cell coordinates/labels checked against the saved
   data); cached in `figure_5D_actual_coordinates/albis_molecules_roi.npz`.
+  The cache is reused only if `albis_regeneration.json` records the same
+  `simulation_sphere.py` hash as the installed albis; after regenerating
+  Figure 5A, move both files to an archive folder so they are rebuilt.
 - scCube: saved Figure 5A cell positions.
 - SPIDER: cell positions from the separate seed-20260922 run. With Figure 5A's
   shared seed, SPIDER's positions equal scCube's (see `../README.md`).
+
+The cache covers ±200 µm (since 2026-10-01); `actual_capture.py` and `plot_albis_3d.py`
+use its central ±145 µm field.
+
+`native_spots.py` (`submit_native_spots.sh`, output `native_spots/`): each method's own
+spots. ALBIS's field is centred on its spot nearest the tissue centre (its spot grid is
+anchored to the capture window), so ALBIS and SPIDER both show a 3 × 3 block; the fields
+sit at different tissue positions. scCube spots are drawn as the convex hull of each
+spot's own member cells (scCube assigns cells to square grid tiles; `platform="Visium"`
+only shifts every second column's reported centre, marked "+"), counts inside each tile.
 
 `plot_albis_3d.py`: 3D view of the cached ALBIS molecules and cells
 (`figure_5D_actual_coordinates/figure5d_albis_3d.*`); no regeneration.

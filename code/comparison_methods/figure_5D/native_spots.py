@@ -23,9 +23,10 @@ import pandas as pd
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.collections import LineCollection, PatchCollection
+from matplotlib.collections import PatchCollection
 from matplotlib.colors import to_rgb
-from matplotlib.patches import Circle, Patch
+from matplotlib.patches import Circle, Patch, Polygon
+from scipy.spatial import ConvexHull
 
 PAPER = Path(__file__).resolve().parents[3]
 BASE = PAPER / "data/figure_5/figure_5A_600k"
@@ -60,14 +61,19 @@ panels, reports = {}, []
 mol = np.load(ALBIS_DIR / "albis_molecules_roi.npz")
 mol_xy, mol_type = mol["xyz"][:, :2], np.array([f"type{i + 1}" for i in mol["source_type"]])
 spot_xy, spot_obs, pre = slice_obs(BASE / "albis/spot.h5ad", 0.0)
-f = in_field(spot_xy, -radius)  # whole capture inside the cached molecule field
+# ALBIS's spot grid is anchored to its capture window, so no spot sits at the tissue
+# centre; centre ALBIS's field on its spot nearest the centre so it shows the same
+# 3 x 3 block as SPIDER (the fields then sit at different tissue positions).
+albis_centre = spot_xy[np.argmin(np.abs(spot_xy).sum(1))].copy()
+spot_xy, mol_xy = spot_xy - albis_centre, mol_xy - albis_centre
+f = in_field(spot_xy, -radius)  # whole capture inside the field (the molecule cache covers +-200 um)
 spot_xy, pre_totals = spot_xy[f], np.asarray(pre[np.where(f)[0]].sum(axis=1)).ravel()
 d2 = ((mol_xy[:, None, :] - spot_xy[None, :, :]) ** 2).sum(2)
 inside = d2.min(1) <= radius ** 2
 counts = (d2 <= radius ** 2).sum(0)
 assert np.array_equal(counts, pre_totals.astype(int)), (counts, pre_totals)
 panels["ALBIS"] = dict(points=mol_xy, types=mol_type, inside=inside, spots=spot_xy, counts=counts)
-reports.append(dict(method="ALBIS", spots=spot_xy.tolist(), counts=counts.tolist(),
+reports.append(dict(method="ALBIS", field_centre_um=albis_centre.tolist(), spots=spot_xy.tolist(), counts=counts.tolist(),
                     check="molecules within radius == saved counts_pre_batch totals"))
 
 # SPIDER: cells within the radius of SPIDER's own circular spots.
@@ -84,17 +90,25 @@ panels["SPIDER"] = dict(points=cell_xy[c], types=cell_obs.cell_type_true.astype(
 reports.append(dict(method="SPIDER", spots=spot_xy.tolist(), counts=counts.tolist(),
                     check="cells within radius == saved n_source_cells"))
 
-# scCube: native memberships (every cell belongs to one spot).
+# scCube: native memberships (every cell belongs to one spot). scCube assigns cells to
+# square grid tiles; platform="Visium" then shifts every second column's reported centre
+# by half a spacing without changing membership. Each spot is drawn as the convex hull
+# of its own member cells (native membership only; scCube's grid is not re-derived).
 cell_xy, cell_obs, _ = slice_obs(BASE / "sccube/cell.h5ad", OFFSET)
 spots = pd.read_csv(args.out / "sccube_spots.csv").set_index("spot")
 member = pd.read_csv(args.out / "sccube_membership.csv.gz").set_index("Cell").spot
-spot_of_cell = spots.loc[member.reindex(cell_obs.index).to_numpy(), ["x_um", "y_um"]].to_numpy() - OFFSET
+spot_of = member.reindex(cell_obs.index).to_numpy()
 spot_xy = spots[["x_um", "y_um"]].to_numpy() - OFFSET
 f = in_field(spot_xy)
 c = in_field(cell_xy)
+tiles, tile_counts = [], []
+for name in pd.unique(spot_of[c]):  # every spot with a member cell in the field
+    pts = cell_xy[spot_of == name]
+    tiles.append(pts[ConvexHull(pts).vertices] if len(pts) >= 3 else pts)
+    tile_counts.append((pts.mean(0), int(spots.loc[name, "n_cells"])))
 panels["scCube"] = dict(points=cell_xy[c], types=cell_obs.cell_type_true.astype(str).to_numpy()[c],
                         inside=np.ones(c.sum(), bool), spots=spot_xy[f], counts=spots.n_cells.to_numpy()[f],
-                        links=np.stack([cell_xy[c], spot_of_cell[c]], axis=1))
+                        tiles=tiles, tile_counts=tile_counts)
 reports.append(dict(method="scCube", n_spots_in_field=int(f.sum()), counts=spots.n_cells.to_numpy()[f].tolist(),
                     check="memberships from scCube generate_spot_data_random reproduce saved Figure 5A spots"))
 
@@ -106,17 +120,21 @@ subtitles = {"ALBIS": "Native mRNA instances and spots",
 for ax, name in zip(axes, ["ALBIS", "scCube", "SPIDER"]):
     p = panels[name]
     albis = name == "ALBIS"
-    if "links" in p:
-        ax.add_collection(LineCollection(p["links"], colors="#BDBDBD", linewidths=.5, zorder=1))
+    if "tiles" in p:
+        ax.add_collection(PatchCollection([Polygon(t, closed=True) for t in p["tiles"]], facecolor="#F4F4F4",
+                                          edgecolor="#9E9E9E", linewidths=.8, zorder=1))
     out = ~p["inside"]
     ax.scatter(*p["points"][out].T, s=3 if albis else 10, c="#BDBDBD", alpha=.35, marker="x" if albis else "o",
                linewidths=.35 if albis else 0, rasterized=True, zorder=2)
     ax.scatter(*p["points"][~out].T, s=5 if albis else 20, c=[palette[t] for t in p["types"][~out]],
                marker="x" if albis else "o", linewidths=.45 if albis else 0, rasterized=True, zorder=3)
+    for centre, n in p.get("tile_counts", []):  # scCube: cell count inside each tile within the field
+        if np.all(np.abs(centre) <= HALF - 8):
+            ax.text(*centre, str(n), ha="center", va="center", fontsize=8, fontweight="bold", zorder=5, clip_on=True,
+                    bbox=dict(boxstyle="round,pad=.15", facecolor="white", edgecolor="none", alpha=.8))
     for centre, n in zip(p["spots"], p["counts"]):
-        if name == "scCube":
+        if name == "scCube":  # scCube's reported spot centre (every second column shifted for "Visium")
             ax.plot(*centre, marker="+", color="#333333", ms=6, mew=1, zorder=4)
-            ax.text(centre[0], centre[1] - 5, str(n), ha="center", va="top", fontsize=7, zorder=5)
         else:
             ax.add_patch(Circle(centre, radius, fill=False, edgecolor="#333333", lw=1.2, zorder=4))
             ax.text(centre[0], centre[1] - radius - 4, str(n), ha="center", va="top", fontsize=9, zorder=5)

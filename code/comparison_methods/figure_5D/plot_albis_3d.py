@@ -14,8 +14,8 @@ ROOT=Path(__file__).resolve().parents[4]
 OUT=ROOT/'sim_paper/data/figure_5/figure_5D_actual_coordinates'
 BASE=ROOT/'sim_paper/data/figure_5/figure_5A_600k'
 palette=json.loads((BASE/'settings.json').read_text())['celltype_colors']
-m=np.load(OUT/'albis_molecules_roi.npz');xyz=m['xyz']
-labels=np.array([f'type{i+1}' for i in m['source_type']])
+m=np.load(OUT/'albis_molecules_roi.npz');roi=(np.abs(m['xyz'][:,0])<=145)&(np.abs(m['xyz'][:,1])<=145);xyz=m['xyz'][roi]  # cache covers +-200 um
+labels=np.array([f'type{i+1}' for i in m['source_type'][roi]])
 zlo,zhi=json.loads((OUT/'albis_regeneration.json').read_text())['z_bounds']
 a=ad.read_h5ad(BASE/'albis/cell.h5ad',backed='r')
 c=np.asarray(a.obsm['spatial_3d']);r=a.obs.cell_radius.to_numpy()

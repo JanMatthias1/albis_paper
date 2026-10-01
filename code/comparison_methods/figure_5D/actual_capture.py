@@ -5,7 +5,7 @@ own seed (distinct_seeds/, see submit_distinct_seeds.sh): with Figure 5A's share
 scCube and SPIDER draw identical uniform cell positions, which this panel would expose.
 """
 from pathlib import Path
-import sys,json,hashlib
+import json,hashlib
 import numpy as np,anndata as ad
 import matplotlib
 matplotlib.use('Agg')
@@ -14,6 +14,8 @@ from matplotlib.patches import Circle,Patch
 from matplotlib.colors import to_rgb
 from matplotlib.collections import PatchCollection
 import argparse
+import albis as ab
+import albis.simulation_sphere
 ROOT=Path('/dcs04/hicks/data/Jan/sim_project');PAPER=ROOT/'sim_paper'
 BASE=PAPER/'data/figure_5/figure_5A_600k'
 ALBIS_DIR=PAPER/'data/figure_5/figure_5D_actual_coordinates'  # shared ALBIS molecule cache
@@ -21,16 +23,20 @@ PANEL=ALBIS_DIR/'distinct_seeds'  # manuscript panel
 parser=argparse.ArgumentParser();parser.add_argument('--spider-base',type=Path,default=PANEL);parser.add_argument('--out',type=Path,default=PANEL)
 args=parser.parse_args();SPIDER_BASE=args.spider_base
 OUT=args.out;OUT.mkdir(exist_ok=True)
-SOURCE=PAPER/'data/figure_4/cross_modality_alignment/strong_domain_mix_shift3x'
-cfg=json.loads((SOURCE/'config.json').read_text());palette=json.loads((BASE/'settings.json').read_text())['celltype_colors']
+SOURCE=BASE/'albis_generation/data/spot/generation_manifest.json'  # Figure 5A's own ALBIS generation record
+manifest=json.loads(SOURCE.read_text());cfg=manifest['simulator_parameters'];palette=json.loads((BASE/'settings.json').read_text())['celltype_colors']
 angles=np.arange(6)*np.pi/3;centers=np.vstack([[0,0],100*np.column_stack([np.cos(angles),np.sin(angles)])]);radius=27.5
-source_code=ROOT/'albis/albis/simulation_sphere.py';digest=hashlib.sha256(source_code.read_bytes()).hexdigest()
-expected=json.loads((SOURCE/'data/spot/generation_manifest.json').read_text())['source_sha256']['albis/albis/simulation_sphere.py'];assert digest==expected
+source_code=Path(albis.simulation_sphere.__file__);digest=hashlib.sha256(source_code.read_bytes()).hexdigest()
+expected=manifest['source_sha256'].get('albis/simulation_sphere.py')
+assert digest==expected,f'Installed albis {ab.__version__} simulation_sphere.py does not match the one that generated {BASE}; regenerate Figure 5A with this albis'
 cache=ALBIS_DIR/'albis_molecules_roi.npz'  # ALBIS is identical in every variant
+record=ALBIS_DIR/'albis_regeneration.json'
+if cache.exists():
+ cached=json.loads(record.read_text()).get('source_sha256') if record.exists() else None
+ assert cached==digest,f'{cache} was made by a different albis simulation_sphere.py; move it and {record.name} to an archive folder to regenerate'
 if not cache.exists():
- sys.path.insert(0,str(ROOT/'albis'));from albis.simulation_sphere import simulate_3d_molecule_sphere_base
  print('Regenerating native ALBIS molecular realization',flush=True)
- base=simulate_3d_molecule_sphere_base(**cfg)
+ base=ab.simulate_3d_molecule_sphere_base(**cfg)
  saved=ad.read_h5ad(BASE/'albis/cell.h5ad',backed='r');truth=base['adata_cell_obs']
  assert saved.n_obs==truth.n_obs
  assert np.allclose(saved.obsm['spatial_3d'],truth.obsm['spatial'])
@@ -38,12 +44,14 @@ if not cache.exists():
  mol=base['molecules'];xyz=mol['full_xyz']
  # Slice5: fixed native Z slab [-410,0); central field selected before inspecting types.
  zlo=-cfg['sphere_R_um']+4*(2*cfg['sphere_R_um']/cfg['n_slices']);zhi=zlo+2*cfg['sphere_R_um']/cfg['n_slices']
- keep=(xyz[:,2]>=zlo)&(xyz[:,2]<zhi)&(np.abs(xyz[:,0])<=145)&(np.abs(xyz[:,1])<=145)
+ # Cache +-200 um (native_spots.py centres its ALBIS field on an ALBIS spot); this panel uses +-145.
+ keep=(xyz[:,2]>=zlo)&(xyz[:,2]<zhi)&(np.abs(xyz[:,0])<=200)&(np.abs(xyz[:,1])<=200)
  np.savez_compressed(cache,xyz=xyz[keep],gene=mol['full_gene'][keep],source_type=mol['full_src_celltype'][keep])
- (ALBIS_DIR/'albis_regeneration.json').write_text(json.dumps(dict(source_sha256=digest,seed=cfg['seed'],config=cfg,validated='All600k original cell coordinates and type labels match saved Figure5A',z_bounds=[zlo,zhi],molecules='Native pre-batch molecule instances; not post-resampling molecule coordinates'),indent=2)+'\n')
+ record.write_text(json.dumps(dict(source_sha256=digest,seed=cfg['seed'],config=cfg,validated='All600k original cell coordinates and type labels match saved Figure5A',z_bounds=[zlo,zhi],xy_half_width_um=200,molecules='Native pre-batch molecule instances; not post-resampling molecule coordinates'),indent=2)+'\n')
  del base,mol,xyz,truth
 points={};types={};ids={}
-m=np.load(cache);points['ALBIS']=m['xyz'][:,:2];types['ALBIS']=np.array([f'type{i+1}' for i in m['source_type']]);ids['ALBIS']=np.arange(len(points['ALBIS']))
+m=np.load(cache);roi=(np.abs(m['xyz'][:,0])<=145)&(np.abs(m['xyz'][:,1])<=145)
+points['ALBIS']=m['xyz'][roi,:2];types['ALBIS']=np.array([f'type{i+1}' for i in m['source_type'][roi]]);ids['ALBIS']=np.arange(len(points['ALBIS']))
 # Project the saved spherical cells from the same slice onto the XY field.
 # Include circles intersecting the field even when their centers are outside it.
 a=ad.read_h5ad(BASE/'albis/cell.h5ad',backed='r')

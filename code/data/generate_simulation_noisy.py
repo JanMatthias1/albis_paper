@@ -33,25 +33,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-# ---------------------------------------------------------------------------
-# Locate and import albis as ab (same logic as the tutorial notebook)
-# ---------------------------------------------------------------------------
-def find_repo_root(start):
-    for candidate in [start, *start.parents]:
-        if (candidate / "pyproject.toml").is_file() and (candidate / "albis" / "__init__.py").is_file():
-            return candidate
-        nested = candidate / "albis"
-        if (nested / "pyproject.toml").is_file() and (nested / "albis" / "__init__.py").is_file():
-            return nested
-    raise RuntimeError("Could not find the albis repository root.")
-
-
-repo_root = find_repo_root(Path.cwd().resolve())
-if str(repo_root) not in sys.path:
-    sys.path.insert(0, str(repo_root))
-
-sys.modules.pop("albis", None)
 import albis as ab
+
+REQUIRED_ALBIS_VERSION = "0.1.2"
+if ab.__version__ != REQUIRED_ALBIS_VERSION:
+    raise RuntimeError(
+        f"albis {ab.__version__} found at {ab.__file__}; this script requires albis "
+        f"{REQUIRED_ALBIS_VERSION} (pip install albis=={REQUIRED_ALBIS_VERSION})."
+    )
 
 print("Python:", sys.executable)
 print("albis module:", getattr(ab, "__file__", "<no __file__>"))

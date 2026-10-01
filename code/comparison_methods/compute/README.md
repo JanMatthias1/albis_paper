@@ -1,5 +1,21 @@
 # Current compute figures and native benchmark
 
+## Three-seed run (2026-10-01, albis 0.1.2)
+
+`bash submit_seeds.sh` prepares `data/figure_5/compute/native_seeds_<date>/` and submits
+60 jobs: per seed (2025, 101, 202) one Splatter reference, ALBIS and SPIDER at each of
+10k/100k/200k/400k/600k/1M/2M/5M cells (`native_extension.sbatch`), and three scCube
+batches (10k-100k, 200k-600k, 1M-5M, one VAE each; `sccube_seed_batch.sbatch`, 100 ms
+RSS sampling). `prepare_seeds.py` writes every size x seed from
+`settings_template_n600000_seed2025.json` with the same (n/600000)^(1/3) scaling as
+before (its seed-2025/101/202 files match the earlier pilot's exactly) and freezes a
+code snapshot; jobs run that snapshot. `sccube_split.py` gained `--seed` and `--out`
+(defaults unchanged). Job IDs: `<run>/submissions.tsv`. Current run:
+`native_seeds_20261001`. The report/plot below still reads the single-seed run's
+table; a multi-seed version (mean and spread over seeds) is the next step.
+The single-seed run (albis 0.1.1) is archived in
+`data/figure_5/archive_albis0.1.1_20261001/compute/`.
+
 This directory retains the code for the current preliminary four-panel figure,
 its four standalone images, and the completed native scaling workflow through
 5 million cells. Additional runs and seed replicates are deferred pending feedback.

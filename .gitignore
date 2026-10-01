@@ -45,11 +45,8 @@ CLAUDE.md
 **/OUTPUT_POLICY_AUDIT.md
 
 # code/applications_albis (Figure 4)
-code/applications_albis/alignment/README.md
+code/applications_albis/*/**/README.md
 code/applications_albis/alignment/METHODS_reference_alignment_error.md
-code/applications_albis/spatial_clustering/README.md
-code/applications_albis/spatial_clustering/TODO.md
-code/applications_albis/spatial_clustering/T5_3D_tutorial_stagate.ipynb
 
 # code/clustering (Figure 3); public overview = code/clustering/README.md
 code/clustering/README_internal.md
@@ -65,7 +62,8 @@ code/comparison_methods/README.md
 code/count_distribution/**/README_internal.md
 code/count_distribution/**/FIGURE2_METHODOLOGY.md
 code/count_distribution/**/HISTORY_internal.md
+code/count_distribution/misc/
 
 # code/real_data_qc; was code/real_data_qc/.gitignore
-code/real_data_qc/**/README.md
+code/real_data_qc/*/**/README.md
 code/real_data_qc/**/_env.sh
