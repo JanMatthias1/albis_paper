@@ -1,25 +1,16 @@
 """
-Per-slice spatial view of a Figure 2 modality's QC'd data -- one panel per
-slice_id (0-9), so the off-tissue exclusion / pole-thinning pattern
-(see DATA_VERSIONS.md, "realwindow is now the Figure 2 default" +
-"Known issue: bin/spot zero-inflation from sparse tissue packing") is
-visible slice by slice rather than pooled into one overlaid scatter.
+Per-slice spatial view of a Figure 2 modality's QC'd data: one panel per
+slice_id (0-9), so off-tissue exclusion and thinning towards the sphere's
+poles are visible slice by slice.
 
 Reads simulation_<modality>_z_qc.h5ad for the given tag and plots
-obsm['spatial'], colored by domain_true, one subplot per slice_id in a
-2x5 grid.
+obsm['spatial'], colored by domain_true, in a 2x5 grid.
 
 Usage:
     python plot_qc_slices.py --modality spot [--color-by cell_type_true]
 
---tag defaults to the current canonical Figure 2 tag for the modality; the
-plot lands in <tag_dir>/plots/.
-
-2026-09-23: FIG2 now points at smaller_sphere/data/ (data moved there in the
-2026-09-17 reorg; the old data/figure_2/<tag>/ path no longer exists), tags
-updated to the 2026-09-23 bin jitter / spot gene-mean retune (spot domain
-size factors tried and dropped the same day), bin8um added, cell
-tag corrected to the 2026-09-17 dispersion retune (-2.5, was -2.3).
+--tag defaults to the Figure 2 tag for the modality
+(data/figure_2/smaller_sphere/data/<tag>/); the plot lands in <tag_dir>/plots/.
 """
 
 import argparse

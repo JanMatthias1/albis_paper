@@ -1,25 +1,21 @@
 """
-Generate an albis synthetic spatial-transcriptomics dataset with higher
-per-gene count noise (lower NB dispersion), along with diagnostic plots,
-under sim_paper/data/noisy.
+Generate one ALBIS simulation (one modality: cell, bin or spot) for the
+manuscript, with its h5ad, a _summary.json and diagnostic plots.
 
-Identical to generate_simulation.py except this bypasses ab.generate_data()
-and calls ab.simulate_3d_molecule_sphere_multires() directly, since the
-NB dispersion knobs (theta, theta_jitter, noise_scale) are not forwarded by
-generate_data() -- see sim_app/README.md, "Low-level simulator".
+Calls albis.simulate_3d_molecule_sphere_multires() directly rather than
+albis.generate_data(), because the count-noise settings (theta, theta_jitter,
+noise_scale) are only exposed by the low-level simulator.
 
-Defaults were picked by comparing against real Xenium data with
-sim_paper/code/count_distribution/count_distribution.py --compare-input:
-the manuscript-baseline simulation (theta=25 input) fits an empirical
-theta_hat ~= 1.56, while real slices (non_diseased_lung, lung_cancer) fit
-theta_hat ~= 0.15-0.16 -- i.e. real data is far more overdispersed. These
-defaults (theta=2.0, theta_jitter=1.0, noise_scale=1.3) are a first pass at
-closing that gap; rerun count_distribution.py --compare-input against this
-output to check the resulting theta_hat and retune --theta if needed.
+The defaults below are a starting point. The settings used in each figure
+(gene mean, dispersion, batch effect, tissue size, domain mix, ...) are passed
+on the command line by the figure scripts, e.g.
+code/count_distribution/smaller_sphere/*.sh.
 
-Run from anywhere inside the sim_project tree, e.g.:
-    cd /dcs04/hicks/data/Jan/sim_project/sim_paper
-    python generate_simulation_noisy.py
+Output: data/noisy/[<--out-tag>/], or --output-dir if given.
+
+Example:
+    python generate_simulation_noisy.py --modality cell --out-tag my_run
+    sbatch run_generate_simulation_noisy.sh [extra flags]   # all 3 modalities
 """
 
 import json
@@ -79,8 +75,7 @@ NOISY_BASE_GENE_LOGNORMAL = (0.7, 0.7)
 # becomes 0.467-0.933, i.e. more than 3x the old matrix's *maximum* at its
 # *minimum*. Opt-in only (--strong-domain-mix) -- the default stays the
 # original matrix so this never silently affects Figure 2 count-distribution
-# comparisons, only dedicated Figure 3 domain-recovery test runs. See
-# figure.md, 2026-08-25, "domain_type_mix compositional distinguishability".
+# comparisons, only dedicated Figure 3 domain-recovery runs.
 MANUSCRIPT_DOMAIN_TYPE_MIX = np.array(
     [
         [0.18, 0.18, 0.13, 0.12, 0.11, 0.10, 0.09, 0.09],
@@ -108,8 +103,7 @@ STRONG_DOMAIN_TYPE_MIX = np.array(
 # at only ~0.16% of sphere volume -- real tissue is essentially fully packed.
 # A fixed 8um bin grid over that mostly lands in empty interstitial space:
 # 66.3% of bins came back with zero genes detected vs. 0.0% in real
-# breast_cancer_visium_hd (see DATA_VERSIONS.md, "Known issue" section,
-# 2026-08-20). Raising theta does not fix this -- tested up to theta=200 with
+# breast_cancer_visium_hd. Raising theta does not fix this -- tested up to theta=200 with
 # almost no effect -- because it's geometric (empty grid cells), not
 # per-molecule count noise. Local validation swept target 3D packing fraction
 # via --sphere-r-um (holding --n-cells fixed): packing fully solves emptiness
@@ -170,8 +164,7 @@ def parse_args():
         help="Expression multiplier for a cell type's own unique marker genes. Pooling variance "
         "across all cell types inflates a marker gene's variance far above the NB fit (between-type "
         "mean differences dominate over within-type NB variance) -- higher values make that upper "
-        "branch in the mean-variance plot more pronounced; see the 2026-08-24 count_distribution "
-        "mean-variance investigation.",
+        "branch in the mean-variance plot more pronounced.",
     )
     parser.add_argument(
         "--shared-marker-foldchange",
@@ -232,8 +225,7 @@ def parse_args():
         type=float,
         default=NOISY_SPHERE_R_UM,
         help="Sphere radius; with --n-cells fixed, smaller = higher 3D cell-packing "
-        "fraction (see count_distribution bin/spot zero-inflation investigation, "
-        "2026-08-20 -- default 6000um gives ~0.16%% packing, which leaves the "
+        "fraction (default 6000um gives ~0.16%% packing, which leaves the "
         "majority of 8um bins empty).",
     )
     parser.add_argument(
@@ -247,8 +239,7 @@ def parse_args():
         default=7.5,
         help="Lognormal mean cell radius (um), which also sets the mean molecule-spillover "
         "radius per cell (sample_molecule_coords_for_cell scales molecule spread to this). "
-        "Never varied by any packing-fraction sweep to date -- candidate lever for bin's "
-        "bimodal genes-per-cell shape, see figure.md 2026-08-25.",
+        "Affects how many genes each bin detects.",
     )
     parser.add_argument(
         "--allow-cell-overlap",
@@ -265,11 +256,9 @@ def parse_args():
         help="Bin modality grid spacing (um). Manuscript baseline is 8um (Visium-HD-like). "
         "A larger bin aggregates more of each cell's molecule cloud per observation, which "
         "directly addresses two issues diagnosed at 8um: the near-binary empty/non-empty bin "
-        "sampling caused by bin size being comparable to --cell-r-mean (see the "
-        "--cell-r-mean/--allow-cell-overlap radius sweep, figure.md 2026-08-25), and weak "
+        "sampling caused by bin size being comparable to --cell-r-mean, and weak "
         "per-bin domain-compositional signal for BANKSY domain recovery (same "
-        "aggregation-reveals-composition mechanism documented for spot vs. bin/cell, "
-        "figure.md 2026-08-25 domain_type_mix section). Real Visium HD ships 8um/16um (and "
+        "aggregation-reveals-composition mechanism as for spot vs. bin/cell). Real Visium HD ships 8um/16um (and "
         "2um) bins, so this is a legitimate alternate real configuration, not just a knob.",
     )
     parser.add_argument(
