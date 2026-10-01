@@ -84,7 +84,7 @@ bash sim_paper/code/clustering/plot_figure3_summaries.sh
 ```
 
 Environments (`sim_paper/env/`): `albis-tutorial` (`_env.sh`; QC, PCA/Harmony,
-Leiden, plots), `sim-app-banksy` (`_env_banksy.sh`; BANKSY), `rctd` (RCTD, R).
+Leiden, plots), `albis-banksy` (`_env_banksy.sh`; BANKSY), `rctd` (RCTD, R).
 Python requirements: `requirements.txt`.
 
 Single-slice plots use stored `slice_id` 4 (the 5th of 10 slices from the bottom).

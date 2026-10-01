@@ -31,7 +31,7 @@ else
     REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 fi
 
-CONDA_ENV_NAME="${CONDA_ENV_NAME:-sim-app-banksy}"
+CONDA_ENV_NAME="${CONDA_ENV_NAME:-albis-banksy}"
 PYTHON_VERSION="${PYTHON_VERSION:-3.10}"
 ENV_PREFIX="${REPO_ROOT}/env/${CONDA_ENV_NAME}"
 

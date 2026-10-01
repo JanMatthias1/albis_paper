@@ -659,8 +659,7 @@ def run_compare(args: argparse.Namespace, rng: np.random.Generator) -> None:
 
     # Numeric summary alongside the plots -- lets a sweep across many configs be scored
     # programmatically (theta_hat, total_counts, empty-bin fraction, ...) instead of having
-    # to eyeball every PNG, which is how prior sweeps (see figure.md/DATA_VERSIONS.md bin
-    # packing-fraction x log_mu history) were tracked by hand.
+    # to eyeball every PNG.
     summary = {
         "modality": args.modality,
         "compare_label": args.compare_label,

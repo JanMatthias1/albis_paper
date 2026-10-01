@@ -17,7 +17,7 @@ if [[ "$phase" == select || "$phase" == summary ]]; then
 fi
 [[ "$phase" == sweep || "$phase" == final ]]
 task="${SLURM_ARRAY_TASK_ID:?submit as array}"
-embed_python="$project/sim_paper/env/sim-app-banksy/bin/python"
+embed_python="$project/sim_paper/env/albis-banksy/bin/python"
 if [[ "$phase" == final ]] && (( task % 2 == 1 )); then embed_python="$tutorial"; fi
 "$embed_python" -u "$code/pipeline.py" embed --phase "$phase" --task "$task"
 "$tutorial" -u "$code/pipeline.py" cluster --phase "$phase" --task "$task"

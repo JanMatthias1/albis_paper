@@ -21,7 +21,7 @@ fi
 task="${SLURM_ARRAY_TASK_ID:?submit as an array}"
 # Only expression controls use the tutorial environment for embedding; BANKSY
 # feature generation needs its existing isolated package versions.
-embed_python="$project/sim_paper/env/sim-app-banksy/bin/python"
+embed_python="$project/sim_paper/env/albis-banksy/bin/python"
 if [[ "$phase" == final ]] && (( task % 2 == 1 )); then embed_python="$tutorial"; fi
 "$embed_python" -u "$code/run.py" --phase "$phase" --task "$task" --stage embed
 "$tutorial" -u "$code/run.py" --phase "$phase" --task "$task" --stage cluster

@@ -4,8 +4,7 @@ Drop degenerate observations (empty or near-empty cells/bins/spots) from a
 simulated dataset before clustering.
 
 This isn't about matching real data's full QC pipeline (see
-code/real_data_qc/visium_hd_qc.py's SpotSweeper local-outlier QC for that,
-and figure.md's "parked" note on why that's a separate, larger question) --
+code/real_data_qc/visium_hd_qc.py's SpotSweeper local-outlier QC for that) --
 it's a minimal, targeted fix for a specific clustering failure: at
 packing_pf0p04, bin-level Leiden never collapsed below ~190 clusters even at
 the resolution-search floor, far short of the target 6-8. A likely cause is

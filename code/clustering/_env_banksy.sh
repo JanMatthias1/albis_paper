@@ -4,7 +4,7 @@
 # sim_paper/env/create_banksy_env.sh for why this is a separate env from the
 # rest of the clustering pipeline's albis-tutorial env.
 
-ENV_PREFIX="/dcs04/hicks/data/Jan/sim_project/sim_paper/env/sim-app-banksy"
+ENV_PREFIX="/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-banksy"
 PYTHON_BIN="${ENV_PREFIX}/bin/python"
 export PYTHONUNBUFFERED=1
 

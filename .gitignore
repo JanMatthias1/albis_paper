@@ -25,6 +25,10 @@ tutorial/outputs/
 /docs/
 /code/misc/
 
+# Archived / superseded code stays on disk but is not versioned
+code/**/_archive/
+code/**/archive/
+
 # Job logs stay on disk but are not versioned
 code/**/logs/
 code/**/logs_*/
@@ -55,8 +59,8 @@ code/clustering/README_PLOTTING.md
 code/clustering/PATHS.md
 code/clustering/*/**/README.md
 
-# code/comparison_methods (Figure 5); public docs = per-panel READMEs
-code/comparison_methods/README.md
+# code/comparison_methods (Figure 5); public overview = code/comparison_methods/README.md
+code/comparison_methods/*/**/README.md
 
 # code/count_distribution (Figure 2); was code/count_distribution/.gitignore
 code/count_distribution/**/README_internal.md
@@ -67,3 +71,4 @@ code/count_distribution/misc/
 # code/real_data_qc; was code/real_data_qc/.gitignore
 code/real_data_qc/*/**/README.md
 code/real_data_qc/**/_env.sh
+/env/albis-banksy

@@ -23,8 +23,7 @@ Figure 2 simulations -- checked empirically before writing this script:
     before anything else. cell is now regenerated at the SAME sphere_r_um
     (2050) directly, with n_cells scaled down to 24207 (600000 *
     (2050/6000)**3) to preserve its original ~0.16% packing fraction rather
-    than being forced up to bin/spot's 4% -- see DATA_VERSIONS.md and the
-    2026-09-15 conversation this was built from. rescale_to_ref() is now a
+    than being forced up to bin/spot's 4%. rescale_to_ref() is now a
     no-op for all three modalities (kept below for robustness/documentation,
     not because it does anything at these tags).
   * Reuses the *existing* obsm['spatial_unaligned'] per (modality,
