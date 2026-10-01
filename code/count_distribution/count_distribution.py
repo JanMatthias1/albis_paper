@@ -49,7 +49,7 @@ e.g. real Xenium data -- on the same four diagnostics instead of plotting
 regardless of how many cells/genes each one has.
 
 Expected environment:
-    conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
+    conda activate /dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial
 
 Example:
     python sim_paper/code/count_distribution/count_distribution.py --modality cell
