@@ -105,13 +105,14 @@ def main():
     args=p.parse_args();check_sources(args.root)
     task=task_for(args.root,args.phase,args.task)
     # Retain the exact selection-seed result in the final summary, without re-fitting.
+    # With fixed parameters (use_fixed_parameters.py) there is no sweep, so it is fitted here.
     if args.phase=='final' and task['pipeline']=='banksy' and task['mix']=='strong' and task['seed']==2025:
         dest=Path(task['directory']);selected=args.root/f"sweep/strong/{task['modality']}/seed2025/lam{task['lambda']:g}"
-        assert (selected/'metrics.json').exists()
-        dest.parent.mkdir(parents=True,exist_ok=True)
-        if not dest.exists():dest.symlink_to(selected,target_is_directory=True)
-        assert dest.resolve()==selected.resolve()
-        print('Reusing selected seed2025 sweep result:',selected,flush=True);return
+        if (selected/'metrics.json').exists():
+            dest.parent.mkdir(parents=True,exist_ok=True)
+            if not dest.exists():dest.symlink_to(selected,target_is_directory=True)
+            assert dest.resolve()==selected.resolve()
+            print('Reusing selected seed2025 sweep result:',selected,flush=True);return
     if args.stage=='embed':embed(args.root,task)
     else:cluster(args.root,task)
 

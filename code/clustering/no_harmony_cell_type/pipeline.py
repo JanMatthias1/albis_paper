@@ -63,9 +63,11 @@ def reuse_source(task):
 
 
 def reuse_final(root, task):
+    # With fixed parameters (no_harmony_domain/use_fixed_parameters.py) there is no sweep to reuse.
     if task['phase'] == 'final' and task['pipeline'] == 'banksy' and task['mix'] == 'strong' and task['seed'] == 2025:
         source = root/f"sweep/strong/{task['modality']}/seed2025/lam{task['lambda']:g}"
-        assert (source/'metrics.json').exists()
+        if not (source/'metrics.json').exists():
+            return False
         dest = Path(task['directory'])
         dest.parent.mkdir(parents=True, exist_ok=True)
         if not dest.exists():
