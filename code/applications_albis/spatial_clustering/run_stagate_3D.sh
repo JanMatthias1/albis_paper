@@ -10,7 +10,7 @@ DEP_JOB="${1:-none}"
 DEP_ARG=()
 [[ "${DEP_JOB}" != "none" ]] && DEP_ARG=(--dependency="afterok:${DEP_JOB}")
 
-# Full-batch bin16um exceeded 80GB A100 memory on 2026-09-18.
+# Full-batch bin16um exceeds 80GB A100 memory.
 # Use the 96GB H100 for every bin16um condition/seed, A100 for cell/spot.
 # GPU_GRES remains an explicit override for all submitted datasets.
 GPU_OVERRIDE="${GPU_GRES:-}"

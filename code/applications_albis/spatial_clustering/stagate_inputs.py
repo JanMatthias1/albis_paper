@@ -3,7 +3,7 @@ from pathlib import Path
 
 PROJECT = Path('/dcs04/hicks/data/Jan/sim_project')
 SLIDE = PROJECT / 'sim_paper/data/figure_3/strong_domain_mix/batch_sigma_slide'
-# Since 2026-09-23 the strong-mix generators name each QC file by its generation
+# The strong-mix generators name each QC file by its generation
 # parameters: <Figure 2 tag body>_strongmix_bsigma<batch, no dot>[_seed<seed>]_qc.h5ad
 # (see code/clustering/strong_domain_mix/generate/generate_strong_mix_*.sh).
 TAG_BODY = {

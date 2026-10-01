@@ -6,12 +6,6 @@
 # Use this after a plotting-code change (as opposed to run_stagate_3D.sh, which
 # retrains).
 #
-# 2026-09-18: plot_stagate_summary.py / plot_stagate_ari_strongmix_prebatch.py
-# archived to _archive_20260918_pre_bsseed_grid/ -- both read the old
-# <mod>_strongmix[_lowbatch|_prebatch] STAGATE output, which no longer exists
-# (superseded by the stagate_inputs.py bs<value>_seed<seed> grid; see
-# plot_stagate_fig4b.py for the current equivalent).
-#
 # Discovers run dirs from what's on disk under STAGATE_DIR (matching
 # <mod>_strongmix_bs<value>_seed<seed>, the current stagate_inputs.py grid)
 # rather than hardcoding, so it stays in sync with whatever 3D_stagate.py has

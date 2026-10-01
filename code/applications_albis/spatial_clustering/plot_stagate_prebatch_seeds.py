@@ -5,8 +5,7 @@ STAGATE domain recovery on the strong-mix data with NO batch effect
 
 Bars = mean over simulation seeds 101 / 202 / 2025 error bars = sample SD, labels = mean.
 Same runs and colours as Figure 4B
-(plot_stagate_fig4b.py), restricted to its sigma = 0 column. Supersedes the
-single-seed stagate_ari_strongmix_prebatch.png of 2026-09-05.
+(plot_stagate_fig4b.py), restricted to its sigma = 0 column.
 
 Writes <STAGATE>/stagate_ari_strongmix_prebatch_seeds.{png,pdf,csv}.
 

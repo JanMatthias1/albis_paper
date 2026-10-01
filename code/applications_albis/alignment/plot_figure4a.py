@@ -1,11 +1,6 @@
 """
 Figure 4A -- before/after STAIR 3D alignment of the ALBIS sphere z-stack.
 
-Renamed from plot_figure4c.py 2026-09-20 (this single-technology z-stack
-alignment task was relettered Figure 4C -> Figure 4A; see
-code/applications_albis/alignment/README.md's "Current manuscript selection").
-Output filenames below were renamed to match (figure4c_ -> figure4a_ prefix).
-
 Reads the STAIR outputs written by 3D_stair.py
     sim_paper/data/figure_4/alignment/STAIR/<dataset>/adata_results/
         Sim_3D_STAIR_<dataset>.h5ad

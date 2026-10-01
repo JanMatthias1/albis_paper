@@ -108,7 +108,7 @@ def main():
     parser.add_argument('--reference',default='0')
     args=parser.parse_args()
     rows, fits=[],[]
-    for ds in ['cell','bin16um','spot']:  # 2026-10-01: Fig4A strong-mix shared tissue at r=4600 um, 1M cells
+    for ds in ['cell','bin16um','spot']:  # Fig4A strong-mix shared tissue at r=4600 um, 1M cells
         r,f=evaluate(args.base/f'STAIR/{ds}/adata_results/Sim_3D_STAIR_{ds}.h5ad',ds,args.reference)
         rows.extend(r);fits.extend(f)
     out=args.base/'plots';out.mkdir(exist_ok=True)

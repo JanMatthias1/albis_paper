@@ -18,7 +18,7 @@ OUTDIR="/dcs04/hicks/data/Jan/sim_project/sim_paper/code/applications_albis/alig
 LOGDIR="${OUTDIR}/logs_stair_3D"
 mkdir -p "${LOGDIR}"
 
-# 2026-09-28: Fig4C strong-mix data (see 3D_stair.py DATASETS); bin8um dropped.
+# Figure 4A strong-mix data (see 3D_stair.py DATASETS).
 DATASETS=(
   "bin16um"
   "spot"
@@ -26,19 +26,12 @@ DATASETS=(
 )
 [[ $# -gt 0 ]] && DATASETS=("$@")
 
-# 2026-09-17: bin8um added -- 6.6M obs, ~4x bin16um's 1.65M, and no prior
-# STAIR run of this modality to size against (bin16um/spot/cell's 150G/48h
-# was already generous headroom over their actual peak usage, see README).
-# Bumped rather than left at the shared default; may still need a resubmit
-# at higher mem/time if this first attempt OOMs or times out.
+# Memory/time per dataset; larger stacks (bin8um, 600k+ cells) get more memory.
 for d in "${DATASETS[@]}"; do
   MEM="150G"
   TIME="48:00:00"
   [[ "${d}" == "bin8um" ]] && MEM="250G" && TIME="24:00:00"
-  # 2026-09-19: cell_r6000 is 600k obs -- between bin16um (350k, 150G default
-  # is fine) and bin8um (1.3M, needs 250G) -- bump proportionally, untested.
   [[ "${d}" == "cell_r6000" ]] && MEM="200G" && TIME="24:00:00"
-  # 2026-09-28: cell is now the Fig4C 600k-cell stack (same size as cell_r6000).
   [[ "${d}" == "cell" ]] && MEM="200G" && TIME="24:00:00"
 
   sbatch \

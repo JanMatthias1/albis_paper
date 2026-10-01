@@ -1,31 +1,18 @@
 """
-Figure 4E -- cross-technology spatial alignment with STAIR.
+Figure 4C -- cross-technology spatial alignment with STAIR.
 
 Takes the SAME physical tissue slice (one slice_id from the ALBIS 10-slice
 z-stack design) captured at three different technologies -- bin16um, spot,
 cell -- and asks STAIR to align them into one shared spatial frame using
-expression alone, exactly as `3D_stair.py` (Figure 4C) aligns different
+expression alone, exactly as `3D_stair.py` (Figure 4A) aligns different
 z-sections of one technology. Here the three "slices" STAIR sees are the
 three technologies of one physical slice, not ten z-planes of one technology.
 
-Adapted from a multi-sample-alignment-benchmark cross-tech script (user-
-supplied, itself adapted from that project's `3D_alignment/3D_stair.py`).
-One change vs. that version, forced by a property of *this* project's
-Figure 2 simulations -- checked empirically before writing this script:
+Adapted from the cross-technology STAIR script of the
+multi-sample-alignment-benchmark project. Notes:
 
-  * 2026-09-15: cell used to be simulated at a much larger ~5985 um sphere
-    radius (600k cells, ~0.16% 3D packing -- needed at that n_cells to avoid
-    unrealistically crowding the sphere) while bin16um/spot shared a ~2050 um
-    radius (packing_pf0p04, ~4% packing -- a compromise tuned to fix a
-    DIFFERENT problem, bin/spot's empty-grid-cell artifact, that doesn't
-    apply to cell). rescale_to_ref() used to isotropically rescale cell's
-    coords onto the bin/spot disc by the resulting ~0.343 radius ratio
-    before anything else. cell is now regenerated at the SAME sphere_r_um
-    (2050) directly, with n_cells scaled down to 24207 (600000 *
-    (2050/6000)**3) to preserve its original ~0.16% packing fraction rather
-    than being forced up to bin/spot's 4%. rescale_to_ref() is now a
-    no-op for all three modalities (kept below for robustness/documentation,
-    not because it does anything at these tags).
+  * All three modalities share one sphere radius, so rescale_to_ref() is a
+    no-op (kept for inputs whose modalities differ in radius).
   * Reuses the *existing* obsm['spatial_unaligned'] per (modality,
     slice_id) as the "already misaligned" cross-tech input, rather than
     obsm['spatial'] directly. Each modality's slice_id==N unaligned coords
@@ -35,14 +22,9 @@ Figure 2 simulations -- checked empirically before writing this script:
     three already-co-registered point clouds) makes the task non-trivial
     and mirrors 3D_stair.py's prepare_input() exactly: obsm['spatial'] is
     stashed as ground truth, STAIR gets obsm['spatial_unaligned'] instead.
-  * 2026-09-16: the three modalities' per-slice perturbations are now
-    SYNCED -- Figure 2's generate_simulation_noisy.py calls pass
-    --sync-unaligned-seed, so cell/bin16um/spot draw the identical
-    rotation+translation for a given slice_id (previously each modality
-    used its own independent draw, offset by a fixed per-modality constant;
-    see sync_unaligned_seed in simulation_sphere.py). All three technologies
-    for one slice now start from one shared ground-truth misalignment
-    rather than three unrelated ones.
+  * Each modality's misalignment comes from the generator; the Figure 4C
+    pipeline (strong_domain_mix/run_strongmix_offsets.sh) gives each one its
+    own rigid offset and passes the data with --input-root.
 
 batch_key/slice_order becomes the three technology labels (bin16um / spot /
 cell) instead of z-plane ids 0..9; n_neigh_hom / c_neigh_het take one shared
@@ -103,15 +85,9 @@ print("Torch:", torch.__version__, "| CUDA:", torch.cuda.is_available(), torch.v
 
 
 # --------------------------------------------------------------------------- #
-# dataset table -- same Figure 2 tags 3D_stair.py / Figure 4C use            #
+# default dataset table (Figure 2 data); the Figure 4C pipeline overrides it  #
+# with --input-root                                                           #
 # --------------------------------------------------------------------------- #
-# 2026-09-17: figure_2 was split into parallel smaller_sphere (r=2050) /
-# larger_sphere (r=6000) tracks; the tags below moved from bare
-# `data/figure_2/<tag>/` to `data/figure_2/smaller_sphere/data/<tag>/`, which
-# had silently broken this script (FileNotFoundError) since that move --
-# same fix as 3D_stair.py's (Figure 4C), see that script's dataset-table
-# comment for the full reorg context. Prior slice_5 output (Sep 16, predates
-# the reorg) archived to STAIR/cross_tech/slice_5_pre_reorg_20260917/.
 FIG2 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data"
 BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/cross_modality_alignment/STAIR/cross_tech"
 
@@ -215,8 +191,12 @@ def alignment_metrics(adata):
 # main routine                                                                #
 # --------------------------------------------------------------------------- #
 def run_cross_tech_alignment(tech_adatas, slice_id, n_neigh_hom, c_neigh_het,
-                             output_adata, output_embeddings, output_align, used_device):
-    tech_adatas = rescale_to_ref(tech_adatas, REF_TECH)
+                             output_adata, output_embeddings, output_align, used_device,
+                             rescale=True):
+    if rescale:
+        tech_adatas = rescale_to_ref(tech_adatas, REF_TECH)
+    else:
+        print("[rescale] skipped (--no-rescale): coordinates used at their simulated scale")
     tech_adatas = {t: prepare_input(a) for t, a in tech_adatas.items()}
 
     key_use = list(TECHS)
@@ -291,6 +271,8 @@ def parse_args():
     ap.add_argument('--input-root', default=None,
                     help='Dedicated generated data directory containing bin16um/, spot/, cell/.')
     ap.add_argument('--output-base', default=BASE_OUTDIR)
+    ap.add_argument('--no-rescale', action='store_true',
+                    help="Skip rescale_to_ref(); use every modality's simulated coordinates as-is")
     return ap.parse_args()
 
 
@@ -330,4 +312,5 @@ if __name__ == "__main__":
         output_embeddings=output_embeddings,
         output_align=output_align,
         used_device=used_device,
+        rescale=not args.no_rescale,
     )
