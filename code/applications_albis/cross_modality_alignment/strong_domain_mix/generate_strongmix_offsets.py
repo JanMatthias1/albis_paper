@@ -4,7 +4,7 @@
 ONE ALBIS call builds one tissue (cells, domains, cell types, molecules) from
 the bin16um strong-mix parameters and aggregates it into bin16um, spot and
 cell outputs, so all three modalities share the same underlying tissue
-composition -- unlike ../weak_domain_mix/generate_native_offsets.py, which ran one call per
+composition -- unlike the retired code/misc/applications_albis/cross_modality_alignment/weak_domain_mix/generate_native_offsets.py, which ran one call per
 modality with modality-specific n_cells/dispersion (different tissues).
 
 Tissue/expression = Figure 3 strong-mix bin16um config
@@ -17,6 +17,13 @@ own rotation/translation per slice).
     python generate_strongmix_offsets.py --outdir OUT            # writes OUT/data/<tech>/
     python generate_strongmix_offsets.py --outdir OUT --print-config
     python generate_strongmix_offsets.py --outdir OUT --crop-modalities bin,spot --crop-window-um 2221
+    python generate_strongmix_offsets.py --outdir OUT --sphere-r-um 4600 --n-cells 1000000   # Figure 4A
+
+--sphere-r-um sets the sphere size; the core fuzz width (0.05 R) and the default
+max shift (1.5 R) scale with it, so the defaults (2050 um, 600k cells) give exactly
+the configuration above. Figure 4A uses r=4600 um with 1M cells so the central
+sections are cut square by the 6.5 mm bin/spot window (lower cell density than
+Figure 2/3; illustrative). Figure 4C and Figure 5A use the defaults, uncropped.
 
 --crop-modalities/--crop-window-um crop only the listed bin/spot outputs to a
 W x W capture square (cell always keeps its window). The intact sphere is built
@@ -30,7 +37,6 @@ import hashlib
 import inspect
 import json
 import platform
-import subprocess
 import sys
 from importlib.metadata import version
 from pathlib import Path
@@ -39,11 +45,17 @@ import numpy as np
 from scipy import sparse
 
 ROOT = Path(__file__).resolve().parents[5]
-REPO = ROOT / "albis"
 sys.dont_write_bytecode = True
-sys.path.insert(0, str(REPO))
 import albis as ab
+import albis.simulation_sphere
 from albis.simulation_sphere import _to_serializable
+
+REQUIRED_ALBIS_VERSION = "0.1.2"
+if ab.__version__ != REQUIRED_ALBIS_VERSION:
+    raise RuntimeError(
+        f"albis {ab.__version__} found at {ab.__file__}; this script requires albis "
+        f"{REQUIRED_ALBIS_VERSION} (pip install albis=={REQUIRED_ALBIS_VERSION})."
+    )
 
 # Copied from code/data/generate_simulation_noisy.py (that module parses argv
 # at import time, so it can't be imported).
@@ -80,17 +92,21 @@ def simulate_cropped(params, crop_modalities, window_um):
     return sim
 
 
-def simulator_parameters(max_shift=3075., max_deg=270., perturbation_seed=12345,
-                         tissue_seed=2025, slice_axis="Z"):
+def simulator_parameters(max_shift=None, max_deg=270., perturbation_seed=12345,
+                         tissue_seed=2025, slice_axis="Z", sphere_r_um=2050., n_cells=600000):
+    """Size-dependent settings scale with the sphere radius as at r=2050:
+    core fuzz width 0.05 R (102.5 um) and, unless given, max shift 1.5 R (3075 um)."""
+    if max_shift is None:
+        max_shift = 1.5 * sphere_r_um
     parameters = {name: item.default for name, item in
                   inspect.signature(ab.simulate_3d_molecule_sphere_multires).parameters.items()
                   if item.default is not inspect.Parameter.empty}
     parameters.update(
-        sphere_R_um=2050., capture_window_um=(6500., 6500.), xenium_capture_window_um=(12000., 24000.),
+        sphere_R_um=sphere_r_um, capture_window_um=(6500., 6500.), xenium_capture_window_um=(12000., 24000.),
         n_domains=6, core_frac=.55, core_bump_amp=.25, wedge_angle_amp_deg=25., noise_terms=16,
         noise_freq_range=(3., 6.), boundary_fuzz_width_deg=6., boundary_fuzz_flip_prob=.15,
-        core_fuzz_width_um=102.5, core_fuzz_flip_prob=.25,
-        n_cells=600000, allow_cell_overlap=False,
+        core_fuzz_width_um=.05 * sphere_r_um, core_fuzz_flip_prob=.25,
+        n_cells=n_cells, allow_cell_overlap=False,
         cell_radius_kwargs=dict(radius_dist="lognormal", r_mean=7.5, r_sigma=.28, r_min=4., r_max=14.),
         n_cell_types=8, domain_type_mix=STRONG_DOMAIN_TYPE_MIX,
         base_gene_lognormal=(-2.5, .7), theta=2., theta_jitter=.6, noise_scale=1.3,
@@ -105,11 +121,13 @@ def simulator_parameters(max_shift=3075., max_deg=270., perturbation_seed=12345,
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--outdir", type=Path, required=True)
-    parser.add_argument("--max-shift", type=float, default=3075.)
+    parser.add_argument("--sphere-r-um", type=float, default=2050.,
+                        help="Sphere radius; core fuzz width (0.05 R) and default max shift (1.5 R) scale with it")
+    parser.add_argument("--max-shift", type=float, default=None, help="Default 1.5 x --sphere-r-um (3075 at 2050)")
     parser.add_argument("--max-deg", type=float, default=270.)
     parser.add_argument("--base-seed-unaligned", type=int, default=12345)
     parser.add_argument("--seed", type=int, default=2025)
-    parser.add_argument("--n-cells", type=int, default=None, help="Override (smoke tests only)")
+    parser.add_argument("--n-cells", type=int, default=600000)
     parser.add_argument("--crop-modalities", default="", help="Comma list from {bin,spot} to crop")
     parser.add_argument("--crop-window-um", type=float, default=None, help="Side of the square crop (um)")
     parser.add_argument("--print-config", action="store_true")
@@ -117,9 +135,8 @@ def main():
     crop = [m for m in args.crop_modalities.split(",") if m]
     if not set(crop) <= {"bin", "spot"} or bool(crop) != (args.crop_window_um is not None):
         parser.error("--crop-modalities (bin and/or spot) and --crop-window-um go together")
-    params = simulator_parameters(args.max_shift, args.max_deg, args.base_seed_unaligned, args.seed)
-    if args.n_cells:
-        params["n_cells"] = args.n_cells
+    params = simulator_parameters(args.max_shift, args.max_deg, args.base_seed_unaligned, args.seed,
+                                  sphere_r_um=args.sphere_r_um, n_cells=args.n_cells)
     resolved = _to_serializable(params)
     if crop:
         resolved["crop"] = {"modalities": crop, "window_um": [args.crop_window_um] * 2}
@@ -130,12 +147,13 @@ def main():
     destinations = {t: args.outdir / "data" / t for t in TECHS}
     for d in destinations.values():
         d.mkdir(parents=True, exist_ok=False)
-    source_files = [Path(__file__).resolve(), REPO / "albis/simulation_sphere.py"]
-    revision = subprocess.run(["git", "-C", str(REPO), "rev-parse", "HEAD"], capture_output=True, text=True)
+    script = Path(__file__).resolve()
+    simulator_source = Path(albis.simulation_sphere.__file__)
     provenance = {"status": "started", "shared_tissue": "single ALBIS call, all three modalities",
         "simulator_parameters": resolved,
-        "albis_git_revision": revision.stdout.strip() if revision.returncode == 0 else None,
-        "source_sha256": {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in source_files},
+        "albis_version": ab.__version__,
+        "source_sha256": {str(script.relative_to(ROOT)): hashlib.sha256(script.read_bytes()).hexdigest(),
+                          "albis/simulation_sphere.py": hashlib.sha256(simulator_source.read_bytes()).hexdigest()},
         "versions": {name: version(name) for name in ("numpy", "scipy", "anndata")},
         "python": platform.python_version(), "argv": sys.argv,
         "qc": "post-batch X total counts > 0 and detected genes >= 3"}

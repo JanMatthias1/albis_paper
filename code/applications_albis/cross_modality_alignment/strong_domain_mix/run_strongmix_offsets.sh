@@ -1,6 +1,6 @@
 #!/bin/bash
 # Strong-domain-mix shift3x: shared-tissue generation -> section-5 STAIR ->
-# plots + reference RMSE + gene metrics (same downstream as ../weak_domain_mix/run_native_offsets.sh).
+# plots + reference RMSE + gene metrics (same downstream as the retired weak-mix runner, code/misc/applications_albis/cross_modality_alignment/weak_domain_mix/run_native_offsets.sh).
 # Usage: bash run_strongmix_offsets.sh submit [OUTDIR] [GENERATOR ARGS...]
 #   e.g. ... submit OUT --crop-modalities bin,spot --crop-window-um 2221
 set -euo pipefail
