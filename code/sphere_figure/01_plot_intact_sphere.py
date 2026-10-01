@@ -144,18 +144,21 @@ def main():
     ax.set_title("Intact 3D Tissue Sphere", fontsize=8, fontweight="bold", y=0.93)
 
     handles = [
-        plt.Line2D([0], [0], marker="o", color="none", label=domain, markerfacecolor=color, markersize=4)
+        plt.Line2D([0], [0], marker="o", color="none", label=domain,
+                   markerfacecolor=color, markeredgecolor="none", markersize=7)
         for domain, color in DOMAIN_COLORS.items()
     ]
     ax.legend(
-        handles=handles,
+        handles=[handles[i] for i in (0, 3, 1, 4, 2, 5)],
+        title="Domain",
+        title_fontsize=9,
         loc="lower center",
         bbox_to_anchor=(0.5, -0.07),
-        ncol=6,
+        ncol=3,
         frameon=False,
-        fontsize=5,
-        handletextpad=0.2,
-        columnspacing=0.7,
+        fontsize=8,
+        handletextpad=0.4,
+        columnspacing=1.0,
     )
 
     for suffix in ("png", "pdf"):
