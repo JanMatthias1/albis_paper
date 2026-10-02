@@ -142,10 +142,11 @@ for ax, name in zip(axes, ["ALBIS", "scCube", "SPIDER"]):
     ax.set_title(subtitles[name], fontweight="bold", fontsize=11, pad=12)
     ax.set(xlim=(-HALF, HALF), ylim=(-HALF, HALF), aspect="equal")
     ax.set_axis_off()
-    ax.plot([-135, -85], [-137, -137], color="black", lw=2)
-    ax.text(-110, -133, "50 µm", ha="center", fontsize=9)
+    # scale bar just below the field, clear of the spot-count labels
+    ax.plot([-HALF, -HALF + 50], [-HALF - 10, -HALF - 10], color="black", lw=2, clip_on=False)
+    ax.text(-HALF + 25, -HALF - 14, "50 µm", ha="center", va="top", fontsize=9, clip_on=False)
 fig.legend(handles=[Patch(color=palette[f"type{i}"], label=f"Type {i}") for i in range(1, 9)],
-           loc="lower center", bbox_to_anchor=(.5, .10), ncol=8, frameon=False, fontsize=10)
+           loc="lower center", bbox_to_anchor=(.5, .03), ncol=8, frameon=False, fontsize=10)
 fig.subplots_adjust(left=.025, right=.975, top=.80, bottom=.20, wspace=.15)
 for ext in ["png", "pdf", "svg"]:
     fig.savefig(args.out / f"figure5d_native_spots.{ext}", dpi=300, bbox_inches="tight", facecolor="white")

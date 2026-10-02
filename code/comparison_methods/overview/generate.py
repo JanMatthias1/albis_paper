@@ -150,7 +150,7 @@ def competitor_outputs(method, cfg, out, spider_spots):
                 if len(result) == 4:
                     counts = result[3]  # native W (spot_ct_count), square captures
                 else:
-                    # User-approved exception (AGENTS.md, 2026-09-28): st-spider 1.2.0's
+                    # Exception to running SPIDER unmodified: st-spider 1.2.0's
                     # circle branch computes W but does not return it. This repeats its
                     # own line (spider/sim_expr.py: spot_ct_count = spot_cell_idx_matrix
                     # * onehot_ct) with its own membership matrix and one-hot encoder.

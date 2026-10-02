@@ -47,9 +47,11 @@ Runtime and memory of ALBIS, scCube and SPIDER from 10k to 5M cells, on one
 CPU thread, for three seeds. Setup (Splatter reference, scCube VAE training)
 is timed separately from generation.
 
-- `submit_seeds.sh` → `prepare_seeds.py`, then `native_extension.sbatch` (ALBIS, SPIDER) and `sccube_seed_batch.sbatch` (scCube)
+- `submit_seeds.sh`: the whole benchmark → `prepare_seeds.py` (settings, and hashes of the run
+  scripts), then `native_extension.sbatch` (ALBIS, SPIDER) and `sccube_seed_batch.sbatch` (scCube),
+  then `report_seeds.sbatch` once all jobs finish
 - `albis_native.py`, `spider_native.py`, `sccube_split.py`: timed native calls
-- `report_large.py`, `plot_compute_four_panel_preliminary.py`: tables and figures
+- `report_seeds.py`, `plot_compute.py`: tables (per seed and mean ± SD) and the four-panel figure
 - `METHODS.md`: methods text
 
 ## Conventions

@@ -14,4 +14,4 @@ case "$METHOD" in
     spider) python_bin="$project/comparison_methods/env/spider/bin/python" ;;
     *) exit 2 ;;
 esac
-exec "$python_bin" -u "$RUN_ROOT/code/${METHOD}_native.py"
+exec "$python_bin" -u "$project/sim_paper/code/comparison_methods/compute/${METHOD}_native.py"

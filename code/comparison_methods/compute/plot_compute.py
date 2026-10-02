@@ -1,0 +1,99 @@
+"""Four-panel compute figure from report_seeds.py's measurements.csv: lines = mean over
+simulation seeds, small points = individual seeds. Writes <root>/figures/compute/."""
+import argparse
+import os
+from pathlib import Path
+os.environ.setdefault('MPLCONFIGDIR', '/tmp/compute-figure-mpl')
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from matplotlib.transforms import Bbox
+import pandas as pd
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--root', type=Path, required=True)
+args = parser.parse_args()
+root = args.root.resolve()
+out = root / 'figures' / 'compute'
+out.mkdir(parents=True, exist_ok=True)
+
+data = pd.read_csv(root / 'measurements.csv')
+data = data.loc[data.status.eq('ok')]
+n_seeds = data.seed.nunique()
+methods = {'albis': ('ALBIS', '#8E63C7', 'o'), 'sccube': ('scCube', '#43B7A5', 's'), 'spider': ('SPIDER', '#F2A65A', '^')}
+panels = [
+    ('simulation_seconds', 'Simulation time', 'Splatter reference and scCube VAE training excluded',
+     'Elapsed time (s)', 'simulation_time'),
+    ('total_seconds', 'Time including setup', 'Splatter reference + input loading + scCube VAE training',
+     'Elapsed time (s)', 'time_including_setup'),
+    ('generation_peak_rss_gib', 'Memory during generation', 'Dashed, hollow: whole-process peak used as proxy',
+     'Peak RAM (GiB)', 'memory_during_generation'),
+    ('process_peak_rss_gib', 'Memory including setup', 'Method-process peak; Splatter RAM not measured',
+     'Peak RAM (GiB)', 'memory_including_setup')]
+plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 9, 'axes.spines.top': False,
+                     'axes.spines.right': False, 'savefig.dpi': 300, 'svg.fonttype': 'none', 'pdf.fonttype': 42})
+fig, axes = plt.subplots(2, 2, figsize=(11, 9))
+fig.subplots_adjust(left=.10, right=.97, bottom=.19, top=.81, wspace=.33, hspace=.85)
+sizes = sorted(data.n_cells.unique())
+ticks, labels = [10000, 100000, 600000, 1000000, 2000000, 5000000], ['10k', '100k', '600k', '1M', '2M', '5M']
+for ax, (key, title, subtitle, ylabel, name) in zip(axes.flat, panels):
+    ax.text(.5, 1.22, title, transform=ax.transAxes, ha='center', fontsize=12, fontweight='bold')
+    ax.text(.5, 1.10, subtitle, transform=ax.transAxes, ha='center', fontsize=8, color='#555555')
+    for method, (label, color, marker) in methods.items():
+        d = data.loc[data.method.eq(method)]
+        proxy = key == 'generation_peak_rss_gib' and method != 'sccube'
+        if key == 'generation_peak_rss_gib':
+            label += ' (process peak proxy)' if proxy else ' (100 ms samples)'
+        elif key == 'process_peak_rss_gib' and method == 'sccube':
+            label += ' (includes training)'
+        mean = d.groupby('n_cells')[key].mean().reindex(sizes)  # reindex shows gaps for missing sizes
+        ax.scatter(d.n_cells, d[key], s=10, color=color, alpha=.35, linewidths=0, zorder=2)
+        ax.plot(sizes, mean, label=label, color=color, marker=marker, lw=1.7, markersize=5, zorder=3,
+                markerfacecolor='white' if proxy else color, linestyle='--' if proxy else '-')
+    ax.set_xscale('log')
+    ax.set_xticks(ticks, labels, rotation=35)
+    ax.set_xlim(8500, 6000000)
+    ax.set_xlabel('Requested cells (log scale)')
+    ax.set_ylabel(ylabel)
+    if key.endswith('seconds'):
+        ax.set_yscale('log')
+    else:
+        ax.set_ylim(bottom=0)
+    ax.grid(axis='y', color='#DDDDDD', lw=.6)
+    ax.legend(frameon=False, fontsize=8)
+fig.text(.5, .975, 'Computational cost of native tissue simulation', ha='center', fontsize=15, fontweight='bold')
+fig.text(.5, .945, f'Mean of {n_seeds} simulation seeds (points: individual seeds) · CPU, 1 thread · 556 genes',
+         ha='center', color='#555555')
+notes = ('Setup time is charged in full at every size; scCube trains one VAE per size batch (10k–100k, 200k–600k, 1M–5M).\n'
+         'ALBIS and SPIDER report whole-process peak RAM; scCube generation memory is sampled every 100 ms.\n'
+         'scCube "including setup" memory is the cumulative process peak (training and earlier sizes in the batch).\n'
+         'Native output representations differ: ALBIS generates explicit molecules; SPIDER keeps a reference-backed expression view.')
+fig.text(.07, .025, notes, fontsize=8, linespacing=1.5)
+
+# Save each panel on its own as well, with its headings centred on the panel body.
+fig.canvas.draw()
+renderer = fig.canvas.get_renderer()
+bounds = []
+for ax in axes.flat:
+    headings = ax.texts[:2]
+    for t in headings:
+        t.set_visible(False)
+    body = ax.get_tightbbox(renderer)
+    center = (body.x0 + body.x1) / 2
+    for t in headings:
+        t.set_x(ax.transAxes.inverted().transform((center, body.y0))[0])
+        t.set_visible(True)
+    full = Bbox.union([body] + [t.get_window_extent(renderer) for t in headings])
+    width = max(center - full.x0, full.x1 - center)
+    bounds.append(Bbox.from_extents(center - width, full.y0, center + width, full.y1)
+                  .transformed(fig.dpi_scale_trans.inverted()).expanded(1.045, 1.055))
+for ext in ['png', 'pdf', 'svg']:
+    fig.savefig(out / f'compute_four_panel.{ext}', bbox_inches='tight', facecolor='white')
+    for text in fig.texts:
+        text.set_visible(False)
+    for panel, bound in zip(panels, bounds):
+        fig.savefig(out / f'{panel[-1]}.{ext}', bbox_inches=bound, facecolor='white')
+    for text in fig.texts:
+        text.set_visible(True)
+plt.close(fig)
+print(f'{len(data)} measurements from {n_seeds} seeds; figures in {out}', flush=True)

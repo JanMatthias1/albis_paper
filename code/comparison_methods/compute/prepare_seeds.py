@@ -1,12 +1,12 @@
-"""Prepare a multi-seed native compute run: settings for every size x seed, a frozen
-code snapshot and the task table. Settings scale the 600k template exactly as every
+"""Prepare a multi-seed native compute run: settings for every size x seed, the task
+table and the SHA-256 of every run script (recorded in protocol.json; the jobs run the
+scripts from this folder, nothing is copied into the run). Settings scale the 600k template exactly as every
 earlier run did: extent, ALBIS sphere radius and core fuzz width by (n / 600000)^(1/3),
 target cells per type = n / 8; the seed is set in `seed` and `albis.seed`."""
 import argparse
 import hashlib
 import json
 from pathlib import Path
-import shutil
 
 SIZES = [10000, 100000, 200000, 400000, 600000, 1000000, 2000000, 5000000]
 SEEDS = [2025, 101, 202]
@@ -23,10 +23,8 @@ args = parser.parse_args()
 root = args.root.resolve()
 code = Path(__file__).resolve().parent
 root.mkdir(parents=True, exist_ok=False)
-for folder in ['settings', 'raw', 'logs', 'code', 'references', 'sccube']:
+for folder in ['settings', 'raw', 'logs', 'references', 'sccube']:
     (root / folder).mkdir()
-for name in CODE_FILES:
-    shutil.copy2(code / name, root / 'code' / name)
 
 template = json.loads((code / 'settings_template_n600000_seed2025.json').read_text())
 rows = ['method\tn_cells\tseed\tsettings\toutput']
@@ -50,6 +48,6 @@ for seed in SEEDS:
     seeds=SEEDS, sizes=SIZES, sccube_batches=SCCUBE_BATCHES, n_genes=556, threads=1,
     hardware_constraint='sapphirerapids', reference='one Splatter pool per seed (reference_native.R)',
     template='settings_template_n600000_seed2025.json (copied from the single-seed pilot run)',
-    source_hashes={n: hashlib.sha256((root / 'code' / n).read_bytes()).hexdigest() for n in CODE_FILES}),
+    source_hashes={n: hashlib.sha256((code / n).read_bytes()).hexdigest() for n in CODE_FILES}),
     indent=2) + '\n')
 print(root)
