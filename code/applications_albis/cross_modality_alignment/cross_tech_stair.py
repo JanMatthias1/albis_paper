@@ -11,8 +11,10 @@ three technologies of one physical slice, not ten z-planes of one technology.
 Adapted from the cross-technology STAIR script of the
 multi-sample-alignment-benchmark project. Notes:
 
-  * All three modalities share one sphere radius, so rescale_to_ref() is a
-    no-op (kept for inputs whose modalities differ in radius).
+  * Coordinates are used at their simulated scale. rescale_to_ref() (--rescale)
+    is kept only for inputs whose modalities come from spheres of different
+    radius; it estimates each radius from the coordinate extent, so it must not
+    be used when a modality is cropped (it would shrink the uncropped ones).
   * Reuses the *existing* obsm['spatial_unaligned'] per (modality,
     slice_id) as the "already misaligned" cross-tech input, rather than
     obsm['spatial'] directly. Each modality's slice_id==N unaligned coords
@@ -36,7 +38,7 @@ Output, per slice, under
     sim_paper/data/figure_4/cross_modality_alignment/STAIR/cross_tech/slice_<n>/
         adata_results/Sim_CrossTech_STAIR_slice_<n>.h5ad   obsm:
             spatial              -> STAIR input (per-technology unaligned coords)
-            spatial_true         -> ground truth (cell rescaled onto bin/spot disc)
+            spatial_true         -> ground truth
             transform_init       -> STAIR initial (MNN) alignment
             transform_fine       -> STAIR fine (ICP) alignment   [the result]
             STAIR                -> integrated cross-tech spatial embedding
@@ -192,11 +194,11 @@ def alignment_metrics(adata):
 # --------------------------------------------------------------------------- #
 def run_cross_tech_alignment(tech_adatas, slice_id, n_neigh_hom, c_neigh_het,
                              output_adata, output_embeddings, output_align, used_device,
-                             rescale=True):
+                             rescale=False):
     if rescale:
         tech_adatas = rescale_to_ref(tech_adatas, REF_TECH)
     else:
-        print("[rescale] skipped (--no-rescale): coordinates used at their simulated scale")
+        print("[rescale] off: coordinates used at their simulated scale")
     tech_adatas = {t: prepare_input(a) for t, a in tech_adatas.items()}
 
     key_use = list(TECHS)
@@ -271,13 +273,18 @@ def parse_args():
     ap.add_argument('--input-root', default=None,
                     help='Dedicated generated data directory containing bin16um/, spot/, cell/.')
     ap.add_argument('--output-base', default=BASE_OUTDIR)
-    ap.add_argument('--no-rescale', action='store_true',
-                    help="Skip rescale_to_ref(); use every modality's simulated coordinates as-is")
+    ap.add_argument('--rescale', action='store_true',
+                    help="Rescale non-reference modalities onto the reference's radius (only for "
+                         "modalities simulated on spheres of different size; never with cropping)")
+    ap.add_argument('--seed', type=int, default=42, help='Random seed for STAIR (python, numpy, torch)')
     return ap.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
+    random.seed(args.seed); np.random.seed(args.seed)
+    torch.manual_seed(args.seed); torch.cuda.manual_seed_all(args.seed)
+    print(f"seed: {args.seed}")
 
     if args.input_root:
         DATASETS = {t: os.path.join(args.input_root, t,
@@ -312,5 +319,5 @@ if __name__ == "__main__":
         output_embeddings=output_embeddings,
         output_align=output_align,
         used_device=used_device,
-        rescale=not args.no_rescale,
+        rescale=args.rescale,
     )

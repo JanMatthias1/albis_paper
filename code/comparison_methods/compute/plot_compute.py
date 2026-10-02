@@ -26,7 +26,7 @@ panels = [
      'Elapsed time (s)', 'simulation_time'),
     ('total_seconds', 'Time including setup', 'Splatter reference + input loading + scCube VAE training',
      'Elapsed time (s)', 'time_including_setup'),
-    ('generation_peak_rss_gib', 'Memory during generation', 'Dashed, hollow: whole-process peak used as proxy',
+    ('generation_peak_rss_gib', 'Memory during generation', 'ALBIS, SPIDER: one size per process; scCube: 100 ms samples',
      'Peak RAM (GiB)', 'memory_during_generation'),
     ('process_peak_rss_gib', 'Memory including setup', 'Method-process peak; Splatter RAM not measured',
      'Peak RAM (GiB)', 'memory_including_setup')]
@@ -41,15 +41,12 @@ for ax, (key, title, subtitle, ylabel, name) in zip(axes.flat, panels):
     ax.text(.5, 1.10, subtitle, transform=ax.transAxes, ha='center', fontsize=8, color='#555555')
     for method, (label, color, marker) in methods.items():
         d = data.loc[data.method.eq(method)]
-        proxy = key == 'generation_peak_rss_gib' and method != 'sccube'
-        if key == 'generation_peak_rss_gib':
-            label += ' (process peak proxy)' if proxy else ' (100 ms samples)'
-        elif key == 'process_peak_rss_gib' and method == 'sccube':
+        if key == 'process_peak_rss_gib' and method == 'sccube':
             label += ' (includes training)'
         mean = d.groupby('n_cells')[key].mean().reindex(sizes)  # reindex shows gaps for missing sizes
         ax.scatter(d.n_cells, d[key], s=10, color=color, alpha=.35, linewidths=0, zorder=2)
         ax.plot(sizes, mean, label=label, color=color, marker=marker, lw=1.7, markersize=5, zorder=3,
-                markerfacecolor='white' if proxy else color, linestyle='--' if proxy else '-')
+                markerfacecolor=color, linestyle='-')
     ax.set_xscale('log')
     ax.set_xticks(ticks, labels, rotation=35)
     ax.set_xlim(8500, 6000000)
@@ -65,7 +62,7 @@ fig.text(.5, .975, 'Computational cost of native tissue simulation', ha='center'
 fig.text(.5, .945, f'Mean of {n_seeds} simulation seeds (points: individual seeds) · CPU, 1 thread · 556 genes',
          ha='center', color='#555555')
 notes = ('Setup time is charged in full at every size; scCube trains one VAE per size batch (10k–100k, 200k–600k, 1M–5M).\n'
-         'ALBIS and SPIDER report whole-process peak RAM; scCube generation memory is sampled every 100 ms.\n'
+         'ALBIS and SPIDER run one size per process, so their process peak RAM is their generation peak; scCube is sampled every 100 ms.\n'
          'scCube "including setup" memory is the cumulative process peak (training and earlier sizes in the batch).\n'
          'Native output representations differ: ALBIS generates explicit molecules; SPIDER keeps a reference-backed expression view.')
 fig.text(.07, .025, notes, fontsize=8, linespacing=1.5)

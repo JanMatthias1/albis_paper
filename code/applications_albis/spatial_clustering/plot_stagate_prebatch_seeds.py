@@ -56,7 +56,7 @@ def main():
     ax.grid(axis="y", color=GRID, linewidth=0.8)
     ax.set_axisbelow(True)
     ax.spines[["top", "right"]].set_visible(False)
-    ax.set_title("STAGATE domain recovery, no batch effect", fontsize=16, fontweight="bold", pad=12)
+    ax.set_title("STAGATE domain recovery", fontsize=16, fontweight="bold", pad=12)
     ax.legend(handles=[Patch(facecolor=c, label=label) for _, c, label in METHODS],
               frameon=False, fontsize=11, loc="upper right")
     fig.tight_layout()

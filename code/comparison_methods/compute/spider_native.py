@@ -46,10 +46,12 @@ labels, xyz = simulate_10X_3d(
 expression = get_sim_cell_level_expr(
     celltype_assignment=labels, adata=reference, Num_celltype=8,
     Num_ct_sample=requested_counts, match_list=list(settings['target_cells_per_type']), ct_key='Cell_type')
-# Same input to SPIDER's own slicer as Figure 5A (overview/generate.py): cells with
-# obsm 'spatial_3d' (and its xy as 'spatial'), explicit edges over the whole cube.
+# SPIDER's own slicer, explicit edges over the whole cube (as Figure 5A, overview/generate.py).
+# It gets the cells and their coordinates (obsm 'spatial_3d', xy as 'spatial') but no copy of
+# the expression: SPIDER's expression stays the view it returned (copying it would add our own
+# cost to the timing and overflows scipy's 32-bit indices at 5M cells).
 n_slices = settings['albis']['n_slices']
-cells = ad.AnnData(expression.X, obs=pd.DataFrame(index=expression.obs_names), var=pd.DataFrame(index=expression.var_names))
+cells = ad.AnnData(obs=pd.DataFrame(index=expression.obs_names))
 cells.obsm['spatial_3d'] = np.asarray(xyz, dtype=float)
 cells.obsm['spatial'] = cells.obsm['spatial_3d'][:, :2].copy()
 sections = slice_anndata_by_z(cells, z_key='spatial_3d', z_bins=np.linspace(0, settings['extent_um'], n_slices + 1))

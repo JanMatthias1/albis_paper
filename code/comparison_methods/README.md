@@ -21,11 +21,12 @@ own genes.
 ## 5B: expression statistics (`statistics/`)
 
 The Figure 2 count-distribution comparison (`code/count_distribution/`),
-applied to slice 5 of the 5A data: ALBIS vs SPIDER and ALBIS vs scCube. scCube
-outputs log-normalized values rather than counts, so `sccube_compare.py`
-compares only what applies (genes detected, sparsity, normalized values).
+applied to slice 5 of the 5A data, with ALBIS, SPIDER and scCube on the same
+panels. scCube outputs log-normalized values rather than counts, so it appears
+only on genes detected, sparsity and (for cells) the log1p(normalized) panel; for
+bins and spots it has a separate native-expression panel.
 
-- `run_figure5B.sh`: subset to one slice → QC → comparisons
+- `run_figure5B.sh`: subset to one slice → QC → `plot_three_methods.py`
 
 ## 5D: capture close-up (`figure_5D/`)
 

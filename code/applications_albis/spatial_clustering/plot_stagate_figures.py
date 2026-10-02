@@ -60,6 +60,9 @@ def panel_figure(n, projection=None):
 def draw_panel(ax, adata, key, title, coords):
     args, labels, colors = scatter_colors(adata.obs, key,
         'domain_true' if key.startswith('mclust_') else None)
+    # Clusters keep their matched domain colours, but the legend shows only the
+    # cluster number (no "1 → D0" correspondence).
+    labels = [label.split(' → ')[0] for label in labels]
     ax.scatter(*coords.T, **args, s=4, linewidths=0, alpha=.85)
     ax.set_title(title)
     handles = [Line2D([0], [0], marker='o', linestyle='', color=color,

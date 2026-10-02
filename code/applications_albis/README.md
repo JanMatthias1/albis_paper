@@ -46,8 +46,8 @@ reference, plus how similar the genes are across modalities after alignment.
 
 The same tissue and offsets, but with bin and spot cropped to a 2221 µm square
 capture area (Visium's 6.5 mm scaled to the smaller sphere) while cell stays
-uncropped. Alignment uses `cross_tech_stair.py --no-rescale`, so every modality
-keeps its true size and the bin/spot squares sit inside the cell section.
+uncropped. Every modality keeps its true size, so the bin/spot squares sit inside
+the cell section.
 
 - `run_cropped_no_rescale.sh submit`: generation → STAIR → metrics → plots
 

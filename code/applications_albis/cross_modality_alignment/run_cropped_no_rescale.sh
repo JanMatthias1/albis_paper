@@ -1,9 +1,9 @@
 #!/bin/bash
 # Cross-modality STAIR with bin and spot cropped to a 2221 um square capture
 # area (Visium's 6.5 mm scaled by the sphere shrink 2050/6000), cell uncropped,
-# and NO rescaling: cell keeps its true size (~4.1 mm disc) with the bin/spot
-# squares inside it. Same tissue settings as Figure 4C (strong_domain_mix/
-# run_strongmix_offsets.sh); only the crop and cross_tech_stair.py --no-rescale differ.
+# and no rescaling (the cross_tech_stair.py default), so cell keeps its true size
+# (~4.1 mm disc) with the bin/spot squares inside it. Same tissue settings as
+# Figure 4C (strong_domain_mix/run_strongmix_offsets.sh); only the crop differs.
 # Usage: bash run_cropped_no_rescale.sh submit [OUTDIR]
 #   submits generation, then STAIR + plots + metrics (afterok)
 #   DRY_RUN=1 prints the sbatch commands without submitting.
@@ -49,7 +49,7 @@ case "$MODE" in
     if [[ -n "${VIRTUAL_ENV:-}" ]]; then PATH="${PATH//$VIRTUAL_ENV\/bin:/}"; unset VIRTUAL_ENV; fi
     conda activate "$STAIR_ENV"
     "$STAIR_ENV/bin/python" "$CODE/cross_tech_stair.py" --slice 5 --input-root "$OUT/data" \
-      --output-base "$OUT/STAIR/cross_tech" --no-rescale
+      --output-base "$OUT/STAIR/cross_tech"
     "$PYTHON" "$CODE/plot/plot_independent_offsets.py" --base "$OUT"
     "$PYTHON" "$CODE/evaluation_gene_metrics.py" --root "$OUT"
     ;;

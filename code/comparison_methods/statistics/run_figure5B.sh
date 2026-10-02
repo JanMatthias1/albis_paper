@@ -8,8 +8,9 @@
 # Figure 5B with Figure 2's code, on Figure 5A data, stored slice 4 (5th from the bottom):
 #   1. subset each method/modality to the slice      (subset_slice.py)
 #   2. QC with Figure 2's step00_qc_filter.py              (total > 0, >= 3 genes)
-#   3. ALBIS vs SPIDER: count_distribution.py, unchanged, full_panel + qc_filtered
-#   4. ALBIS vs scCube: sccube_compare.py (Figure 2 functions; scCube is log-normalized)
+#   3. plot_three_methods.py: ALBIS, SPIDER and scCube on the same panels with Figure 2's
+#      statistics (count_distribution.py functions), full_panel + qc_filtered. scCube is
+#      log-normalized, so it appears on genes detected, sparsity and (cell) log1p only.
 # All methods have 556 genes, so Figure 2's panel-matching modes are not needed.
 set -euo pipefail
 source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/_env.sh
@@ -31,12 +32,9 @@ for modality in cell bin spot; do
   for mode in full_panel qc_filtered; do
     suffix=""; [[ $mode == qc_filtered ]] && suffix="_qc"
     albis="$IN/albis_${modality}_slice${SLICE}${suffix}.h5ad"
-    "$PYTHON_BIN" "$P/code/count_distribution/count_distribution.py" \
-      --modality ALBIS --input "$albis" --slice-id $SLICE \
-      --compare-input "$IN/spider_${modality}_slice${SLICE}${suffix}.h5ad" --compare-label SPIDER \
-      --title-context "ALBIS vs SPIDER" --output-dir "$OUT/$modality/albis_vs_spider/$mode"
-    "$PYTHON_BIN" "$CODE/sccube_compare.py" --modality "$modality" --albis "$albis" \
-      --sccube "$IN/sccube_${modality}_slice${SLICE}${suffix}.h5ad" --output-dir "$OUT/$modality/albis_vs_sccube/$mode"
+    "$PYTHON_BIN" "$CODE/plot_three_methods.py" --modality "$modality" --albis "$albis" \
+      --spider "$IN/spider_${modality}_slice${SLICE}${suffix}.h5ad" \
+      --sccube "$IN/sccube_${modality}_slice${SLICE}${suffix}.h5ad" --output-dir "$OUT/$modality/$mode"
   done
 done
 echo "[done] $OUT"

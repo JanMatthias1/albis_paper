@@ -11,7 +11,7 @@ min, max over seeds) and RESULTS.md, then runs plot_compute.py.
 Time: simulation = the method's calls from 3D tissue to cell-level data in Z sections
 (10 slices); setup = Splatter reference +
 input loading + scCube VAE training (charged in full at every size). Memory: ALBIS
-and SPIDER report whole-process peak RSS (also used as their generation peak);
+and SPIDER run one size per process, so their process peak RSS is their generation peak;
 scCube reports its cumulative process peak (includes training and earlier sizes in
 the batch) and the peak of the 100 ms samples taken during each size's generation.
 """
@@ -55,7 +55,7 @@ for seed in seeds:
                 row.update(status=d['status'], simulation_seconds=d['generation_seconds'], setup_seconds=setup,
                            process_peak_rss_gib=d['process_peak_rss_bytes'] / GIB,
                            generation_peak_rss_gib=d['process_peak_rss_bytes'] / GIB,
-                           generation_memory='process peak (proxy)')
+                           generation_memory='process peak (one size per process)')
             rows.append(row)
     for batch, batch_sizes in protocol['sccube_batches'].items():
         folder = root / 'sccube' / f'seed{seed}_{batch}'
