@@ -18,6 +18,7 @@ out = root / 'figures' / 'compute'
 out.mkdir(parents=True, exist_ok=True)
 
 data = pd.read_csv(root / 'measurements.csv')
+failed = data.loc[data.status.eq('failed')]
 data = data.loc[data.status.eq('ok')]
 n_seeds = data.seed.nunique()
 methods = {'albis': ('ALBIS', '#8E63C7', 'o'), 'sccube': ('scCube', '#43B7A5', 's'), 'spider': ('SPIDER', '#F2A65A', '^')}
@@ -63,7 +64,14 @@ fig.text(.5, .945, f'Mean of {n_seeds} simulation seeds (points: individual seed
          ha='center', color='#555555')
 notes = ('Every method runs each size in its own process; scCube trains its own VAE in each run (setup is measured per run).\n'
          'Memory is the process peak RAM; scCube generation-only memory is the peak of 100 ms samples during generation.\n'
-         'Native output representations differ: ALBIS generates explicit molecules; SPIDER keeps a reference-backed expression view.')
+         'Native output representations differ: ALBIS generates explicit molecules; SPIDER and scCube generate cell-level expression.')
+# Sizes where a method failed for every seed: no point is drawn; say so under the figure.
+for (method, n), runs in failed.groupby(['method', 'n_cells']):
+    if not data.loc[data.method.eq(method) & data.n_cells.eq(n)].empty:
+        continue
+    stage = runs.failed_stage.dropna().unique() if 'failed_stage' in runs else []
+    notes += (f"\n{methods[method][0]}, {n:,} cells: did not complete ({len(runs)} of {len(runs)} seeds failed"
+              + (f" in {', '.join(stage)}" if len(stage) else '') + '; see RESULTS.md).')
 fig.text(.07, .025, notes, fontsize=8, linespacing=1.5)
 
 # Save each panel on its own as well, with its headings centred on the panel body.

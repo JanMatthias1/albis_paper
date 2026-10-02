@@ -35,7 +35,7 @@ job() { sbatch --parsable --partition=shared "$@"; }
 
 splatter=$(job --job-name=fig5a_splatter --cpus-per-task=1 --mem=16G --time=02:00:00 \
   --output="$out/logs/splatter_%j.out" --wrap "$common; \
-  $envs/splatter/bin/Rscript $project/comparison_methods/code/workflows/splatter_expression.R \
+  $envs/splatter/bin/Rscript $project/sim_paper/code/comparison_methods/overview/splatter_expression.R \
   --contract $out/splatter_contract.json --seed 20260921 --out-dir $out/splatter > $out/splatter.log 2>&1; \
   test \$(wc -l < $out/splatter/genes.tsv) -eq 556")
 albis=$(job --job-name=fig5a_albis --cpus-per-task=4 --mem=150G --time=06:00:00 \

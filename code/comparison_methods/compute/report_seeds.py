@@ -55,7 +55,9 @@ for seed in seeds:
             if d:
                 assert (d['n_cells'], d['seed'], d['n_genes']) == (n, seed, protocol['n_genes']), path
                 setup = 0.0 if method == 'albis' else d['input_seconds'] + (reference_seconds or float('nan'))
-                row.update(status=d['status'], simulation_seconds=d['generation_seconds'], setup_seconds=setup,
+                # A failed run has no generation time; its error is listed in RESULTS.md and the figure.
+                row.update(status=d['status'], simulation_seconds=d.get('generation_seconds', float('nan')),
+                           setup_seconds=setup, error=d.get('error'), failed_stage=d.get('failed_stage'),
                            process_peak_rss_gib=d['process_peak_rss_bytes'] / GIB,
                            generation_peak_rss_gib=d['process_peak_rss_bytes'] / GIB,
                            generation_memory='process peak (one size per process)',
@@ -109,7 +111,8 @@ for r in summary.to_dict('records'):
     lines.append(f"| {r['method']} | {r['n_cells']:,} | {r['n_seeds']} | {cell('simulation_seconds', '.1f')} | "
                  f"{cell('total_seconds', '.1f')} | {cell('generation_peak_rss_gib', '.2f')} | {cell('setup_peak_rss_gib', '.2f')} |")
 lines += ['', __doc__.split('\n\n', 2)[2].strip(), '']
-missing = data.loc[~data.status.eq('ok'), ['method', 'n_cells', 'seed', 'status']]
+missing = data.loc[~data.status.eq('ok'), ['method', 'n_cells', 'seed', 'status']
+                   + [c for c in ['failed_stage', 'error'] if c in data]]
 if len(missing):
     lines += ['Missing or failed measurements:', '', missing.to_string(index=False), '']
 (root / 'RESULTS.md').write_text('\n'.join(lines))
