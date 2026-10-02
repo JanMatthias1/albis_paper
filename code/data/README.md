@@ -21,7 +21,7 @@ The figure scripts call `generate_simulation_noisy.py` with their own settings
 | `--strong-domain-mix`, `--domain-size-factors` | how distinct the spatial domains are |
 | `--batch-sigma` | per-slice batch effect |
 | `--sphere-r-um`, `--n-cells`, `--cell-r-mean`, `--capture-window-um` | tissue size, cell density and capture area |
-| `--core-fuzz-width-um`, `--max-shift` | domain boundaries and slice misalignment |
+| `--max-shift` | slice misalignment |
 | `--seed`, `--out-tag`, `--output-dir`, `--output-stem` | reproducibility and output location |
 
 Output goes to `data/noisy/[<out-tag>/]` unless `--output-dir` is set.

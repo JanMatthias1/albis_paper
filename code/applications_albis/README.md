@@ -68,7 +68,6 @@ each domain enriched for two cell types (0.30 each, 0.067 for the rest);
 | Dispersion θ (jitter) | 2.0 (0.6) | cell 0.40 (0.15); bin16um 2.0 (0.6); spot 0.25 (0.10) | 2.0 (0.6) |
 | Batch σ | 0.7 | {0, 0.05, tuned}: cell 1.5, bin16um 0.7, spot 0.3 | 0.7 |
 | Per-slice offset (max shift, max rotation) | 6900 µm (1.5 R), 270° | 1025 µm (0.5 R), 270° (not used: STAGATE uses the aligned coordinates) | 3075 µm (1.5 R), 270° |
-| Domain-boundary fuzz | 230 µm | 102.5 µm | 102.5 µm |
 | Simulation seed | 2025 | 2025, 101, 202 | 2025 |
 
 4A and 4C use the Figure 3 bin16um expression settings for all three

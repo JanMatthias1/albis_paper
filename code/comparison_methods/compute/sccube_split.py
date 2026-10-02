@@ -1,4 +1,5 @@
-"""Approved direct upstream calls; train once, reuse in memory, save no models."""
+"""Approved direct upstream calls; train once, reuse in memory, save no models. Cells are
+placed in 3D and sectioned along Z natively (generate_pattern_random, is_split=True)."""
 import argparse
 import gc
 import hashlib
@@ -108,7 +109,8 @@ for i, s in enumerate(settings[:1] if args.mode == 'combined' else settings):
     started = time.perf_counter()
     expression, generated_metadata = model.generate_pattern_random(
         expression, generated_metadata, spatial_dim=3, spatial_size=8,
-        delta=2.0, lamda=0.75, is_split=False, set_seed=True, seed=seed)
+        delta=2.0, lamda=0.75, is_split=True, split_coord='point_z', slice_num=s['albis']['n_slices'],
+        set_seed=True, seed=seed)
     spatial_seconds = time.perf_counter() - started
     # Take high-water mark before validation/hashing allocations.
     peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 2**20
@@ -116,6 +118,7 @@ for i, s in enumerate(settings[:1] if args.mode == 'combined' else settings):
         args.phase_file.write_text(f"validation_n{s['n_cells']}")
     assert expression.shape == (556, s['n_cells'])
     assert len(generated_metadata) == s['n_cells']
+    assert generated_metadata['slice'].nunique() == s['albis']['n_slices']
     # Read-only chunked checks avoid a whole-output boolean temporary at 5M.
     for start in range(0, s['n_cells'], 10000):
         assert np.isfinite(expression.iloc[:, start:start+10000].to_numpy()).all()
@@ -127,7 +130,7 @@ for i, s in enumerate(settings[:1] if args.mode == 'combined' else settings):
         digest = hashlib.sha256(pd.util.hash_pandas_object(frame, index=True).values.tobytes())
         digest.update(repr((frame.columns.tolist(), frame.dtypes.astype(str).tolist())).encode())
         digests[name] = digest.hexdigest()
-    record = dict(status='ok', n_cells=s['n_cells'], seed=seed, n_genes=556,
+    record = dict(status='ok', n_cells=s['n_cells'], seed=seed, n_genes=556, n_slices=s['albis']['n_slices'],
                   spatial_seconds=spatial_seconds, cumulative_process_peak_rss_gib=peak,
                   output_hashes=digests)
     if args.mode == 'combined':

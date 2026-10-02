@@ -1,4 +1,5 @@
-"""Direct SPIDER APIs; preserve its returned labels, XYZ and expression object."""
+"""Direct SPIDER APIs: 3D cells and cell-level expression, then sections along Z with
+spider.slice_anndata_by_z (equal z-bins over the cube). Returned objects are unchanged."""
 import hashlib
 import importlib.metadata
 import json
@@ -11,7 +12,7 @@ import anndata as ad
 import numpy as np
 import pandas as pd
 from scipy.io import mmread
-from spider import simulate_10X_3d, get_sim_cell_level_expr
+from spider import simulate_10X_3d, get_sim_cell_level_expr, slice_anndata_by_z
 
 assert importlib.metadata.version('st-spider') == '1.2.0'
 phase_file = Path(os.environ['PHASE_FILE']) if os.environ.get('PHASE_FILE') else None
@@ -45,6 +46,13 @@ labels, xyz = simulate_10X_3d(
 expression = get_sim_cell_level_expr(
     celltype_assignment=labels, adata=reference, Num_celltype=8,
     Num_ct_sample=requested_counts, match_list=list(settings['target_cells_per_type']), ct_key='Cell_type')
+# Same input to SPIDER's own slicer as Figure 5A (overview/generate.py): cells with
+# obsm 'spatial_3d' (and its xy as 'spatial'), explicit edges over the whole cube.
+n_slices = settings['albis']['n_slices']
+cells = ad.AnnData(expression.X, obs=pd.DataFrame(index=expression.obs_names), var=pd.DataFrame(index=expression.var_names))
+cells.obsm['spatial_3d'] = np.asarray(xyz, dtype=float)
+cells.obsm['spatial'] = cells.obsm['spatial_3d'][:, :2].copy()
+sections = slice_anndata_by_z(cells, z_key='spatial_3d', z_bins=np.linspace(0, settings['extent_um'], n_slices + 1))
 generation_seconds = time.perf_counter() - started
 if phase_file:
     phase_file.write_text('validation')
@@ -52,11 +60,12 @@ if phase_file:
 assert xyz.shape == (settings['n_cells'],3)
 assert expression.shape == (settings['n_cells'],556)
 assert len(labels) == settings['n_cells']
+assert len(sections) == n_slices and sum(s.n_obs for s in sections) == settings['n_cells']
 report = dict(status='ok', method='spider', n_cells=settings['n_cells'], seed=settings['seed'],
-    n_genes=expression.n_vars, input_seconds=input_seconds, generation_seconds=generation_seconds,
+    n_genes=expression.n_vars, n_slices=n_slices, input_seconds=input_seconds, generation_seconds=generation_seconds,
     process_peak_rss_bytes=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss*1024,
     output_policy='native labels, coordinates and expression object unchanged; no simulated-data export',
-    endpoint='simulate_10X_3d and get_sim_cell_level_expr returns',
+    endpoint='simulate_10X_3d, get_sim_cell_level_expr and slice_anndata_by_z returns',
     expression_is_view=bool(expression.is_view),
     script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
 (out/'measurement.json').write_text(json.dumps(report, indent=2)+'\n')

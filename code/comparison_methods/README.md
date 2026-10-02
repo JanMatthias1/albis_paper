@@ -44,7 +44,7 @@ the 5A scCube tissue, using scCube's own `generate_spot_data_random`.
 ## Compute: runtime and memory (`compute/`)
 
 Runtime and memory of ALBIS, scCube and SPIDER from 10k to 5M cells, on one
-CPU thread, for three seeds. Setup (Splatter reference, scCube VAE training)
+CPU thread, for three seeds, from the 3D tissue to cell-level data in 10 sections. Setup (Splatter reference, scCube VAE training)
 is timed separately from generation.
 
 - `submit_seeds.sh`: the whole benchmark → `prepare_seeds.py` (settings, and hashes of the run

@@ -1,4 +1,7 @@
-"""Direct ALBIS base API call. No method wrappers or output transformations."""
+"""Direct ALBIS API calls: the 3D tissue (simulate_3d_molecule_sphere_base), then
+cell-level sections along Z (section_3d_molecule_sphere, output_modalities=["cell"]).
+No method wrappers or output transformations."""
+import inspect
 import json
 import os
 from pathlib import Path
@@ -23,8 +26,13 @@ out.mkdir(parents=True, exist_ok=False)
 params = settings['albis']
 if phase_file:
     phase_file.write_text('generation')
+# Section settings come from the same settings file; only cell output is requested.
+section_kw = {k: params[k] for k in inspect.signature(ab.section_3d_molecule_sphere).parameters if k in params}
+section_kw['output_modalities'] = ['cell']
 started = time.perf_counter()
 result = ab.simulate_3d_molecule_sphere_base(**params)
+base_seconds = time.perf_counter() - started
+sectioned = ab.section_3d_molecule_sphere(result, **section_kw)
 generation_seconds = time.perf_counter() - started
 if phase_file:
     phase_file.write_text('validation')
@@ -33,12 +41,16 @@ if phase_file:
 assert result['adata_cell_true'].shape == (settings['n_cells'], 556)
 assert result['molecules']['full_xyz'].shape == (len(result['molecules']['full_gene']), 3)
 assert len(result['molecules']['assigned_gene']) == 0
+cells = sectioned['adata_cell_sectioned']['Z']
+assert cells.shape == (settings['n_cells'], 556)
+assert sorted(cells.obs['slice_id'].unique()) == list(range(params['n_slices']))
 report = dict(status='ok', method='albis', n_cells=settings['n_cells'], seed=settings['seed'],
     n_genes=result['adata_cell_true'].n_vars, n_molecules=len(result['molecules']['full_gene']),
-    generation_seconds=generation_seconds,
+    generation_seconds=generation_seconds, base_seconds=base_seconds,
+    section_seconds=generation_seconds - base_seconds, n_slices=params['n_slices'],
     process_peak_rss_bytes=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss*1024,
     output_policy='native returned dictionary and arrays unchanged; no simulated-data export',
-    endpoint='simulate_3d_molecule_sphere_base return', albis_version=ab.__version__,
+    endpoint='section_3d_molecule_sphere return: cell-level, n_slices sections along Z', albis_version=ab.__version__,
     script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
 (out/'measurement.json').write_text(json.dumps(report, indent=2)+'\n')
 print(json.dumps(report), flush=True)

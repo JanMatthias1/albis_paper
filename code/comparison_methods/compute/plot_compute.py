@@ -22,7 +22,7 @@ data = data.loc[data.status.eq('ok')]
 n_seeds = data.seed.nunique()
 methods = {'albis': ('ALBIS', '#8E63C7', 'o'), 'sccube': ('scCube', '#43B7A5', 's'), 'spider': ('SPIDER', '#F2A65A', '^')}
 panels = [
-    ('simulation_seconds', 'Simulation time', 'Splatter reference and scCube VAE training excluded',
+    ('simulation_seconds', 'Simulation time', '3D tissue to 10 cell-level sections; Splatter and scCube VAE training excluded',
      'Elapsed time (s)', 'simulation_time'),
     ('total_seconds', 'Time including setup', 'Splatter reference + input loading + scCube VAE training',
      'Elapsed time (s)', 'time_including_setup'),

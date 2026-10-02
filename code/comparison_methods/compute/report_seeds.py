@@ -8,7 +8,8 @@ Reads, under --root (a run made by submit_seeds.sh):
 Writes measurements.csv (one row per method x size x seed), summary.csv (mean, SD,
 min, max over seeds) and RESULTS.md, then runs plot_compute.py.
 
-Time: simulation = the method's generation call(s); setup = Splatter reference +
+Time: simulation = the method's calls from 3D tissue to cell-level data in Z sections
+(10 slices); setup = Splatter reference +
 input loading + scCube VAE training (charged in full at every size). Memory: ALBIS
 and SPIDER report whole-process peak RSS (also used as their generation peak);
 scCube reports its cumulative process peak (includes training and earlier sizes in

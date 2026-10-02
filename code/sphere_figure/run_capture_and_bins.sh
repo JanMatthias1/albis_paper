@@ -27,8 +27,8 @@ if command -v conda >/dev/null 2>&1; then
     conda activate "${ENV_PREFIX}"
     # Don't overwrite PYTHON_BIN with `command -v python` here -- on a busy
     # node this can silently resolve to a DIFFERENT env's interpreter still
-    # ahead on PATH, even though `conda activate` itself "succeeded"
-    # (2026-08-25). The absolute path set above is unambiguous.
+    # ahead on PATH, even though `conda activate` itself "succeeded".
+    # The absolute path set above is unambiguous.
 else
     echo "WARNING: conda was not found; using ${PYTHON_BIN} directly." >&2
     if [[ ! -x "${PYTHON_BIN}" ]]; then

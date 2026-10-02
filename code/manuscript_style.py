@@ -1,4 +1,4 @@
-"""Semantic manuscript colors; Figure 3 typography agreed on 2026-09-19.
+"""Semantic manuscript colors and Figure 3 typography.
 
 No style is applied on import, so Figure 1/2 remain independent.
 """

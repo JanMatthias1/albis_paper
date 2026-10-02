@@ -7,11 +7,10 @@
 #SBATCH --partition=shared
 #
 # SpotSweeper QC for the Visium V2 Human Lymph Node sample (probe-based
-# CytAssist FFPE; downloaded 2026-09-04 from
+# CytAssist FFPE; downloaded from
 # cf.10xgenomics.com/samples/spatial-exp/3.1.3/Visium_V2_Human_Lymph_Node/
-# into data/real_data/lymph_node_visium/) -- a second real Visium reference
-# for the Figure 2 "spot" count-distribution comparison, alongside
-# breast_cancer_visium (whole-transcriptome, fresh-frozen). Wraps
+# into data/real_data/lymph_node_visium/) -- one of the two real Visium
+# references for the Figure 2 "spot" comparison, alongside tonsil_visium. Wraps
 # visium_qc.py --sample lymph_node -- see that file for what it does
 # (SpotSweeper local-outlier filtering on total_counts/n_genes_by_counts/
 # pct_counts_mt, drops flagged spots).
@@ -19,7 +18,7 @@
 # Output under sim_paper/data/real_data_qc/lymph_node_visium/:
 #   lymph_node_visium_qc.h5ad, qc_summary.json, qc_*.png
 #
-# Feeds into count_distribution/spot_vs_lymph_node_visium.sh.
+# Feeds into count_distribution/smaller_sphere/spot_vs_lymph_node_visium.sh.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/real_data_qc/logs

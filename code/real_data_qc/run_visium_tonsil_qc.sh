@@ -7,24 +7,21 @@
 #SBATCH --partition=shared
 #
 # SpotSweeper QC for CytAssist FFPE Protein Expression Human Tonsil AddOns
-# (probe-based, CytAssist; downloaded 2026-09-04 from
+# (probe-based, CytAssist; downloaded from
 # cf.10xgenomics.com/samples/spatial-exp/2.1.0/CytAssist_FFPE_Protein_Expression_Human_Tonsil_AddOns/
 # into data/real_data/tonsil_visium/ -- the processed spaceranger outputs
 # (*_filtered_feature_bc_matrix.h5 + *_spatial.tar.gz), same bundle shape as
 # lymph_node_visium; raw FASTQ/probe-set inputs not needed since these are
 # already 10x's own spaceranger-processed matrix, 18,126 genes x 4,908 spots).
 # Second 18k CytAssist probe reference for the Figure 2 "spot" comparison,
-# alongside lymph_node_visium -- spot's real-reference set is being retuned
-# jointly against both (breast_cancer_visium, 36k WTA, dropped per user
-# decision 2026-09-04). Wraps visium_qc.py --sample tonsil -- see that file
+# alongside lymph_node_visium; the spot simulation is tuned against both. Wraps visium_qc.py --sample tonsil -- see that file
 # for what it does (SpotSweeper local-outlier filtering on
 # total_counts/n_genes_by_counts/pct_counts_mt, drops flagged spots).
 #
 # Output under sim_paper/data/real_data_qc/tonsil_visium/:
 #   tonsil_visium_qc.h5ad, qc_summary.json, qc_*.png
 #
-# Feeds into code/misc/data/misc/sweep_spot_logmu_probe.sh and
-# count_distribution/spot_vs_tonsil_visium.sh.
+# Feeds into count_distribution/smaller_sphere/spot_vs_tonsil_visium.sh.
 set -euo pipefail
 
 mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/real_data_qc/logs
