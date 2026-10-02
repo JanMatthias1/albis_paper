@@ -11,7 +11,7 @@
 # (16 points from 0 to the canonical 0.3), seed 2025.
 # Data = Figure 2 spot settings (r = 2050 µm, log_mu -2.25 / sigma 1.0,
 # theta 0.25, jitter 0.10) + --strong-domain-mix; nothing else differs.
-# Per point: generate -> QC -> BANKSY (λ 0.1, k_geom 8) + Harmony ->
+# Per point: generate -> QC -> BANKSY (λ 0.5, k_geom 8) + Harmony ->
 # resolution-matched Leiden ARI -> composition_recovery (ARI + slice leakage)
 # -> plots. Raw/QC h5ad are written into the point folder; existing files are reused.
 set -euo pipefail
@@ -24,7 +24,7 @@ TUTORIAL_PYTHON="${PYTHON_BIN}"
 cd /dcs04/hicks/data/Jan/sim_project
 
 OUT_ROOT="sim_paper/data/figure_3/strong_domain_mix/batch_sigma_slide"
-LAM=0.1
+LAM=0.5
 KG=8
 
 BATCH_SIGMAS=(0.0 0.05 0.1 0.12 0.13 0.14 0.15 0.18 0.2 0.22 0.25 0.26 0.27 0.28 0.29 0.3)

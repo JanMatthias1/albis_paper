@@ -55,8 +55,7 @@ resampling as batched data, so technical noise is matched across conditions.
 | | cell | bin16um | spot |
 |---|---:|---:|---:|
 | BANKSY k_geom | 60 | 100 | 8 |
-| BANKSY λ, domain (σ = 0) | 0.3 | 0.3 | 0.5 |
-| BANKSY λ, batch-σ sweep | 0.5 | 0.5 | 0.1 |
+| BANKSY λ, domain (σ = 0 and batch-σ sweep) | 0.3 | 0.3 | 0.5 |
 | Tuned batch σ | 1.5 | 0.7 | 0.3 |
 
 Batch-zero λ were selected on the strong mix, seed 2025 (highest ARI among runs

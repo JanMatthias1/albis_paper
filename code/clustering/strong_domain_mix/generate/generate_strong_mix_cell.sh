@@ -11,7 +11,7 @@
 # (0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.5), seed 2025.
 # Data = Figure 2 cell settings (r = 2050 µm, 24,207 cells, log_mu -2.5,
 # theta 0.40, jitter 0.15) + --strong-domain-mix; nothing else differs.
-# Per point: generate -> QC -> BANKSY (λ 0.5, k_geom 60) + Harmony ->
+# Per point: generate -> QC -> BANKSY (λ 0.3, k_geom 60) + Harmony ->
 # resolution-matched Leiden ARI -> composition_recovery (ARI + slice leakage)
 # -> plots. Raw/QC h5ad are written into the point folder; existing files are
 # reused. k_geom 60 suits this cell density (larger values smooth over a
@@ -27,7 +27,7 @@ TUTORIAL_PYTHON="${PYTHON_BIN}"
 cd /dcs04/hicks/data/Jan/sim_project
 
 OUT_ROOT="sim_paper/data/figure_3/strong_domain_mix/batch_sigma_slide"
-LAM=0.5
+LAM=0.3
 KG=60
 
 BATCH_SIGMAS=(0 0.05 0.1 0.2 0.3 0.4 0.5 1.0 1.5)

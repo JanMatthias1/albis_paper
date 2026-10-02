@@ -61,9 +61,8 @@ for ax, (key, title, subtitle, ylabel, name) in zip(axes.flat, panels):
 fig.text(.5, .975, 'Computational cost of native tissue simulation', ha='center', fontsize=15, fontweight='bold')
 fig.text(.5, .945, f'Mean of {n_seeds} simulation seeds (points: individual seeds) · CPU, 1 thread · 556 genes',
          ha='center', color='#555555')
-notes = ('Setup time is charged in full at every size; scCube trains one VAE per size batch (10k–100k, 200k–600k, 1M–5M).\n'
-         'ALBIS and SPIDER run one size per process, so their process peak RAM is their generation peak; scCube is sampled every 100 ms.\n'
-         'scCube "including setup" memory is the cumulative process peak (training and earlier sizes in the batch).\n'
+notes = ('Every method runs each size in its own process; scCube trains its own VAE in each run (setup is measured per run).\n'
+         'Memory is the process peak RAM; scCube generation-only memory is the peak of 100 ms samples during generation.\n'
          'Native output representations differ: ALBIS generates explicit molecules; SPIDER keeps a reference-backed expression view.')
 fig.text(.07, .025, notes, fontsize=8, linespacing=1.5)
 

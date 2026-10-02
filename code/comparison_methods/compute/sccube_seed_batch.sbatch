@@ -2,9 +2,9 @@
 #SBATCH --partition=shared
 #SBATCH --constraint=sapphirerapids
 #SBATCH --cpus-per-task=2
-#SBATCH --mem=96G
+#SBATCH --mem=32G
 #SBATCH --time=04:00:00
-# One scCube batch (one VAE training, then each size in SIZES) for one seed, with
+# scCube for one seed and one size (SIZES): train a VAE, then generate that size, with
 # 100 ms RSS sampling.
 # Env: RUN_ROOT, SEED, BATCH (folder name), SIZES (space-separated cell counts).
 set -euo pipefail

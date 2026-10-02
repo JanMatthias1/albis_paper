@@ -37,13 +37,13 @@ FOLDER="${MOD}"
 case "${MOD}" in
   cell)
     SPHERE_R_UM=2050
-    LAM=0.5; KG=60
+    LAM=0.3; KG=60
     TAG_BODY="log_mu_-2.5_theta_0.40_jitter0.15"
     GEN_FLAGS=(--n-cells 24207 --base-gene-lognormal -2.5 0.7 --theta 0.40 --theta-jitter 0.15 --strong-domain-mix --sync-unaligned-seed)
     ;;
   bin)
     SPHERE_R_UM=2050
-    LAM=0.5; KG=100
+    LAM=0.3; KG=100
     TAG_BODY="packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6"
     GEN_FLAGS=(--bin-size-um 16 --base-gene-lognormal -2.5 0.7 --theta 2.0 --theta-jitter 0.6 --strong-domain-mix --sync-unaligned-seed)
     # on-disk folder is bin16um; the tools take --modality bin
@@ -51,7 +51,7 @@ case "${MOD}" in
     ;;
   spot)
     SPHERE_R_UM=2050
-    LAM=0.1; KG=8
+    LAM=0.5; KG=8
     TAG_BODY="packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10"
     GEN_FLAGS=(--base-gene-lognormal -2.25 1.0 --theta 0.25 --theta-jitter 0.10 --strong-domain-mix --sync-unaligned-seed)
     ;;

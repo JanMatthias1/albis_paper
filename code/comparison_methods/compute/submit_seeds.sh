@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Multi-seed native compute benchmark (seeds 2025, 101, 202; 10k-5M cells; 1 thread).
 #   bash submit_seeds.sh [RUN_ROOT]   (default data/figure_5/compute/native_seeds_<date>; must not exist)
-# Per seed: Splatter reference -> SPIDER per size and 3 scCube batches; ALBIS per size
+# Per seed: Splatter reference -> SPIDER and scCube per size; ALBIS per size
 # (no reference needed). Jobs run the scripts in this folder. Last, report_seeds.sbatch
 # (after all jobs) writes measurements.csv, summary.csv, RESULTS.md and figures/compute/.
 # Job IDs: RUN_ROOT/submissions.tsv.
@@ -31,12 +31,13 @@ for seed in 2025 101 202; do
             log task "$method" "$n" "$seed" "$job"
         done
     done
-    for batch in "b10k_100k:10000 100000" "b200k_600k:200000 400000 600000" "b1m_5m:1000000 2000000 5000000"; do
-        name=${batch%%:*}; sizes=${batch#*:}
-        job=$(sb --dependency="afterok:$ref" --export=ALL,RUN_ROOT="$root",SEED="$seed",BATCH="$name",SIZES="$sizes" \
-            --job-name="sccube_${name}_s$seed" --output="$root/logs/sccube_${name}_seed${seed}_%j.out" \
+    # scCube: one process per size, each training its own VAE and then generating that size.
+    for n in 10000 100000 200000 400000 600000 1000000 2000000 5000000; do
+        mem=32G; [[ $n -ge 5000000 ]] && mem=96G
+        job=$(sb --dependency="afterok:$ref" --export=ALL,RUN_ROOT="$root",SEED="$seed",BATCH="n$n",SIZES="$n" \
+            --mem="$mem" --job-name="sccube_n${n}_s$seed" --output="$root/logs/sccube_n${n}_seed${seed}_%j.out" \
             "$code/sccube_seed_batch.sbatch")
-        log task sccube "${sizes// /,}" "$seed" "$job"
+        log task sccube "$n" "$seed" "$job"
     done
 done
 all_jobs=$(awk 'NR > 1 {print $5}' "$root/submissions.tsv" | paste -sd:)

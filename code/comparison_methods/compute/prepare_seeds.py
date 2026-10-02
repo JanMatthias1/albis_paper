@@ -10,9 +10,9 @@ from pathlib import Path
 
 SIZES = [10000, 100000, 200000, 400000, 600000, 1000000, 2000000, 5000000]
 SEEDS = [2025, 101, 202]
-# scCube trains one VAE per batch, as in the single-seed run (10k-100k, 200k-600k, 1M-5M)
-SCCUBE_BATCHES = {'b10k_100k': [10000, 100000], 'b200k_600k': [200000, 400000, 600000],
-                  'b1m_5m': [1000000, 2000000, 5000000]}
+# scCube runs each size in its own process, like ALBIS and SPIDER: train a VAE, then
+# generate that size (no model files are saved, so each process trains its own)
+SCCUBE_BATCHES = {f'n{n}': [n] for n in SIZES}
 CODE_FILES = ['albis_native.py', 'spider_native.py', 'sccube_split.py', 'sample_rss.py', 'reference_native.R',
               'reference_native.sbatch', 'native_extension.sbatch', 'sccube_seed_batch.sbatch',
               'prepare_seeds.py', 'submit_seeds.sh', 'settings_template_n600000_seed2025.json']

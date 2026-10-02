@@ -4,16 +4,15 @@ Reads, under --root (a run made by submit_seeds.sh):
   raw/<method>_n<N>_seed<S>/measurement.json   ALBIS and SPIDER, one per size x seed
   references/seed<S>/measurement.json           Splatter reference (SPIDER/scCube input)
   sccube/seed<S>_<batch>/{measurements,setup}.json and
-  sccube/seed<S>_<batch>_rss_samples.csv        scCube, one VAE per batch, 100 ms RSS samples
+  sccube/seed<S>_<batch>_rss_samples.csv        scCube, one process (own VAE) per size, 100 ms RSS samples
 Writes measurements.csv (one row per method x size x seed), summary.csv (mean, SD,
 min, max over seeds) and RESULTS.md, then runs plot_compute.py.
 
 Time: simulation = the method's calls from 3D tissue to cell-level data in Z sections
 (10 slices); setup = Splatter reference +
-input loading + scCube VAE training (charged in full at every size). Memory: ALBIS
+input loading + scCube VAE training (measured in each size's own run). Memory: ALBIS
 and SPIDER run one size per process, so their process peak RSS is their generation peak;
-scCube reports its cumulative process peak (includes training and earlier sizes in
-the batch) and the peak of the 100 ms samples taken during each size's generation.
+scCube reports its process peak (includes VAE training) and the peak of the 100 ms samples taken during each size's generation.
 """
 import argparse
 import json
