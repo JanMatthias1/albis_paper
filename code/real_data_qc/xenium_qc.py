@@ -39,6 +39,9 @@ SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
 SLICE_RAW_DIRS = {
     "non_diseased_lung": "Xenium_Preview_Human_Non_diseased_Lung_With_Add_on_FFPE",
     "lung_cancer": "Xenium_Preview_Human_Lung_Cancer_With_Add_on_2_FFPE",
+    "brain_healthy": "brain_samples_xenium/Xenium_V1_FFPE_Human_Brain_Healthy_With_Addon",
+    "brain_glioblastoma": "brain_samples_xenium/Xenium_V1_FFPE_Human_Brain_Glioblastoma_With_Addon",
+    "brain_alzheimers": "brain_samples_xenium/Xenium_V1_FFPE_Human_Brain_Alzheimers_With_Addon",
 }
 
 

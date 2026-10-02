@@ -10,6 +10,7 @@ applied.
 |---|---|---|---|
 | Xenium (cells) | non-diseased lung, lung cancer | `xenium_qc.py` (`run_real_data_qc.sh`) | 4-MAD low-tail cutoffs on total counts and genes per cell; drops cells with zero count density or control probe/codeword counts |
 | Visium HD (8 / 16 µm bins) | breast cancer, human pancreas | `visium_hd_qc.py` (raw archives unpacked first with `extract_breast_visium_hd.py`) | SpotSweeper local outliers on total counts, genes and % mitochondrial |
+| Xenium (cells) | human brain: healthy, glioblastoma, Alzheimer's (FFPE, with add-on panel; raw in `data/real_data/brain_samples_xenium/`) | `xenium_qc.py` (`run_brain_xenium_qc.sh`) → `data/real_data_qc/brain_samples_xenium/<slice>/` | same as the lung Xenium QC |
 | Visium (spots) | lymph node, tonsil (CytAssist, probe-based) | `visium_qc.py` (`run_visium_lymph_qc.sh`, `run_visium_tonsil_qc.sh`) | SpotSweeper local outliers, as for Visium HD |
 
 Other scripts:

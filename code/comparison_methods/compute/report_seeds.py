@@ -12,7 +12,9 @@ Time: simulation = the method's calls from 3D tissue to cell-level data in Z sec
 (10 slices); setup = Splatter reference +
 input loading + scCube VAE training (measured in each size's own run). Memory: ALBIS
 and SPIDER run one size per process, so their process peak RSS is their generation peak;
-scCube reports its process peak (includes VAE training) and the peak of the 100 ms samples taken during each size's generation.
+SPIDER and scCube setup peak = the larger of the method process peak and the Splatter
+process peak (the two run one after the other). scCube reports its process peak
+(includes VAE training) and the peak of the 100 ms samples taken during each size's generation.
 """
 import argparse
 import json
@@ -24,7 +26,7 @@ import pandas as pd
 
 GIB = 2 ** 30
 METRICS = ['simulation_seconds', 'setup_seconds', 'total_seconds',
-           'generation_peak_rss_gib', 'process_peak_rss_gib']
+           'generation_peak_rss_gib', 'process_peak_rss_gib', 'setup_peak_rss_gib']
 
 parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument('--root', type=Path, required=True)
@@ -43,6 +45,8 @@ rows = []
 for seed in seeds:
     reference = load(root / 'references' / f'seed{seed}' / 'measurement.json')
     reference_seconds = reference['generation_seconds'] if reference and reference['status'] == 'ok' else None
+    reference_peak = (reference['process_peak_rss_bytes'] / GIB if reference and 'process_peak_rss_bytes' in reference
+                      else float('nan'))
     for n in sizes:
         for method in ['albis', 'spider']:
             path = root / 'raw' / f'{method}_n{n}_seed{seed}' / 'measurement.json'
@@ -54,7 +58,11 @@ for seed in seeds:
                 row.update(status=d['status'], simulation_seconds=d['generation_seconds'], setup_seconds=setup,
                            process_peak_rss_gib=d['process_peak_rss_bytes'] / GIB,
                            generation_peak_rss_gib=d['process_peak_rss_bytes'] / GIB,
-                           generation_memory='process peak (one size per process)')
+                           generation_memory='process peak (one size per process)',
+                           # Splatter runs before SPIDER in its own process: the setup peak is the larger one
+                           setup_peak_rss_gib=(d['process_peak_rss_bytes'] / GIB if method == 'albis'
+                                               else max(d['process_peak_rss_bytes'] / GIB, reference_peak)),
+                           reference_peak_rss_gib=float('nan') if method == 'albis' else reference_peak)
             rows.append(row)
     for batch, batch_sizes in protocol['sccube_batches'].items():
         folder = root / 'sccube' / f'seed{seed}_{batch}'
@@ -75,7 +83,9 @@ for seed in seeds:
                            vae_training_seconds=setup['vae_training_seconds'],
                            process_peak_rss_gib=d['cumulative_process_peak_rss_gib'],
                            generation_peak_rss_gib=phase.max() / GIB if len(phase) else float('nan'),
-                           generation_rss_samples=len(phase), generation_memory='100 ms samples')
+                           generation_rss_samples=len(phase), generation_memory='100 ms samples',
+                           setup_peak_rss_gib=max(d['cumulative_process_peak_rss_gib'], reference_peak),
+                           reference_peak_rss_gib=reference_peak)
             rows.append(row)
 
 data = pd.DataFrame(rows).sort_values(['method', 'n_cells', 'seed']).reset_index(drop=True)
@@ -92,12 +102,12 @@ summary.to_csv(root / 'summary.csv', index=False)
 lines = [f'# Native compute benchmark: {len(seeds)} seeds ({", ".join(map(str, seeds))})', '',
          f'Successful measurements: {len(ok)} / {len(data)}. {protocol["n_genes"]} genes, '
          f'{protocol["threads"]} CPU thread. Values are mean ± SD over seeds.', '',
-         '| Method | Cells | Seeds | Simulation (s) | Including setup (s) | Generation peak RAM (GiB) | Process peak RAM (GiB) |',
+         '| Method | Cells | Seeds | Simulation (s) | Including setup (s) | Generation peak RAM (GiB) | Peak RAM including setup (GiB) |',
          '|---|---:|---:|---:|---:|---:|---:|']
 for r in summary.to_dict('records'):
     cell = lambda m, f: f"{r[m + '_mean']:{f}} ± {r[m + '_std']:{f}}"
     lines.append(f"| {r['method']} | {r['n_cells']:,} | {r['n_seeds']} | {cell('simulation_seconds', '.1f')} | "
-                 f"{cell('total_seconds', '.1f')} | {cell('generation_peak_rss_gib', '.2f')} | {cell('process_peak_rss_gib', '.2f')} |")
+                 f"{cell('total_seconds', '.1f')} | {cell('generation_peak_rss_gib', '.2f')} | {cell('setup_peak_rss_gib', '.2f')} |")
 lines += ['', __doc__.split('\n\n', 2)[2].strip(), '']
 missing = data.loc[~data.status.eq('ok'), ['method', 'n_cells', 'seed', 'status']]
 if len(missing):

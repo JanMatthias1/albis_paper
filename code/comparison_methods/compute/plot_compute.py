@@ -28,7 +28,7 @@ panels = [
      'Elapsed time (s)', 'time_including_setup'),
     ('generation_peak_rss_gib', 'Memory during generation', 'ALBIS, SPIDER: one size per process; scCube: 100 ms samples',
      'Peak RAM (GiB)', 'memory_during_generation'),
-    ('process_peak_rss_gib', 'Memory including setup', 'Method-process peak; Splatter RAM not measured',
+    ('setup_peak_rss_gib', 'Memory including setup', 'Larger of method-process and Splatter-process peaks',
      'Peak RAM (GiB)', 'memory_including_setup')]
 plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 9, 'axes.spines.top': False,
                      'axes.spines.right': False, 'savefig.dpi': 300, 'svg.fonttype': 'none', 'pdf.fonttype': 42})
@@ -41,7 +41,7 @@ for ax, (key, title, subtitle, ylabel, name) in zip(axes.flat, panels):
     ax.text(.5, 1.10, subtitle, transform=ax.transAxes, ha='center', fontsize=8, color='#555555')
     for method, (label, color, marker) in methods.items():
         d = data.loc[data.method.eq(method)]
-        if key == 'process_peak_rss_gib' and method == 'sccube':
+        if key == 'setup_peak_rss_gib' and method == 'sccube':
             label += ' (includes training)'
         mean = d.groupby('n_cells')[key].mean().reindex(sizes)  # reindex shows gaps for missing sizes
         ax.scatter(d.n_cells, d[key], s=10, color=color, alpha=.35, linewidths=0, zorder=2)

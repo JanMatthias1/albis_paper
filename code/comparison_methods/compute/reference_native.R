@@ -21,6 +21,10 @@ writeMM(as(counts(reference), 'CsparseMatrix'), file.path(out,'counts.mtx'))
 writeLines(rownames(reference),file.path(out,'genes.tsv'))
 write.table(data.frame(Cell=colnames(reference), Cell_type=as.character(colData(reference)$Group)),
     file.path(out,'cells.tsv'),sep='\t',row.names=FALSE,quote=FALSE)
+# Peak resident memory of this process (VmHWM, kB), as ALBIS/SPIDER report ru_maxrss.
+status <- readLines('/proc/self/status')
+peak_kb <- as.numeric(sub('^VmHWM:\\s*([0-9]+) kB$', '\\1', grep('^VmHWM:', status, value=TRUE)))
 write_json(list(status='ok',method='splatter',seed=settings$seed,n_genes=556,
     n_cells=settings$reference_cells,generation_seconds=generation_seconds,
+    process_peak_rss_bytes=peak_kb*1024,
     version=as.character(packageVersion('splatter'))),file.path(out,'measurement.json'),auto_unbox=TRUE,pretty=TRUE)

@@ -52,9 +52,14 @@ def add_count_stats(d):
     d["total_counts"] = np.asarray(d["X"].sum(axis=1)).ravel()
 
 
-def annotate(ax, jsds, loc="upper left"):
+def ref_label(d):
+    """Name of the JSD reference in the annotation box (optional short "jsd_label")."""
+    return d.get("jsd_label", d["display_label"])
+
+
+def annotate(ax, jsds, ref="ALBIS", loc="upper left"):
     x, ha = (0.03, "left") if "left" in loc else (0.97, "right")
-    ax.text(x, 0.97, "\n".join(f"JSD(ALBIS vs {k}) = {v:.3f}" for k, v in jsds.items()),
+    ax.text(x, 0.97, "\n".join(f"JSD({ref} vs {k}) = {v:.3f}" for k, v in jsds.items()),
             transform=ax.transAxes, ha=ha, va="top", fontsize=cd.ANNOT_SIZE, fontweight="bold",
             bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="0.6", alpha=0.85))
 
@@ -67,12 +72,17 @@ def grid(values, log_x):
 
 
 def hist_panel(ax, values, datasets, log_x):
-    """Overlaid density histograms; returns JSD of ALBIS (first) vs each other method. Each JSD
+    """Overlaid histograms; returns JSD of the first dataset (ALBIS) vs each other one. Each JSD
     uses bins pooled over that pair only, exactly as count_distribution.py compares two datasets,
-    so ALBIS vs SPIDER matches Figure 2's definition regardless of scCube being drawn."""
+    so ALBIS vs SPIDER matches Figure 2's definition regardless of scCube being drawn.
+    Log-x panels show the fraction per bin: density divides by the linear bin width, which on
+    log bins shrinks high-value distributions by orders of magnitude (e.g. SPIDER totals)."""
     bins = grid(values, log_x)
     for d, v in zip(datasets, values):
-        ax.hist(v, bins=bins, density=True, color=d["color"], alpha=0.5, label=d["display_label"])
+        weights = np.full(len(v), 1 / len(v)) if log_x else None
+        ax.hist(v, bins=bins, density=not log_x, weights=weights, color=d["color"], alpha=0.5,
+                label=d["display_label"])
+    ax.set_ylabel("Fraction per bin" if log_x else "Density")
     if log_x:
         ax.set_xscale("log")
     ax.set_ylim(top=ax.get_ylim()[1] * 1.22)  # headroom so the JSD box sits above the bars
@@ -123,9 +133,9 @@ def mean_dropout(counts, out):
 def total_counts(counts, out):
     fig, ax = plt.subplots(figsize=(7, 6.5))
     jsd = hist_panel(ax, [d["total_counts"][d["total_counts"] > 0] for d in counts], counts, log_x=True)
-    ax.set(xlabel="Total counts per observation", ylabel="Density", title="Total counts per observation")
+    ax.set(xlabel="Total counts per observation", title="Total counts per observation")
     ax.legend(frameon=False, loc="upper right")
-    annotate(ax, jsd)
+    annotate(ax, jsd, ref_label(counts[0]))
     save(fig, out / "total_counts_compare.png")
     return jsd
 
@@ -133,9 +143,9 @@ def total_counts(counts, out):
 def genes_detected(datasets, out):
     fig, ax = plt.subplots(figsize=(7, 6.5))
     jsd = hist_panel(ax, [d["n_genes"][d["n_genes"] > 0] for d in datasets], datasets, log_x=True)
-    ax.set(xlabel="Genes detected per observation", ylabel="Density", title="Genes detected per observation")
+    ax.set(xlabel="Genes detected per observation", title="Genes detected per observation")
     ax.legend(frameon=False, loc="upper right")
-    annotate(ax, jsd)
+    annotate(ax, jsd, ref_label(datasets[0]))
     save(fig, out / "genes_per_cell_compare.png")
     return jsd
 
@@ -181,17 +191,17 @@ def raw_norm_log(counts, sccube, rng, out, native_panel=False):
     for ax, key, title, log_x in [(axes[0], "raw", "Raw counts", True), (axes[1], "norm", "Normalized", True)]:
         jsds[key] = hist_panel(ax, [s[key][s[key] > 0] for s in staged], counts, log_x)
         ax.set(title=title, xlabel="Value (nonzero matrix entries)")
-        annotate(ax, jsds[key], loc="upper right")
+        annotate(ax, jsds[key], ref_label(counts[0]), loc="upper right")
     jsds["log1p_normalized"] = hist_panel(axes[2], [v[v > 0] for v in log_vals], log_sets, log_x=False)
     axes[2].set(title="log1p(normalized)", xlabel="Value (nonzero matrix entries)")
-    annotate(axes[2], jsds["log1p_normalized"], loc="upper right")
+    annotate(axes[2], jsds["log1p_normalized"], ref_label(counts[0]), loc="upper right")
     axes[2].legend(frameon=False, loc="center right")
     if native_panel:
         axes[3].hist(native[native > 0], bins=60, density=True, color=sccube["color"], alpha=0.5,
                      label=sccube["display_label"])
-        axes[3].set(title="scCube native\n(sum of cell log1p(normalized))", xlabel="Value (nonzero matrix entries)")
+        axes[3].set(title="scCube native\n(sum of cell log1p(normalized))", xlabel="Value (nonzero matrix entries)",
+                    ylabel="Density")
         axes[3].legend(frameon=False, loc="upper right")
-    axes[0].set_ylabel("Density")
     save(fig, out / "raw_norm_log_compare.png")
     return jsds
 
