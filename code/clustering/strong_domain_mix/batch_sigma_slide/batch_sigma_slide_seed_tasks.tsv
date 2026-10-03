@@ -71,3 +71,60 @@ cell	0.05	101
 cell	0.05	202
 bin	0.05	101
 bin	0.05	202
+cell	0.15	
+cell	0.15	101
+cell	0.15	202
+cell	0.25	
+cell	0.25	101
+cell	0.25	202
+cell	0.35	
+cell	0.35	101
+cell	0.35	202
+cell	0.45	
+cell	0.45	101
+cell	0.45	202
+cell	0.6	
+cell	0.6	101
+cell	0.6	202
+cell	0.7	
+cell	0.7	101
+cell	0.7	202
+bin	0.1	
+bin	0.1	101
+bin	0.1	202
+bin	0.15	
+bin	0.15	101
+bin	0.15	202
+bin	0.2	
+bin	0.2	101
+bin	0.2	202
+bin	0.5	
+bin	0.5	101
+bin	0.5	202
+bin	0.6	
+bin	0.6	101
+bin	0.6	202
+bin	1	
+bin	1	101
+bin	1	202
+bin	1.5	
+bin	1.5	101
+bin	1.5	202
+spot	0.35	
+spot	0.35	101
+spot	0.35	202
+spot	0.45	
+spot	0.45	101
+spot	0.45	202
+spot	0.5	
+spot	0.5	101
+spot	0.5	202
+spot	0.7	
+spot	0.7	101
+spot	0.7	202
+spot	1	
+spot	1	101
+spot	1	202
+spot	1.5	
+spot	1.5	101
+spot	1.5	202

@@ -65,6 +65,13 @@ def read_ari(path: Path, ground_truth: str) -> float:
     return next(r["ari"] for r in data if r["ground_truth"] == ground_truth)
 
 
+def reached_target(path: Path, ground_truth: str) -> bool:
+    """True if the Leiden search hit the target cluster count for this ground truth."""
+    data = json.loads(path.read_text())
+    r = next(r for r in data if r["ground_truth"] == ground_truth)
+    return int(r["achieved_k"]) == int(r["target_k"])
+
+
 def final_runs(mix: str, target: str) -> list[tuple[str, str, int, Path]]:
     """[(modality, λ, seed, ari_summary path)] from that mix's final_tasks.tsv."""
     tsv = CODE_DIR / mix / "banksy_harmony_batch_zero" / TARGET_DIR[target] / "final_tasks.tsv"
@@ -113,6 +120,12 @@ def load_current():
     EXCLUDED.clear()
     historical, _ = load()
     data = {key: value for key, value in historical.items() if key[1] == 'genes_bs'}
+    # same rule as the batch-zero runs: a Harmony run that missed the target count is left out
+    for (mix, col, mod, target), seeds in data.items():
+        for seed in list(seeds):
+            if not reached_target(genes_path(mix, mod, True, seed), target):
+                del seeds[seed]
+                EXCLUDED.append((mix, col, mod, target, seed))
     lambdas = {}
     for target, experiment, metric, count in [
         ('domain_true', 'no_harmony_domain', 'domain_ari', 6),

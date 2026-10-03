@@ -32,13 +32,17 @@ SLIDE_ROOT = SIM_PAPER_DIR / "data" / "figure_3" / "strong_domain_mix" / "batch_
 # plot and its write-up share one color identity rather than two unrelated
 # palettes for the same three series.
 MODALITIES = {
-    "cell": {"label": "Cell (λ=0.5, k_geom=60)", "color": MODALITY_LOOKUP["cell"], "canonical": 1.5},
+    "cell": {"label": "Cell (λ=0.3, k_geom=60)", "color": MODALITY_LOOKUP["cell"], "canonical": 1.5},
     # --modality passed to the pipeline is "bin" (only cell/bin/spot are
     # valid), even though the folder is "bin16um" -- true_mod fixes the
     # ari_summary_<true_mod>.json lookup below.
-    "bin16um": {"label": "Bin (16 µm) (λ=0.5, k_geom=100)", "color": MODALITY_LOOKUP["bin16um"], "canonical": 0.7, "true_mod": "bin"},
-    "spot": {"label": "Spot (λ=0.1, k_geom=8)", "color": MODALITY_LOOKUP["spot"], "canonical": 0.3},
+    "bin16um": {"label": "Bin (16 µm) (λ=0.3, k_geom=100)", "color": MODALITY_LOOKUP["bin16um"], "canonical": 0.7, "true_mod": "bin"},
+    "spot": {"label": "Spot (λ=0.5, k_geom=8)", "color": MODALITY_LOOKUP["spot"], "canonical": 0.3},
 }
+
+# Shared batch_sigma grid for all three modalities (see gen_batch_sigma_slide_seed_tasks.py).
+# Runs at other values (spot's earlier fine points 0.12-0.29) stay on disk but are not plotted.
+GRID = [round(0.05 * i, 2) for i in range(11)] + [0.6, 0.7, 1.0, 1.5]
 
 INK = "#000000"
 INK_SOFT = "#000000"
@@ -81,6 +85,8 @@ def discover_points(mod: str) -> list[dict]:
         if not match:
             continue
         bs = float(match[1])
+        if not any(np.isclose(bs, g) for g in GRID):
+            continue
         seed = int(match[2] or 2025)
         ari_path = run_dir / "ari" / f"ari_summary_{true_mod}.json"
         if not ari_path.is_file():

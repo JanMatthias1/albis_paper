@@ -41,6 +41,16 @@ NEW_BS = {
     "spot": [0.4, 0.6],
 }
 
+# Shared grid (2026-10-03): every modality is plotted on the same batch_sigma
+# values -- 0 to 0.5 in steps of 0.05, then 0.6, 0.7, 1.0, 1.5 (covers each
+# canonical value: spot 0.3, bin16um 0.7, cell 1.5). These are the points each
+# modality was missing; each gets a baseline (default seed 2025) + 2 seeds.
+GRID_FILL = {
+    "cell": [0.15, 0.25, 0.35, 0.45, 0.6, 0.7],
+    "bin": [0.1, 0.15, 0.2, 0.5, 0.6, 1.0, 1.5],
+    "spot": [0.35, 0.45, 0.5, 0.7, 1.0, 1.5],
+}
+
 EXTRA_SEEDS = [101, 202]
 
 OUT_PATH = Path(__file__).resolve().parent / "batch_sigma_slide_seed_tasks.tsv"
@@ -61,6 +71,12 @@ def build_tasks() -> list[tuple[str, float, str]]:
     for mod in ("cell", "bin"):
         for seed in EXTRA_SEEDS:
             tasks.append((mod, 0.05, str(seed)))
+    # Shared-grid fill, appended so indices 0-71 stay unchanged (new rows 72-128).
+    for mod, bs_list in GRID_FILL.items():
+        for bs in bs_list:
+            tasks.append((mod, bs, ""))  # baseline, no --seed flag
+            for seed in EXTRA_SEEDS:
+                tasks.append((mod, bs, str(seed)))
     return tasks
 
 
