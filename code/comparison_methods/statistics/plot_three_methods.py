@@ -71,18 +71,18 @@ def grid(values, log_x):
             else np.linspace(pooled.min(), pooled.max(), 60))
 
 
-def hist_panel(ax, values, datasets, log_x):
+def hist_panel(ax, values, datasets, log_x, unit="observations"):
     """Overlaid histograms; returns JSD of the first dataset (ALBIS) vs each other one. Each JSD
     uses bins pooled over that pair only, exactly as count_distribution.py compares two datasets,
     so ALBIS vs SPIDER matches Figure 2's definition regardless of scCube being drawn.
-    Log-x panels show the fraction per bin: density divides by the linear bin width, which on
-    log bins shrinks high-value distributions by orders of magnitude (e.g. SPIDER totals)."""
+    Log-x panels show the fraction of `unit` per bin (bars sum to 1): density divides by the
+    linear bin width, which on log bins shrinks high-value distributions by orders of magnitude (e.g. SPIDER totals)."""
     bins = grid(values, log_x)
     for d, v in zip(datasets, values):
         weights = np.full(len(v), 1 / len(v)) if log_x else None
         ax.hist(v, bins=bins, density=not log_x, weights=weights, color=d["color"], alpha=0.5,
                 label=d["display_label"])
-    ax.set_ylabel("Fraction per bin" if log_x else "Density")
+    ax.set_ylabel(f"Fraction of {unit}" if log_x else "Density")
     if log_x:
         ax.set_xscale("log")
     ax.set_ylim(top=ax.get_ylim()[1] * 1.22)  # headroom so the JSD box sits above the bars
@@ -189,7 +189,7 @@ def raw_norm_log(counts, sccube, rng, out, native_panel=False):
     fig, axes = plt.subplots(1, 4 if native_panel else 3, figsize=(22.5 if native_panel else 17, 6))
     jsds = {}
     for ax, key, title, log_x in [(axes[0], "raw", "Raw counts", True), (axes[1], "norm", "Normalized", True)]:
-        jsds[key] = hist_panel(ax, [s[key][s[key] > 0] for s in staged], counts, log_x)
+        jsds[key] = hist_panel(ax, [s[key][s[key] > 0] for s in staged], counts, log_x, unit="entries")
         ax.set(title=title, xlabel="Value (nonzero matrix entries)")
         annotate(ax, jsds[key], ref_label(counts[0]), loc="upper right")
     jsds["log1p_normalized"] = hist_panel(axes[2], [v[v > 0] for v in log_vals], log_sets, log_x=False)

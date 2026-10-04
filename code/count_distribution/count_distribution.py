@@ -84,6 +84,23 @@ PRIMARY_COLOR = "#2a78d6"  # blue
 COMPARE_COLOR = "#eb6834"  # orange
 # Comparison-plot title suffix; set from --title-context (default = Figure 2's).
 TITLE_CONTEXT = "simulated vs real"
+# What one observation (matrix row) is for plot text; set from --modality in run_compare.
+OBS_UNIT = "cell"
+
+
+def obs_unit(modality: str) -> str:
+    """'bin'/'bin8um'/'bin16um' -> 'bin', 'spot' -> 'spot', anything else -> 'cell'."""
+    for unit in ("bin", "spot"):
+        if modality.startswith(unit):
+            return unit
+    return "cell"
+
+
+def fraction_hist(ax, values: np.ndarray, bins: np.ndarray, **kwargs) -> None:
+    """Histogram where each bar is the fraction of values in that interval, so bars sum to 1
+    per dataset (Figure 5B convention). density=True would also divide by the linear bin
+    width, which on log-spaced bins shrinks the wide right-hand bars."""
+    ax.hist(values, bins=bins, weights=np.full(len(values), 1 / len(values)), **kwargs)
 
 # Sized for legibility once these PNGs are shrunk into a multi-panel print
 # figure -- default matplotlib sizes (title ~12, legend ~10) read fine full-size
@@ -440,7 +457,7 @@ def plot_mean_dropout_compare(datasets: list[dict], output_path: Path) -> None:
 
     ax.set_xscale("log")
     ax.set_xlabel("Mean count per gene")
-    ax.set_ylabel("Fraction of zero cells")
+    ax.set_ylabel(f"Fraction of zero {OBS_UNIT}s")
     ax.set_title(f"Gene mean-dropout: {TITLE_CONTEXT}")
     ax.legend(frameon=False, loc="upper left", bbox_to_anchor=(1.01, 1.0), borderaxespad=0)
     fig.tight_layout()
@@ -459,11 +476,11 @@ def plot_total_counts_compare(datasets: list[dict], output_path: Path) -> None:
 
     fig, ax = plt.subplots(figsize=(7, 6.5))
     for d, pos in zip(datasets, positive):
-        ax.hist(pos, bins=bins, density=True, color=d["color"], alpha=0.5, label=d["display_label"])
+        fraction_hist(ax, pos, bins, color=d["color"], alpha=0.5, label=d["display_label"])
     ax.set_xscale("log")
-    ax.set_xlabel("Total counts per cell")
-    ax.set_ylabel("Density (fraction of cells)")
-    ax.set_title(f"Total counts per cell: {TITLE_CONTEXT}")
+    ax.set_xlabel(f"Total counts per {OBS_UNIT}")
+    ax.set_ylabel(f"Fraction of {OBS_UNIT}s")
+    ax.set_title(f"Total counts per {OBS_UNIT}: {TITLE_CONTEXT}")
     annotate_jsd(ax, compute_jsd(positive[0], positive[1], bins), loc="upper left")
     fig.tight_layout()
     fig.savefig(output_path, dpi=180, bbox_inches="tight")
@@ -478,11 +495,11 @@ def plot_genes_per_cell_compare(datasets: list[dict], output_path: Path) -> None
 
     fig, ax = plt.subplots(figsize=(7, 6.5))
     for d, pos in zip(datasets, positive):
-        ax.hist(pos, bins=bins, density=True, color=d["color"], alpha=0.5, label=d["display_label"])
+        fraction_hist(ax, pos, bins, color=d["color"], alpha=0.5, label=d["display_label"])
     ax.set_xscale("log")
-    ax.set_xlabel("Genes detected per cell")
-    ax.set_ylabel("Density (fraction of cells)")
-    ax.set_title(f"Genes detected per cell: {TITLE_CONTEXT}")
+    ax.set_xlabel(f"Genes detected per {OBS_UNIT}")
+    ax.set_ylabel(f"Fraction of {OBS_UNIT}s")
+    ax.set_title(f"Genes detected per {OBS_UNIT}: {TITLE_CONTEXT}")
     ax.legend(frameon=False, loc="upper right")
     annotate_jsd(ax, compute_jsd(positive[0], positive[1], bins), loc="upper left")
     fig.tight_layout()
@@ -559,11 +576,14 @@ def plot_raw_norm_log_compare(
         else:
             bins = np.linspace(all_vals.min(), all_vals.max(), 60)
         for s, vals in zip(staged, vals_by_dataset):
-            ax.hist(vals, bins=bins, density=True, color=s["color"], alpha=0.5, label=s["display_label"])
+            if log_x:
+                fraction_hist(ax, vals, bins, color=s["color"], alpha=0.5, label=s["display_label"])
+            else:
+                ax.hist(vals, bins=bins, density=True, color=s["color"], alpha=0.5, label=s["display_label"])
         ax.set_title(title)
         ax.set_xlabel("Value (nonzero matrix entries)")
+        ax.set_ylabel("Fraction of entries" if log_x else "Density")
         annotate_jsd(ax, compute_jsd(vals_by_dataset[0], vals_by_dataset[1], bins), loc="upper right")
-    axes[0].set_ylabel("Density")
     fig.tight_layout()
     fig.savefig(output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
@@ -587,8 +607,9 @@ def restrict_to_slice(adata: ad.AnnData, slice_id: int) -> ad.AnnData:
 
 
 def run_compare(args: argparse.Namespace, rng: np.random.Generator) -> None:
-    global TITLE_CONTEXT
+    global TITLE_CONTEXT, OBS_UNIT
     TITLE_CONTEXT = args.title_context
+    OBS_UNIT = obs_unit(args.modality)
     print(f"[load] primary: {args.input}")
     primary = sc.read_h5ad(args.input)
     print(f"[load] primary shape: {primary.n_obs} observations x {primary.n_vars} genes")
