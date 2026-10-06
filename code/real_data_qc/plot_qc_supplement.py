@@ -26,7 +26,8 @@ COLORS={'Retained':'#B9C0C7','Below median − 4 MAD':'#4C8FD5','Other Xenium ex
 def load_panel(name):
     folder=ROOT/name;summary=json.loads((folder/'qc_summary.json').read_text())
     files=list(folder.glob('*_qc.h5ad'));assert len(files)==1
-    with h5py.File(files[0]) as f: kept=read_elem(f['obs']).index.astype(str)
+    with h5py.File(files[0]) as f:
+        kept=read_elem(f['obs']).index.astype(str);n_genes=len(read_elem(f['var']))
     raw=Path(summary['input_dir'])
     if 'nmads' in summary:
         import xenium_qc as xenium
@@ -58,7 +59,7 @@ def load_panel(name):
         rule=f"SpotSweeper · k={summary['n_neighbors']}, cutoff={summary['cutoff']:g}"
     before=next(v for k,v in summary.items() if k.endswith('_before_qc'))
     assert len(xy)==before and int((categories=='Retained').sum())==len(kept),name
-    return xy,categories,rule,dict(dataset=name,before_qc=before,after_qc=len(kept),
+    return xy,categories,rule,dict(dataset=name,n_genes=n_genes,before_qc=before,after_qc=len(kept),
                                   excluded=before-len(kept),retained_percent=100*len(kept)/before)
 
 
@@ -82,16 +83,15 @@ def main():
         ax.scatter(xy[order,0], xy[order,1], s=size, c=colors[order],
                    linewidths=0, rasterized=True, alpha=0.9)
         ax.set_aspect('equal');ax.invert_yaxis();ax.set_axis_off()
-        ax.set_title(title,fontsize=14,pad=12)
-        ax.text(.5,-.035,f"{record['after_qc']:,} / {record['before_qc']:,} retained ({record['retained_percent']:.1f}%)\n{rule}",
-                transform=ax.transAxes,ha='center',va='top',fontsize=11)
-    handles=[Line2D([],[],marker='o',linestyle='',color=color,label=label,markersize=10) for label,color in COLORS.items()]
-    if rows==2:
-        key=axes.flat[-1];key.set_axis_off()
-        key.legend(handles=handles,loc='center',frameon=False,fontsize=12,title='Spatial QC status',title_fontsize=16)
-    else:
-        fig.legend(handles=handles,loc='lower center',ncol=2,frameon=False)
-    fig.subplots_adjust(left=.025,right=.985,top=.94,bottom=.09,wspace=.18,hspace=.32)
+        ax.set_title(title,fontsize=17,pad=12)
+        ax.text(.5,-.035,f"{record['n_genes']:,} genes\n{record['after_qc']:,} / {record['before_qc']:,} retained ({record['retained_percent']:.1f}%)\n{rule}",
+                transform=ax.transAxes,ha='center',va='top',fontsize=14)
+    handles=[Line2D([],[],marker='o',linestyle='',color=color,label=label,markersize=12) for label,color in COLORS.items()]
+    # The legend fills the grid's first unused panel.
+    key=axes.flat[len(datasets)];key.set_axis_off()
+    key.legend(handles=handles,loc='center',frameon=False,fontsize=14,title='Spatial QC status',title_fontsize=16)
+    for ax in axes.flat[len(datasets)+1:]: ax.set_axis_off()
+    fig.subplots_adjust(left=.025,right=.985,top=.94,bottom=.06,wspace=.18,hspace=.40)
     out=ROOT/'supplementary';out.mkdir(exist_ok=True)
     plt.rcParams['svg.fonttype']='none'
     for ext in ['png','pdf','svg']:
@@ -105,7 +105,7 @@ def main():
         'Blue Visium/Visium HD observations were excluded by SpotSweeper (36 neighbors; cutoff 3), '
         'using low total counts, low detected genes, or high mitochondrial percentage. '
         'Membership was verified against saved post-QC files. Maps have independent spatial scales and show every observation in the pre-QC tissue universe. Observations are drawn in a reproducibly shuffled order with equal marker sizes within each panel to reduce occlusion bias. '
-        'Panel annotations report retained counts and percentages.\n')
+        'Panel annotations report the number of genes and the retained counts and percentages.\n')
     print('Saved',out/'real_data_qc_overview.png',flush=True)
 
 
