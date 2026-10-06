@@ -7,8 +7,9 @@ This repository contains the analysis and figure code for the ALBIS manuscript.
 The ALBIS package itself is developed at
 [JanMatthias1/Albis](https://github.com/JanMatthias1/Albis#readme).
 
-**Paper:** link to be added
-**Authors:**
+**Paper:** link to be added\
+**Authors:** Jan Matthias\*, Jianing Yao\*, Stephanie C. Hicks\
+\* These authors contributed equally.
 
 ## Abstract
 
