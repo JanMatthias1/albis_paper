@@ -42,7 +42,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # shared reference_metrics.py
-from manuscript_style import MODALITY_LOOKUP, category_color
+from manuscript_style import MODALITY_LOOKUP, category_color, save_figure
 TECH_COLORS = {key: MODALITY_LOOKUP[key] for key in ('bin16um', 'spot', 'cell')}
 COL_LABELS = ["Unaligned", "STAIR aligned", "Ground truth"]
 LAYER_Z = {"bin16um": 0.0, "spot": 900.0, "cell": 1800.0}
@@ -173,7 +173,7 @@ def plot(adata, slice_id, outdir, do_procrustes=True, reference=None, common_lim
     fig.patch.set_facecolor("white")
 
     outpath = os.path.join(outdir, f"slice{slice_id}_sphere_3d_domain_true.png")
-    fig.savefig(outpath, dpi=200, facecolor="white")
+    save_figure(fig, outpath, dpi=500, facecolor="white")
     plt.close(fig)
     print("wrote", outpath)
 

@@ -35,7 +35,7 @@ TECHS = ["bin16um", "spot", "cell"]
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from manuscript_style import MODALITY_LOOKUP, category_color
+from manuscript_style import MODALITY_LOOKUP, category_color, save_figure
 TECH_COLORS = {key: MODALITY_LOOKUP[key] for key in ('bin16um', 'spot', 'cell')}
 COL_LABELS = ["Unaligned", "STAIR aligned", "Ground truth"]
 
@@ -138,7 +138,7 @@ def plot(adata, outdir, slice_id, do_procrustes=True):
     fig.tight_layout(rect=[0, 0.035, 1, 0.96])
 
     outpath = os.path.join(outdir, f"slice{slice_id}_tech_breakdown.png")
-    fig.savefig(outpath, dpi=200, facecolor="white")
+    save_figure(fig, outpath, dpi=500, facecolor="white")
     plt.close(fig)
     print("wrote", outpath)
 

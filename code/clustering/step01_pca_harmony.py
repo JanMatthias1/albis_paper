@@ -36,7 +36,7 @@ from pc_pairs import plot_pc_pairs, sampled_indices
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from manuscript_style import (
-    apply_style, scatter_colors, legend_handles, pretty_label,
+    save_figure, apply_style, scatter_colors, legend_handles, pretty_label,
     LEGEND_MARKERSIZE, LEGEND_TITLE_SIZE, PANEL_FIGSIZE, PANEL_MARGINS, PANEL_EXPORT_BOTTOM,
     matched_labels,
 )
@@ -49,7 +49,7 @@ CLUSTERING_ROOT = SIM_PAPER_DIR / "data" / "clustering"
 DEFAULT_OUTPUT = CLUSTERING_ROOT / "spot" / "pca_harmony" / "simulation_spot_z_pca_harmony.h5ad"
 VALID_MODALITIES = ("spot", "bin", "cell")
 
-PANEL_DPI = 300
+PANEL_DPI = 500
 
 
 def parse_args() -> argparse.Namespace:
@@ -194,7 +194,7 @@ def plot_two_dims(adata, embedding_key: str, color_key: str, output_path: Path) 
         )
 
     fig.tight_layout()
-    fig.savefig(output_path, dpi=300, bbox_inches="tight")
+    save_figure(fig, output_path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -282,7 +282,7 @@ def plot_umap_before_after(
     fig.subplots_adjust(**PANEL_MARGINS)
     crop = Bbox.from_extents(0, PANEL_EXPORT_BOTTOM,
                              fig.get_figwidth(), fig.get_figheight())
-    fig.savefig(output_path, dpi=PANEL_DPI, bbox_inches=crop)
+    save_figure(fig, output_path, dpi=PANEL_DPI, bbox_inches=crop)
     plt.close(fig)
 
 

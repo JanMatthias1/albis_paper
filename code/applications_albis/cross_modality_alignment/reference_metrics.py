@@ -79,7 +79,7 @@ def plot_results(result, corrected, truth, technology, domains, outdir, slice_id
 
     labels = {"bin16um": "Bin (16 µm)", "spot": "Spot", "cell": "Cell"}
     plt.rcParams.update({"font.size": 9, "axes.titlesize": 10, "axes.labelsize": 9,
-                         "pdf.fonttype": 42, "ps.fonttype": 42})
+                         "pdf.fonttype": 42, "ps.fonttype": 42, "svg.fonttype": "none"})
     ref = result["reference_modality"]
     stem = f"figure4c_reference_{ref}_slice_{slice_id}"
     fig, ax = plt.subplots(figsize=(6.3, 3.7))
@@ -99,8 +99,8 @@ def plot_results(result, corrected, truth, technology, domains, outdir, slice_id
     ax.margins(y=.22)
     ax.legend(frameon=False)
     fig.tight_layout()
-    for ext in ("png", "pdf"):
-        fig.savefig(outdir / f"{stem}_rmse.{ext}", dpi=300)
+    for ext in ("png", "pdf", "svg"):
+        fig.savefig(outdir / f"{stem}_rmse.{ext}", dpi=500)
     plt.close(fig)
 
     # Per-modality rows prevent dense bin points from hiding cell/spot errors.
@@ -139,8 +139,8 @@ def plot_results(result, corrected, truth, technology, domains, outdir, slice_id
     fig.legend(handles=handles, loc="lower center", ncol=6, frameon=False)
     fig.suptitle(f"Section {slice_id} · shared rigid correction from {labels[ref]}")
     fig.tight_layout(rect=(0, .045, 1, .965))
-    for ext in ("png", "pdf"):
-        fig.savefig(outdir / f"{stem}_domains.{ext}", dpi=300)
+    for ext in ("png", "pdf", "svg"):
+        fig.savefig(outdir / f"{stem}_domains.{ext}", dpi=500)
     plt.close(fig)
 
 

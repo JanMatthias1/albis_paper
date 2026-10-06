@@ -43,7 +43,7 @@ fig.subplots_adjust(left=.14, right=.97, top=.91, bottom=.17)
 a.output_dir.mkdir(parents=True, exist_ok=True)
 stem = a.output_dir / f'spatial_spots_slice{a.slice_id}'
 for ext in ('png','pdf','svg'):
-    fig.savefig(stem.with_suffix('.'+ext), dpi=300)
+    fig.savefig(stem.with_suffix('.'+ext), dpi=500)
 plt.close(fig)
 summary = dict(input=str(a.input.resolve()), slice_id=a.slice_id, total_spots=len(obs), displayed_spots=int(keep.sum()), hidden_spots=int((~keep).sum()), spot_radius_um=radius, spot_spacing_um=sorted(obs.spot_spacing_um.unique().tolist()), coordinates='spatial', color='cell_type_true')
 stem.with_suffix('.json').write_text(json.dumps(summary, indent=2)+'\n')

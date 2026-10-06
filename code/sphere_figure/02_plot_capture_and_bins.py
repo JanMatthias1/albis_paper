@@ -20,6 +20,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+plt.rcParams.update({"svg.fonttype": "path", "pdf.fonttype": 42})  # SVG text as outlines (looks identical everywhere); PDF keeps editable text
 import numpy as np
 
 
@@ -116,7 +117,7 @@ def style_3d_axis(ax, radius=6000, zlim=None):
 
 
 def save_figure(fig, outdir, stem, dpi):
-    for suffix in ("png", "pdf"):
+    for suffix in ("png", "pdf", "svg"):
         out = outdir / f"{stem}.{suffix}"
         fig.savefig(out, dpi=dpi, bbox_inches="tight", pad_inches=0.02)
         print(f"Saved: {out}")
@@ -262,7 +263,7 @@ def plot_unaligned_sections(adata, outdir, dpi, max_bins):
         dpi,
         max_bins,
         spatial_key="spatial_3d_unaligned",
-        title="Reconstructed bins, coordinate-shifted",
+        title="Coordinate-shifted slices",
         stem="figure_1d_unaligned_bins",
     )
 

@@ -223,7 +223,7 @@ def ridge_plots(table, coverage, outdir, n_genes, min_grids=5):
     import matplotlib.pyplot as plt
     plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 10,
                          'axes.titlesize': 12, 'axes.labelsize': 10,
-                         'pdf.fonttype': 42, 'ps.fonttype': 42})
+                         'pdf.fonttype': 42, 'ps.fonttype': 42, 'svg.fonttype': 'none'})
     averaged = average_pair_scores(table, coverage, min_grids)
     averaged.to_csv(outdir / 'gene_similarity_average_per_gene.csv', index=False)
     summaries = []
@@ -285,8 +285,8 @@ def ridge_plots(table, coverage, outdir, n_genes, min_grids=5):
             ax.set_title(METRICS[metric], pad=12)
         fig.suptitle('Average Gene Similarity', fontsize=17, fontweight='bold')
         fig.subplots_adjust(left=.10, right=.98, bottom=.09, top=.85, wspace=.35, hspace=.48)
-        for ext in ('png', 'pdf'):
-            fig.savefig(outdir / f'gene_similarity_ridges_average_{variant}.{ext}', dpi=300, facecolor='white')
+        for ext in ('png', 'pdf', 'svg'):
+            fig.savefig(outdir / f'gene_similarity_ridges_average_{variant}.{ext}', dpi=500, facecolor='white')
         plt.close(fig)
 
 

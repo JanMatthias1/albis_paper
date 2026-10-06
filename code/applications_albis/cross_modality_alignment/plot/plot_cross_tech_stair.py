@@ -37,7 +37,7 @@ COL_LABELS = ["Unaligned", "STAIR aligned", "Ground truth"]
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from manuscript_style import MODALITY_LOOKUP, category_color
+from manuscript_style import MODALITY_LOOKUP, category_color, save_figure
 TECH_COLORS = {key: MODALITY_LOOKUP[key] for key in ('bin16um', 'spot', 'cell')}
 
 
@@ -130,7 +130,7 @@ def plot_overlay_2d(adata, color_by, do_procrustes, outdir, slice_id):
     fig.patch.set_facecolor("white")
     fig.tight_layout(rect=[0, 0.035, 1, 0.94])
     outpath = os.path.join(outdir, f"figure4e_overlay_2d_{color_by}_slice_{slice_id}.png")
-    fig.savefig(outpath, dpi=200, facecolor="white")
+    save_figure(fig, outpath, dpi=500, facecolor="white")
     plt.close(fig)
     print("wrote", outpath)
 
@@ -150,7 +150,7 @@ def plot_rmse(metrics, outdir, slice_id):
     plt.xticks(rotation=0)
     plt.tight_layout()
     p = os.path.join(outdir, f"figure4e_rmse_slice_{slice_id}.png")
-    plt.savefig(p, dpi=200)
+    save_figure(plt.gcf(), p, dpi=500)
     plt.close()
     print("wrote", p)
     print(df)

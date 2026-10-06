@@ -91,7 +91,7 @@ def main():
                ncol=2, frameon=False, fontsize=source.TICK_SIZE, columnspacing=2.0, handletextpad=.6)
     fig.subplots_adjust(left=.055, right=.992, top=.83, bottom=.30, wspace=.08)
     for ext in ['png', 'pdf', 'svg']:
-        fig.savefig(f'{stem}.{ext}', dpi=300, facecolor='white', bbox_inches='tight')
+        fig.savefig(f'{stem}.{ext}', dpi=500, facecolor='white', bbox_inches='tight')
     plt.close(fig)
     for suffix, records in [('by_seed', rows), ('summary', summary)]:
         with open(f'{stem}_{suffix}.csv', 'w') as f:

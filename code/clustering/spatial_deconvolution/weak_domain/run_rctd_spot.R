@@ -232,6 +232,6 @@ p <- ggplot(plot_df, aes(x = true, y = estimated)) +
   labs(title = "RCTD spot deconvolution: estimated vs. true cell-type fraction",
        x = "true fraction (cell_type_frac_true)", y = "RCTD estimated fraction") +
   theme_bw()
-ggsave(file.path(OUT_DIR, "est_vs_true_scatter.png"), p, width = 9, height = 5, dpi = 150)
+ggsave(file.path(OUT_DIR, "est_vs_true_scatter.png"), p, width = 9, height = 5, dpi = 500)
 
 cat("\n[done] outputs written to", OUT_DIR, "\n")

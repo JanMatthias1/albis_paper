@@ -92,6 +92,6 @@ if __name__ == "__main__":
     fig.tight_layout(rect=[0, 0.04, 1, 0.95])
 
     outpath = os.path.join(outdir, f"qc_slices_{args.modality}_{args.color_by}.png")
-    fig.savefig(outpath, dpi=180, facecolor="white")
+    fig.savefig(outpath, dpi=500, facecolor="white")
     plt.close(fig)
     print("wrote", outpath)

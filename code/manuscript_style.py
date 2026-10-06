@@ -3,6 +3,7 @@
 No style is applied on import, so Figure 1/2 remain independent.
 """
 import re
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, BoundaryNorm
@@ -35,7 +36,27 @@ def apply_style():
         "axes.titlesize": TITLE_SIZE, "axes.titleweight": "bold", "axes.labelsize": LABEL_SIZE,
         "xtick.labelsize": TICK_SIZE, "ytick.labelsize": TICK_SIZE,
         "legend.fontsize": LEGEND_SIZE, "legend.title_fontsize": LEGEND_TITLE_SIZE,
-        "figure.titlesize": TITLE_SIZE, "figure.titleweight": "bold", "savefig.dpi": 300})
+        "figure.titlesize": TITLE_SIZE, "figure.titleweight": "bold", "savefig.dpi": 500,
+        "svg.fonttype": "path", "pdf.fonttype": 42})  # SVG text as outlines (same look in any viewer); PDF text editable
+
+
+VECTOR_RASTER_MIN_POINTS = 2000  # denser scatters are embedded as images in PDF/SVG
+
+
+def save_figure(fig, path, **kwargs):
+    """Save `path` as PNG plus PDF/SVG siblings (same stem).
+
+    Text, lines and patches stay vector (SVG text as outlines, PDF text editable); scatters with many points are rasterized at
+    the save dpi in the vector files only, which keeps them small. PNG is unaffected.
+    """
+    path = Path(path)
+    for ax in fig.axes:
+        for artist in ax.collections:
+            if len(artist.get_offsets()) >= VECTOR_RASTER_MIN_POINTS:
+                artist.set_rasterized(True)
+    with plt.rc_context({"pdf.fonttype": 42, "svg.fonttype": "path"}):
+        for ext in ("png", "pdf", "svg"):
+            fig.savefig(path.with_suffix("." + ext), **kwargs)
 
 
 def pretty_label(key):

@@ -38,7 +38,7 @@ CELL_TYPES = [f"type{i}" for i in range(1, 9)]
 
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from manuscript_style import CELLTYPE_COLORS as MANUSCRIPT_CELLTYPE_COLORS, apply_style
+from manuscript_style import CELLTYPE_COLORS as MANUSCRIPT_CELLTYPE_COLORS, apply_style, save_figure
 apply_style()
 CELLTYPE_COLORS = {f"type{i}": MANUSCRIPT_CELLTYPE_COLORS[f"Cell Type {i}"] for i in range(1, 9)}
 
@@ -178,7 +178,7 @@ def plot_spatial_zoom(true_frac, est_frac, spatial, meta, spot_radius_um,
     if out_name == "rctd_spatial_zoom_4types.png":
         add_dataset_caption(fig)
     out = os.path.join(OUT_DIR, out_name)
-    fig.savefig(out, dpi=300)
+    save_figure(fig, out, dpi=500)
     plt.close(fig)
     print("wrote", out)
 
@@ -261,7 +261,7 @@ def plot_error_boxplot(true_frac, est_frac):
     fig.tight_layout()
     add_dataset_caption(fig)
     out = os.path.join(OUT_DIR, "rctd_error_boxplot.png")
-    fig.savefig(out, dpi=300)
+    save_figure(fig, out, dpi=500)
     plt.close(fig)
     print("wrote", out)
 

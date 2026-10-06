@@ -168,8 +168,10 @@ def plot(strong, summary, out_png):
                title='Simulation seed',title_fontsize=13,loc='upper center',
                bbox_to_anchor=(.78,1),ncol=3,frameon=False,fontsize=12)
     fig.tight_layout(rect=[0,0,1,.84])
-    fig.savefig(out_png,dpi=300,facecolor='white')
-    fig.savefig(Path(out_png).with_suffix('.pdf'),dpi=300,facecolor='white')
+    fig.savefig(out_png,dpi=500,facecolor='white')
+    fig.savefig(Path(out_png).with_suffix('.pdf'),dpi=500,facecolor='white')
+    with plt.rc_context({'svg.fonttype': 'none'}):
+        fig.savefig(Path(out_png).with_suffix('.svg'),dpi=500,facecolor='white')
     plt.close(fig)
     print('wrote',out_png)
 

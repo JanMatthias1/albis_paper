@@ -50,7 +50,7 @@ COL_LABELS = ["Unaligned", "STAIR aligned", "Ground truth"]
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from manuscript_style import category_color, category_order
+from manuscript_style import category_color, category_order, save_figure
 
 
 def procrustes_fit(X, Y):
@@ -128,7 +128,7 @@ def plot_overlay_2d(data, color_by, do_procrustes, outdir, tag):
         fig.patch.set_facecolor("white")
         fig.tight_layout(rect=[0, 0.035, 1, 0.94])
         outpath = os.path.join(outdir, f"figure4a_overlay_2d_{tag}_{ds}.png")
-        fig.savefig(outpath, dpi=200, facecolor="white")
+        save_figure(fig, outpath, dpi=500, facecolor="white")
         plt.close(fig)
         print("wrote", outpath)
 
@@ -157,7 +157,7 @@ def plot_sphere_3d(data, color_by, do_procrustes, outdir, tag):
         fig.patch.set_facecolor("white")
         fig.subplots_adjust(left=0.01, right=0.99, top=0.92, bottom=0.08, wspace=0.0)
         outpath = os.path.join(outdir, f"figure4a_sphere_3d_{tag}_{ds}.png")
-        fig.savefig(outpath, dpi=200, facecolor="white")
+        save_figure(fig, outpath, dpi=500, facecolor="white")
         plt.close(fig)
         print("wrote", outpath)
 
@@ -184,7 +184,7 @@ def plot_rmse(data, outdir):
     plt.xticks(rotation=0)
     plt.tight_layout()
     p = os.path.join(outdir, "figure4a_rmse.png")
-    plt.savefig(p, dpi=200)
+    save_figure(plt.gcf(), p, dpi=500)
     plt.close()
     print("wrote", p)
     print(df)

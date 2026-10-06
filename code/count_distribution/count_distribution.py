@@ -62,6 +62,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 import matplotlib
@@ -77,6 +78,8 @@ from scipy.spatial.distance import jensenshannon
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SIM_PAPER_DIR = SCRIPT_DIR.parents[1]
+sys.path.insert(0, str(SCRIPT_DIR.parent))
+from manuscript_style import save_figure  # noqa: E402  (PNG + PDF/SVG; applies no style)
 
 # Fixed categorical assignment (dataviz palette slots 1/2) -- color follows the
 # dataset role (primary vs compare), never plot order.
@@ -274,7 +277,7 @@ def plot_mean_variance(mean: np.ndarray, var: np.ndarray, theta: float, modality
     x = np.logspace(np.log10(mean[keep].min()), np.log10(mean[keep].max()), 200)
     ax.plot(x, x, "k--", label="Poisson (var = mean)")
     if np.isfinite(theta):
-        ax.plot(x, x + x**2 / theta, "r-", label=rf"NB fit ($\hat\theta$={theta:.1f})")
+        ax.plot(x, x + x**2 / theta, "r-", label=rf"NB fit ($\hat{{\mathrm{{\theta}}}}$={theta:.1f})")
 
     ax.set_xscale("log")
     ax.set_yscale("log")
@@ -283,7 +286,7 @@ def plot_mean_variance(mean: np.ndarray, var: np.ndarray, theta: float, modality
     ax.set_title(f"{modality}: gene mean-variance")
     ax.legend(frameon=False)
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    save_figure(fig, output_path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -300,7 +303,7 @@ def plot_mean_dropout(mean: np.ndarray, zero_frac: np.ndarray, theta: float, mod
     x = np.logspace(np.log10(mean[keep].min()), np.log10(mean[keep].max()), 200)
     ax.plot(x, np.exp(-x), "k--", label="Poisson-predicted")
     if np.isfinite(theta):
-        ax.plot(x, (theta / (theta + x)) ** theta, "r-", label=rf"NB-predicted ($\hat\theta$={theta:.1f})")
+        ax.plot(x, (theta / (theta + x)) ** theta, "r-", label=rf"NB-predicted ($\hat{{\mathrm{{\theta}}}}$={theta:.1f})")
 
     ax.set_xscale("log")
     ax.set_xlabel("Mean count per gene")
@@ -308,7 +311,7 @@ def plot_mean_dropout(mean: np.ndarray, zero_frac: np.ndarray, theta: float, mod
     ax.set_title(f"{modality}: gene mean-dropout")
     ax.legend(frameon=False)
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    save_figure(fig, output_path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -323,7 +326,7 @@ def plot_total_counts(total_counts: np.ndarray, modality: str, output_path: Path
     ax.set_ylabel("Number of cells")
     ax.set_title(f"{modality}: total counts per cell")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    save_figure(fig, output_path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -342,7 +345,7 @@ def plot_genes_per_cell(n_genes: np.ndarray, modality: str, output_path: Path) -
     ax.set_ylabel("Number of cells")
     ax.set_title(f"{modality}: genes detected per cell")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    save_figure(fig, output_path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -368,7 +371,7 @@ def plot_sparsity_summary(stats: dict[str, float], modality: str, output_path: P
     ax.set_ylim(0, 105)
     ax.set_title(f"{modality}: sparsity summary")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    save_figure(fig, output_path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -410,7 +413,7 @@ def plot_raw_norm_log(
     axes[0].set_ylabel("Count")
     fig.suptitle(f"{modality}: raw -> normalized -> log1p")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    save_figure(fig, output_path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -427,7 +430,7 @@ def plot_mean_variance_compare(datasets: list[dict], output_path: Path) -> None:
         ax.scatter(d["mean"][keep], d["var"][keep], s=8, alpha=0.4, linewidths=0, color=d["color"], label=d["display_label"])
         if np.isfinite(d["theta"]):
             ax.plot(x, x + x**2 / d["theta"], "-", color=d["color"], linewidth=1.5,
-                     label=rf"{d['display_label']} NB fit ($\hat\theta$={d['theta']:.1f})")
+                     label=rf"{d['display_label']} NB fit ($\hat{{\mathrm{{\theta}}}}$={d['theta']:.1f})")
 
     ax.set_xscale("log")
     ax.set_yscale("log")
@@ -436,7 +439,7 @@ def plot_mean_variance_compare(datasets: list[dict], output_path: Path) -> None:
     ax.set_title(f"Gene mean-variance: {TITLE_CONTEXT}")
     ax.legend(frameon=False, loc="upper left")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    save_figure(fig, output_path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -453,7 +456,7 @@ def plot_mean_dropout_compare(datasets: list[dict], output_path: Path) -> None:
         ax.scatter(d["mean"][keep], d["zero_frac"][keep], s=8, alpha=0.4, linewidths=0, color=d["color"], label=d["display_label"])
         if np.isfinite(d["theta"]):
             ax.plot(x, (d["theta"] / (d["theta"] + x)) ** d["theta"], "-", color=d["color"], linewidth=1.5,
-                     label=rf"{d['display_label']} NB-predicted ($\hat\theta$={d['theta']:.1f})")
+                     label=rf"{d['display_label']} NB-predicted ($\hat{{\mathrm{{\theta}}}}$={d['theta']:.1f})")
 
     ax.set_xscale("log")
     ax.set_xlabel("Mean count per gene")
@@ -461,7 +464,7 @@ def plot_mean_dropout_compare(datasets: list[dict], output_path: Path) -> None:
     ax.set_title(f"Gene mean-dropout: {TITLE_CONTEXT}")
     ax.legend(frameon=False, loc="upper left", bbox_to_anchor=(1.01, 1.0), borderaxespad=0)
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    save_figure(fig, output_path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -483,7 +486,7 @@ def plot_total_counts_compare(datasets: list[dict], output_path: Path) -> None:
     ax.set_title(f"Total counts per {OBS_UNIT}: {TITLE_CONTEXT}")
     annotate_jsd(ax, compute_jsd(positive[0], positive[1], bins), loc="upper left")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    save_figure(fig, output_path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -503,7 +506,7 @@ def plot_genes_per_cell_compare(datasets: list[dict], output_path: Path) -> None
     ax.legend(frameon=False, loc="upper right")
     annotate_jsd(ax, compute_jsd(positive[0], positive[1], bins), loc="upper left")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    save_figure(fig, output_path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -530,7 +533,7 @@ def plot_sparsity_summary_compare(datasets: list[dict], output_path: Path) -> No
     ax.set_title(f"Sparsity summary: {TITLE_CONTEXT}")
     ax.legend(frameon=False)
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    save_figure(fig, output_path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -542,7 +545,7 @@ def plot_dataset_legend(datasets: list[dict], output_path: Path) -> None:
     fig, ax = plt.subplots(figsize=(3.5, 0.6 + 0.45 * len(handles)))
     ax.axis("off")
     ax.legend(handles=handles, loc="center", frameon=False)
-    fig.savefig(output_path, dpi=180, bbox_inches="tight", pad_inches=0.02, transparent=True)
+    save_figure(fig, output_path, dpi=500, bbox_inches="tight", pad_inches=0.02, transparent=True)
     plt.close(fig)
 
 
@@ -585,7 +588,7 @@ def plot_raw_norm_log_compare(
         ax.set_ylabel("Fraction of entries" if log_x else "Density")
         annotate_jsd(ax, compute_jsd(vals_by_dataset[0], vals_by_dataset[1], bins), loc="upper right")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    save_figure(fig, output_path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 

@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from manuscript_style import MODALITY_LOOKUP, apply_style
+from manuscript_style import MODALITY_LOOKUP, apply_style, save_figure
 apply_style()
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -161,7 +161,7 @@ def main() -> None:
     fig.tight_layout()
 
     out_path = SLIDE_ROOT / "batch_sigma_slide_domain_ari_final.png"
-    fig.savefig(out_path, dpi=300, bbox_inches="tight", facecolor="white")
+    save_figure(fig, out_path, dpi=500, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     print(f"[save] {out_path}")
 

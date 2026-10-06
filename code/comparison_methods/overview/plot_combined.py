@@ -175,7 +175,7 @@ def main():
         fig.text(.5, .012, cfg['overview_note'], ha='center', fontsize=8)
     for ext in ('png','pdf','svg'):
         path=args.input/f'{args.output_prefix}.{ext}'
-        fig.savefig(path,dpi=300,facecolor='white')
+        fig.savefig(path,dpi=750,facecolor='white')
         print(path,flush=True)
     plt.close(fig)
     (args.input/f'{args.output_prefix}_summary.json').write_text(json.dumps(dict(

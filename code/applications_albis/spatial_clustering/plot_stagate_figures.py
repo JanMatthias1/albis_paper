@@ -37,7 +37,7 @@ import sys
 from pathlib import Path
 from matplotlib.transforms import Bbox
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from manuscript_style import (apply_style, scatter_colors, matched_labels,
+from manuscript_style import (apply_style, save_figure, scatter_colors, matched_labels,
     PANEL_FIGSIZE, PANEL_MARGINS, PANEL_EXPORT_BOTTOM)
 import json
 apply_style()
@@ -76,7 +76,7 @@ def draw_panel(ax, adata, key, title, coords):
 
 def save_panel(fig, outdir, name):
     crop = Bbox.from_extents(0, PANEL_EXPORT_BOTTOM, fig.get_figwidth(), fig.get_figheight())
-    fig.savefig(os.path.join(outdir, name), dpi=300, bbox_inches=crop)
+    save_figure(fig, os.path.join(outdir, name), dpi=500, bbox_inches=crop)
     plt.close(fig)
 
 

@@ -15,6 +15,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+plt.rcParams.update({"svg.fonttype": "path", "pdf.fonttype": 42})  # SVG text as outlines (looks identical everywhere); PDF keeps editable text
 import numpy as np
 
 
@@ -161,7 +162,7 @@ def main():
         columnspacing=1.0,
     )
 
-    for suffix in ("png", "pdf"):
+    for suffix in ("png", "pdf", "svg"):
         out = args.outdir / f"figure_1a_intact_sphere.{suffix}"
         fig.savefig(out, dpi=args.dpi, bbox_inches="tight", pad_inches=0.02)
         print(f"Saved: {out}")

@@ -15,7 +15,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from manuscript_style import apply_style, BOX_EDGE, BOX_MEDIAN, GRID_COLOR
+from manuscript_style import apply_style, save_figure, BOX_EDGE, BOX_MEDIAN, GRID_COLOR
 apply_style()
 BASE = Path(__file__).resolve().parents[3] / 'data/figure_4/alignment'
 
@@ -98,7 +98,7 @@ def plot(df, out):
     ax.spines[['top','right']].set_visible(False)
     ax.legend(handles=[plt.Rectangle((0,0),1,1,color=c,alpha=.65,label=s) for s,c in colors.items()],frameon=False)
     fig.tight_layout()
-    fig.savefig(out,dpi=300)
+    save_figure(fig,out,dpi=500)
     plt.close(fig)
 
 

@@ -118,7 +118,7 @@ def main():
                loc="lower center", bbox_to_anchor=(.5, .035), ncol=8, frameon=False, fontsize=10)
     fig.subplots_adjust(left=.01, right=.99, top=.84, bottom=.28, wspace=.12)
     for ext in ["png", "pdf", "svg"]:
-        fig.savefig(OUT / f"slice5_spot_aggregation.{ext}", dpi=300, bbox_inches="tight", facecolor="white")
+        fig.savefig(OUT / f"slice5_spot_aggregation.{ext}", dpi=500, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     summary = pd.DataFrame(rows)
     print(summary.to_string(index=False))

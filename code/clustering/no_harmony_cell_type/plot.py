@@ -41,7 +41,7 @@ def plot(root):
                loc='lower center', ncol=2, frameon=False)
     fig.tight_layout(rect=(0,.10,1,.95))
     for ext in ['png','pdf','svg']:
-        fig.savefig(root/f'summary/cell_type_recovery_no_harmony.{ext}', dpi=300, bbox_inches='tight')
+        fig.savefig(root/f'summary/cell_type_recovery_no_harmony.{ext}', dpi=500, bbox_inches='tight')
     plt.close(fig)
     (root/'summary/caption.txt').write_text('Cell-type recovery at batch_sigma=0 without Harmony, using BANKSY or expression-only PCA and K15/Leiden. Bars: three-seed mean; error bars: sample SD; dots: seeds 2025,101,202. BANKSY lambda selected by cell-type ARI on strong-mix seed2025, also included in this summary. Bin and spot labels denote dominant cell type, not mixture recovery.\n')
     (root/'summary/figure_provenance.json').write_text(json.dumps(dict(source=str(root/'summary/metrics_by_seed.csv'),

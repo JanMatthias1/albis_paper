@@ -176,7 +176,7 @@ def plot_qc_exclusions(adata, x_col="x_centroid", y_col="y_centroid", s=1, sampl
         for label, color in color_map.items()
     ]
     plt.legend(handles=legend_elements, markerscale=6, loc="upper right")
-    plt.savefig(output_path, dpi=180)
+    plt.savefig(output_path, dpi=500)
     plt.close()
 
 
@@ -222,7 +222,7 @@ def plot_qc_metrics(adata, thresholds, sample_name=None, output_path=None):
         fig.suptitle(f"QC metrics for {sample_name}", fontsize=16)
 
     plt.tight_layout()
-    plt.savefig(output_path, dpi=180)
+    plt.savefig(output_path, dpi=500)
     plt.close(fig)
 
 

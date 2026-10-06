@@ -146,7 +146,7 @@ def save_embedding_plot(embedding, obs, col, title, path, cmap="tab20", axis_lab
     fig, ax = plt.subplots(figsize=(8, 6))
     scatter_by_label(ax, embedding, obs[col].astype(str), title, cmap=cmap, axis_labels=axis_labels)
     fig.tight_layout()
-    fig.savefig(path, dpi=300, bbox_inches="tight")
+    fig.savefig(path, dpi=500, bbox_inches="tight")
     plt.close(fig)
     print(f"  [plot] saved {path.name}")
 

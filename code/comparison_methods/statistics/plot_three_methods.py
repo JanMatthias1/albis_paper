@@ -92,7 +92,7 @@ def hist_panel(ax, values, datasets, log_x, unit="observations"):
 
 def save(fig, path):
     fig.tight_layout()
-    fig.savefig(path, dpi=180, bbox_inches="tight")
+    cd.save_figure(fig, path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -224,7 +224,7 @@ def legend(datasets, out):
     ax.axis("off")
     ax.legend(handles=[Patch(facecolor=d["color"], alpha=0.5, label=d["display_label"]) for d in datasets],
               loc="center", frameon=False)
-    fig.savefig(out / "dataset_legend.png", dpi=180, bbox_inches="tight", pad_inches=0.02, transparent=True)
+    cd.save_figure(fig, out / "dataset_legend.png", dpi=500, bbox_inches="tight", pad_inches=0.02, transparent=True)
     plt.close(fig)
 
 

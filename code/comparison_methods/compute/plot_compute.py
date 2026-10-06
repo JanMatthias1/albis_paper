@@ -32,7 +32,7 @@ panels = [
     ('setup_peak_rss_gib', 'Memory including setup', 'Larger of method-process and Splatter-process peaks',
      'Peak RAM (GiB)', 'memory_including_setup')]
 plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 9, 'axes.spines.top': False,
-                     'axes.spines.right': False, 'savefig.dpi': 300, 'svg.fonttype': 'none', 'pdf.fonttype': 42})
+                     'axes.spines.right': False, 'savefig.dpi': 500, 'svg.fonttype': 'none', 'pdf.fonttype': 42})
 fig, axes = plt.subplots(2, 2, figsize=(11, 9))
 fig.subplots_adjust(left=.10, right=.97, bottom=.19, top=.81, wspace=.33, hspace=.85)
 sizes = sorted(data.n_cells.unique())
@@ -95,8 +95,14 @@ for ext in ['png', 'pdf', 'svg']:
     fig.savefig(out / f'compute_four_panel.{ext}', bbox_inches='tight', facecolor='white')
     for text in fig.texts:
         text.set_visible(False)
-    for panel, bound in zip(panels, bounds):
+    # Hide the other panels too: bbox_inches only crops the view, so PDF/SVG would still
+    # contain all four panels (they show up when the file is imported into an editor).
+    for i, (panel, bound) in enumerate(zip(panels, bounds)):
+        for j, other in enumerate(axes.flat):
+            other.set_visible(i == j)
         fig.savefig(out / f'{panel[-1]}.{ext}', bbox_inches=bound, facecolor='white')
+    for ax in axes.flat:
+        ax.set_visible(True)
     for text in fig.texts:
         text.set_visible(True)
 plt.close(fig)

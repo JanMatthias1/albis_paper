@@ -129,7 +129,7 @@ def plot_two_dims(adata, embedding_key: str, color_key: str, output_path: Path, 
         ax.legend(handles=handles, title=color_key, bbox_to_anchor=(1.02, 1), loc="upper left", frameon=False)
 
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    fig.savefig(output_path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 

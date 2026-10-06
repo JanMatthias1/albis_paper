@@ -50,6 +50,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import anndata as ad
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from manuscript_style import save_figure
 
 RCTD_DIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD"
 CONFIGS = {  # config -> {reference seed: run dir under RCTD_DIR}
@@ -176,7 +180,7 @@ def plot_scatter(est, truth):
                   fontsize=11, fontweight="bold")
     fig.tight_layout()
     out = os.path.join(OUT_DIR, "est_vs_true_scatter.png")
-    fig.savefig(out, dpi=150)
+    save_figure(fig, out, dpi=500)
     plt.close(fig)
     print("wrote", out)
 

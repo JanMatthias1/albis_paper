@@ -244,7 +244,7 @@ def main() -> None:
     out_path = FIG3_DIR / "ari_recovery_summary" / "banksy_vs_pca_recovery.png"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     for ext in ("png", "pdf", "svg"):
-        fig.savefig(out_path.with_suffix("." + ext), dpi=300, facecolor="white", bbox_inches="tight")
+        fig.savefig(out_path.with_suffix("." + ext), dpi=500, facecolor="white", bbox_inches="tight")
     plt.close(fig)
     print(f"[save] {out_path}")
 

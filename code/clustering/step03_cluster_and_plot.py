@@ -34,7 +34,7 @@ import scanpy as sc
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from manuscript_style import (
-    apply_style, scatter_colors, legend_handles, pretty_label,
+    save_figure, apply_style, scatter_colors, legend_handles, pretty_label,
     LEGEND_MARKERSIZE, LEGEND_TITLE_SIZE, PANEL_FIGSIZE, PANEL_MARGINS, PANEL_EXPORT_BOTTOM,
     matched_labels, category_order,
 )
@@ -46,7 +46,7 @@ CLUSTERING_ROOT = SIM_PAPER_DIR / "data" / "clustering"
 DEFAULT_INPUT = CLUSTERING_ROOT / "spot" / "pca_harmony" / "simulation_spot_z_pca_harmony.h5ad"
 DEFAULT_OUTPUT_DIR = CLUSTERING_ROOT
 
-PANEL_DPI = 300
+PANEL_DPI = 500
 VALID_MODALITIES = ("spot", "bin", "cell")
 VALID_ALGORITHMS = ("leiden", "louvain")
 VALID_PIPELINES = ("pca_harmony",)
@@ -154,7 +154,7 @@ def plot_umap(adata, color_key: str, output_path: Path) -> None:
         )
 
     fig.tight_layout()
-    fig.savefig(output_path, dpi=300, bbox_inches="tight")
+    save_figure(fig, output_path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -204,7 +204,7 @@ def plot_umap_true_vs_predicted(adata, true_key: str, pred_key: str, output_path
     fig.subplots_adjust(**PANEL_MARGINS)
     crop = Bbox.from_extents(0, PANEL_EXPORT_BOTTOM,
                              fig.get_figwidth(), fig.get_figheight())
-    fig.savefig(output_path, dpi=PANEL_DPI, bbox_inches=crop)
+    save_figure(fig, output_path, dpi=PANEL_DPI, bbox_inches=crop)
     plt.close(fig)
 
 
@@ -231,7 +231,7 @@ def plot_contingency_heatmap(adata, true_key: str, pred_key: str, output_path: P
     ax.set_title(f"{pretty_label(true_key)} vs. predicted cluster")
     fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="fraction of row")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=300, bbox_inches="tight")
+    save_figure(fig, output_path, dpi=500, bbox_inches="tight")
     plt.close(fig)
 
 

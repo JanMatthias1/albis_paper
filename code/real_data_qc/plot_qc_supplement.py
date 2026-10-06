@@ -19,7 +19,6 @@ DATASETS=[('non_diseased_lung','Xenium · Non-diseased lung'),
  ('lung_cancer','Xenium · Lung cancer'),
  ('breast_cancer_visium_hd_16um','Visium HD · Breast cancer (16 µm)'),
  ('human_pancreas_visium_hd_16um','Visium HD · Pancreas (16 µm)'),
- ('breast_cancer_visium','Visium · Breast cancer'),
  ('lymph_node_visium','Visium · Lymph node'),('tonsil_visium','Visium · Tonsil')]
 COLORS={'Retained':'#B9C0C7','Below median − 4 MAD':'#4C8FD5','Other Xenium exclusions':'#E65F5C','SpotSweeper exclusion':'#4C8FD5'}
 
@@ -94,8 +93,9 @@ def main():
         fig.legend(handles=handles,loc='lower center',ncol=2,frameon=False)
     fig.subplots_adjust(left=.025,right=.985,top=.94,bottom=.09,wspace=.18,hspace=.32)
     out=ROOT/'supplementary';out.mkdir(exist_ok=True)
-    for ext in ['png','pdf']:
-        fig.savefig(out/f'real_data_qc_overview.{ext}',dpi=300,facecolor='white')
+    plt.rcParams['svg.fonttype']='none'
+    for ext in ['png','pdf','svg']:
+        fig.savefig(out/f'real_data_qc_overview.{ext}',dpi=500,facecolor='white')
     plt.close(fig)
     pd.DataFrame(records).to_csv(out/'real_data_qc_overview_counts.csv',index=False)
     (out/'real_data_qc_overview_caption.txt').write_text(

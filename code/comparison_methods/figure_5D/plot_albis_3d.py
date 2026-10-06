@@ -52,6 +52,6 @@ for axis in (ax.xaxis,ax.yaxis,ax.zaxis):axis.pane.fill=False
 ax.grid(False)
 fig.legend(handles=[Patch(color=palette[f'type{i}'],label=f'Type {i}') for i in range(1,9)],loc='lower center',ncol=4,frameon=False)
 fig.subplots_adjust(bottom=.10,top=.93,left=0,right=.95)
-for ext in ['png','pdf','svg']:fig.savefig(OUT/f'figure5d_albis_3d.{ext}',dpi=250,bbox_inches='tight')
+for ext in ['png','pdf','svg']:fig.savefig(OUT/f'figure5d_albis_3d.{ext}',dpi=500,bbox_inches='tight')
 (OUT/'figure5d_albis_3d_provenance.json').write_text(json.dumps(dict(molecules=len(xyz),cells=len(c),z_bounds=[zlo,zhi],cell_selection='Slice 5 centers with full XY circle inside field; sphere mesh clipped at slab Z boundaries',geometry='Saved XYZ and cell radii; illustrative capture circles on lower Z plane; color membership uses XY distance through entire slab',rendering='Translucent spheres and mRNA crosses; matplotlib transparency is approximate'),indent=2)+'\n')
 print('Saved',OUT/'figure5d_albis_3d.png')

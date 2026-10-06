@@ -7,6 +7,7 @@ as two grid figures, colored by a single obs column.
 from __future__ import annotations
 
 import math
+import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -14,6 +15,9 @@ import matplotlib.colors as mcolors
 import matplotlib.patches as mpatches
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from manuscript_style import save_figure
 
 
 def make_color_lookup(labels: pd.Series):
@@ -106,7 +110,7 @@ def plot_pc_pair_grid(
         fontsize=17,
     )
     fig.tight_layout(rect=[0, 0, 1, 0.97])
-    fig.savefig(output_path, dpi=dpi, bbox_inches="tight")
+    save_figure(fig, output_path, dpi=dpi, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -156,7 +160,7 @@ def plot_pc_pairs(
     ncols: int = 5,
     legend_max_levels: int = 30,
     random_state: int = 0,
-    dpi: int = 160,
+    dpi: int = 500,
 ) -> None:
     """Plot pre/post-Harmony PC-pair grids for adata.obsm[pre_key]/[post_key].
 

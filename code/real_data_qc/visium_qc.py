@@ -128,7 +128,7 @@ def plot_qc_metrics_spatial(adata, sample_name, output_dir: Path) -> None:
             coord_key="spatial", legend=True,
             title=f"{sample_name}: {metric} (SpotSweeper local outliers)",
         )
-        plt.savefig(output_dir / f"qc_{metric}.png", dpi=180)
+        plt.savefig(output_dir / f"qc_{metric}.png", dpi=500)
         plt.close()
 
 
@@ -163,7 +163,7 @@ def plot_qc_exclusions(adata, sample_name, output_path: Path) -> None:
 
     legend_elements = [mpatches.Patch(color=color, label=label) for label, color in color_map.items()]
     plt.legend(handles=legend_elements, markerscale=6, loc="upper right")
-    plt.savefig(output_path, dpi=180)
+    plt.savefig(output_path, dpi=500)
     plt.close()
 
 

@@ -8,8 +8,8 @@ Central 290 x 290 um field of each tissue. Everything drawn is native output:
   Membership = cells within the spot radius, which generate.py asserted equals
   SPIDER's own membership matrix; the label is asserted equal to n_source_cells.
 - scCube: Figure 5A cells and spots; memberships from sccube_slice_membership.py
-  (scCube's own generate_spot_data_random, reproduces the saved spots). Lines join
-  each cell to its spot centre; the label is the spot's cell count.
+  (scCube's own generate_spot_data_random, reproduces the saved spots). Each spot is
+  the convex hull of its member cells; the label is the spot's cell count.
 Run with sim_paper/env/albis-tutorial/bin/python.
 """
 import argparse
@@ -115,7 +115,7 @@ reports.append(dict(method="scCube", n_spots_in_field=int(f.sum()), counts=spots
 plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 11, "pdf.fonttype": 42, "svg.fonttype": "none"})
 fig, axes = plt.subplots(1, 3, figsize=(13, 5.8))
 subtitles = {"ALBIS": "Native mRNA instances and spots",
-             "scCube": f"Native cells and spots ({cfg['sccube_cells_per_spot']} cells per spot)",
+             "scCube": f"Native cells and spots (target {cfg['sccube_cells_per_spot']} cells per spot)",
              "SPIDER": "Native cells and spots"}
 for ax, name in zip(axes, ["ALBIS", "scCube", "SPIDER"]):
     p = panels[name]
@@ -149,7 +149,7 @@ fig.legend(handles=[Patch(color=palette[f"type{i}"], label=f"Type {i}") for i in
            loc="lower center", bbox_to_anchor=(.5, .03), ncol=8, frameon=False, fontsize=10)
 fig.subplots_adjust(left=.025, right=.975, top=.80, bottom=.20, wspace=.15)
 for ext in ["png", "pdf", "svg"]:
-    fig.savefig(args.out / f"figure5d_native_spots.{ext}", dpi=300, bbox_inches="tight", facecolor="white")
+    fig.savefig(args.out / f"figure5d_native_spots.{ext}", dpi=500, bbox_inches="tight", facecolor="white")
 (args.out / "provenance.json").write_text(json.dumps(dict(
     albis_and_sccube=str(BASE), spider=str(args.spider_base / "spider"), slice_id=SLICE_ID,
     field_um=[-HALF, HALF], spot_radius_um=radius,
