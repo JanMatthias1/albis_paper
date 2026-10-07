@@ -51,31 +51,15 @@ BASE_DATA_DIR = Path("/dcs04/hicks/data/Jan/sim_project/albis_paper/data/noisy")
 SLICE_AXIS = "Z"
 VALID_MODALITIES = ("spot", "bin", "cell")
 
-# Manuscript baseline uses theta=25 (default), theta_jitter=2.0, noise_scale=0.9.
-# These push dispersion down / background noise up to better match real data
-# (see module docstring for the theta_hat comparison that motivated them).
+# Defaults only; the figure scripts pass their own values.
 NOISY_THETA = 2.0
 NOISY_THETA_JITTER = 1.0
 NOISY_NOISE_SCALE = 1.3
 MANUSCRIPT_BATCH_SIGMA = 0.22
-# Manuscript baseline (and simulate_3d_molecule_sphere_multires's own default)
-# is base_gene_lognormal=(0.7, 0.7) -- median per-gene baseline expression
-# exp(0.7) ~= 2.0. Lower the first value (log_mu) to bring down average
-# per-cell total counts / genes detected without touching dispersion/noise.
 NOISY_BASE_GENE_LOGNORMAL = (0.7, 0.7)
 
-# Manuscript-baseline domain_type_mix (6 domains x 8 cell types) makes several
-# domains only weakly distinguishable by composition: domain 5 (core) is
-# exactly uniform, domain 4 deviates only 12% from uniform, domain 3 only
-# 28% -- pairwise L1 distance between domains ranges just 0.06-0.36. No
-# clustering method (plain, BANKSY, or a domain expression shift) can recover
-# domains whose true compositions barely differ. This alternative gives every
-# domain two strongly-enriched "signature" cell types (0.30 each vs. a 0.125
-# uniform baseline) and leaves no domain uniform -- pairwise L1 distance
-# becomes 0.467-0.933, i.e. more than 3x the old matrix's *maximum* at its
-# *minimum*. Opt-in only (--strong-domain-mix) -- the default stays the
-# original matrix so this never silently affects Figure 2 count-distribution
-# comparisons, only dedicated Figure 3 domain-recovery runs.
+# Domain x cell-type composition (6 domains x 8 cell types): weak baseline mix,
+# and the strong mix (two enriched cell types per domain) used with --strong-domain-mix.
 MANUSCRIPT_DOMAIN_TYPE_MIX = np.array(
     [
         [0.18, 0.18, 0.13, 0.12, 0.11, 0.10, 0.09, 0.09],
@@ -99,26 +83,9 @@ STRONG_DOMAIN_TYPE_MIX = np.array(
     dtype=float,
 )
 
-# Manuscript-baseline geometry (sphere_R_um=6000, n_cells=600_000) packs cells
-# at only ~0.16% of sphere volume -- real tissue is essentially fully packed.
-# A fixed 8um bin grid over that mostly lands in empty interstitial space:
-# 66.3% of bins came back with zero genes detected vs. 0.0% in real
-# breast_cancer_visium_hd. Raising theta does not fix this -- tested up to theta=200 with
-# almost no effect -- because it's geometric (empty grid cells), not
-# per-molecule count noise. Local validation swept target 3D packing fraction
-# via --sphere-r-um (holding --n-cells fixed): packing fully solves emptiness
-# by ~10% but overshoots real counts/bin by 5-9x, because it shrinks cell
-# spacing enough that neighboring cells' molecule clouds start overlapping
-# into the same bin. There's no packing fraction that hits both targets
-# exactly; ~0.8-1.5% packing was the best compromise found (empty bins cut
-# from 66% to ~7-18%, counts/bin within ~1.1-1.6x of real). See
-# packing_fraction_to_sphere_R() below for the conversion.
 NOISY_N_CELLS = 600_000
 NOISY_SPHERE_R_UM = 6000.0
-# Capture area = the real instrument's, per modality, independent of how much
-# tissue sits in it -- it does NOT scale with --sphere-r-um. bin/spot get the
-# 6.5 mm Visium / Visium HD square; cell gets the 12 x 24 mm Xenium window
-# (applied via xenium_capture_window_um, which crops cell-level output).
+# Real instrument capture area per modality (Visium / Visium HD, Xenium); not scaled with sphere radius.
 PLATFORM_CAPTURE_WINDOW_UM = {
     "bin": (6500.0, 6500.0),
     "spot": (6500.0, 6500.0),
@@ -161,18 +128,13 @@ def parse_args():
         "--marker-foldchange",
         type=float,
         default=3.5,
-        help="Expression multiplier for a cell type's own unique marker genes. Pooling variance "
-        "across all cell types inflates a marker gene's variance far above the NB fit (between-type "
-        "mean differences dominate over within-type NB variance) -- higher values make that upper "
-        "branch in the mean-variance plot more pronounced.",
+        help="Expression multiplier for a cell type's own marker genes.",
     )
     parser.add_argument(
         "--shared-marker-foldchange",
         type=float,
         default=2.5,
-        help="Expression multiplier for markers shared across all cell types (same variance-inflation "
-        "caveat as --marker-foldchange, but shared markers don't differ between types so the effect "
-        "is much smaller in practice).",
+        help="Expression multiplier for markers shared across all cell types.",
     )
     parser.add_argument(
         "--base-gene-lognormal",
@@ -180,9 +142,7 @@ def parse_args():
         nargs=2,
         metavar=("LOG_MU", "LOG_SIGMA"),
         default=NOISY_BASE_GENE_LOGNORMAL,
-        help="Lognormal (log_mu, log_sigma) for per-gene baseline expression "
-        "(base_gene = exp(Normal(log_mu, log_sigma))); lower log_mu = lower "
-        "average per-cell total counts / genes detected.",
+        help="Lognormal (log_mu, log_sigma) of per-gene baseline expression; lower log_mu = fewer counts.",
     )
     parser.add_argument(
         "--batch-sigma",
@@ -194,19 +154,12 @@ def parse_args():
         "--seed",
         type=int,
         default=2025,
-        help="Master seed for simulate_3d_molecule_sphere_multires -- drives the base tissue "
-        "(cell placement, domain boundaries, cell types, baseline gene expression) directly, "
-        "and the per-slice batch-effect factors indirectly (seed + a fixed per-modality offset). "
-        "Does NOT affect obsm['spatial_unaligned'] (see --sync-unaligned-seed / base_seed_unaligned, "
-        "seeded independently). Default (2025) matches the library default and all prior runs; "
-        "override to build an independent replicate of the same config for variability/error bars.",
+        help="Master seed (tissue, cell types, expression, batch factors); change for replicates.",
     )
     parser.add_argument(
         "--strong-domain-mix",
         action="store_true",
-        help="Use STRONG_DOMAIN_TYPE_MIX instead of the manuscript-baseline domain_type_mix -- "
-        "opt-in only, for dedicated Figure 3 domain-recovery test runs. Never affects Figure 2 "
-        "count-distribution comparisons since it defaults off.",
+        help="Use STRONG_DOMAIN_TYPE_MIX instead of the baseline domain x cell-type mix.",
     )
     parser.add_argument(
         "--domain-size-factors",
@@ -214,19 +167,13 @@ def parse_args():
         nargs=6,
         default=None,
         metavar=("D0", "D1", "D2", "D3", "D4", "D5"),
-        help="Per-domain expression scale factor (6 values, one per domain -- this script's "
-        "n_domains=6 is hardcoded below). Multiplies every gene's NB mean uniformly for cells "
-        "in that domain (albis's existing domain_size_factors kwarg -- a per-domain library-size "
-        "shift, independent of cell type; NOT a per-gene profile the way cell-type markers are). "
-        "Defaults to None (all domains =1.0, no effect, current manuscript behavior).",
+        help="Per-domain library-size factor (one per domain); default: no effect.",
     )
     parser.add_argument(
         "--sphere-r-um",
         type=float,
         default=NOISY_SPHERE_R_UM,
-        help="Sphere radius; with --n-cells fixed, smaller = higher 3D cell-packing "
-        "fraction (default 6000um gives ~0.16%% packing, which leaves the "
-        "majority of 8um bins empty).",
+        help="Sphere radius (um); with --n-cells fixed, smaller = denser tissue.",
     )
     parser.add_argument(
         "--n-cells",
@@ -237,37 +184,25 @@ def parse_args():
         "--cell-r-mean",
         type=float,
         default=7.5,
-        help="Lognormal mean cell radius (um), which also sets the mean molecule-spillover "
-        "radius per cell (sample_molecule_coords_for_cell scales molecule spread to this). "
-        "Affects how many genes each bin detects.",
+        help="Lognormal mean cell radius (um); also sets each cell's molecule spread.",
     )
     parser.add_argument(
         "--allow-cell-overlap",
         action="store_true",
-        help="Passed through to simulate_3d_molecule_sphere_multires (default False). Needed to "
-        "test --cell-r-mean values large enough that non-overlapping placement at the given "
-        "--n-cells/--sphere-r-um becomes geometrically infeasible. Already validated elsewhere "
-        "in this project as not changing bin-level count statistics at the manuscript radius.",
+        help="Allow overlapping cells during placement (default off; off for all manuscript data).",
     )
     parser.add_argument(
         "--bin-size-um",
         type=float,
         default=8.0,
-        help="Bin modality grid spacing (um). Manuscript baseline is 8um (Visium-HD-like). "
-        "A larger bin aggregates more of each cell's molecule cloud per observation, which "
-        "directly addresses two issues diagnosed at 8um: the near-binary empty/non-empty bin "
-        "sampling caused by bin size being comparable to --cell-r-mean, and weak "
-        "per-bin domain-compositional signal for BANKSY domain recovery (same "
-        "aggregation-reveals-composition mechanism as for spot vs. bin/cell). Real Visium HD ships 8um/16um (and "
-        "2um) bins, so this is a legitimate alternate real configuration, not just a knob.",
+        help="Bin grid spacing (um), e.g. 8 or 16 as in Visium HD.",
     )
     parser.add_argument(
         "--capture-window-um",
         type=float,
         default=None,
-        help="Square capture window side length (um). Default (unset) uses the "
-        "real platform window for the modality: 6500 for bin/spot (Visium / "
-        "Visium HD), 12000x24000 for cell (Xenium). NOT scaled by --sphere-r-um.",
+        help="Square capture window side (um). Default: platform window "
+        "(6500 for bin/spot, 12000x24000 for cell).",
     )
     parser.add_argument(
         "--core-fuzz-width-um",
@@ -284,26 +219,18 @@ def parse_args():
     parser.add_argument(
         "--sync-unaligned-seed",
         action="store_true",
-        help="Pass sync_unaligned_seed=True through to simulate_3d_molecule_sphere_multires so "
-        "obsm['spatial_unaligned']'s per-slice rigid (rotation+translation) perturbation is seeded "
-        "identically across modalities (same base_seed_unaligned + slice_id, no per-modality offset) "
-        "instead of each modality drawing its own independent perturbation (default). Needed so "
-        "cross_tech_stair.py's cross-technology STAIR alignment starts all three modalities from the "
-        "SAME misalignment for a given slice_id.",
+        help="Use the same per-slice misalignment (obsm['spatial_unaligned']) across modalities.",
     )
     parser.add_argument(
         "--out-tag",
         default="",
-        help="If set, write output under data/noisy/<out-tag>/ instead of data/noisy/ directly "
-        "(e.g. a parameter-sweep label like 'log_mu_-2.5'), so this run doesn't overwrite the "
-        "existing simulation_<modality>_<axis>.h5ad.",
+        help="Write output under data/noisy/<out-tag>/ instead of data/noisy/.",
     )
     parser.add_argument("--output-dir", type=Path, default=None,
                         help="Explicit output directory; overrides data/noisy and --out-tag.")
     parser.add_argument("--output-stem", default=None,
-                        help="File stem for the h5ad, its _summary.json and plots/<stem>/ (default: "
-                        "simulation_<modality>_<axis>). Figure 3's strong-mix scripts pass a "
-                        "parameter-derived name so the file itself records how it was generated.")
+                        help="File stem for the h5ad, _summary.json and plots/<stem>/ "
+                        "(default: simulation_<modality>_<axis>).")
     return parser.parse_args()
 
 
@@ -352,12 +279,7 @@ def generate_modality(
     marker_foldchange, shared_marker_foldchange, domain_size_factors, domain_type_mix, bin_size_um,
     sync_unaligned_seed, seed,
 ):
-    # ab.generate_data() doesn't forward theta/theta_jitter/noise_scale/
-    # base_gene_lognormal, so call the lower-level simulator directly and pull
-    # out the requested modality/axis ourselves (mirrors what generate_data()
-    # does internally).
-    # Platform capture window: bin/spot crop via capture_window_um; cell crops
-    # via xenium_capture_window_um.
+    # bin/spot crop via capture_window_um; cell via xenium_capture_window_um.
     capture_kw = (
         {"xenium_capture_window_um": tuple(capture_window_um)}
         if output_modality == "cell"
@@ -383,10 +305,7 @@ def generate_modality(
             radius_dist="lognormal",
             r_mean=cell_r_mean,
             r_sigma=0.28,
-            # r_min/r_max scaled proportionally to cell_r_mean (manuscript ratio: 4.0/7.5,
-            # 14.0/7.5) -- sample_cell_radii() clips to [r_min, r_max] regardless of r_mean,
-            # so leaving these fixed at the manuscript's absolute values would silently
-            # clamp any --cell-r-mean override back down near the old default.
+            # clip bounds scale with cell_r_mean (ratios of the 7.5 um default)
             r_min=cell_r_mean * (4.0 / 7.5),
             r_max=cell_r_mean * (14.0 / 7.5),
         ),

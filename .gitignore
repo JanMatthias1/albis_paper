@@ -52,6 +52,9 @@ CLAUDE.md
 code/applications_albis/*/**/README.md
 code/applications_albis/alignment/METHODS_reference_alignment_error.md
 
+# code/data; public overview = code/data/README.md
+code/data/README_internal.md
+
 # code/clustering (Figure 3); public overview = code/clustering/README.md
 code/clustering/README_internal.md
 code/clustering/HISTORY_internal.md
