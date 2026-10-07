@@ -5,7 +5,7 @@ set -euo pipefail
 # create_banksy_env.sh
 #
 # Creates an ISOLATED conda environment for the BANKSY clustering step
-# (sim_paper/code/clustering/01_build_banksy_matrix.py).
+# (albis_paper/code/clustering/01_build_banksy_matrix.py).
 #
 # banksy_py pins a much older scanpy/numpy/anndata/pandas/scikit-learn/scipy/
 # matplotlib stack than the rest of this project uses (the albis-tutorial
@@ -62,7 +62,7 @@ echo "        isolated in this env on purpose, see header comment)"
 python -m pip install banksy_py
 
 echo "[setup] Installing harmonypy for batch correction (matches"
-echo "        sim_paper/code/clustering/01.2_pca_harmony.py's Harmony implementation, so"
+echo "        albis_paper/code/clustering/01.2_pca_harmony.py's Harmony implementation, so"
 echo "        results are consistent with the rest of the clustering pipeline)"
 python -m pip install harmonypy
 

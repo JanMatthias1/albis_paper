@@ -9,6 +9,6 @@
 # Env: RUN_ROOT. Runs the live report/plot code (they only read the measurements).
 set -euo pipefail
 project=/dcs04/hicks/data/Jan/sim_project
-code="$project/sim_paper/code/comparison_methods/compute"
+code="$project/albis_paper/code/comparison_methods/compute"
 export MPLCONFIGDIR="$RUN_ROOT/cache/report/matplotlib" XDG_CACHE_HOME="$RUN_ROOT/cache/report"
 exec "$project/comparison_methods/env/analysis/bin/python" "$code/report_seeds.py" --root "$RUN_ROOT"

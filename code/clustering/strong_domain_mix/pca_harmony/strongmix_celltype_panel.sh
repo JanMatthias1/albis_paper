@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=strongmix_celltype_panel
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs/strongmix_celltype_panel_%A_%a.out
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/logs/strongmix_celltype_panel_%A_%a.out
 #SBATCH --array=0-17
 #SBATCH --time=04:00:00
 #SBATCH --mem=32G
@@ -24,8 +24,8 @@
 #   (spot's no-batch input folder is bs0.0; its output folder is bs0 like the others)
 set -euo pipefail
 
-mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
-source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env.sh
+mkdir -p /dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/logs
+source /dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
 # task -> "<output name> <02/step03 --modality> <batch_sigma_slide dir>"
@@ -52,7 +52,7 @@ TASKS=(
 )
 read -r NAME MODALITY POINT <<< "${TASKS[${SLURM_ARRAY_TASK_ID}]}"
 
-SLIDE_DIR="sim_paper/data/figure_3/strong_domain_mix/batch_sigma_slide/${POINT}"
+SLIDE_DIR="albis_paper/data/figure_3/strong_domain_mix/batch_sigma_slide/${POINT}"
 QC_FILES=("${SLIDE_DIR}"/*_strongmix_bsigma*_qc.h5ad)
 if [[ ${#QC_FILES[@]} -ne 1 || ! -f "${QC_FILES[0]}" ]]; then
     echo "[error] expected exactly one strong-mix QC h5ad in ${SLIDE_DIR}, found: ${QC_FILES[*]}" >&2
@@ -61,20 +61,20 @@ fi
 SIM_QC="${QC_FILES[0]}"
 OUT_POINT="$(basename "${POINT}")"
 [[ "${OUT_POINT}" == bs0.0 ]] && OUT_POINT=bs0
-CLUSTER_ROOT="sim_paper/data/figure_3/strong_domain_mix/pca_harmony/${NAME}/${OUT_POINT}"
+CLUSTER_ROOT="albis_paper/data/figure_3/strong_domain_mix/pca_harmony/${NAME}/${OUT_POINT}"
 PCA_H5AD="${CLUSTER_ROOT}/pca_harmony_qc/simulation_${MODALITY}_z_pca_harmony_qc.h5ad"
 echo "[input] ${SIM_QC} -> ${CLUSTER_ROOT}"
 
 if [[ ! -f "${PCA_H5AD}" ]]; then
     echo "[pca_harmony] running"
-    "${PYTHON_BIN}" sim_paper/code/clustering/step01_pca_harmony.py \
+    "${PYTHON_BIN}" albis_paper/code/clustering/step01_pca_harmony.py \
         --modality "${MODALITY}" --input "${SIM_QC}" \
         --no-umap-sample \
         --output "${PCA_H5AD}"
 fi
 
 echo "[ari] resolution-matched ARI recovery"
-"${PYTHON_BIN}" sim_paper/code/clustering/step02_leiden_resolution_sweep.py \
+"${PYTHON_BIN}" albis_paper/code/clustering/step02_leiden_resolution_sweep.py \
     --modality "${MODALITY}" \
     --input "${PCA_H5AD}" \
     --output-dir "${CLUSTER_ROOT}/ari_recovery_qc"
@@ -88,7 +88,7 @@ with open('${CLUSTER_ROOT}/ari_recovery_qc/ari_summary_${MODALITY}.json') as f:
 print(next(r['resolution'] for r in summary if r['ground_truth'] == 'cell_type_true'))
 ")
 echo "[leiden] cell_type_true-matched-resolution qualitative plots (resolution=${RESOLUTION})"
-"${PYTHON_BIN}" sim_paper/code/clustering/step03_cluster_and_plot.py \
+"${PYTHON_BIN}" albis_paper/code/clustering/step03_cluster_and_plot.py \
     --modality "${MODALITY}" \
     --input "${PCA_H5AD}" \
     --output-dir "${CLUSTER_ROOT}/leiden_pca_qc_celltype_matched" \

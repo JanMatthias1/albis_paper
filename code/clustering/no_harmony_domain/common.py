@@ -5,8 +5,8 @@ import json
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[4]
 CODE = Path(__file__).resolve().parent
-BASE = ROOT / 'sim_paper/data/figure_3/no_harmony_domain'
-SHARED = ROOT / 'sim_paper/code/clustering'
+BASE = ROOT / 'albis_paper/data/figure_3/no_harmony_domain'
+SHARED = ROOT / 'albis_paper/code/clustering'
 SEEDS = [2025, 101, 202]
 MODALITIES = ['cell', 'bin16um', 'spot']
 K_GEOM = dict(cell=60, bin16um=100, spot=8)

@@ -10,7 +10,7 @@ Central 290 x 290 um field of each tissue. Everything drawn is native output:
 - scCube: Figure 5A cells and spots; memberships from sccube_slice_membership.py
   (scCube's own generate_spot_data_random, reproduces the saved spots). Each spot is
   the convex hull of its member cells; the label is the spot's cell count.
-Run with sim_paper/env/albis-tutorial/bin/python.
+Run with albis_paper/env/albis-tutorial/bin/python.
 """
 import argparse
 import json

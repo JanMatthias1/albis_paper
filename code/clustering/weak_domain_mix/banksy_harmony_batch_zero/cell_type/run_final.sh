@@ -4,6 +4,6 @@
 # Keeps every h5ad and draws UMAP + spatial plots (MODE=final)
 # -> data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/cell_type/<modality>/lam<λ>/
 set -euo pipefail
-HERE=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/weak_domain_mix/banksy_harmony_batch_zero/cell_type
+HERE=/dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/weak_domain_mix/banksy_harmony_batch_zero/cell_type
 bash "${HERE}/../../../submit_banksy_lambda.sh" "${HERE}/final_tasks.tsv" \
-    /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/logs final
+    /dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_3/weak_domain_mix/banksy_harmony_batch_zero/logs final

@@ -13,7 +13,7 @@ adata_results/Sim_3D_STAGATE_<dataset>.h5ad.
 Usage:
     python plot_stagate_figures.py --dataset cell_strongmix_bs0_seed2025
 
-Output, under sim_paper/data/figure_4/spatial_clustering/STAGATE/<run_tag>/plots/ :
+Output, under albis_paper/data/figure_4/spatial_clustering/STAGATE/<run_tag>/plots/ :
     domains_3d_true_vs_stagate.png
     umap_stagate3d.png            domain_true + STAGATE 3D Domains
     umap_stagate3d_by_slice.png   + Slice ID
@@ -30,7 +30,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
 
-BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/spatial_clustering/STAGATE"
+BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_4/spatial_clustering/STAGATE"
 
 
 import sys

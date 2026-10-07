@@ -1,6 +1,6 @@
 """No-Harmony domain recovery with unchanged tuned-batch cell-type recovery.
 
-Run with sim_paper/env/albis-tutorial/bin/python from the project root.
+Run with albis_paper/env/albis-tutorial/bin/python from the project root.
 Writes a separate banksy_vs_pca_recovery_condensed_no_harmony figure.
 """
 import csv

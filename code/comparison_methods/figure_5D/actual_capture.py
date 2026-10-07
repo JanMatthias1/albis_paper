@@ -16,7 +16,7 @@ from matplotlib.collections import PatchCollection
 import argparse
 import albis as ab
 import albis.simulation_sphere
-ROOT=Path('/dcs04/hicks/data/Jan/sim_project');PAPER=ROOT/'sim_paper'
+ROOT=Path('/dcs04/hicks/data/Jan/sim_project');PAPER=ROOT/'albis_paper'
 BASE=PAPER/'data/figure_5/figure_5A_600k'
 ALBIS_DIR=PAPER/'data/figure_5/figure_5D_actual_coordinates'  # shared ALBIS molecule cache
 PANEL=ALBIS_DIR/'distinct_seeds'  # manuscript panel

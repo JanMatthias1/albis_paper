@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=96G
 #SBATCH --time=06:00:00
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/comparison_methods/statistics/logs/figure5B_%j.out
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/albis_paper/code/comparison_methods/statistics/logs/figure5B_%j.out
 # Figure 5B with Figure 2's code, on Figure 5A data, stored slice 4 (5th from the bottom):
 #   1. subset each method/modality to the slice      (subset_slice.py)
 #   2. QC with Figure 2's step00_qc_filter.py              (total > 0, >= 3 genes)
@@ -13,8 +13,8 @@
 #      log-normalized, so it appears on genes detected, sparsity and (cell) log1p only.
 # All methods have 556 genes, so Figure 2's panel-matching modes are not needed.
 set -euo pipefail
-source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/_env.sh
-P=/dcs04/hicks/data/Jan/sim_project/sim_paper
+source /dcs04/hicks/data/Jan/sim_project/albis_paper/code/count_distribution/_env.sh
+P=/dcs04/hicks/data/Jan/sim_project/albis_paper
 CODE="$P/code/comparison_methods/statistics"
 SRC="$P/data/figure_5/figure_5A_600k"
 OUT="$P/data/figure_5/figure_5B"

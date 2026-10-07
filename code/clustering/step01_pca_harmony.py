@@ -8,10 +8,10 @@ field used by albis when adding slice-specific batch effects.
 
 Expected environment:
     conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
-    python -m pip install -r sim_paper/code/clustering/requirements.txt
+    python -m pip install -r albis_paper/code/clustering/requirements.txt
 
 Example:
-    python sim_paper/code/clustering/step01_pca_harmony.py
+    python albis_paper/code/clustering/step01_pca_harmony.py
 """
 
 from __future__ import annotations
@@ -318,7 +318,7 @@ def main() -> None:
     if not args.input.is_file():
         raise SystemExit(
             f"Input file not found: {args.input}\n"
-            "Generate it first with sim_paper/code/data/generate_simulation_noisy.py."
+            "Generate it first with albis_paper/code/data/generate_simulation_noisy.py."
         )
 
     args.output.parent.mkdir(parents=True, exist_ok=True)

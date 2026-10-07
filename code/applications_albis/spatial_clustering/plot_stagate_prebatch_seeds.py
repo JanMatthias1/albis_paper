@@ -9,7 +9,7 @@ Same runs and colours as Figure 4B
 
 Writes <STAGATE>/stagate_ari_strongmix_prebatch_seeds.{png,pdf,csv}.
 
-Env: sim_paper/env/albis-tutorial.
+Env: albis_paper/env/albis-tutorial.
 """
 import os
 

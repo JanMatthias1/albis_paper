@@ -28,7 +28,7 @@ Differences from the tutorial:
     and reports ARI/NMI for both, which is the comparison Figure 4B makes.
 
 Output (per dataset) under
-    sim_paper/data/figure_4/spatial_clustering/STAGATE/<dataset>/
+    albis_paper/data/figure_4/spatial_clustering/STAGATE/<dataset>/
         adata_results/Sim_3D_STAGATE_<dataset>.h5ad
             obsm['STAGATE'] / obsm['STAGATE_2D']   the two embeddings
             obs['mclust_3d'] / obs['mclust_2d']    mclust labels (k = 6)
@@ -75,7 +75,7 @@ print("Torch:", torch.__version__, "| CUDA:", torch.cuda.is_available(), torch.v
 # --------------------------------------------------------------------------- #
 from stagate_inputs import DATASETS
 
-BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/spatial_clustering/STAGATE"
+BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_4/spatial_clustering/STAGATE"
 
 N_DOMAINS = 6  # obs['domain_true'] has D0..D5
 N_TOP_GENES = 3000  # HVG cap; the ALBIS panel is 556 genes so this keeps them all

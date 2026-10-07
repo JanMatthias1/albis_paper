@@ -19,13 +19,13 @@ DEP_JOB="${1:-none}"
 DEP_ARG=()
 [[ "${DEP_JOB}" != "none" ]] && DEP_ARG=(--dependency="afterok:${DEP_JOB}")
 
-CODE_DIR="/dcs04/hicks/data/Jan/sim_project/sim_paper/code/applications_albis/spatial_clustering"
-STAGATE_DIR="/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/spatial_clustering/STAGATE"
+CODE_DIR="/dcs04/hicks/data/Jan/sim_project/albis_paper/code/applications_albis/spatial_clustering"
+STAGATE_DIR="/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_4/spatial_clustering/STAGATE"
 CONDA_SH="/jhpce/shared/jhpce/core/anaconda3/2023.03/etc/profile.d/conda.sh"
 # plot_stagate_figures.py only needs scanpy/anndata/matplotlib/sklearn (no
 # torch/STAGATE_pyG/R), but those all live in the same stagate-pyg env used
 # for training, so just reuse it rather than standing up a second env.
-STAGATE_ENV="/dcs04/hicks/data/Jan/sim_project/sim_paper/env/stagate-pyg"
+STAGATE_ENV="/dcs04/hicks/data/Jan/sim_project/albis_paper/env/stagate-pyg"
 PYTHON_BIN="${STAGATE_ENV}/bin/python"
 LOGDIR="${CODE_DIR}/logs_stagate_plots_3D"
 mkdir -p "${LOGDIR}"

@@ -40,7 +40,7 @@ from scipy import sparse
 from scipy.stats import gaussian_kde
 
 CODE = Path(__file__).resolve().parent
-DEFAULT_ROOT = CODE.parents[2] / 'data/figure_4/cross_modality_alignment/independent_offsets_shift3x'
+DEFAULT_ROOT = CODE.parents[2] / 'data/figure_4/cross_modality_alignment/strong_domain_mix_shift3x'
 DEFAULT_HELPER = Path('/dcs04/hicks/data/multi-sample-alignment-benchmark/code/Jan/evaluation_metrics/feature_similarity.py')
 TECHS = ('bin16um', 'spot', 'cell')
 EVALUATION_PAIRS = (('bin16um', 'spot'), ('bin16um', 'cell'))

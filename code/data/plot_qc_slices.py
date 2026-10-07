@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.lines import Line2D
 
-FIG2 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data"
+FIG2 = "/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_2/smaller_sphere/data"
 PASTEL = ["#4878d0", "#ee854a", "#6acc64", "#d65f5f", "#956cb4",
           "#8c613c", "#dc7ec0", "#797979", "#d5bb67", "#82c6e2"]
 

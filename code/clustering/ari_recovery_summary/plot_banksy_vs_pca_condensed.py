@@ -1,6 +1,6 @@
 """Wide barplots: batch-zero domain recovery and tuned-batch cell-type recovery.
 
-Run with sim_paper/env/albis-tutorial/bin/python from the project root.
+Run with albis_paper/env/albis-tutorial/bin/python from the project root.
 Existing figures remain unchanged; outputs use banksy_vs_pca_recovery_condensed.
 """
 import csv

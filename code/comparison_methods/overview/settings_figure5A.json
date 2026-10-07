@@ -17,7 +17,7 @@
   "sccube_cells_per_spot": 10,
   "spider_self_probability": 0.7,
   "spider_max_iterations": 80000,
-  "albis_generator": "sim_paper/code/applications_albis/cross_modality_alignment/strong_domain_mix/generate_strongmix_offsets.py (defaults: seed 2025, 600k cells, 556 genes)",
+  "albis_generator": "albis_paper/code/applications_albis/cross_modality_alignment/strong_domain_mix/generate_strongmix_offsets.py (defaults: seed 2025, 600k cells, 556 genes)",
   "display_offsets_um": {"albis": [2050.0, 2050.0, 2050.0]},
   "unavailable_methods": {},
   "plot_bin_edge_width": 0,

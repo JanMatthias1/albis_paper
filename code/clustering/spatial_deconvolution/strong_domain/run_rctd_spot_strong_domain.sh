@@ -22,7 +22,7 @@
 # run_figure3_global.sh submits this after those jobs; run standalone only
 # once they are done.
 #SBATCH --job-name=rctd_spot_strong
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/logs/rctd_spot_strong_%A_%a.out
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/spatial_deconvolution/logs/rctd_spot_strong_%A_%a.out
 #SBATCH --array=0-2
 #SBATCH --time=04:00:00
 #SBATCH --mem=64G
@@ -30,10 +30,10 @@
 #SBATCH --partition=shared
 set -euo pipefail
 
-mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/logs
+mkdir -p /dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/spatial_deconvolution/logs
 
-SLIDE=/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/strong_domain_mix/batch_sigma_slide
-RCTD_ROOT=/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD
+SLIDE=/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_3/strong_domain_mix/batch_sigma_slide
+RCTD_ROOT=/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_3/spatial_deconvolution/RCTD
 CELL_BODY="log_mu_-2.5_theta_0.40_jitter0.15_strongmix_bsigma15"
 
 REF_SEEDS=("" 101 202)   # "" = default seed 2025 (not written in names)
@@ -46,18 +46,18 @@ for f in "${RCTD_CELL_H5AD}" "${RCTD_SPOT_H5AD}"; do
     [[ -f "${f}" ]] || { echo "[error] missing input ${f} -- run the strong-mix generators first" >&2; exit 1; }
 done
 
-RCTD_ENV="/dcs04/hicks/data/Jan/sim_project/sim_paper/env/rctd"
+RCTD_ENV="/dcs04/hicks/data/Jan/sim_project/albis_paper/env/rctd"
 export LD_LIBRARY_PATH="${RCTD_ENV}/lib:${LD_LIBRARY_PATH:-}"
 export R_HOME="${RCTD_ENV}/lib/R"
 export RETICULATE_PYTHON="${RCTD_ENV}/bin/python"
 
 "${RCTD_ENV}/bin/Rscript" \
-    /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/weak_domain/run_rctd_spot.R
+    /dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/spatial_deconvolution/weak_domain/run_rctd_spot.R
 
 echo "[done] RCTD (strong domain mix, reference seed ${SEED:-2025}) -> ${RCTD_OUT_DIR}"
 
 # Produce the manuscript panels after fitting; the plotter reads which spot
 # truth to use from this run's metrics_summary.json.
-/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-tutorial/bin/python \
-    /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/plot_rctd_results.py \
+/dcs04/hicks/data/Jan/sim_project/albis_paper/env/albis-tutorial/bin/python \
+    /dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/spatial_deconvolution/plot_rctd_results.py \
     "${RCTD_OUT_DIR}"

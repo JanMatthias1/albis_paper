@@ -6,7 +6,7 @@ set -euo pipefail
 #
 # Creates an ISOLATED conda environment for RCTD (Robust Cell Type
 # Decomposition, https://github.com/dmcable/spacexr) -- spatial deconvolution
-# of Visium spots (sim_paper/code/clustering/spatial_deconvolution/).
+# of Visium spots (albis_paper/code/clustering/spatial_deconvolution/).
 #
 # RCTD ("spacexr") is GitHub-only, not on CRAN/Bioconductor/conda-forge, so it
 # is installed via remotes::install_github inside a conda-forge R. The h5ad
@@ -89,4 +89,4 @@ echo ""
 echo "[setup] Done. Environment created at: ${ENV_PREFIX}"
 echo ""
 echo "Run RCTD spot deconvolution with:"
-echo "  sbatch sim_paper/code/clustering/spatial_deconvolution/run_rctd_spot.sh"
+echo "  sbatch albis_paper/code/clustering/spatial_deconvolution/run_rctd_spot.sh"

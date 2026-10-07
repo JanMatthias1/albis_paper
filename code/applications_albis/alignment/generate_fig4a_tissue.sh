@@ -10,9 +10,9 @@
 #   DRY_RUN=1 prints the sbatch command without submitting.
 set -euo pipefail
 ROOT=/dcs04/hicks/data/Jan/sim_project
-CM="$ROOT/sim_paper/code/applications_albis/cross_modality_alignment"
-PYTHON="$ROOT/sim_paper/env/albis-tutorial/bin/python"
-OUT=${1:-"$ROOT/sim_paper/data/figure_4/alignment/strong_domain_mix_shift3x_r4600"}
+CM="$ROOT/albis_paper/code/applications_albis/cross_modality_alignment"
+PYTHON="$ROOT/albis_paper/env/albis-tutorial/bin/python"
+OUT=${1:-"$ROOT/albis_paper/data/figure_4/alignment/strong_domain_mix_shift3x_r4600"}
 GEN_ARGS=(--sphere-r-um 4600 --n-cells 1000000)
 
 cmd=(sbatch --parsable --job-name=fig4a_r4600_gen --partition=shared --mem=150G --cpus-per-task=4
@@ -24,7 +24,7 @@ test ! -e "$OUT" || { echo "Output exists (archive it first): $OUT" >&2; exit 1;
 mkdir -p "$OUT/logs"
 # record the exact code and settings used
 tar --exclude=__pycache__ --exclude=logs_cross_tech_stair -czf "$OUT/source_snapshot.tar.gz" -C "$ROOT" \
-    sim_paper/code/applications_albis/cross_modality_alignment sim_paper/code/applications_albis/alignment
+    albis_paper/code/applications_albis/cross_modality_alignment albis_paper/code/applications_albis/alignment
 "$PYTHON" "$CM/strong_domain_mix/generate_strongmix_offsets.py" --outdir "$OUT" "${GEN_ARGS[@]}" \
     --print-config > "$OUT/config.json"
 job=$("${cmd[@]}")

@@ -5,7 +5,7 @@ set -euo pipefail
 # create_stagate_env.sh
 #
 # Creates an ISOLATED conda environment for STAGATE 3D spatial-domain
-# identification (Figure 4B, sim_paper/code/applications_albis/spatial_clustering/).
+# identification (Figure 4B, albis_paper/code/applications_albis/spatial_clustering/).
 #
 # We install the PyTorch-Geometric port (STAGATE_pyG), NOT the original
 # TensorFlow-1.15 STAGATE:
@@ -140,4 +140,4 @@ echo "Activate with:"
 echo "  conda activate ${ENV_PREFIX}"
 echo ""
 echo "Run Figure 4B with:"
-echo "  bash sim_paper/code/applications_albis/spatial_clustering/run_stagate_3D.sh"
+echo "  bash albis_paper/code/applications_albis/spatial_clustering/run_stagate_3D.sh"

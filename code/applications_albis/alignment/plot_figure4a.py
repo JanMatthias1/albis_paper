@@ -2,11 +2,11 @@
 Figure 4A -- before/after STAIR 3D alignment of the ALBIS sphere z-stack.
 
 Reads the STAIR outputs written by 3D_stair.py
-    sim_paper/data/figure_4/alignment/STAIR/<dataset>/adata_results/
+    albis_paper/data/figure_4/alignment/STAIR/<dataset>/adata_results/
         Sim_3D_STAIR_<dataset>.h5ad
         metrics.json
 
-Produces, under sim_paper/data/figure_4/alignment/plots/ :
+Produces, under albis_paper/data/figure_4/alignment/plots/ :
     figure4a_overlay_2d_<colorby>_<dataset>.png  one modality per image, cols =
                                         [unaligned | STAIR | truth], all 10 slices overlaid, 2D
     figure4a_sphere_3d_<colorby>_<dataset>.png   same columns, 3D scatter (the reconstructed sphere)
@@ -41,9 +41,9 @@ import matplotlib.colors as mcolors
 from matplotlib.lines import Line2D
 from sklearn.neighbors import NearestNeighbors
 
-BASE = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/alignment"
+BASE = "/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_4/alignment"
 ALL_DATASETS = ["bin16um", "spot", "cell"]
-FIG4 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4"
+FIG4 = "/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_4"
 DATASET_CHOICES = ALL_DATASETS + ["bin16um_realwindow", "spot_realwindow", "cell_r6000"]
 COL_LABELS = ["Unaligned", "STAIR aligned", "Ground truth"]
 

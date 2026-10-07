@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=batch_slide_seeds
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs/batch_slide_seeds_%A_%a.out
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/logs/batch_slide_seeds_%A_%a.out
 #SBATCH --array=0-71%8
 #SBATCH --time=18:00:00
 #SBATCH --mem=320G
@@ -16,15 +16,15 @@
 # of the counts); settings = Figure 2 + --strong-domain-mix.
 set -euo pipefail
 
-mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/logs
-source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env_banksy.sh
+mkdir -p /dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/logs
+source /dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/_env_banksy.sh
 BANKSY_PYTHON="${PYTHON_BIN}"
-source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env.sh
+source /dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/_env.sh
 TUTORIAL_PYTHON="${PYTHON_BIN}"
 cd /dcs04/hicks/data/Jan/sim_project
 
-OUT_ROOT="sim_paper/data/figure_3/strong_domain_mix/batch_sigma_slide"
-TASKS_TSV="sim_paper/code/clustering/strong_domain_mix/batch_sigma_slide/batch_sigma_slide_seed_tasks.tsv"
+OUT_ROOT="albis_paper/data/figure_3/strong_domain_mix/batch_sigma_slide"
+TASKS_TSV="albis_paper/code/clustering/strong_domain_mix/batch_sigma_slide/batch_sigma_slide_seed_tasks.tsv"
 
 i="${SLURM_ARRAY_TASK_ID:-0}"
 row=$((i + 2))  # +1 for 1-indexing, +1 for the header line
@@ -77,7 +77,7 @@ echo "[task ${i}] modality=${MOD} batch_sigma=${BS} seed=${SEED:-<default>} lamb
 
 if [[ ! -f "${SIM_RAW}" ]]; then
     echo "[generate] ${TAG}"
-    "${BANKSY_PYTHON}" sim_paper/code/data/generate_simulation_noisy.py \
+    "${BANKSY_PYTHON}" albis_paper/code/data/generate_simulation_noisy.py \
         --modality "${MOD}" --sphere-r-um "${SPHERE_R_UM}" \
         "${GEN_FLAGS[@]}" \
         --batch-sigma "${BS}" \
@@ -86,30 +86,30 @@ if [[ ! -f "${SIM_RAW}" ]]; then
 fi
 if [[ ! -f "${SIM_QC}" ]]; then
     echo "[qc] ${TAG}"
-    "${TUTORIAL_PYTHON}" sim_paper/code/clustering/step00_qc_filter.py \
+    "${TUTORIAL_PYTHON}" albis_paper/code/clustering/step00_qc_filter.py \
         --modality "${MOD}" --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 
 mkdir -p "${RUN}"
 BANKSY_H5AD="${RUN}/banksy_matrix/simulation_${MOD}_z_banksy_pca_harmony_qc.h5ad"
 if [[ ! -f "${BANKSY_H5AD}" ]]; then
-    "${BANKSY_PYTHON}" sim_paper/code/clustering/step01_build_banksy_matrix.py \
+    "${BANKSY_PYTHON}" albis_paper/code/clustering/step01_build_banksy_matrix.py \
         --modality "${MOD}" --input "${SIM_QC}" \
         --lambda "${LAM}" --k-geom "${KG}" --max-m 1 \
         --stagger-scale 5 --skip-umap \
         --output-dir "${RUN}/banksy_matrix"
 fi
 
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/step02_leiden_resolution_sweep.py \
+"${TUTORIAL_PYTHON}" albis_paper/code/clustering/step02_leiden_resolution_sweep.py \
     --modality "${MOD}" --packing-tag "cellbin_batch_slide_${TAG}" \
     --input "${BANKSY_H5AD}" --output-dir "${RUN}/ari"
 
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/composition_recovery.py \
+"${TUTORIAL_PYTHON}" albis_paper/code/clustering/composition_recovery.py \
     --h5ad "${RUN}/ari/simulation_${MOD}_z_ari_recovery.h5ad" --tag "${FOLDER}_$(basename "${RUN}")" \
     --out-dir "${OUT_ROOT}/scores"
 
 # Render the manuscript panels from the completed embeddings and labels.
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/plot_banksy_results.py \
+"${TUTORIAL_PYTHON}" albis_paper/code/clustering/plot_banksy_results.py \
     --input "${BANKSY_H5AD}" \
     --cluster-input "${RUN}/ari/simulation_${MOD}_z_ari_recovery.h5ad"
 

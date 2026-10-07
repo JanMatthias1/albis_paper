@@ -22,7 +22,7 @@ import pandas as pd
 import anndata as ad
 
 OUT_DIR = sys.argv[1] if len(sys.argv) > 1 else \
-    "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/weak_mix"
+    "/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_3/spatial_deconvolution/RCTD/weak_mix"
 # The spot truth must be the query RCTD was fitted on (spot_ids map back by row
 # position); it is read from the run's metrics_summary.json ("spot_h5ad"), with
 # the Figure 2 (weak-mix) spot as fallback.
@@ -33,7 +33,7 @@ def _fitted_spot_h5ad():
     except OSError:
         return None
 SPOT_H5AD = _fitted_spot_h5ad() or \
-    "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad"
+    "/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad"
 CELL_TYPES = [f"type{i}" for i in range(1, 9)]
 
 from pathlib import Path

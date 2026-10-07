@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=strong_mix_bin16um
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/strong_domain_mix/generate/logs/strong_mix_bin16um_%A_%a.out
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/strong_domain_mix/generate/logs/strong_mix_bin16um_%A_%a.out
 #SBATCH --array=0-7%4
 #SBATCH --time=18:00:00
 #SBATCH --mem=320G
@@ -16,14 +16,14 @@
 # -> plots. Raw/QC h5ad are written into the point folder; existing files are reused.
 set -euo pipefail
 
-mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/strong_domain_mix/generate/logs
-source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env_banksy.sh
+mkdir -p /dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/strong_domain_mix/generate/logs
+source /dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/_env_banksy.sh
 BANKSY_PYTHON="${PYTHON_BIN}"
-source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env.sh
+source /dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/_env.sh
 TUTORIAL_PYTHON="${PYTHON_BIN}"
 cd /dcs04/hicks/data/Jan/sim_project
 
-OUT_ROOT="sim_paper/data/figure_3/strong_domain_mix/batch_sigma_slide"
+OUT_ROOT="albis_paper/data/figure_3/strong_domain_mix/batch_sigma_slide"
 LAM=0.3
 KG=100
 
@@ -42,37 +42,37 @@ mkdir -p "${RUN}"
 echo "[task ${SLURM_ARRAY_TASK_ID:-0}] bin16um batch_sigma=${BS} lambda=${LAM} k_geom=${KG}"
 
 if [[ ! -f "${SIM_RAW}" ]]; then
-    "${BANKSY_PYTHON}" sim_paper/code/data/generate_simulation_noisy.py \
+    "${BANKSY_PYTHON}" albis_paper/code/data/generate_simulation_noisy.py \
         --modality bin --sphere-r-um 2050 --bin-size-um 16 \
         --base-gene-lognormal -2.5 0.7 --theta 2.0 --theta-jitter 0.6 \
         --strong-domain-mix --batch-sigma "${BS}" --sync-unaligned-seed \
         --output-dir "${RUN}" --output-stem "${DATA_TAG}"
 fi
 if [[ ! -f "${SIM_QC}" ]]; then
-    "${TUTORIAL_PYTHON}" sim_paper/code/clustering/step00_qc_filter.py \
+    "${TUTORIAL_PYTHON}" albis_paper/code/clustering/step00_qc_filter.py \
         --modality bin --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 
 mkdir -p "${RUN}"
 BANKSY_H5AD="${RUN}/banksy_matrix/simulation_bin_z_banksy_pca_harmony_qc.h5ad"
 if [[ ! -f "${BANKSY_H5AD}" ]]; then
-    "${BANKSY_PYTHON}" sim_paper/code/clustering/step01_build_banksy_matrix.py \
+    "${BANKSY_PYTHON}" albis_paper/code/clustering/step01_build_banksy_matrix.py \
         --modality bin --input "${SIM_QC}" \
         --lambda "${LAM}" --k-geom "${KG}" --max-m 1 \
         --stagger-scale 5 --skip-umap \
         --output-dir "${RUN}/banksy_matrix"
 fi
 
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/step02_leiden_resolution_sweep.py \
+"${TUTORIAL_PYTHON}" albis_paper/code/clustering/step02_leiden_resolution_sweep.py \
     --modality bin --packing-tag "strong_mix_bin16um_bs${BS}" \
     --input "${BANKSY_H5AD}" --output-dir "${RUN}/ari"
 
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/composition_recovery.py \
+"${TUTORIAL_PYTHON}" albis_paper/code/clustering/composition_recovery.py \
     --h5ad "${RUN}/ari/simulation_bin_z_ari_recovery.h5ad" --tag "bin16um_bs${BS}" \
     --out-dir "${OUT_ROOT}/scores"
 
 # Render the manuscript panels from the completed embeddings and labels.
-"${TUTORIAL_PYTHON}" sim_paper/code/clustering/plot_banksy_results.py \
+"${TUTORIAL_PYTHON}" albis_paper/code/clustering/plot_banksy_results.py \
     --input "${BANKSY_H5AD}" \
     --cluster-input "${RUN}/ari/simulation_bin_z_ari_recovery.h5ad"
 

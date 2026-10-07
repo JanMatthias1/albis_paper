@@ -10,4 +10,4 @@ export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMBA_NUM_THRE
 export PYTHONDONTWRITEBYTECODE=1
 export MPLCONFIGDIR="${OUTPUT}_cache/matplotlib" XDG_CACHE_HOME="${OUTPUT}_cache" NUMBA_CACHE_DIR="${OUTPUT}_cache/numba"
 # The Python script creates OUTPUT exclusively; caches are lazy-created inside it.
-exec "$project/comparison_methods/env/splatter/bin/Rscript" "$project/sim_paper/code/comparison_methods/compute/reference_native.R"
+exec "$project/comparison_methods/env/splatter/bin/Rscript" "$project/albis_paper/code/comparison_methods/compute/reference_native.R"

@@ -1,10 +1,10 @@
 # Shared conda-activation logic for the BANKSY-matrix SLURM wrapper.
 # Usage: source "$(dirname "${BASH_SOURCE[0]}")/_env_banksy.sh"
 # Sets PYTHON_BIN to the isolated albis banksy env's python -- see
-# sim_paper/env/create_banksy_env.sh for why this is a separate env from the
+# albis_paper/env/create_banksy_env.sh for why this is a separate env from the
 # rest of the clustering pipeline's albis-tutorial env.
 
-ENV_PREFIX="/dcs04/hicks/data/Jan/sim_project/sim_paper/env/albis-banksy"
+ENV_PREFIX="/dcs04/hicks/data/Jan/sim_project/albis_paper/env/albis-banksy"
 PYTHON_BIN="${ENV_PREFIX}/bin/python"
 export PYTHONUNBUFFERED=1
 
@@ -22,7 +22,7 @@ else
     echo "WARNING: conda was not found; using ${PYTHON_BIN} directly." >&2
     if [[ ! -x "${PYTHON_BIN}" ]]; then
         echo "ERROR: Python not found at ${PYTHON_BIN}" >&2
-        echo "Create the environment with /dcs04/hicks/data/Jan/sim_project/sim_paper/env/create_banksy_env.sh first." >&2
+        echo "Create the environment with /dcs04/hicks/data/Jan/sim_project/albis_paper/env/create_banksy_env.sh first." >&2
         exit 1
     fi
     export PATH="${ENV_PREFIX}/bin:${PATH}"

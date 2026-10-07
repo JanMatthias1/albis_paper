@@ -32,7 +32,7 @@ import shutil
 import tarfile
 from pathlib import Path
 
-DEFAULT_BASE_DIR = Path("/dcs04/hicks/data/Jan/sim_project/sim_paper/data/real_data/breast_cancer")
+DEFAULT_BASE_DIR = Path("/dcs04/hicks/data/Jan/sim_project/albis_paper/data/real_data/breast_cancer")
 
 
 def parse_args() -> argparse.Namespace:

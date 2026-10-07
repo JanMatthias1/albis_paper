@@ -11,8 +11,8 @@ from matplotlib.patches import Patch
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 ROOT=Path(__file__).resolve().parents[4]
-OUT=ROOT/'sim_paper/data/figure_5/figure_5D_actual_coordinates'
-BASE=ROOT/'sim_paper/data/figure_5/figure_5A_600k'
+OUT=ROOT/'albis_paper/data/figure_5/figure_5D_actual_coordinates'
+BASE=ROOT/'albis_paper/data/figure_5/figure_5A_600k'
 palette=json.loads((BASE/'settings.json').read_text())['celltype_colors']
 m=np.load(OUT/'albis_molecules_roi.npz');roi=(np.abs(m['xyz'][:,0])<=145)&(np.abs(m['xyz'][:,1])<=145);xyz=m['xyz'][roi]  # cache covers +-200 um
 labels=np.array([f'type{i+1}' for i in m['source_type'][roi]])

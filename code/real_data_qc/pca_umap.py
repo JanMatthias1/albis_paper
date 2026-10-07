@@ -20,8 +20,8 @@ Expected environment:
                               # sc.pp.highly_variable_genes(flavor="seurat_v3")
 
 Example:
-    python sim_paper/code/real_data_qc/pca_umap.py --dataset non_diseased_lung
-    python sim_paper/code/real_data_qc/pca_umap.py --dataset breast_cancer_visium_hd
+    python albis_paper/code/real_data_qc/pca_umap.py --dataset non_diseased_lung
+    python albis_paper/code/real_data_qc/pca_umap.py --dataset breast_cancer_visium_hd
 """
 
 from __future__ import annotations

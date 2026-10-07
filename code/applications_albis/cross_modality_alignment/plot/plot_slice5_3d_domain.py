@@ -37,7 +37,7 @@ from matplotlib.lines import Line2D
 from matplotlib.transforms import Bbox
 from mpl_toolkits.mplot3d import proj3d
 
-BASE = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/cross_modality_alignment"
+BASE = "/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_4/cross_modality_alignment"
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))

@@ -10,7 +10,7 @@ CODE = Path(__file__).resolve().parent
 sys.path.insert(0, str(CODE.parent / 'no_harmony_domain'))
 from common import ROOT, SHARED, SEEDS, MODALITIES, K_GEOM, LAMBDAS, save, load_shared, task_for
 
-BASE = ROOT / 'sim_paper/data/figure_3/no_harmony_cell_type'
+BASE = ROOT / 'albis_paper/data/figure_3/no_harmony_cell_type'
 DOMAIN = BASE.parent / 'no_harmony_domain'
 
 

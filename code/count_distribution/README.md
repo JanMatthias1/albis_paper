@@ -66,17 +66,17 @@ modes are dominated by empty off-tissue observations; use the QC modes for them.
 From `/dcs04/hicks/data/Jan/sim_project`:
 
 ```bash
-sbatch sim_paper/code/count_distribution/smaller_sphere/<pairing>.sh
+sbatch albis_paper/code/count_distribution/smaller_sphere/<pairing>.sh
 ```
 
-Outputs: `sim_paper/data/figure_2/smaller_sphere/plots/<pairing>/<mode>/`.
-Simulated data: `sim_paper/data/figure_2/smaller_sphere/data/<tag>/`.
-Real references (QC'd): `sim_paper/data/real_data_qc/<reference>/`.
+Outputs: `albis_paper/data/figure_2/smaller_sphere/plots/<pairing>/<mode>/`.
+Simulated data: `albis_paper/data/figure_2/smaller_sphere/data/<tag>/`.
+Real references (QC'd): `albis_paper/data/real_data_qc/<reference>/`.
 
 Direct use:
 
 ```bash
-python sim_paper/code/count_distribution/count_distribution.py \
+python albis_paper/code/count_distribution/count_distribution.py \
     --modality cell --input <simulation.h5ad> \
     --compare-input <reference.h5ad> --compare-label <name> \
     [--match-panel-size] [--slice-id 4 | --all-slices] --output-dir <dir>

@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=weakmix_bs0_gen
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/weak_domain_mix/logs/weakmix_bs0_gen_%A_%a.out
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_3/weak_domain_mix/logs/weakmix_bs0_gen_%A_%a.out
 #SBATCH --array=0-2
 #SBATCH --time=06:00:00
 #SBATCH --mem=96G
@@ -16,9 +16,9 @@
 # Outputs: data/figure_3/weak_domain_mix/data/<modality>/{<stem>.h5ad, <stem>_qc.h5ad, plots/}
 set -euo pipefail
 
-ROOT=/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/weak_domain_mix
+ROOT=/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_3/weak_domain_mix
 mkdir -p "${ROOT}/logs"
-source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env.sh
+source /dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
 case "${SLURM_ARRAY_TASK_ID:?run as an array task}" in
@@ -42,12 +42,12 @@ mkdir -p "${RUN}"
 echo "[task ${SLURM_ARRAY_TASK_ID}] ${NAME} weak mix, batch_sigma=0"
 
 if [[ ! -f "${SIM_RAW}" ]]; then
-    "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
+    "${PYTHON_BIN}" albis_paper/code/data/generate_simulation_noisy.py \
         --modality "${MOD}" "${FLAGS[@]}" --batch-sigma 0 --sync-unaligned-seed \
         --output-dir "${RUN}" --output-stem "${STEM}"
 fi
 if [[ ! -f "${SIM_QC}" ]]; then
-    "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
+    "${PYTHON_BIN}" albis_paper/code/clustering/step00_qc_filter.py \
         --modality "${MOD}" --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 echo "[done] ${RUN}"

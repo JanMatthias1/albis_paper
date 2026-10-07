@@ -3,11 +3,11 @@ Figure 4E -- before/after STAIR cross-technology alignment (bin16um + spot +
 cell of the same physical ALBIS slice_id).
 
 Reads the output of cross_tech_stair.py
-    sim_paper/data/figure_4/cross_modality_alignment/STAIR/cross_tech/slice_<n>/adata_results/
+    albis_paper/data/figure_4/cross_modality_alignment/STAIR/cross_tech/slice_<n>/adata_results/
         Sim_CrossTech_STAIR_slice_<n>.h5ad
         metrics.json
 
-Produces, under sim_paper/data/figure_4/cross_modality_alignment/plots/ :
+Produces, under albis_paper/data/figure_4/cross_modality_alignment/plots/ :
     figure4e_overlay_2d_<colorby>_slice_<n>.png   cols = [unaligned | STAIR | truth],
                                                    all 3 technologies overlaid, 2D
     figure4e_rmse_slice_<n>.png                   joint-Procrustes RMSE bar, unaligned
@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.lines import Line2D
 
-BASE = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/cross_modality_alignment"
+BASE = "/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_4/cross_modality_alignment"
 COL_LABELS = ["Unaligned", "STAIR aligned", "Ground truth"]
 import sys
 from pathlib import Path

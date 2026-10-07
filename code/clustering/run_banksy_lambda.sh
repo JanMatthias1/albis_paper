@@ -26,7 +26,7 @@ set -euo pipefail
 
 TASKS="${1:?usage: run_banksy_lambda.sh TASKS_TSV}"
 MODE="${MODE:-sweep}"
-CODE=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering
+CODE=/dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering
 source "${CODE}/_env_banksy.sh"
 BANKSY_PYTHON="${PYTHON_BIN}"
 source "${CODE}/_env.sh"
@@ -53,7 +53,7 @@ echo "[input] ${QC}"
 echo "[output] ${RUN}"
 
 if [[ ! -f "${BANKSY_H5AD}" && ( "${MODE}" == final || ! -f "${ARI_JSON}" ) ]]; then
-    "${BANKSY_PYTHON}" sim_paper/code/clustering/step01_build_banksy_matrix.py \
+    "${BANKSY_PYTHON}" albis_paper/code/clustering/step01_build_banksy_matrix.py \
         --modality "${PMOD}" --input "${QC}" \
         --lambda "${LAM}" --k-geom "${KG}" --max-m 1 \
         --stagger-scale 5 --skip-umap \
@@ -61,7 +61,7 @@ if [[ ! -f "${BANKSY_H5AD}" && ( "${MODE}" == final || ! -f "${ARI_JSON}" ) ]]; 
 fi
 
 if [[ ! -f "${ARI_JSON}" || ( "${MODE}" == final && ! -f "${ARI_H5AD}" ) ]]; then
-    "${TUTORIAL_PYTHON}" sim_paper/code/clustering/step02_leiden_resolution_sweep.py \
+    "${TUTORIAL_PYTHON}" albis_paper/code/clustering/step02_leiden_resolution_sweep.py \
         --modality "${PMOD}" --input "${BANKSY_H5AD}" --output-dir "${RUN}/ari"
 
     "${TUTORIAL_PYTHON}" - "${ARI_H5AD}" "${RUN}/labels.csv.gz" <<'EOF'
@@ -79,7 +79,7 @@ EOF
 fi
 
 if [[ "${MODE}" == final ]]; then
-    "${TUTORIAL_PYTHON}" sim_paper/code/clustering/plot_banksy_results.py \
+    "${TUTORIAL_PYTHON}" albis_paper/code/clustering/plot_banksy_results.py \
         --input "${BANKSY_H5AD}" --cluster-input "${ARI_H5AD}"
 elif [[ "${PMOD}" == bin && -z "${KEEP_H5AD:-}" ]]; then
     rm -f "${BANKSY_H5AD}" "${ARI_H5AD}"

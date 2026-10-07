@@ -23,7 +23,7 @@ Expected environment:
     conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
 
 Example:
-    python sim_paper/code/clustering/step00_qc_filter.py --modality bin --packing-tag packing_pf0p04
+    python albis_paper/code/clustering/step00_qc_filter.py --modality bin --packing-tag packing_pf0p04
 """
 
 from __future__ import annotations

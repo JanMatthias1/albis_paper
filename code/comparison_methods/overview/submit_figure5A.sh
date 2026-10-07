@@ -8,11 +8,11 @@
 # Usage: bash submit_figure5A.sh [/absolute/new/output]   (default: figure_5A_600k)
 set -euo pipefail
 project=/dcs04/hicks/data/Jan/sim_project
-code="$project/sim_paper/code/comparison_methods/overview"
+code="$project/albis_paper/code/comparison_methods/overview"
 envs="$project/comparison_methods/env"
-albis_python="$project/sim_paper/env/albis-tutorial/bin/python"
-albis_generator="$project/sim_paper/code/applications_albis/cross_modality_alignment/strong_domain_mix/generate_strongmix_offsets.py"
-out="${1:-$project/sim_paper/data/figure_5/figure_5A_600k}"
+albis_python="$project/albis_paper/env/albis-tutorial/bin/python"
+albis_generator="$project/albis_paper/code/applications_albis/cross_modality_alignment/strong_domain_mix/generate_strongmix_offsets.py"
+out="${1:-$project/albis_paper/data/figure_5/figure_5A_600k}"
 [[ -e "$out" ]] && { echo "Refusing to overwrite existing output: $out" >&2; exit 1; }
 
 mkdir -p "$out/logs" "$out/albis" "$out/cache/matplotlib" "$out/cache/numba"
@@ -35,7 +35,7 @@ job() { sbatch --parsable --partition=shared "$@"; }
 
 splatter=$(job --job-name=fig5a_splatter --cpus-per-task=1 --mem=16G --time=02:00:00 \
   --output="$out/logs/splatter_%j.out" --wrap "$common; \
-  $envs/splatter/bin/Rscript $project/sim_paper/code/comparison_methods/overview/splatter_expression.R \
+  $envs/splatter/bin/Rscript $project/albis_paper/code/comparison_methods/overview/splatter_expression.R \
   --contract $out/splatter_contract.json --seed 20260921 --out-dir $out/splatter > $out/splatter.log 2>&1; \
   test \$(wc -l < $out/splatter/genes.tsv) -eq 556")
 albis=$(job --job-name=fig5a_albis --cpus-per-task=4 --mem=150G --time=06:00:00 \

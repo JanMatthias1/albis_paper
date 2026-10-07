@@ -10,11 +10,11 @@
 set -euo pipefail
 # SLURM runs a spool copy of this file, so BASH_SOURCE is not the project path.
 ROOT=/dcs04/hicks/data/Jan/sim_project
-CODE="$ROOT/sim_paper/code/applications_albis/cross_modality_alignment"
-PYTHON="$ROOT/sim_paper/env/albis-tutorial/bin/python"
+CODE="$ROOT/albis_paper/code/applications_albis/cross_modality_alignment"
+PYTHON="$ROOT/albis_paper/env/albis-tutorial/bin/python"
 STAIR_ENV=/dcs04/hicks/data/multi-sample-alignment-benchmark/envs/STAIR
 MODE=${1:-submit}
-OUT=${2:-"$ROOT/sim_paper/data/figure_4/cross_modality_alignment/_internal_cropped_bin_spot_no_rescale"}
+OUT=${2:-"$ROOT/albis_paper/data/figure_4/cross_modality_alignment/_internal_cropped_bin_spot_no_rescale"}
 GEN_ARGS=(--crop-modalities bin,spot --crop-window-um 2221)
 export PYTHONDONTWRITEBYTECODE=1
 export MPLCONFIGDIR="/tmp/crossmod-norescale-mpl-${SLURM_JOB_ID:-local}"
@@ -32,7 +32,7 @@ case "$MODE" in
     test ! -e "$OUT" || { echo "Output exists (archive it first): $OUT" >&2; exit 1; }
     mkdir -p "$OUT/logs"
     tar --exclude=__pycache__ --exclude=logs_cross_tech_stair -czf "$OUT/source_snapshot.tar.gz" -C "$ROOT" \
-      sim_paper/code/applications_albis/cross_modality_alignment sim_paper/code/manuscript_style.py
+      albis_paper/code/applications_albis/cross_modality_alignment albis_paper/code/manuscript_style.py
     "$PYTHON" "$CODE/strong_domain_mix/generate_strongmix_offsets.py" --outdir "$OUT" "${GEN_ARGS[@]}" \
       --print-config > "$OUT/config.json"
     generation=$("${gen[@]}")

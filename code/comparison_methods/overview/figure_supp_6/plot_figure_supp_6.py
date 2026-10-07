@@ -21,8 +21,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 
 ROOT = Path(__file__).resolve().parents[5]
-BASE = ROOT / "sim_paper/data/figure_5/figure_5A_600k"
-OUT = ROOT / "sim_paper/data/figure_5/figure_supp_6"
+BASE = ROOT / "albis_paper/data/figure_5/figure_5A_600k"
+OUT = ROOT / "albis_paper/data/figure_5/figure_supp_6"
 TARGETS = [3, 100, 1000, 5000, 10000]
 TYPES = [f"type{i}" for i in range(1, 9)]
 SLICE_ID = 4

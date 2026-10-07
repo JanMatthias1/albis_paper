@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=albis_generate_noisy
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/data/logs/albis_generate_noisy_%A_%a.out
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/albis_paper/code/data/logs/albis_generate_noisy_%A_%a.out
 #SBATCH --array=0-2
 #SBATCH --time=04:00:00
 #SBATCH --mem=250G
@@ -11,7 +11,7 @@
 set -euo pipefail
 
 # Make sure the log directory exists (SLURM needs it to exist before the job starts writing)
-mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/data/logs
+mkdir -p /dcs04/hicks/data/Jan/sim_project/albis_paper/code/data/logs
 
 ENV_PREFIX="/dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial"
 PYTHON_BIN="${ENV_PREFIX}/bin/python"
@@ -41,7 +41,7 @@ else
     export PATH="${ENV_PREFIX}/bin:${PATH}"
 fi
 
-cd /dcs04/hicks/data/Jan/sim_project/sim_paper/code/data
+cd /dcs04/hicks/data/Jan/sim_project/albis_paper/code/data
 
 echo "Job started: $(date)"
 echo "Host: $(hostname)"

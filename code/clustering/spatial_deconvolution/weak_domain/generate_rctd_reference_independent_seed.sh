@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=rctd_ref_seed
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/logs/rctd_ref_seed_%A_%a.out
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/spatial_deconvolution/logs/rctd_ref_seed_%A_%a.out
 #SBATCH --array=0-1
 #SBATCH --time=02:00:00
 #SBATCH --mem=32G
@@ -18,20 +18,20 @@
 # these files apart from the shared Figure 2/3/4 cell data.
 set -euo pipefail
 
-mkdir -p /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/spatial_deconvolution/logs
-source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/_env.sh
+mkdir -p /dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/spatial_deconvolution/logs
+source /dcs04/hicks/data/Jan/sim_project/albis_paper/code/count_distribution/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
 SEEDS=(999999 314159)
 SEED="${SEEDS[${SLURM_ARRAY_TASK_ID:-0}]}"
 TAG="log_mu_-2.5_theta_0.40_jitter0.15_bsigma15_rctdref_seed${SEED}"
-SIM_RAW="sim_paper/data/figure_2/smaller_sphere/data/${TAG}/simulation_cell_z.h5ad"
-SIM_QC="sim_paper/data/figure_2/smaller_sphere/data/${TAG}/simulation_cell_z_qc.h5ad"
-NOISY_DIR="sim_paper/data/noisy/${TAG}"
+SIM_RAW="albis_paper/data/figure_2/smaller_sphere/data/${TAG}/simulation_cell_z.h5ad"
+SIM_QC="albis_paper/data/figure_2/smaller_sphere/data/${TAG}/simulation_cell_z_qc.h5ad"
+NOISY_DIR="albis_paper/data/noisy/${TAG}"
 
 if [[ ! -f "${SIM_RAW}" ]]; then
     echo "[generate] ${TAG} (seed=${SEED})"
-    "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
+    "${PYTHON_BIN}" albis_paper/code/data/generate_simulation_noisy.py \
         --modality cell \
         --sphere-r-um 2050 \
         --n-cells 24207 \
@@ -42,13 +42,13 @@ if [[ ! -f "${SIM_RAW}" ]]; then
         --seed "${SEED}" \
         --sync-unaligned-seed \
         --out-tag "${TAG}"
-    mkdir -p sim_paper/data/figure_2/smaller_sphere/data
-    mv "${NOISY_DIR}" "sim_paper/data/figure_2/smaller_sphere/data/${TAG}"
+    mkdir -p albis_paper/data/figure_2/smaller_sphere/data
+    mv "${NOISY_DIR}" "albis_paper/data/figure_2/smaller_sphere/data/${TAG}"
 fi
 
 if [[ ! -f "${SIM_QC}" ]]; then
     echo "[qc] ${TAG}"
-    "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
+    "${PYTHON_BIN}" albis_paper/code/clustering/step00_qc_filter.py \
         --modality cell --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 

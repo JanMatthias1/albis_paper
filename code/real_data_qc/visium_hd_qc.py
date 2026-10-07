@@ -16,8 +16,8 @@ Expected environment:
     pip install spotsweeper   # one-time; not yet in requirements
 
 Example:
-    python sim_paper/code/real_data_qc/visium_hd_qc.py --sample breast_cancer
-    python sim_paper/code/real_data_qc/visium_hd_qc.py --sample human_pancreas
+    python albis_paper/code/real_data_qc/visium_hd_qc.py --sample breast_cancer
+    python albis_paper/code/real_data_qc/visium_hd_qc.py --sample human_pancreas
 """
 
 from __future__ import annotations

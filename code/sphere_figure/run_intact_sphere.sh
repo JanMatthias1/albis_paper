@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=sphere_intact
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure/logs/sphere_intact_%j.out
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/albis_paper/code/sphere_figure/logs/sphere_intact_%j.out
 #SBATCH --time=04:00:00
 #SBATCH --mem=250G
 #SBATCH --cpus-per-task=4
@@ -8,7 +8,7 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="/dcs04/hicks/data/Jan/sim_project/sim_paper/code/sphere_figure"
+SCRIPT_DIR="/dcs04/hicks/data/Jan/sim_project/albis_paper/code/sphere_figure"
 mkdir -p "$SCRIPT_DIR/logs"
 mkdir -p "$SCRIPT_DIR/.mplconfig"
 export MPLCONFIGDIR="$SCRIPT_DIR/.mplconfig"

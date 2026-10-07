@@ -13,8 +13,8 @@ Expected environment:
     conda activate /dcs04/hicks/data/Jan/sim_project/albis/env/albis-tutorial
 
 Example:
-    python sim_paper/code/real_data_qc/xenium_qc.py --slice non_diseased_lung
-    python sim_paper/code/real_data_qc/xenium_qc.py --slice lung_cancer
+    python albis_paper/code/real_data_qc/xenium_qc.py --slice non_diseased_lung
+    python albis_paper/code/real_data_qc/xenium_qc.py --slice lung_cancer
 """
 
 from __future__ import annotations

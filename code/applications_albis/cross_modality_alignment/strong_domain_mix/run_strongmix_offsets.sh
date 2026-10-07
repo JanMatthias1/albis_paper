@@ -6,11 +6,11 @@
 set -euo pipefail
 # SLURM runs a spool copy of this file, so BASH_SOURCE is not the project path.
 ROOT=/dcs04/hicks/data/Jan/sim_project
-CODE="$ROOT/sim_paper/code/applications_albis/cross_modality_alignment"
+CODE="$ROOT/albis_paper/code/applications_albis/cross_modality_alignment"
 HERE="$CODE/strong_domain_mix"
-PYTHON="$ROOT/sim_paper/env/albis-tutorial/bin/python"
+PYTHON="$ROOT/albis_paper/env/albis-tutorial/bin/python"
 MODE=${1:-submit}
-OUT=${2:-"$ROOT/sim_paper/data/figure_4/cross_modality_alignment/strong_domain_mix_shift3x"}
+OUT=${2:-"$ROOT/albis_paper/data/figure_4/cross_modality_alignment/strong_domain_mix_shift3x"}
 GEN_ARGS=("${@:3}")  # passed to generate_strongmix_offsets.py
 export PYTHONDONTWRITEBYTECODE=1
 export MPLCONFIGDIR="/tmp/strongmix-crossmod-mpl-${SLURM_JOB_ID:-local}"
@@ -22,7 +22,7 @@ case "$MODE" in
     test ! -e "$OUT/submitted_jobs.tsv"
     mkdir -p "$OUT/logs"
     tar --exclude=__pycache__ --exclude=logs_cross_tech_stair -czf "$OUT/source_snapshot.tar.gz" -C "$ROOT" \
-      albis/albis sim_paper/code/applications_albis/cross_modality_alignment sim_paper/code/manuscript_style.py
+      albis/albis albis_paper/code/applications_albis/cross_modality_alignment albis_paper/code/manuscript_style.py
     "$PYTHON" "$HERE/generate_strongmix_offsets.py" --outdir "$OUT" "${GEN_ARGS[@]}" --print-config > "$OUT/config.json"
     generation=$(sbatch --parsable --job-name=crossmod_strongmix --partition=shared \
       --mem=150G --cpus-per-task=4 --time=06:00:00 --output="$OUT/logs/generate_%j.out" \

@@ -7,8 +7,8 @@
 # Job IDs: RUN_ROOT/submissions.tsv.
 set -euo pipefail
 project=/dcs04/hicks/data/Jan/sim_project
-code="$project/sim_paper/code/comparison_methods/compute"
-root="${1:-$project/sim_paper/data/figure_5/compute/native_seeds_$(date +%Y%m%d)}"
+code="$project/albis_paper/code/comparison_methods/compute"
+root="${1:-$project/albis_paper/data/figure_5/compute/native_seeds_$(date +%Y%m%d)}"
 "$project/comparison_methods/env/analysis/bin/python" "$code/prepare_seeds.py" --root "$root" >/dev/null
 printf 'kind\tmethod\tn_cells\tseed\tjob_id\n' > "$root/submissions.tsv"
 log() { printf '%s\t%s\t%s\t%s\t%s\n' "$@" >> "$root/submissions.tsv"; }

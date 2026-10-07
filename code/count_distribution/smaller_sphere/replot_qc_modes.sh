@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=fig2_replot_qc_modes
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/smaller_sphere/logs/fig2_replot_qc_modes_%j.out
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/albis_paper/code/count_distribution/smaller_sphere/logs/fig2_replot_qc_modes_%j.out
 #SBATCH --time=04:00:00
 #SBATCH --mem=96G
 #SBATCH --cpus-per-task=4
@@ -11,12 +11,12 @@
 # pre-QC matrices and 250G). Same commands as the per-pair scripts; use after plot-only changes
 # to count_distribution.py.
 set -euo pipefail
-source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/_env.sh
+source /dcs04/hicks/data/Jan/sim_project/albis_paper/code/count_distribution/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 
-DATA="sim_paper/data/figure_2/smaller_sphere/data"
-PLOTS="sim_paper/data/figure_2/smaller_sphere/plots"
-REAL="sim_paper/data/real_data_qc"
+DATA="albis_paper/data/figure_2/smaller_sphere/data"
+PLOTS="albis_paper/data/figure_2/smaller_sphere/plots"
+REAL="albis_paper/data/real_data_qc"
 BIN16="packing_pf0p04_bin16um_log_mu_-2.5_jitter0.6_bsigma07"
 BIN8="packing_pf0p04_bin8um_from16umcfg_log_mu_-2.5_jitter0.6_bsigma07"
 CELL="log_mu_-2.5_theta_0.40_jitter0.15_bsigma15"
@@ -37,11 +37,11 @@ PAIRS=(
 for pair in "${PAIRS[@]}"; do
     IFS="|" read -r MODALITY TAG REAL_LABEL REAL_FILE OUT <<< "${pair}"
     SIM_QC="${DATA}/${TAG}/simulation_${MODALITY}_z_qc.h5ad"
-    "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
+    "${PYTHON_BIN}" albis_paper/code/count_distribution/count_distribution.py \
         --modality "${MODALITY}" --input "${SIM_QC}" \
         --compare-input "${REAL}/${REAL_FILE}" --compare-label "${REAL_LABEL}" \
         --output-dir "${PLOTS}/${OUT}/qc_filtered"
-    "${PYTHON_BIN}" sim_paper/code/count_distribution/count_distribution.py \
+    "${PYTHON_BIN}" albis_paper/code/count_distribution/count_distribution.py \
         --modality "${MODALITY}" --input "${SIM_QC}" \
         --compare-input "${REAL}/${REAL_FILE}" --compare-label "${REAL_LABEL}" \
         --match-panel-size \

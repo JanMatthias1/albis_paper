@@ -13,7 +13,7 @@ partially overlap, which is what the bottom-left panel shows once you've
 seen each technology is a complete circle on its own in the top row.
 
 Reads the same cross_tech_stair.py output as plot_cross_tech_stair.py:
-    sim_paper/data/figure_4/cross_modality_alignment/STAIR/cross_tech/slice_<n>/
+    albis_paper/data/figure_4/cross_modality_alignment/STAIR/cross_tech/slice_<n>/
         adata_results/Sim_CrossTech_STAIR_slice_<n>.h5ad
 """
 
@@ -30,7 +30,7 @@ import matplotlib.colors as mcolors
 from matplotlib.lines import Line2D
 from matplotlib.patches import Circle
 
-BASE = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/cross_modality_alignment"
+BASE = "/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_4/cross_modality_alignment"
 TECHS = ["bin16um", "spot", "cell"]
 import sys
 from pathlib import Path

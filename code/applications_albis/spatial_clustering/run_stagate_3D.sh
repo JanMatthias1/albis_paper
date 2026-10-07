@@ -15,11 +15,11 @@ DEP_ARG=()
 # GPU_GRES remains an explicit override for all submitted datasets.
 GPU_OVERRIDE="${GPU_GRES:-}"
 
-SCRIPT="/dcs04/hicks/data/Jan/sim_project/sim_paper/code/applications_albis/spatial_clustering/3D_stagate.py"
+SCRIPT="/dcs04/hicks/data/Jan/sim_project/albis_paper/code/applications_albis/spatial_clustering/3D_stagate.py"
 CONDA_SH="/jhpce/shared/jhpce/core/anaconda3/2023.03/etc/profile.d/conda.sh"
-STAGATE_ENV="/dcs04/hicks/data/Jan/sim_project/sim_paper/env/stagate-pyg"
+STAGATE_ENV="/dcs04/hicks/data/Jan/sim_project/albis_paper/env/stagate-pyg"
 PYTHON_BIN="${STAGATE_ENV}/bin/python"
-OUTDIR="/dcs04/hicks/data/Jan/sim_project/sim_paper/code/applications_albis/spatial_clustering"
+OUTDIR="/dcs04/hicks/data/Jan/sim_project/albis_paper/code/applications_albis/spatial_clustering"
 LOGDIR="${OUTDIR}/logs_stagate_3D"
 mkdir -p "${LOGDIR}"
 

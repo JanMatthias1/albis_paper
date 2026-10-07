@@ -20,7 +20,7 @@ resolution / batch level) is stated in text, not drawn.
 Reads <STAGATE>/<dataset>/adata_results/metrics.json (written by 3D_stagate.py).
 Writes <STAGATE>/stagate_fig4b_batch.png and stagate_fig4b_strongmix.csv.
 
-Env: sim_paper/env/albis-tutorial (or any with pandas + matplotlib).
+Env: albis_paper/env/albis-tutorial (or any with pandas + matplotlib).
 """
 import glob
 import json
@@ -36,7 +36,7 @@ import pandas as pd
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-STAGATE_DIR = ("/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/"
+STAGATE_DIR = ("/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_4/"
                "spatial_clustering/STAGATE")
 TUNED_SIGMA = {"bin16um": 0.7, "spot": 0.3, "cell": 1.5}
 MODALITIES = ["bin16um", "spot", "cell"]

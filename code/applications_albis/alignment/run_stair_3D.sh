@@ -10,11 +10,11 @@ DEP_ARG=()
 [[ "${DEP_JOB}" != "none" ]] && DEP_ARG=(--dependency="afterok:${DEP_JOB}")
 shift || true
 
-SCRIPT="/dcs04/hicks/data/Jan/sim_project/sim_paper/code/applications_albis/alignment/3D_stair.py"
+SCRIPT="/dcs04/hicks/data/Jan/sim_project/albis_paper/code/applications_albis/alignment/3D_stair.py"
 CONDA_SH="/jhpce/shared/jhpce/core/anaconda3/2023.03/etc/profile.d/conda.sh"
 STAIR_ENV="/dcs04/hicks/data/multi-sample-alignment-benchmark/envs/STAIR"
 PYTHON_BIN="${STAIR_ENV}/bin/python"
-OUTDIR="/dcs04/hicks/data/Jan/sim_project/sim_paper/code/applications_albis/alignment"
+OUTDIR="/dcs04/hicks/data/Jan/sim_project/albis_paper/code/applications_albis/alignment"
 LOGDIR="${OUTDIR}/logs_stair_3D"
 mkdir -p "${LOGDIR}"
 

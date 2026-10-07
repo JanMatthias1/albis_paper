@@ -4,12 +4,12 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=96G
 #SBATCH --time=03:00:00
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/comparison_methods/statistics/logs/real_brain_vs_methods_%j.out
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/albis_paper/code/comparison_methods/statistics/logs/real_brain_vs_methods_%j.out
 # Each QC'd Xenium brain sample (code/real_data_qc/run_brain_xenium_qc.sh) vs the Figure 5B cell
 # inputs (ALBIS, SPIDER, scCube; slice 4, QC'd), simulated panels HVG-matched to the real sample.
 set -euo pipefail
-source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/count_distribution/_env.sh
-P=/dcs04/hicks/data/Jan/sim_project/sim_paper
+source /dcs04/hicks/data/Jan/sim_project/albis_paper/code/count_distribution/_env.sh
+P=/dcs04/hicks/data/Jan/sim_project/albis_paper
 CODE="$P/code/comparison_methods/statistics"
 IN="$P/data/figure_5/figure_5B/inputs"
 REAL="$P/data/real_data_qc/brain_samples_xenium"

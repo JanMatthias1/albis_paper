@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=weakmix_seed_gen
-#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/weak_domain_mix/logs/weakmix_seed_gen_%A_%a.out
+#SBATCH --output=/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_3/weak_domain_mix/logs/weakmix_seed_gen_%A_%a.out
 #SBATCH --array=0-11
 #SBATCH --time=08:00:00
 #SBATCH --mem=120G
@@ -22,7 +22,7 @@
 # skipped. DRY_RUN=1 prints the commands instead of running them.
 set -euo pipefail
 
-source /dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering/_env.sh
+source /dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering/_env.sh
 cd /dcs04/hicks/data/Jan/sim_project
 RUN=(); [[ -n "${DRY_RUN:-}" ]] && RUN=(echo)
 
@@ -49,11 +49,11 @@ case "${NAME}" in
 esac
 
 if [[ "${BATCH}" == usual ]]; then
-    OUT="sim_paper/data/figure_2/smaller_sphere/data/${TAG}_seed${SEED}"
+    OUT="albis_paper/data/figure_2/smaller_sphere/data/${TAG}_seed${SEED}"
     STEM="simulation_${MOD}_z"
     BS="${SIGMA}"
 else
-    OUT="sim_paper/data/figure_3/weak_domain_mix/data/${NAME}_seed${SEED}"
+    OUT="albis_paper/data/figure_3/weak_domain_mix/data/${NAME}_seed${SEED}"
     STEM="${STEM0}_seed${SEED}"
     BS=0
 fi
@@ -63,12 +63,12 @@ echo "[task ${TASK}] ${NAME} weak mix, batch_sigma=${BS}, seed=${SEED} -> ${OUT}
 "${RUN[@]}" mkdir -p "${OUT}"
 
 if [[ ! -f "${SIM_RAW}" ]]; then
-    "${RUN[@]}" "${PYTHON_BIN}" sim_paper/code/data/generate_simulation_noisy.py \
+    "${RUN[@]}" "${PYTHON_BIN}" albis_paper/code/data/generate_simulation_noisy.py \
         --modality "${MOD}" "${FLAGS[@]}" --batch-sigma "${BS}" --sync-unaligned-seed \
         --seed "${SEED}" --output-dir "${OUT}" --output-stem "${STEM}"
 fi
 if [[ ! -f "${SIM_QC}" ]]; then
-    "${RUN[@]}" "${PYTHON_BIN}" sim_paper/code/clustering/step00_qc_filter.py \
+    "${RUN[@]}" "${PYTHON_BIN}" albis_paper/code/clustering/step00_qc_filter.py \
         --modality "${MOD}" --input "${SIM_RAW}" --output "${SIM_QC}"
 fi
 echo "[done] ${OUT}"

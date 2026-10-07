@@ -46,7 +46,7 @@ print("albis version:", getattr(ab, "__version__", "<no __version__>"))
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-BASE_DATA_DIR = Path("/dcs04/hicks/data/Jan/sim_project/sim_paper/data/noisy")
+BASE_DATA_DIR = Path("/dcs04/hicks/data/Jan/sim_project/albis_paper/data/noisy")
 
 SLICE_AXIS = "Z"
 VALID_MODALITIES = ("spot", "bin", "cell")

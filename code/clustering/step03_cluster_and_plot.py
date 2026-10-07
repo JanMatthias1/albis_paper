@@ -11,8 +11,8 @@ step01_pca_harmony.py's output (Harmony-corrected PCA embedding), using the firs
 "pca_harmony" explicitly) so another embedding can be added later.
 
 Example:
-    python sim_paper/code/clustering/step03_cluster_and_plot.py --resolution 0.5
-    python sim_paper/code/clustering/step03_cluster_and_plot.py --algorithm louvain --resolution 1.0
+    python albis_paper/code/clustering/step03_cluster_and_plot.py --resolution 0.5
+    python albis_paper/code/clustering/step03_cluster_and_plot.py --algorithm louvain --resolution 1.0
 """
 
 from __future__ import annotations
@@ -251,7 +251,7 @@ def main() -> None:
     if not args.input.is_file():
         raise SystemExit(
             f"Input file not found: {args.input}\n"
-            f"Run sim_paper/code/clustering/step01_pca_harmony.py first."
+            f"Run albis_paper/code/clustering/step01_pca_harmony.py first."
         )
 
     tag = resolution_tag(args.resolution)

@@ -55,7 +55,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from manuscript_style import save_figure
 
-RCTD_DIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD"
+RCTD_DIR = "/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_3/spatial_deconvolution/RCTD"
 CONFIGS = {  # config -> {reference seed: run dir under RCTD_DIR}
     "weak_mix": {"2025": "weak_mix", "999999": "weak_mix_seed999999", "314159": "weak_mix_seed314159"},
     "strong_mix": {"2025": "strong_mix", "101": "strong_mix_seed101", "202": "strong_mix_seed202"},

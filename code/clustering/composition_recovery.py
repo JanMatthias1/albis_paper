@@ -17,7 +17,7 @@ Expected environment:
     source code/count_distribution/_env.sh   (albis-tutorial: scanpy/sklearn/scipy)
 
 Example:
-    python sim_paper/code/clustering/composition_recovery.py \\
+    python albis_paper/code/clustering/composition_recovery.py \\
         --h5ad data/figure_3/strong_domain_mix/batch_sigma_slide/spot/bs0.3/ari/simulation_spot_z_ari_recovery.h5ad \\
         --tag spot_bs0.3 --out-dir data/figure_3/strong_domain_mix/batch_sigma_slide/scores
 """

@@ -2,7 +2,7 @@
 
 Code for spatial-domain and cell-type recovery on ALBIS simulations
 (cells, 16 µm bins, spots), the batch-effect sweep, and RCTD deconvolution.
-Outputs are written to `sim_paper/data/figure_3/`, which mirrors this layout.
+Outputs are written to `albis_paper/data/figure_3/`, which mirrors this layout.
 
 ## Layout
 
@@ -69,20 +69,20 @@ From `/dcs04/hicks/data/Jan/sim_project`:
 
 ```bash
 # cell-type panels, RCTD, batch-σ sweep, summary plots
-bash sim_paper/code/clustering/run_figure3_global.sh
+bash albis_paper/code/clustering/run_figure3_global.sh
 
 # batch-zero, no-Harmony experiments (each: sweep → select → final → summary)
-sbatch --array=0-20 sim_paper/code/clustering/no_harmony_domain/run.sh sweep
-sbatch sim_paper/code/clustering/no_harmony_domain/run.sh select
-sbatch --array=0-35 sim_paper/code/clustering/no_harmony_domain/run.sh final
-sbatch sim_paper/code/clustering/no_harmony_domain/run.sh summary
+sbatch --array=0-20 albis_paper/code/clustering/no_harmony_domain/run.sh sweep
+sbatch albis_paper/code/clustering/no_harmony_domain/run.sh select
+sbatch --array=0-35 albis_paper/code/clustering/no_harmony_domain/run.sh final
+sbatch albis_paper/code/clustering/no_harmony_domain/run.sh summary
 # same four stages for no_harmony_cell_type/run.sh (after no_harmony_domain)
 
 # figures only
-bash sim_paper/code/clustering/plot_figure3_summaries.sh
+bash albis_paper/code/clustering/plot_figure3_summaries.sh
 ```
 
-Environments (`sim_paper/env/`): `albis-tutorial` (`_env.sh`; QC, PCA/Harmony,
+Environments (`albis_paper/env/`): `albis-tutorial` (`_env.sh`; QC, PCA/Harmony,
 Leiden, plots), `albis-banksy` (`_env_banksy.sh`; BANKSY), `rctd` (RCTD, R).
 Python requirements: `requirements.txt`.
 

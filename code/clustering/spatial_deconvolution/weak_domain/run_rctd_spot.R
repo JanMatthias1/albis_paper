@@ -50,15 +50,15 @@ suppressPackageStartupMessages({
 # cell tag seed=2025 + Figure 2 spot, matching Figure 2/3/4).
 CELL_H5AD <- Sys.getenv(
   "RCTD_CELL_H5AD",
-  "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/log_mu_-2.5_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad"
+  "/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_2/smaller_sphere/data/log_mu_-2.5_theta_0.40_jitter0.15_bsigma15/simulation_cell_z_qc.h5ad"
 )
 SPOT_H5AD <- Sys.getenv(
   "RCTD_SPOT_H5AD",
-  "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad"
+  "/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_2/smaller_sphere/data/packing_pf0p04_log_mu_-2.25_sigma1.0_theta_0.25_jitter0.10_bsigma03/simulation_spot_z_qc.h5ad"
 )
 OUT_DIR <- Sys.getenv(
   "RCTD_OUT_DIR",
-  "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/weak_mix"
+  "/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_3/spatial_deconvolution/RCTD/weak_mix"
 )
 DOUBLET_MODE <- "full"
 N_CELL_TYPES <- 8

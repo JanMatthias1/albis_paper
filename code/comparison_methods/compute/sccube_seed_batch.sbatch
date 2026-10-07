@@ -9,7 +9,7 @@
 # Env: RUN_ROOT, SEED, BATCH (folder name), SIZES (space-separated cell counts).
 set -euo pipefail
 project=/dcs04/hicks/data/Jan/sim_project
-code="$project/sim_paper/code/comparison_methods/compute"
+code="$project/albis_paper/code/comparison_methods/compute"
 out="$RUN_ROOT/sccube/seed${SEED}_${BATCH}"
 mkdir -p "$RUN_ROOT/sccube" "$RUN_ROOT/cache/sccube_seed${SEED}_${BATCH}"
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMBA_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1

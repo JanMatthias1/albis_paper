@@ -16,7 +16,7 @@ TASKS="$(realpath "${1:?usage: submit_banksy_lambda.sh TASKS_TSV LOG_DIR [sweep|
 LOG_DIR="${2:?LOG_DIR required}"
 MODE="${3:-sweep}"
 [[ "${MODE}" == sweep || "${MODE}" == final ]] || { echo "mode must be sweep or final" >&2; exit 2; }
-CODE=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering
+CODE=/dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering
 EXCLUDE="${EXCLUDE-compute-158}"
 mkdir -p "${LOG_DIR}"
 

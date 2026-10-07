@@ -35,7 +35,7 @@ per-modality-tuned values 3D_stair.py uses for same-tech z-stacks, since here
 all three modalities sit in one HGAT call together.
 
 Output, per slice, under
-    sim_paper/data/figure_4/cross_modality_alignment/STAIR/cross_tech/slice_<n>/
+    albis_paper/data/figure_4/cross_modality_alignment/STAIR/cross_tech/slice_<n>/
         adata_results/Sim_CrossTech_STAIR_slice_<n>.h5ad   obsm:
             spatial              -> STAIR input (per-technology unaligned coords)
             spatial_true         -> ground truth
@@ -90,8 +90,8 @@ print("Torch:", torch.__version__, "| CUDA:", torch.cuda.is_available(), torch.v
 # default dataset table (Figure 2 data); the Figure 4C pipeline overrides it  #
 # with --input-root                                                           #
 # --------------------------------------------------------------------------- #
-FIG2 = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_2/smaller_sphere/data"
-BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_4/cross_modality_alignment/STAIR/cross_tech"
+FIG2 = "/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_2/smaller_sphere/data"
+BASE_OUTDIR = "/dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_4/cross_modality_alignment/STAIR/cross_tech"
 
 DATASETS = {
     "bin16um": f"{FIG2}/packing_pf0p04_bin16um_log_mu_-2.5_bsigma07/simulation_bin_z_qc.h5ad",

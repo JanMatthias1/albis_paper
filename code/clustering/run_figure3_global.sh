@@ -1,6 +1,6 @@
 #!/bin/bash
 # Figure 3, end to end: submits every job with the right dependencies.
-#   bash sim_paper/code/clustering/run_figure3_global.sh
+#   bash albis_paper/code/clustering/run_figure3_global.sh
 #
 # Options (environment variables):
 #   STAGES="celltype rctd banksy summary"   which stages to submit (default: all)
@@ -41,7 +41,7 @@
 # plot show what is missing).
 set -euo pipefail
 
-CODE=/dcs04/hicks/data/Jan/sim_project/sim_paper/code/clustering
+CODE=/dcs04/hicks/data/Jan/sim_project/albis_paper/code/clustering
 LOGS="${CODE}/logs"
 STAGES="${STAGES:-celltype rctd banksy summary}"
 EXCLUDE="${EXCLUDE-compute-158}"
@@ -77,7 +77,7 @@ if has rctd; then
     avg=$("${SB[@]}" --dependency=afterok:"${canon}":"${seeds}" --job-name=rctd_seed_avg \
         --output="${CODE}/spatial_deconvolution/logs/rctd_seed_avg_%j.out" \
         --time=01:00:00 --mem=16G --cpus-per-task=1 --partition=shared \
-        --wrap="source ${CODE}/_env.sh && export MPLCONFIGDIR=/tmp/fig3-mpl-\${USER} && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/average_rctd_seeds.py --config weak_mix && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/plot_rctd_results.py /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/weak_mix_seed_avg")
+        --wrap="source ${CODE}/_env.sh && export MPLCONFIGDIR=/tmp/fig3-mpl-\${USER} && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/average_rctd_seeds.py --config weak_mix && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/plot_rctd_results.py /dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_3/spatial_deconvolution/RCTD/weak_mix_seed_avg")
     echo "[rctd] weak mix 3-reference average: ${avg} (after ${canon}, ${seeds})"; ALL+=("${avg}")
 fi
 
@@ -103,7 +103,7 @@ if has banksy; then
         avg=$("${SB[@]}" --dependency=afterok:"${s}" --job-name=rctd_strong_avg \
             --output="${CODE}/spatial_deconvolution/logs/rctd_strong_avg_%j.out" \
             --time=01:00:00 --mem=16G --cpus-per-task=1 --partition=shared \
-            --wrap="source ${CODE}/_env.sh && export MPLCONFIGDIR=/tmp/fig3-mpl-\${USER} && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/average_rctd_seeds.py --config strong_mix && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/plot_rctd_results.py /dcs04/hicks/data/Jan/sim_project/sim_paper/data/figure_3/spatial_deconvolution/RCTD/strong_mix_seed_avg")
+            --wrap="source ${CODE}/_env.sh && export MPLCONFIGDIR=/tmp/fig3-mpl-\${USER} && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/average_rctd_seeds.py --config strong_mix && \"\${PYTHON_BIN}\" ${CODE}/spatial_deconvolution/plot_rctd_results.py /dcs04/hicks/data/Jan/sim_project/albis_paper/data/figure_3/spatial_deconvolution/RCTD/strong_mix_seed_avg")
         echo "[rctd] strong mix 3-reference average: ${avg} (after ${s})"; ALL+=("${avg}")
     fi
 fi

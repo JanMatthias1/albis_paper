@@ -11,9 +11,9 @@
 # Usage: bash submit_distinct_seeds.sh [/absolute/new/output]
 set -euo pipefail
 project=/dcs04/hicks/data/Jan/sim_project
-data="$project/sim_paper/data/figure_5"
-overview="$project/sim_paper/code/comparison_methods/overview"
-code="$project/sim_paper/code/comparison_methods/figure_5D"
+data="$project/albis_paper/data/figure_5"
+overview="$project/albis_paper/code/comparison_methods/overview"
+code="$project/albis_paper/code/comparison_methods/figure_5D"
 envs="$project/comparison_methods/env"
 spider_seed=20260922
 out="${1:-$data/figure_5D_actual_coordinates/distinct_seeds}"
@@ -37,7 +37,7 @@ job() { sbatch --parsable --partition=shared "$@"; }
 
 splatter=$(job --job-name=fig5d_seeds_splatter --cpus-per-task=1 --mem=16G --time=02:00:00 \
   --output="$out/logs/splatter_%j.out" --wrap "$common; \
-  $envs/splatter/bin/Rscript $project/sim_paper/code/comparison_methods/overview/splatter_expression.R \
+  $envs/splatter/bin/Rscript $project/albis_paper/code/comparison_methods/overview/splatter_expression.R \
   --contract $out/splatter_contract.json --seed 20260921 --out-dir $out/splatter > $out/splatter.log 2>&1; \
   for f in counts.mtx genes.tsv cells.tsv; do cmp $out/splatter/\$f $data/figure_5A_600k/splatter/\$f; done")
 spider=$(job --job-name=fig5d_seeds_spider --cpus-per-task=4 --mem=128G --time=1-00:00:00 \
@@ -46,7 +46,7 @@ spider=$(job --job-name=fig5d_seeds_spider --cpus-per-task=4 --mem=128G --time=1
 plot=$(job --job-name=fig5d_seeds_plot --cpus-per-task=4 --mem=64G --time=02:00:00 \
   --dependency=afterok:$spider --output="$out/logs/plot_%j.out" --wrap "set -euo pipefail; \
   export MPLCONFIGDIR=$out/cache/matplotlib PYTHONDONTWRITEBYTECODE=1; \
-  $project/sim_paper/env/albis-tutorial/bin/python -u $code/actual_capture.py --spider-base $out --out $out > $out/plot.log 2>&1")
+  $project/albis_paper/env/albis-tutorial/bin/python -u $code/actual_capture.py --spider-base $out --out $out > $out/plot.log 2>&1")
 
 printf 'stage\tjob\nsplatter\t%s\nspider\t%s\nplot\t%s\n' "$splatter" "$spider" "$plot" > "$out/submitted_jobs.tsv"
 echo "Output: $out"; cat "$out/submitted_jobs.tsv"
